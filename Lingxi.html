@@ -18,6 +18,7 @@
     };
   </script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     *,
     *::before,
@@ -80,6 +81,10 @@
       opacity: 0;
       pointer-events: none;
       transform: scale(0.97);
+    }
+
+    .hidden {
+      display: none !important;
     }
 
     /* 手机模式下的紧凑布局 */
@@ -1424,6 +1429,13 @@
       color: #fff;
     }
 
+    .msg.assistant .msg-avatar {
+      background-image: url('agent_avatar.png') !important;
+      background-size: cover !important;
+      background-position: center !important;
+      color: transparent !important;
+    }
+
     .msg .msg-bubble {
       padding: 14px 18px;
       border-radius: 18px;
@@ -2168,7 +2180,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: transparent !important;
+      background-image: url('agent_avatar.png');
+      background-size: cover;
+      background-position: center;
       font-size: 17px;
       font-weight: bold;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -3058,7 +3073,7 @@
 
           <div class="auth-remember-row">
             <label class="auth-remember">
-              <input type="checkbox"> 记住我？
+              <input type="checkbox" id="rememberMe"> 记住我？
             </label>
             <div class="auth-forgot"><a href="#" onclick="showForgot(); return false;">忘记密码？</a></div>
           </div>
@@ -3298,6 +3313,8 @@
     <div class="main-body">
       <!-- Left Sidebar -->
       <div class="sidebar" id="sidebar">
+        <!-- 侧边栏拖动调整宽度手柄 -->
+        <div id="sidebarResizeHandle" style="position: absolute; right: 0; top: 0; bottom: 0; width: 6px; cursor: col-resize; z-index: 100; background: transparent; transition: background 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.15)'" onmouseout="this.style.background='transparent'"></div>
         <button class="new-chat-btn" onclick="newChat()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="12" y1="5" x2="12" y2="19" />
@@ -3789,7 +3806,9 @@
         </div>
 
         <!-- Right AI Assistant Panel -->
-        <div id="courseAssistantSidebar" class="course-assistant-sidebar">
+        <div id="courseAssistantSidebar" class="course-assistant-sidebar" style="position: relative;">
+          <!-- 侧边栏拖动调整宽度手柄 -->
+          <div id="assistantResizeHandle" style="position: absolute; left: 0; top: 0; bottom: 0; width: 6px; cursor: ew-resize; z-index: 100; background: transparent; transition: background 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.15)'" onmouseout="this.style.background='transparent'"></div>
           <div
             style="padding: 14px 18px; border-bottom: 1.5px solid rgba(139,92,246,0.06); font-size: 13px; font-weight: 700; color: #1e1b4b; background: rgba(255,255,255,0.5);">
             科大讯飞智能助手
@@ -3826,16 +3845,58 @@
             </div>
           </div>
         </div>
-        <!-- Floating Elf / Assistant Button -->
-        <div id="courseAssistantElf" class="course-assistant-elf hidden">
-          <div class="elf-close-btn" onclick="closeElf(event)">×</div>
-          <div class="elf-avatar">飞</div>
-          <div class="elf-tooltip">智能助手已收起，点击这里展开！</div>
+      </div>
+      <!-- Global Floating Chat Dialog -->
+      <div id="globalFloatingChat" class="global-floating-chat hidden" style="position: fixed; right: 30px; bottom: 150px; width: 340px; height: 480px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(139, 92, 246, 0.15); border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12); display: flex; flex-direction: column; z-index: 1000; overflow: hidden; transition: opacity 0.3s ease, transform 0.3s ease;">
+        <!-- Resize Handles -->
+        <div id="globalChatResizeLeft" style="position: absolute; left: 0; top: 10px; bottom: 0; width: 6px; cursor: w-resize; z-index: 1001;"></div>
+        <div id="globalChatResizeTop" style="position: absolute; left: 10px; right: 0; top: 0; height: 6px; cursor: n-resize; z-index: 1001;"></div>
+        <div id="globalChatResizeTopLeft" style="position: absolute; left: 0; top: 0; width: 10px; height: 10px; cursor: nw-resize; z-index: 1002;"></div>
+        <!-- Header -->
+        <div id="globalFloatingChatHeader" style="padding: 12px 16px; border-bottom: 1px solid rgba(139, 92, 246, 0.08); background: rgba(255, 255, 255, 0.6); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; cursor: move; user-select: none;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 26px; height: 26px; border-radius: 50%; background-image: url('agent_avatar.png'); background-size: cover; background-position: center; border: 1px solid rgba(139, 92, 246, 0.1);"></div>
+            <span style="font-size: 13px; font-weight: 700; color: #1e1b4b;">灵析智能助手</span>
+          </div>
+          <button onclick="closeGlobalFloatingChat()" style="background: transparent; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 20px; height: 20px;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">×</button>
         </div>
+        <!-- Messages -->
+        <div id="globalFloatingChatMessages" style="flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; background: rgba(248, 250, 252, 0.35);">
+          <div class="msg assistant" style="max-width: 100%;">
+            <div class="msg-avatar" style="background-image: url('agent_avatar.png'); background-size: cover; background-position: center; width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;"></div>
+            <div>
+              <div class="msg-sender" style="font-size: 10px; color: #64748b; margin-bottom: 2px;">智能助手</div>
+              <div class="msg-bubble" style="padding: 10px 12px; font-size: 12px; line-height: 1.5; background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(139, 92, 246, 0.06); border-radius: 12px; border-top-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.01); color: #334155;">
+                您好呀！我是您的智能学习助手灵析。无论您在哪个页面，有任何学习方面的问题都可以随时提问哦！(๑•̀ㅂ•́)و✧
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Input -->
+        <div style="padding: 10px 14px; border-top: 1px solid rgba(139, 92, 246, 0.08); background: rgba(255, 255, 255, 0.6); flex-shrink: 0;">
+          <div style="display: flex; gap: 6px; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 6px 10px; align-items: center;">
+            <input type="text" id="globalFloatingChatInput" placeholder="输入问题..." onkeydown="handleGlobalFloatingChatKey(event)" style="flex: 1; font-size: 12px; background: transparent; height: 24px; border: none; outline: none;">
+            <button onclick="sendGlobalFloatingChatMessage()" style="background: linear-gradient(135deg,#7c3aed,#8b5cf6); color: #fff; width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: none; outline: none; cursor: pointer;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="22 2 11 13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Elf / Assistant Button -->
+      <div id="courseAssistantElf" class="course-assistant-elf hidden">
+        <div class="elf-close-btn" onclick="closeElf(event)">×</div>
+        <div class="elf-avatar">飞</div>
+        <div class="elf-tooltip">智能助手已收起，点击这里展开！</div>
       </div>
 
       <!-- Right Panel -->
       <div class="right-panel" id="rightPanelMain">
+        <!-- 右侧面板拖动调整宽度手柄 -->
+        <div id="rightPanelResizeHandle" style="position: absolute; left: 0; top: 0; bottom: 0; width: 6px; cursor: col-resize; z-index: 100; background: transparent; transition: background 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.15)'" onmouseout="this.style.background='transparent'"></div>
         <div class="panel-tabs">
           <button class="active" onclick="switchPanel(this,'profile')">能力画像</button>
           <button onclick="switchPanel(this,'favorites')">我的收藏</button>
@@ -4134,6 +4195,8 @@
         console.log('✅ 所有章节习题的答案正确属性已自动校准。');
     }
 
+    let currentUserEmail = '';
+    let currentAgent = 'all';
     let uploadedAvatarDataUrl = null;
     let sessionStartTime = null;       // 当前会话开始时间戳（毫秒）
     let isSessionActive = false;      // 会话是否处于活跃状态（页面可见）
@@ -5191,7 +5254,13 @@ function handleLogin(e) {
 
     // Logged in successfully
     currentUserEmail = matchedUserKey;
-    localStorage.setItem('lingxi_current_user', matchedUserKey);
+    const rememberMe = document.getElementById('rememberMe') && document.getElementById('rememberMe').checked;
+    if (rememberMe) {
+        localStorage.setItem('lingxi_current_user', matchedUserKey);
+    } else {
+        localStorage.removeItem('lingxi_current_user');
+        sessionStorage.setItem('lingxi_current_user', matchedUserKey);
+    }
     userName = users[matchedUserKey].name;
 
     // Restore all data structures
@@ -5273,6 +5342,12 @@ function startSession() {
     updateIntervalId = setInterval(() => {
         updateLearningHours();
     }, 10000);
+}
+
+function logout() {
+    localStorage.removeItem('lingxi_current_user');
+    sessionStorage.removeItem('lingxi_current_user');
+    window.location.reload();
 }
 
 function handleRegister(e) {
@@ -5382,7 +5457,8 @@ function handleRegister(e) {
 
   // Logged in
   currentUserEmail = email;
-  localStorage.setItem('lingxi_current_user', email);
+  sessionStorage.setItem('lingxi_current_user', email);
+  localStorage.removeItem('lingxi_current_user');
   userName = name;
 
   // Restore all data structures
@@ -5713,11 +5789,31 @@ function switchMainPage(pageId) {
   document.querySelectorAll('.main-content-page').forEach(page => {
     page.classList.add('hidden');
   });
+
+  // 切换页面时，默认隐藏全局浮动对话框
+  const globalChat = document.getElementById('globalFloatingChat');
+  if (globalChat) {
+      globalChat.classList.add('hidden');
+  }
   
-  // Hide course assistant elf when leaving course study
+  // 切换页面时，更新小精灵的显示状态
   const elf = document.getElementById('courseAssistantElf');
   if (elf) {
-      elf.classList.add('hidden');
+      if (pageId === 'chat') {
+          // 在对话主页面，默认隐藏小助手（因为主页面有常驻的侧边栏或由其自己的逻辑控制）
+          elf.classList.add('hidden');
+      } else if (pageId === 'courseStudy') {
+          // 在课程学习页面，根据课程助教侧边栏折叠状态显示/隐藏
+          const courseSidebar = document.getElementById('courseAssistantSidebar');
+          if (courseSidebar && courseSidebar.classList.contains('collapsed')) {
+              elf.classList.remove('hidden');
+          } else {
+              elf.classList.add('hidden');
+          }
+      } else {
+          // 在其他非对话页面（如搜索、设置、通知等），小助手小精灵始终显示
+          elf.classList.remove('hidden');
+      }
   }
 
   const mainSidebar = document.getElementById('sidebar');
@@ -6339,6 +6435,17 @@ function localSearch(query) {
 }
 
 
+async function loadBackendCourses() {
+  try {
+    const response = await fetch('/api/courses');
+    if (!response.ok) throw new Error('网络响应错误');
+    const courses = await response.json();
+    console.log('成功从后端加载课程列表:', courses);
+  } catch (error) {
+    console.error('加载后端课程数据失败:', error);
+  }
+}
+
 function renderMyCourses() {
   const container = document.getElementById('panelCoursesList');
   if (!container) return;
@@ -6517,14 +6624,40 @@ let activeChapterQuizSelectedEl = null;
 let activeChapterQuizIndex = 0;
 
 // Global Callback Hook for iFlytek Agent (科大讯飞智能体接口预留)
-window.callIflytekAgent = function(message, callback) {
+window.callIflytekAgent = async function(message, callback) {
   console.log("科大讯飞智能体接口收到提问: ", message);
   
-  // 模拟智能体响应延迟
-  setTimeout(() => {
-    const response = `您好！我是科大讯飞智能学习助手。收到您的问题：“${message}”。关于这个疑问，建议您重点关注当前章节讲解的底层原理，配合左侧的“思维导图”标签页查看知识点脉络效果更佳。本接口已完全预留，后续可直接绑定讯飞星火 API / SDK 实现实时大模型对话答疑！`;
-    callback(response);
-  }, 800);
+  const course = activeCourseIndex !== null ? myCourses[activeCourseIndex] : null;
+  const chapter = (course && course.chapters) ? course.chapters[activeChapterIndex] : null;
+  
+  let prompt = message;
+  if (course && chapter) {
+      const introText = chapter.intro || (chapter.content ? chapter.content.replace(/<[^>]+>/g, '').substring(0, 150) : '');
+      prompt = `【学习上下文】当前课程：《${course.title}》，当前章节：《${chapter.title}》，章节简要内容：${introText}
+【指令】
+1. 请以活泼可爱、亲切自然的语气回答用户，拒绝机械冷冰冰的格式。可以带有一些合理的趣味互动，但不要说长篇大论的无用废话。
+2. 当且仅当用户明确要求你“制定学习计划”、“规划学习路线”或“推荐课程”时，你才为用户提供系统化的计划或学习路线。
+3. 否则，请直接针对用户的问题给出具体、准确的解答，不需要主动做学习规划。
+4. 在合适且轻松的对话语境下，可以在句中或句末适当加入一些可爱的颜文字表情（如 ^_^、(๑•̀ㅂ•́)و✧）或表情符号来活跃气氛；如果对话内容不合适（如严肃的技术纠错或代码报错解答），则不要添加任何表情。
+【用户提问】${message}`;
+  }
+  
+  try {
+      const resp = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: prompt, user_id: currentUserEmail })
+      });
+      if (resp.ok) {
+          const data = await resp.json();
+          callback(data.advice || "未能获取到智能助手的回答。");
+      } else {
+          callback("智能助手服务响应异常，请稍后再试。");
+      }
+  } catch (err) {
+      console.error('呼叫大模型服务失败:', err);
+      callback("连接智能助手服务失败，请检查网络或后端服务。");
+  }
 };
 
 function enterCourseStudy(courseIndex) {
@@ -6931,10 +7064,19 @@ function sendStudyAssistantMessage() {
   
   const container = document.getElementById('studyAssistantMessages');
   
+  let avatarStyleHtml = '';
+  let avatarText = userName.charAt(0).toUpperCase();
+  if (uploadedAvatarDataUrl && uploadedAvatarDataUrl.startsWith('data:image')) {
+      avatarStyleHtml = `background-image:url(${uploadedAvatarDataUrl}); background-size:cover; background-position:center;`;
+      avatarText = '';
+  } else {
+      avatarStyleHtml = `background:linear-gradient(135deg,#818cf8,#a78bfa);`;
+  }
+
   container.innerHTML += `
     <div class="msg user" style="max-width: 100%; align-self: flex-end; flex-direction: row-reverse; gap: 8px;">
-      <div class="msg-avatar" style="background: linear-gradient(135deg, #818cf8, #a78bfa); font-size: 11px; width: 28px; height: 28px; border-radius: 8px; display:flex; align-items:center; justify-content:center;">
-        ${userName.charAt(0).toUpperCase()}
+      <div class="msg-avatar" style="${avatarStyleHtml} font-size: 11px; width: 28px; height: 28px; border-radius: 8px; display:flex; align-items:center; justify-content:center;">
+        ${avatarText}
       </div>
       <div>
         <div class="msg-sender" style="font-size: 10px; text-align: right;">${escapeHtml(userName)}</div>
@@ -6970,7 +7112,12 @@ function sendStudyAssistantMessage() {
   window.callIflytekAgent(text, function(response) {
     const typingEl = document.getElementById(typingId);
     if (typingEl) {
-      typingEl.querySelector('.msg-bubble').textContent = response;
+      const bubble = typingEl.querySelector('.msg-bubble');
+      if (typeof marked !== 'undefined') {
+          bubble.innerHTML = `<div class="markdown-body" style="font-size: 12.5px; line-height: 1.5; color: #334155;">${marked.parse(response)}</div>`;
+      } else {
+          bubble.innerHTML = escapeHtml(response).replace(/\n/g, '<br>');
+      }
       container.scrollTop = container.scrollHeight;
     }
   });
@@ -7158,6 +7305,7 @@ function saveProfileSettings(e) {
 function selectAgent(el, agent) {
     document.querySelectorAll('.agent-card').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
+    currentAgent = agent;
     switchMainPage('chat');
 }
 
@@ -7221,46 +7369,59 @@ function switchPanel(btn, panel) {
 // ============================================================
 let elfTooltipTimeout = null;
 function toggleRightPanel() {
-    const panel = document.getElementById('rightPanelMain');
-    panel.classList.toggle('collapsed');
-    panel.classList.toggle('show'); // 新增：在移动端/窄屏下展示该面板
-    const isCollapsed = panel.classList.contains('collapsed');
-    localStorage.setItem('right_panel_collapsed', isCollapsed);
-
-    // 同步收起/展开课程助手侧边栏，并展示/隐藏小精灵
-    const courseSidebar = document.getElementById('courseAssistantSidebar');
+    // 判断当前是否处于课程学习页面
+    const courseStudyArea = document.getElementById('courseStudyArea');
+    const isCourseStudy = courseStudyArea && !courseStudyArea.classList.contains('hidden');
     const elf = document.getElementById('courseAssistantElf');
-    if (courseSidebar) {
-        courseSidebar.classList.toggle('collapsed');
-        const isCourseCollapsed = courseSidebar.classList.contains('collapsed');
-        if (elf) {
-            if (isCourseCollapsed) {
-                elf.classList.remove('hidden');
-                // 仅临时显示 3 秒提示，随后自动隐藏（防移动端一直残留遮挡）
-                const tooltip = elf.querySelector('.elf-tooltip');
-                if (tooltip) {
-                    tooltip.style.opacity = '1';
-                    tooltip.style.transform = 'translateX(0)';
-                    tooltip.style.pointerEvents = 'auto';
-                    if (elfTooltipTimeout) clearTimeout(elfTooltipTimeout);
-                    elfTooltipTimeout = setTimeout(() => {
+
+    if (isCourseStudy) {
+        // 1. 处于课程学习页面：折叠/展开课程助教面板
+        const courseSidebar = document.getElementById('courseAssistantSidebar');
+        if (courseSidebar) {
+            courseSidebar.classList.toggle('collapsed');
+            const isCourseCollapsed = courseSidebar.classList.contains('collapsed');
+            if (elf) {
+                if (isCourseCollapsed) {
+                    elf.classList.remove('hidden');
+                    // 仅临时显示 3 秒提示，随后自动隐藏（防移动端一直残留遮挡）
+                    const tooltip = elf.querySelector('.elf-tooltip');
+                    if (tooltip) {
+                        tooltip.style.opacity = '1';
+                        tooltip.style.transform = 'translateX(0)';
+                        tooltip.style.pointerEvents = 'auto';
+                        if (elfTooltipTimeout) clearTimeout(elfTooltipTimeout);
+                        elfTooltipTimeout = setTimeout(() => {
+                            tooltip.style.opacity = '';
+                            tooltip.style.transform = '';
+                            tooltip.style.pointerEvents = '';
+                        }, 3000);
+                    }
+                } else {
+                    elf.classList.add('hidden');
+                    if (elfTooltipTimeout) {
+                        clearTimeout(elfTooltipTimeout);
+                        elfTooltipTimeout = null;
+                    }
+                    const tooltip = elf.querySelector('.elf-tooltip');
+                    if (tooltip) {
                         tooltip.style.opacity = '';
                         tooltip.style.transform = '';
                         tooltip.style.pointerEvents = '';
-                    }, 3000);
+                    }
                 }
-            } else {
-                elf.classList.add('hidden');
-                if (elfTooltipTimeout) {
-                    clearTimeout(elfTooltipTimeout);
-                    elfTooltipTimeout = null;
-                }
-                const tooltip = elf.querySelector('.elf-tooltip');
-                if (tooltip) {
-                    tooltip.style.opacity = '';
-                    tooltip.style.transform = '';
-                    tooltip.style.pointerEvents = '';
-                }
+            }
+        }
+    } else {
+        // 2. 处于其他非对话页面：折叠/展开右侧主面板
+        const panel = document.getElementById('rightPanelMain');
+        if (panel) {
+            panel.classList.toggle('collapsed');
+            panel.classList.toggle('show');
+            const isCollapsed = panel.classList.contains('collapsed');
+            localStorage.setItem('right_panel_collapsed', isCollapsed);
+            // 在其他页面下展开右侧主面板时，小助手小精灵不再隐藏，继续保持显示
+            if (elf) {
+                elf.classList.remove('hidden');
             }
         }
     }
@@ -7964,8 +8125,39 @@ async function sendMessage() {
     chat.scrollTop = chat.scrollHeight;
 
     try {
+        // 调用后端 API 获取大模型解析意图与建议
+        let advice = "";
+        let topic = text;
+        let difficulty = "初级";
+        let keywords = [];
+
+        try {
+            const chatResp = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text, user_id: currentUserEmail })
+            });
+            if (chatResp.ok) {
+                const chatData = await chatResp.json();
+                advice = chatData.advice;
+                if (chatData.intent) {
+                    topic = chatData.intent.topic || topic;
+                    difficulty = chatData.intent.difficulty || difficulty;
+                    keywords = chatData.intent.keywords || keywords;
+                }
+            }
+        } catch (err) {
+            console.error('无法连接到后端 /api/chat 服务，将使用前端 Mock 代替。', err);
+        }
+
         const analyst = new AnalystAgent();
+        // 如果后端接口返回了解析结果，可以融入/覆盖本地意图
         const intent = analyst.analyze(text);
+        if (topic !== text) {
+            intent.topic = topic;
+            intent.difficulty = difficulty;
+            intent.keywords = keywords;
+        }
         console.log('分析师结果:', intent);
         updateWF(1);
 
@@ -7983,49 +8175,129 @@ async function sendMessage() {
         const thinking = document.getElementById('thinking');
         if (thinking) thinking.remove();
 
-        let replyHtml = `<div class="msg assistant"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble">`;
+        let agentAvatar = '灵';
+        let agentName = '灵析助手';
+        let agentBg = 'linear-gradient(135deg,#6366f1,#8b5cf6)';
+        if (currentAgent === 'analyst') {
+            agentAvatar = '析';
+            agentName = '学习分析师';
+            agentBg = 'linear-gradient(135deg,#3b82f6,#06b6d4)';
+        } else if (currentAgent === 'generator') {
+            agentAvatar = '源';
+            agentName = '资源生成师';
+            agentBg = 'linear-gradient(135deg,#10b981,#34d399)';
+        } else if (currentAgent === 'planner') {
+            agentAvatar = '规';
+            agentName = '路径规划师';
+            agentBg = 'linear-gradient(135deg,#f59e0b,#fbbf24)';
+        }
 
-        // 学习路径
-        replyHtml += `<strong>📋 为您规划的学习路径：</strong><div class="learning-path">`;
-        plan.forEach(step => {
-            replyHtml += `<div class="lp-step" style="border-color:#6366f1"><div class="lp-num" style="background:#eef2ff;color:#6366f1">${step.order}</div><div class="lp-text"><strong>${step.type}</strong> — ${step.items.join('；')}</div></div>`;
-        });
-        replyHtml += `</div>`;
+        let replyHtml = `<div class="msg assistant"><div class="msg-avatar" style="background:${agentBg}">${agentAvatar}</div><div><div class="msg-sender">${agentName}</div><div class="msg-bubble">`;
 
-        // 显示资源卡片
-        if (resources.length > 0) {
-            replyHtml += `<br><strong>🔍 为您找到的相关资源：</strong><div class="resource-grid">`;
-            resources.slice(0, 4).forEach(r => {
-                let icon = '📄';
-                let dataAttrs = '';
-                if (r.type === 'bilibili') {
-                    icon = '▶️';
-                    dataAttrs = `data-type="bilibili" data-url="${r.url}"`;
-                } else if (r.type === 'course') {
-                    icon = '📚';
-                    dataAttrs = `data-type="course" data-title="${escapeHtml(r.title)}"`;
-                } else if (r.type === 'chapter') {
-                    icon = '📖';
-                    const parts = r.title.split(' — ');
-                    if (parts.length === 2) {
-                        const courseTitle = parts[0].trim();
-                        const chapterTitle = parts[1].trim();
-                        dataAttrs = `data-type="chapter" data-course="${escapeHtml(courseTitle)}" data-chapter="${escapeHtml(chapterTitle)}"`;
-                    } else {
-                        dataAttrs = `data-type="chapter" data-error="true"`;
-                    }
-                } else if (r.type === 'question') {
-                    icon = '❓';
-                    dataAttrs = `data-type="question"`;
-                } else {
-                    icon = '📄';
-                    dataAttrs = `data-type="other" data-url="${r.url}"`;
-                }
-                replyHtml += `<div class="resource-card" ${dataAttrs} style="cursor:pointer;"><div class="rc-icon" style="background:#f1f5f9;color:#6366f1">${icon}</div><div class="rc-title">${escapeHtml(r.title)}</div><div class="rc-type">${r.type}</div></div>`;
+        // 1. 先进行解答（显示大模型建议）
+        if (advice) {
+            let parsedAdvice = "";
+            if (typeof marked !== 'undefined') {
+                parsedAdvice = marked.parse(advice);
+            } else {
+                parsedAdvice = escapeHtml(advice).replace(/\n/g, '<br>');
+            }
+            replyHtml += `<div class="ai-advice markdown-body" style="margin-bottom:14px; line-height:1.6; color:#1e293b; font-size:13.5px;">${parsedAdvice}</div>`;
+        }
+
+        // 2. 给出当前智能体所负责的模块
+        if (currentAgent === 'all') {
+            // 全体协同：学习路径 + 资源推荐
+            replyHtml += `<strong>📋 为您规划的学习路径：</strong><div class="learning-path">`;
+            plan.forEach(step => {
+                replyHtml += `<div class="lp-step" style="border-color:#6366f1"><div class="lp-num" style="background:#eef2ff;color:#6366f1">${step.order}</div><div class="lp-text"><strong>${step.type}</strong> — ${step.items.join('；')}</div></div>`;
             });
             replyHtml += `</div>`;
-        } else {
-            replyHtml += `<br>😅 暂时没找到相关资源，试试换个关键词吧。`;
+
+            if (resources.length > 0) {
+                replyHtml += `<br><strong>🔍 为您找到的相关资源：</strong><div class="resource-grid">`;
+                resources.slice(0, 4).forEach(r => {
+                    let icon = '📄';
+                    let dataAttrs = '';
+                    if (r.type === 'bilibili') {
+                        icon = '▶️';
+                        dataAttrs = `data-type="bilibili" data-url="${r.url}"`;
+                    } else if (r.type === 'course') {
+                        icon = '📚';
+                        dataAttrs = `data-type="course" data-title="${escapeHtml(r.title)}"`;
+                    } else if (r.type === 'chapter') {
+                        icon = '📖';
+                        const parts = r.title.split(' — ');
+                        if (parts.length === 2) {
+                            const courseTitle = parts[0].trim();
+                            const chapterTitle = parts[1].trim();
+                            dataAttrs = `data-type="chapter" data-course="${escapeHtml(courseTitle)}" data-chapter="${escapeHtml(chapterTitle)}"`;
+                        } else {
+                            dataAttrs = `data-type="chapter" data-error="true"`;
+                        }
+                    } else if (r.type === 'question') {
+                        icon = '❓';
+                        dataAttrs = `data-type="question"`;
+                    } else {
+                        icon = '📄';
+                        dataAttrs = `data-type="other" data-url="${r.url}"`;
+                    }
+                    replyHtml += `<div class="resource-card" ${dataAttrs} style="cursor:pointer;"><div class="rc-icon" style="background:#f1f5f9;color:#6366f1">${icon}</div><div class="rc-title">${escapeHtml(r.title)}</div><div class="rc-type">${r.type}</div></div>`;
+                });
+                replyHtml += `</div>`;
+            } else {
+                replyHtml += `<br>😅 暂时没找到相关资源，试试换个关键词吧。`;
+            }
+        } else if (currentAgent === 'analyst') {
+            // 学习分析师：展示分析诊断模块
+            replyHtml += `<strong>📊 学习分析师诊断报告：</strong><div class="analyst-report" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; margin-top:8px; font-size:12.5px; color:#0369a1;">
+                <div style="margin-bottom:6px;"><strong>🎯 分析主题：</strong>${escapeHtml(intent.topic)}</div>
+                <div style="margin-bottom:6px;"><strong>📈 推荐难度等级：</strong>${escapeHtml(intent.difficulty)}</div>
+                <div><strong>🏷️ 薄弱知识点/关键词：</strong>${intent.keywords.map(k => `<span style="background:#e0f2fe; padding:2px 6px; border-radius:4px; margin-right:4px;">${escapeHtml(k)}</span>`).join('')}</div>
+            </div>`;
+        } else if (currentAgent === 'generator') {
+            // 资源生成师：推荐资源
+            if (resources.length > 0) {
+                replyHtml += `<strong>🔍 资源生成师推荐资源：</strong><div class="resource-grid">`;
+                resources.slice(0, 4).forEach(r => {
+                    let icon = '📄';
+                    let dataAttrs = '';
+                    if (r.type === 'bilibili') {
+                        icon = '▶️';
+                        dataAttrs = `data-type="bilibili" data-url="${r.url}"`;
+                    } else if (r.type === 'course') {
+                        icon = '📚';
+                        dataAttrs = `data-type="course" data-title="${escapeHtml(r.title)}"`;
+                    } else if (r.type === 'chapter') {
+                        icon = '📖';
+                        const parts = r.title.split(' — ');
+                        if (parts.length === 2) {
+                            const courseTitle = parts[0].trim();
+                            const chapterTitle = parts[1].trim();
+                            dataAttrs = `data-type="chapter" data-course="${escapeHtml(courseTitle)}" data-chapter="${escapeHtml(chapterTitle)}"`;
+                        } else {
+                            dataAttrs = `data-type="chapter" data-error="true"`;
+                        }
+                    } else if (r.type === 'question') {
+                        icon = '❓';
+                        dataAttrs = `data-type="question"`;
+                    } else {
+                        icon = '📄';
+                        dataAttrs = `data-type="other" data-url="${r.url}"`;
+                    }
+                    replyHtml += `<div class="resource-card" ${dataAttrs} style="cursor:pointer;"><div class="rc-icon" style="background:#f0fdf4;color:#10b981">${icon}</div><div class="rc-title">${escapeHtml(r.title)}</div><div class="rc-type">${r.type}</div></div>`;
+                });
+                replyHtml += `</div>`;
+            } else {
+                replyHtml += `<strong>🔍 资源生成师推荐资源：</strong><br>😅 暂时没能匹配到合适的学习资料，您可以尝试修改提问主题。`;
+            }
+        } else if (currentAgent === 'planner') {
+            // 路径规划师：学习路径规划
+            replyHtml += `<strong>📋 路径规划师定制学习路径：</strong><div class="learning-path">`;
+            plan.forEach(step => {
+                replyHtml += `<div class="lp-step" style="border-color:#f59e0b"><div class="lp-num" style="background:#fef3c7;color:#d97706">${step.order}</div><div class="lp-text"><strong>${step.type}</strong> — ${step.items.join('；')}</div></div>`;
+            });
+            replyHtml += `</div>`;
         }
 
         replyHtml += `</div></div></div>`;
@@ -8258,6 +8530,7 @@ document.addEventListener('visibilitychange', function() {
 document.addEventListener('DOMContentLoaded', function() {
     try {
         // Auto-restore session if current user exists
+        currentUserEmail = localStorage.getItem('lingxi_current_user') || sessionStorage.getItem('lingxi_current_user') || '';
         if (currentUserEmail) {
             let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
             if (users[currentUserEmail]) {
@@ -8409,7 +8682,22 @@ document.addEventListener('DOMContentLoaded', function() {
         if (elf) {
             elf.addEventListener('click', function(e) {
                 if (elf.dataset.dragging === 'true') return;
-                toggleRightPanel();
+                
+                // 判断当前是否处于课程学习页面
+                const courseStudyArea = document.getElementById('courseStudyArea');
+                const isCourseStudy = courseStudyArea && !courseStudyArea.classList.contains('hidden');
+                
+                if (isCourseStudy) {
+                    toggleRightPanel();
+                } else {
+                    const floatingChat = document.getElementById('globalFloatingChat');
+                    if (floatingChat) {
+                        floatingChat.classList.remove('hidden');
+                        elf.classList.add('hidden'); // 隐藏小精灵自身
+                        const inp = document.getElementById('globalFloatingChatInput');
+                        if (inp) inp.focus();
+                    }
+                }
             });
             makeElfDraggable(elf);
         }
@@ -8787,6 +9075,426 @@ function openQuizModalFromQuestion(dataStr) {
         alert('打开题目失败，请重试');
     }
 }
+
+// ===== 左右边栏及课程助教面板手动拖拽调整宽度逻辑 =====
+(function() {
+    document.addEventListener('DOMContentLoaded', () => {
+        // 公用获取 clientX
+        function getClientX(e) {
+            return e.touches ? e.touches[0].clientX : e.clientX;
+        }
+
+        // 1. 课程助教右侧面板宽度拖拽
+        const sidebarCourse = document.getElementById('courseAssistantSidebar');
+        const handleCourse = document.getElementById('assistantResizeHandle');
+        if (sidebarCourse && handleCourse) {
+            let isResizing = false;
+            let startX, startWidth;
+
+            function onDragStart(e) {
+                isResizing = true;
+                startX = getClientX(e);
+                startWidth = sidebarCourse.offsetWidth;
+                document.body.style.cursor = 'ew-resize';
+                document.body.style.userSelect = 'none';
+                sidebarCourse.style.transition = 'none';
+
+                if (e.touches) {
+                    document.addEventListener('touchmove', onDragMove, { passive: false });
+                    document.addEventListener('touchend', onDragEnd);
+                } else {
+                    document.addEventListener('mousemove', onDragMove);
+                    document.addEventListener('mouseup', onDragEnd);
+                }
+            }
+
+            function onDragMove(e) {
+                if (!isResizing) return;
+                const currentX = getClientX(e);
+                const deltaX = startX - currentX; // 右侧面板，向左拖拽（clientX变小）宽度增加
+                let newWidth = startWidth + deltaX;
+
+                const minW = 240;
+                const maxW = window.innerWidth * 0.7;
+                newWidth = Math.min(Math.max(newWidth, minW), maxW);
+
+                sidebarCourse.style.width = newWidth + 'px';
+                sidebarCourse.style.flexBasis = newWidth + 'px';
+            }
+
+            function onDragEnd() {
+                if (isResizing) {
+                    isResizing = false;
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                    sidebarCourse.style.transition = '';
+
+                    document.removeEventListener('mousemove', onDragMove);
+                    document.removeEventListener('mouseup', onDragEnd);
+                    document.removeEventListener('touchmove', onDragMove);
+                    document.removeEventListener('touchend', onDragEnd);
+                }
+            }
+
+            handleCourse.addEventListener('mousedown', onDragStart);
+            handleCourse.addEventListener('touchstart', onDragStart, { passive: true });
+        }
+
+        // 2. 左侧导航边栏宽度手动拖拽
+        const sidebarLeft = document.getElementById('sidebar');
+        const handleLeft = document.getElementById('sidebarResizeHandle');
+        if (sidebarLeft && handleLeft) {
+            let isResizing = false;
+            let startX, startWidth;
+
+            function onDragStart(e) {
+                isResizing = true;
+                startX = getClientX(e);
+                startWidth = sidebarLeft.offsetWidth;
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+                sidebarLeft.style.transition = 'none';
+
+                if (e.touches) {
+                    document.addEventListener('touchmove', onDragMove, { passive: false });
+                    document.addEventListener('touchend', onDragEnd);
+                } else {
+                    document.addEventListener('mousemove', onDragMove);
+                    document.addEventListener('mouseup', onDragEnd);
+                }
+            }
+
+            function onDragMove(e) {
+                if (!isResizing) return;
+                const currentX = getClientX(e);
+                const deltaX = currentX - startX; // 左侧边栏，向右拖拽（clientX变大）宽度增加
+                let newWidth = startWidth + deltaX;
+
+                const minW = 200;
+                const maxW = window.innerWidth * 0.4;
+                newWidth = Math.min(Math.max(newWidth, minW), maxW);
+
+                sidebarLeft.style.width = newWidth + 'px';
+            }
+
+            function onDragEnd() {
+                if (isResizing) {
+                    isResizing = false;
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                    sidebarLeft.style.transition = '';
+
+                    document.removeEventListener('mousemove', onDragMove);
+                    document.removeEventListener('mouseup', onDragEnd);
+                    document.removeEventListener('touchmove', onDragMove);
+                    document.removeEventListener('touchend', onDragEnd);
+                }
+            }
+
+            handleLeft.addEventListener('mousedown', onDragStart);
+            handleLeft.addEventListener('touchstart', onDragStart, { passive: true });
+        }
+
+        // 3. 右侧信息面板宽度手动拖拽
+        const panelRight = document.getElementById('rightPanelMain');
+        const handleRight = document.getElementById('rightPanelResizeHandle');
+        if (panelRight && handleRight) {
+            let isResizing = false;
+            let startX, startWidth;
+
+            function onDragStart(e) {
+                isResizing = true;
+                startX = getClientX(e);
+                startWidth = panelRight.offsetWidth;
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+                panelRight.style.transition = 'none';
+
+                if (e.touches) {
+                    document.addEventListener('touchmove', onDragMove, { passive: false });
+                    document.addEventListener('touchend', onDragEnd);
+                } else {
+                    document.addEventListener('mousemove', onDragMove);
+                    document.addEventListener('mouseup', onDragEnd);
+                }
+            }
+
+            function onDragMove(e) {
+                if (!isResizing) return;
+                const currentX = getClientX(e);
+                const deltaX = startX - currentX; // 右侧面板，向左拖拽（clientX变小）宽度增加
+                let newWidth = startWidth + deltaX;
+
+                const minW = 240;
+                const maxW = window.innerWidth * 0.4;
+                newWidth = Math.min(Math.max(newWidth, minW), maxW);
+
+                panelRight.style.width = newWidth + 'px';
+            }
+
+            function onDragEnd() {
+                if (isResizing) {
+                    isResizing = false;
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                    panelRight.style.transition = '';
+
+                    document.removeEventListener('mousemove', onDragMove);
+                    document.removeEventListener('mouseup', onDragEnd);
+                    document.removeEventListener('touchmove', onDragMove);
+                    document.removeEventListener('touchend', onDragEnd);
+                }
+            }
+
+            handleRight.addEventListener('mousedown', onDragStart);
+            handleRight.addEventListener('touchstart', onDragStart, { passive: true });
+        }
+    });
+})();
+
+// ===== 全局浮动聊天对话框逻辑 =====
+function closeGlobalFloatingChat() {
+    const chat = document.getElementById('globalFloatingChat');
+    if (chat) chat.classList.add('hidden');
+    
+    // 显示小精灵
+    const elf = document.getElementById('courseAssistantElf');
+    if (elf) elf.classList.remove('hidden');
+}
+
+function handleGlobalFloatingChatKey(e) {
+    if (e.key === 'Enter') {
+        sendGlobalFloatingChatMessage();
+    }
+}
+
+async function sendGlobalFloatingChatMessage() {
+    const input = document.getElementById('globalFloatingChatInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const container = document.getElementById('globalFloatingChatMessages');
+
+    // 渲染用户消息
+    let avatarStyleHtml = '';
+    let avatarText = userName.charAt(0).toUpperCase();
+    if (uploadedAvatarDataUrl && uploadedAvatarDataUrl.startsWith('data:image')) {
+        avatarStyleHtml = `background-image:url(${uploadedAvatarDataUrl}); background-size:cover; background-position:center;`;
+        avatarText = '';
+    } else {
+        avatarStyleHtml = `background:linear-gradient(135deg,#818cf8,#a78bfa);`;
+    }
+
+    container.innerHTML += `
+        <div class="msg user" style="max-width: 100%; align-self: flex-end; flex-direction: row-reverse; gap: 8px;">
+          <div class="msg-avatar" style="${avatarStyleHtml} font-size: 11px; width: 28px; height: 28px; border-radius: 8px; display:flex; align-items:center; justify-content:center;">
+            ${avatarText}
+          </div>
+          <div>
+            <div class="msg-sender" style="font-size: 10px; text-align: right;">${escapeHtml(userName)}</div>
+            <div class="msg-bubble" style="padding: 10px 12px; font-size: 12px; line-height: 1.5; background: linear-gradient(135deg, #7c3aed, #8b5cf6); color: #fff; border-radius: 12px; border-top-right-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+              ${escapeHtml(text)}
+            </div>
+          </div>
+        </div>
+    `;
+
+    input.value = '';
+    container.scrollTop = container.scrollHeight;
+
+    // 渲染打字状态
+    const typingId = 'typing_' + Date.now();
+    container.innerHTML += `
+        <div class="msg assistant" id="${typingId}" style="max-width: 100%;">
+          <div class="msg-avatar" style="background-image: url('agent_avatar.png'); background-size: cover; background-position: center; width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;"></div>
+          <div>
+            <div class="msg-sender" style="font-size: 10px; color: #64748b; margin-bottom: 2px;">智能助手</div>
+            <div class="msg-bubble" style="padding: 10px 12px; font-size: 12px; line-height: 1.5; background: rgba(255,255,255,0.95); border: 1px solid rgba(139, 92, 246, 0.06); border-radius: 12px; border-top-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.01); color: #334155;">
+              <div class="typing-indicator"><span></span><span></span><span></span></div>
+            </div>
+          </div>
+        </div>
+    `;
+    container.scrollTop = container.scrollHeight;
+
+    // 组装非课程学习场景下的 Prompt，包含相同人设约束
+    const prompt = `【指令】
+1. 请以活泼可爱、亲切自然的语气回答用户，拒绝机械冷冰冰的格式。在句中或句尾自然地加入一些可爱的颜文字表情（如 ^_^、(๑•̀ㅂ•́)و✧、(*^▽^*)）或表情符号来活跃气氛。
+2. 当且仅当用户明确要求你“制定学习计划”、“规划学习路线”或“推荐课程”时，你才为用户提供系统化的计划或学习路线。
+3. 否则，请直接针对用户的问题给出具体、准确的解答，不需要主动做学习规划。
+【用户提问】${text}`;
+
+    try {
+        const resp = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: prompt, user_id: currentUserEmail })
+        });
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) {
+            const bubble = typingEl.querySelector('.msg-bubble');
+            if (resp.ok) {
+                const data = await resp.json();
+                const responseText = data.advice || "未能获取到智能助手的回答。";
+                if (typeof marked !== 'undefined') {
+                    bubble.innerHTML = `<div class="markdown-body" style="font-size: 12px; line-height: 1.5; color: #334155;">${marked.parse(responseText)}</div>`;
+                } else {
+                    bubble.innerHTML = escapeHtml(responseText).replace(/\n/g, '<br>');
+                }
+            } else {
+                bubble.textContent = "智能助手服务响应异常，请稍后再试。";
+            }
+            container.scrollTop = container.scrollHeight;
+        }
+    } catch (err) {
+        console.error('呼叫大模型服务失败:', err);
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) {
+            const bubble = typingEl.querySelector('.msg-bubble');
+            bubble.textContent = "连接智能助手服务失败，请检查网络或后端服务。";
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+}
+
+// ===== 全局浮动窗口拖拽与拉伸逻辑 =====
+(function() {
+    document.addEventListener('DOMContentLoaded', () => {
+        const chat = document.getElementById('globalFloatingChat');
+        const header = document.getElementById('globalFloatingChatHeader');
+        if (!chat || !header) return;
+
+        // 1. 拖拽逻辑 (Drag)
+        let isDragging = false;
+        let startX, startY;
+        let initialLeft, initialTop;
+
+        header.addEventListener('mousedown', (e) => {
+            if (e.target.tagName.toLowerCase() === 'button' || e.target.closest('button')) return; // 避免点击关闭按钮时触发拖拽
+            isDragging = true;
+            
+            // 首次拖拽时，将 fixed 布局转换为具体的 left/top 定位，避免跳动
+            const rect = chat.getBoundingClientRect();
+            chat.style.right = 'auto';
+            chat.style.bottom = 'auto';
+            chat.style.left = rect.left + 'px';
+            chat.style.top = rect.top + 'px';
+            
+            startX = e.clientX;
+            startY = e.clientY;
+            initialLeft = rect.left;
+            initialTop = rect.top;
+            
+            document.body.style.userSelect = 'none';
+            document.body.style.cursor = 'move';
+            
+            document.addEventListener('mousemove', onDragMove);
+            document.addEventListener('mouseup', onDragEnd);
+        });
+
+        function onDragMove(e) {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            
+            let newLeft = initialLeft + dx;
+            let newTop = initialTop + dy;
+            
+            // 限制拖出屏幕
+            const maxLeft = window.innerWidth - chat.offsetWidth;
+            const maxTop = window.innerHeight - chat.offsetHeight;
+            newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+            newTop = Math.max(0, Math.min(newTop, maxTop));
+            
+            chat.style.left = newLeft + 'px';
+            chat.style.top = newTop + 'px';
+        }
+
+        function onDragEnd() {
+            isDragging = false;
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+            document.removeEventListener('mousemove', onDragMove);
+            document.removeEventListener('mouseup', onDragEnd);
+        }
+
+        // 2. 拉伸逻辑 (Resize from Top, Left, and Top-Left)
+        const resizeLeft = document.getElementById('globalChatResizeLeft');
+        const resizeTop = document.getElementById('globalChatResizeTop');
+        const resizeTopLeft = document.getElementById('globalChatResizeTopLeft');
+        
+        let isResizing = false;
+        let resizeType = ''; // 'l', 't', 'tl'
+        let startWidth, startHeight;
+        
+        function onResizeStart(e, type) {
+            e.preventDefault();
+            e.stopPropagation();
+            isResizing = true;
+            resizeType = type;
+            
+            const rect = chat.getBoundingClientRect();
+            chat.style.right = 'auto';
+            chat.style.bottom = 'auto';
+            chat.style.left = rect.left + 'px';
+            chat.style.top = rect.top + 'px';
+            
+            startX = e.clientX;
+            startY = e.clientY;
+            startWidth = rect.width;
+            startHeight = rect.height;
+            initialLeft = rect.left;
+            initialTop = rect.top;
+            
+            document.body.style.userSelect = 'none';
+            document.body.style.cursor = type === 'tl' ? 'nw-resize' : (type === 'l' ? 'w-resize' : 'n-resize');
+            
+            document.addEventListener('mousemove', onResizeMove);
+            document.addEventListener('mouseup', onResizeEnd);
+        }
+        
+        function onResizeMove(e) {
+            if (!isResizing) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            
+            const minW = 280;
+            const maxW = 600;
+            const minH = 320;
+            const maxH = window.innerHeight * 0.8;
+            
+            if (resizeType === 'l' || resizeType === 'tl') {
+                // 拖拽左边缘：向左拖拽 dx < 0，宽度应增加
+                let newWidth = startWidth - dx;
+                if (newWidth >= minW && newWidth <= maxW) {
+                    chat.style.width = newWidth + 'px';
+                    chat.style.left = (initialLeft + dx) + 'px';
+                }
+            }
+            
+            if (resizeType === 't' || resizeType === 'tl') {
+                // 拖拽上边缘：向上拖拽 dy < 0，高度应增加
+                let newHeight = startHeight - dy;
+                if (newHeight >= minH && newHeight <= maxH) {
+                    chat.style.height = newHeight + 'px';
+                    chat.style.top = (initialTop + dy) + 'px';
+                }
+            }
+        }
+        
+        function onResizeEnd() {
+            isResizing = false;
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+            document.removeEventListener('mousemove', onResizeMove);
+            document.removeEventListener('mouseup', onResizeEnd);
+        }
+        
+        if (resizeLeft) resizeLeft.addEventListener('mousedown', (e) => onResizeStart(e, 'l'));
+        if (resizeTop) resizeTop.addEventListener('mousedown', (e) => onResizeStart(e, 't'));
+        if (resizeTopLeft) resizeTopLeft.addEventListener('mousedown', (e) => onResizeStart(e, 'tl'));
+    });
+})();
   </script>
 </body>
 

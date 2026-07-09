@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import sqlite3
 import os
@@ -10,9 +10,9 @@ from bilibili_api import search, sync
 # ============================
 # 1. 配置区（请替换为你的真实凭证）
 # ============================
-SPARK_APP_ID = os.getenv("SPARK_APP_ID", "你的APPID")
-SPARK_API_SECRET = os.getenv("SPARK_API_SECRET", "你的APISecret")
-SPARK_API_KEY = os.getenv("SPARK_API_KEY", "你的APIKey")
+SPARK_APP_ID = os.getenv("SPARK_APP_ID", "fa9d787a")
+SPARK_API_SECRET = os.getenv("SPARK_API_SECRET", "ODQ3NzAyOTA1ZWNlNDk3YmUwNTI3MzUx")
+SPARK_API_KEY = os.getenv("SPARK_API_KEY", "f170f6f6fa1843d7a520bd4b5010674b")
 
 # ============================
 # 2. Flask 应用初始化
@@ -139,6 +139,11 @@ def index():
         return "Lingxi.html 文件未找到，请确保它在同一目录下。", 404
 
 
+@app.route('/<path:path>', methods=['GET'])
+def serve_file(path):
+    return send_from_directory('.', path)
+
+
 # 7.1 获取所有课程
 @app.route('/api/courses', methods=['GET'])
 def get_courses():
@@ -194,8 +199,16 @@ def chat():
     topic = intent.get('topic', user_input)
     videos = search_bilibili_videos(topic, page_size=6)
 
-    # 3. 生成学习建议
-    recommend_prompt = f"用户想学习{intent.get('topic')}，难度{intent.get('difficulty')}，请给出学习建议和资源推荐。"
+    # 3. 生成解答或学习建议
+    recommend_prompt = f"""你是一个温柔、耐心的个性化学习助手“灵析”。请根据用户的输入进行回答。
+在回答时，请遵循以下规则：
+1. 语气一定要温和友好、耐心且有温度，像一位贴心且充满亲和力的学长或学姐，拒绝冷冰冰的机械化官方回复。
+2. 内容要简炼，重点突出，不要有太多无意义的啰嗦和废话。
+3. 在合适且轻松的对话语境中，可以在句中或句尾自然地加入一些可爱的颜文字表情（例如 ^_^、(๑•̀ㅂ•́)و✧、(*^▽^*)）或表情符号来活跃气氛；如果用户在进行严肃的报错咨询或代码纠错提问，则保持专注与专业，不要使用任何表情。
+4. 如果用户是在提问具体的知识点、进行计算、请求代码编写/纠错，或者只是普通的交流闲聊，请直接、温和地解答。
+5. 如果用户表达了明确的学习某个主题的意图，请提供针对该主题的学习建议、学习要点与策略。
+
+用户输入：{user_input}"""
     advice = call_xunfei(recommend_prompt)
 
     # 4. 返回结果
