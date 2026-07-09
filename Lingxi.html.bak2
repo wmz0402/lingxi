@@ -5548,8 +5548,7 @@ function submitProfileSetup(e) {
 }
 
 function quickStartChapter(categoryName, courseTitle, chapterIndex) {
-  const existingCourse = findCourseByFuzzyTitle(courseTitle);
-  let subIdx = existingCourse ? myCourses.indexOf(existingCourse) : -1;
+  let subIdx = myCourses.findIndex(c => c.title === courseTitle);
   if (subIdx === -1) {
     const categoryData = ALL_COURSES_DATA.find(mod => mod.category === categoryName);
     const courseData = categoryData ? categoryData.courses.find(c => c.title === courseTitle) : null;
@@ -5578,9 +5577,7 @@ function quickStartChapter(categoryName, courseTitle, chapterIndex) {
 }
 
 function startOrSubscribeCourse(categoryName, courseTitle) {
-  // Use fuzzy matching to check if course already exists
-  const existingCourse = findCourseByFuzzyTitle(courseTitle);
-  let subIdx = existingCourse ? myCourses.indexOf(existingCourse) : -1;
+  let subIdx = myCourses.findIndex(c => c.title === courseTitle);
   if (subIdx === -1) {
     const categoryData = ALL_COURSES_DATA.find(mod => mod.category === categoryName);
     const courseData = categoryData ? categoryData.courses.find(c => c.title === courseTitle) : null;
@@ -5606,10 +5603,8 @@ function startOrSubscribeCourse(categoryName, courseTitle) {
 
 function unsubscribeCourse(categoryName, courseTitle, event) {
   if (event) event.stopPropagation();
-  const existingCourse = findCourseByFuzzyTitle(courseTitle);
-  const titleToRemove = existingCourse ? existingCourse.title : courseTitle;
-  if (confirm(`确定要退订课程”${courseTitle}”吗？退订后将清除该课程的进度和缓存。`)) {
-    myCourses = myCourses.filter(c => c.title !== titleToRemove);
+  if (confirm(`确定要退订课程“${courseTitle}”吗？退订后将清除该课程的进度和缓存。`)) {
+    myCourses = myCourses.filter(c => c.title !== courseTitle);
     saveUserData();
     renderMyCourses();
     renderCourseBoard();
@@ -5935,8 +5930,7 @@ function renderCourseBoard() {
     
     cat.courses.forEach(course => {
       // 检查订阅状态与进度
-      const foundCourse = findCourseByFuzzyTitle(course.title);
-      const subIdx = foundCourse ? myCourses.indexOf(foundCourse) : -1;
+      const subIdx = myCourses.findIndex(c => c.title === course.title);
       const isSubscribed = subIdx !== -1;
       const progress = isSubscribed ? myCourses[subIdx].progress : 0;
       
@@ -6312,59 +6306,6 @@ function switchMainPage(pageId) {
   }
 }
 
-// Fuzzy course/chapter title matching helper
-function findCourseByFuzzyTitle(targetTitle) {
-  // 1. Exact match
-  let found = myCourses.find(c => c.title === targetTitle);
-  if (found) return found;
-
-  // 2. Normalize: strip English subtitle in parentheses for comparison
-  const normalizedTarget = targetTitle.replace(/\s*\(.*?\)\s*$/, '').trim();
-  found = myCourses.find(c => {
-    const normalizedC = c.title.replace(/\s*\(.*?\)\s*$/, '').trim();
-    return normalizedC === normalizedTarget;
-  });
-  if (found) return found;
-
-  // 3. Containment check (either direction)
-  found = myCourses.find(c => {
-    const nT = normalizedTarget.toLowerCase();
-    const nC = c.title.replace(/\s*\(.*?\)\s*$/, '').trim().toLowerCase();
-    return nT.includes(nC) || nC.includes(nT);
-  });
-  if (found) return found;
-
-  return null;
-}
-
-function findChapterByFuzzyTitle(course, targetChTitle) {
-  // 1. Exact match
-  let found = course.chapters.find(ch => ch.title === targetChTitle);
-  if (found) return found;
-
-  // 2. Normalize chapter numbers: 第1章 ↔ 第一章, 第2章 ↔ 第二章, etc.
-  const normalizeChNum = (str) => {
-    const numMap = {'一':'1','二':'2','三':'3','四':'4','五':'5','六':'6','七':'7','八':'8','九':'9','十':'10'};
-    return str.replace(/第([一二三四五六七八九十]+)章/g, (m, cn) => {
-      const num = numMap[cn] || cn;
-      return '第' + num + '章';
-    });
-  };
-  const normTarget = normalizeChNum(targetChTitle);
-  found = course.chapters.find(ch => normalizeChNum(ch.title) === normTarget);
-  if (found) return found;
-
-  // 3. Containment check
-  const lowerTarget = normTarget.toLowerCase();
-  found = course.chapters.find(ch => {
-    const lowerCh = normalizeChNum(ch.title).toLowerCase();
-    return lowerTarget.includes(lowerCh) || lowerCh.includes(lowerTarget);
-  });
-  if (found) return found;
-
-  return null;
-}
-
 function showResource(title, type) {
   switchMainPage('resource');
   const titleEl = document.getElementById('resourceViewerTitle');
@@ -6378,17 +6319,19 @@ function showResource(title, type) {
     tagEl.textContent = '讲解文档';
     tagEl.style.background = 'rgba(99, 102, 241, 0.08)';
     tagEl.style.color = '#6366f1';
-    // 动态查找实际的章节内容（使用模糊匹配）
+    // 动态查找实际的章节内容
     let foundContent = '';
     const sepIdx = title.indexOf(' — ');
     if (sepIdx !== -1) {
       const courseTitle = title.substring(0, sepIdx);
       const chTitle = title.substring(sepIdx + 4);
-      const course = findCourseByFuzzyTitle(courseTitle);
-      if (course) {
-        const ch = findChapterByFuzzyTitle(course, chTitle);
-        if (ch && ch.content) {
-          foundContent = ch.content;
+      for (const c of myCourses) {
+        if (c.title === courseTitle) {
+          const ch = c.chapters.find(ch => ch.title === chTitle);
+          if (ch && ch.content) {
+            foundContent = ch.content;
+          }
+          break;
         }
       }
     }
@@ -6401,18 +6344,20 @@ function showResource(title, type) {
     tagEl.textContent = '思维导图';
     tagEl.style.background = 'rgba(16, 185, 129, 0.08)';
     tagEl.style.color = '#10b981';
-    // 动态查找实际的思维导图内容（使用模糊匹配）
+    // 动态查找实际的思维导图内容
     let foundMindmap = '';
     const sepIdx = title.indexOf(' — ');
     if (sepIdx !== -1) {
       const courseTitle = title.substring(0, sepIdx);
       const chTitleRaw = title.substring(sepIdx + 4);
       const chTitle = chTitleRaw.replace(/思维导图$/, '');
-      const course = findCourseByFuzzyTitle(courseTitle);
-      if (course) {
-        const ch = findChapterByFuzzyTitle(course, chTitle);
-        if (ch && ch.mindmapHtml) {
-          foundMindmap = ch.mindmapHtml;
+      for (const c of myCourses) {
+        if (c.title === courseTitle) {
+          const ch = c.chapters.find(ch => ch.title === chTitle);
+          if (ch && ch.mindmapHtml) {
+            foundMindmap = ch.mindmapHtml;
+          }
+          break;
         }
       }
     }
@@ -6779,7 +6724,7 @@ async function performLocalSearch(query) {
 
     const sectionTitle = section.querySelector('h3');
     if (sectionTitle) {
-        sectionTitle.textContent = `关于"${query}"的搜索结果`;
+        sectionTitle.textContent = `关于”${query}”的搜索结果`;
     }
 
     const results = localSearch(query);
@@ -6787,26 +6732,26 @@ async function performLocalSearch(query) {
     let html = '';
     if (results.length === 0) {
         html = `
-            <div style="grid-column: span 2; text-align: center; padding: 60px 20px; color: #94a3b8;">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin: 0 auto 16px; display: block; color: #cbd5e1;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <div style="font-size: 15px; font-weight: 500; color: #64748b;">未找到相关课程</div>
-                <div style="font-size: 12px; margin-top: 6px;">可尝试输入：数学、微积分、线性代数、计算机、网络等关键字</div>
+            <div style=”grid-column: span 2; text-align: center; padding: 60px 20px; color: #94a3b8;”>
+                <svg width=”64” height=”64” viewBox=”0 0 24 24” fill=”none” stroke=”currentColor” stroke-width=”1” style=”margin: 0 auto 16px; display: block; color: #cbd5e1;”><circle cx=”11” cy=”11” r=”8”/><line x1=”21” y1=”21” x2=”16.65” y2=”16.65”/></svg>
+                <div style=”font-size: 15px; font-weight: 500; color: #64748b;”>未找到相关课程</div>
+                <div style=”font-size: 12px; margin-top: 6px;”>可尝试输入：数学、微积分、线性代数、计算机、网络等关键字</div>
             </div>
         `;
     } else {
         results.forEach(item => {
             html += `
-                <div class="resource-card" data-type="course" data-category="${escapeHtml(item.category)}" data-title="${escapeHtml(item.title)}" style="padding:16px;border-radius:14px;background:#fff;border:1px solid rgba(0,0,0,0.04);box-shadow:0 2px 8px rgba(0,0,0,0.03);cursor:pointer;transition:transform .2s,border-color .2s;display:flex;flex-direction:column;gap:6px;text-align:left;"
-                     onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#6366f1'"
-                     onmouseout="this.style.transform='';this.style.borderColor='rgba(0,0,0,0.04)'"
-                     onclick="startOrSubscribeCourse('${escapeHtml(item.category)}', '${escapeHtml(item.title)}')"
+                <div class=”resource-card” data-type=”course” data-category=”${escapeHtml(item.category)}” data-title=”${escapeHtml(item.title)}” style=”padding:16px;border-radius:14px;background:#fff;border:1px solid rgba(0,0,0,0.04);box-shadow:0 2px 8px rgba(0,0,0,0.03);cursor:pointer;transition:transform .2s,border-color .2s;display:flex;flex-direction:column;gap:6px;text-align:left;”
+                     onmouseover=”this.style.transform='translateY(-2px)';this.style.borderColor='#6366f1'”
+                     onmouseout=”this.style.transform='';this.style.borderColor='rgba(0,0,0,0.04)'”
+                     onclick=”startOrSubscribeCourse('${escapeHtml(item.category)}', '${escapeHtml(item.title)}')”
                 >
-                    <div style="display:flex;align-items:center;gap:6px;">
-                        <span style="font-size:18px;">📚</span>
-                        <span style="font-size:10px;font-weight:700;color:#6366f1;background:#6366f115;padding:1px 10px;border-radius:20px;letter-spacing:.3px;">课程</span>
+                    <div style=”display:flex;align-items:center;gap:6px;”>
+                        <span style=”font-size:18px;”>📚</span>
+                        <span style=”font-size:10px;font-weight:700;color:#6366f1;background:#6366f115;padding:1px 10px;border-radius:20px;letter-spacing:.3px;”>课程</span>
                     </div>
-                    <div style="font-size:14px;font-weight:600;color:#1e293b;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4;">${escapeHtml(item.title)}</div>
-                    <div style="font-size:12px;color:#94a3b8;margin-top:2px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;text-align:left;line-height:1.4;">${escapeHtml(item.description || '')}</div>
+                    <div style=”font-size:14px;font-weight:600;color:#1e293b;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4;”>${escapeHtml(item.title)}</div>
+                    <div style=”font-size:12px;color:#94a3b8;margin-top:2px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;text-align:left;line-height:1.4;”>${escapeHtml(item.description || '')}</div>
                 </div>
             `;
         });
@@ -6814,7 +6759,7 @@ async function performLocalSearch(query) {
 
     let grid = section.querySelector('.search-results-grid');
     if (!grid) {
-        section.innerHTML = `<h3>关于"${query}"的搜索结果</h3><div class="search-results-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:20px;margin-top:16px;"></div><div id="biliSearchSection"></div>`;
+        section.innerHTML = `<h3>关于”${query}”的搜索结果</h3><div class=”search-results-grid” style=”display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:20px;margin-top:16px;”></div><div id=”biliSearchSection”></div>`;
         grid = section.querySelector('.search-results-grid');
     } else {
         grid.style.display = 'grid';
@@ -6832,29 +6777,29 @@ async function performLocalSearch(query) {
         const biliSection = document.getElementById('biliSearchSection');
         if (biliSection && biliResults.length > 0) {
             let biliHtml = `
-                <div style="margin-top:28px;">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-                        <span style="font-size:16px;">📺</span>
-                        <h3 style="font-size:15px;font-weight:700;color:#1e293b;margin:0;">B站相关视频</h3>
-                        <span style="font-size:10px;font-weight:600;color:#fb7185;background:#fff1f2;padding:2px 10px;border-radius:20px;">Bilibili</span>
+                <div style=”margin-top:28px;”>
+                    <div style=”display:flex;align-items:center;gap:8px;margin-bottom:14px;”>
+                        <span style=”font-size:16px;”>📺</span>
+                        <h3 style=”font-size:15px;font-weight:700;color:#1e293b;margin:0;”>B站相关视频</h3>
+                        <span style=”font-size:10px;font-weight:600;color:#fb7185;background:#fff1f2;padding:2px 10px;border-radius:20px;”>Bilibili</span>
                     </div>
-                    <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:20px;">
+                    <div style=”display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:20px;”>
             `;
             biliResults.forEach(v => {
                 const playText = v.play >= 10000 ? (v.play / 10000).toFixed(1) + '万' : (v.play || '');
                 biliHtml += `
-                    <a href="${v.url || '#'}" target="_blank" rel="noopener" style="text-decoration:none;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,0.04);box-shadow:0 2px 8px rgba(0,0,0,0.03);transition:transform .2s,border-color .2s;"
-                       onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#fb7185'"
-                       onmouseout="this.style.transform='';this.style.borderColor='rgba(0,0,0,0.04)'"
+                    <a href=”${v.url || '#'}” target=”_blank” rel=”noopener” style=”text-decoration:none;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;background:#fff;border:1px solid rgba(0,0,0,0.04);box-shadow:0 2px 8px rgba(0,0,0,0.03);transition:transform .2s,border-color .2s;”
+                       onmouseover=”this.style.transform='translateY(-2px)';this.style.borderColor='#fb7185'”
+                       onmouseout=”this.style.transform='';this.style.borderColor='rgba(0,0,0,0.04)'”
                     >
-                        ${v.extra ? `<div style="width:100%;height:160px;background:#f1f5f9;overflow:hidden;"><img src="${v.extra}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.display='none'" /></div>` : ''}
-                        <div style="padding:12px 14px;display:flex;flex-direction:column;gap:6px;">
-                            <div style="display:flex;align-items:center;gap:6px;">
-                                <span style="font-size:10px;font-weight:700;color:#fb7185;background:#fff1f2;padding:1px 8px;border-radius:20px;">视频</span>
-                                ${playText ? `<span style="font-size:10px;color:#94a3b8;">▶ ${playText}</span>` : ''}
+                        ${v.extra ? `<div style=”width:100%;height:160px;background:#f1f5f9;overflow:hidden;”><img src=”${v.extra}” style=”width:100%;height:100%;object-fit:cover;” onerror=”this.parentElement.style.display='none'” /></div>` : ''}
+                        <div style=”padding:12px 14px;display:flex;flex-direction:column;gap:6px;”>
+                            <div style=”display:flex;align-items:center;gap:6px;”>
+                                <span style=”font-size:10px;font-weight:700;color:#fb7185;background:#fff1f2;padding:1px 8px;border-radius:20px;”>视频</span>
+                                ${playText ? `<span style=”font-size:10px;color:#94a3b8;”>▶ ${playText}</span>` : ''}
                             </div>
-                            <div style="font-size:13px;font-weight:600;color:#1e293b;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4;">${escapeHtml(v.title || '')}</div>
-                            <div style="font-size:11px;color:#94a3b8;">${escapeHtml(v.author || 'UP主')}</div>
+                            <div style=”font-size:13px;font-weight:600;color:#1e293b;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4;”>${escapeHtml(v.title || '')}</div>
+                            <div style=”font-size:11px;color:#94a3b8;”>${escapeHtml(v.author || 'UP主')}</div>
                         </div>
                     </a>
                 `;
@@ -7306,56 +7251,12 @@ function postProcessChapterContent(container) {
         runBtn.onmouseout = () => runBtn.style.background = '#8b5cf6';
         
         runBtn.onclick = () => {
-          let codeToSend = codeText;
-
-          // Auto-wrap incomplete C/C++/Java code with boilerplate
-          if (language === 'c' || language === 'cpp') {
-            if (!codeText.includes('main')) {
-              let wrapped = '';
-              if (language === 'c') {
-                if (!codeText.includes('#include')) {
-                  wrapped += '#include <stdio.h>\n';
-                  wrapped += '#include <stdlib.h>\n';
-                  wrapped += '#include <string.h>\n';
-                  wrapped += '#include <unistd.h>\n';
-                }
-                wrapped += '\nint main() {\n';
-                wrapped += codeText.trim() + '\n';
-                wrapped += 'return 0;\n}\n';
-              } else {
-                if (!codeText.includes('#include')) {
-                  wrapped += '#include <iostream>\n';
-                  wrapped += '#include <vector>\n';
-                  wrapped += '#include <string>\n';
-                  wrapped += '#include <algorithm>\n';
-                  wrapped += 'using namespace std;\n';
-                }
-                wrapped += '\nint main() {\n';
-                wrapped += codeText.trim() + '\n';
-                wrapped += 'return 0;\n}\n';
-              }
-              codeToSend = wrapped;
-            } else if (!codeText.includes('#include') && language === 'c') {
-              codeToSend = '#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <unistd.h>\n' + codeText;
-            } else if (!codeText.includes('#include') && language === 'cpp') {
-              codeToSend = '#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\nusing namespace std;\n' + codeText;
-            }
-          } else if (language === 'java') {
-            if (!codeText.includes('public class') && !codeText.includes('class ')) {
-              let wrapped = '';
-              if (!codeText.includes('import ')) {
-                wrapped += 'import java.util.*;\n\n';
-              }
-              wrapped += 'public class Main {\n';
-              wrapped += '    public static void main(String[] args) {\n';
-              const lines = codeText.trim().split('\n');
-              wrapped += lines.map(l => '        ' + l).join('\n') + '\n';
-              wrapped += '    }\n';
-              wrapped += '}\n';
-              codeToSend = wrapped;
-            }
+          if ((language === 'c' || language === 'cpp' || language === 'java') && !codeText.includes('main')) {
+            output.style.display = 'block';
+            output.innerText = '提示：该代码片段为不完整的代码示例（缺少 main 主函数入口），无法单独编译运行。';
+            output.style.color = '#fbbf24';
+            return;
           }
-
           runBtn.innerText = '运行中...';
           runBtn.disabled = true;
           output.style.display = 'block';
@@ -7365,7 +7266,7 @@ function postProcessChapterContent(container) {
           fetch('/api/run_code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: codeToSend, language: language })
+            body: JSON.stringify({ code: codeText, language: language })
           })
           .then(res => res.json())
           .then(data => {
@@ -8848,12 +8749,11 @@ class PlannerAgent {
     }
 }
 function enterCourseByTitle(courseTitle) {
-    const foundCourse = findCourseByFuzzyTitle(courseTitle);
-    if (foundCourse) {
-        const index = myCourses.indexOf(foundCourse);
+    const index = myCourses.findIndex(c => c.title === courseTitle);
+    if (index !== -1) {
         enterCourseStudy(index);
     } else {
-        alert(`未找到课程”${courseTitle}”，可先通过搜索添加。`);
+        alert(`未找到课程“${courseTitle}”，可先通过搜索添加。`);
         switchMainPage('search');
         document.getElementById('searchInput').value = courseTitle;
         performSearch(courseTitle);
@@ -8861,19 +8761,17 @@ function enterCourseByTitle(courseTitle) {
 }
 
 function enterCourseStudySearch(courseTitle, chapterTitle, tab, autoQuiz = false) {
-    const foundCourse = findCourseByFuzzyTitle(courseTitle);
-    if (!foundCourse) {
-        alert(`未找到课程”${courseTitle}”`);
+    const cIndex = myCourses.findIndex(c => c.title === courseTitle);
+    if (cIndex === -1) {
+        alert(`未找到课程“${courseTitle}”`);
         return;
     }
-    const cIndex = myCourses.indexOf(foundCourse);
     const course = myCourses[cIndex];
-    const foundChapter = findChapterByFuzzyTitle(course, chapterTitle);
-    if (!foundChapter) {
-        alert(`未找到章节”${chapterTitle}”`);
+    const chIndex = course.chapters.findIndex(ch => ch.title === chapterTitle);
+    if (chIndex === -1) {
+        alert(`未找到章节“${chapterTitle}”`);
         return;
     }
-    const chIndex = course.chapters.indexOf(foundChapter);
     if (chIndex > course.unlockedChapterIndex) {
         alert(`该章节尚未解锁，请先完成前面的章节！`);
         return;

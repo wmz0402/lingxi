@@ -102,20 +102,7 @@ for cat_name, file_name in md_files.items():
                 "intro": f"学习关于 {ch_title} 的核心专业理论。",
                 "content": ch_content_html,
                 "quizzes": [], # Will populate from quizzes
-                "mindmapHtml": f"""
-                <div class="mindmap-chart">
-                  <div class="mm-root">{ch_title}</div>
-                  <div class="mm-branches">
-                    <div class="mm-branch">
-                      <div class="mm-parent-node">核心知识</div>
-                      <div class="mm-leaves">
-                        <div class="mm-leaf-item"><div class="mm-leaf-node">理论概念</div></div>
-                        <div class="mm-leaf-item"><div class="mm-leaf-node">规范机理</div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                """
+                "mindmapHtml": ""  # 思维导图由 courses_data.js 中的预构建数据提供，不要在此生成通用模板
             })
             chapter_id += 1
             

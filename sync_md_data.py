@@ -238,20 +238,7 @@ def parse_course_section(course_title, text, is_other_file=False):
                 "intro": f"学习关于 {chap['title']} 的核心专业理论与应用。",
                 "content": chap["theory_raw"],
                 "quizzes": chap["quizzes"],
-                "mindmapHtml": f"""
-                <div class="mindmap-chart">
-                  <div class="mm-root">{chap['title']}</div>
-                  <div class="mm-branches">
-                    <div class="mm-branch">
-                      <div class="mm-parent-node">核心知识</div>
-                      <div class="mm-leaves">
-                        <div class="mm-leaf-item"><div class="mm-leaf-node">理论概念</div></div>
-                        <div class="mm-leaf-item"><div class="mm-leaf-node">应用实践</div></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                """
+                "mindmapHtml": ""  # 思维导图由 courses_data.js 中的预构建数据提供，不要在此生成通用模板
             })
         return processed_chapters
 
@@ -330,20 +317,7 @@ def parse_course_section(course_title, text, is_other_file=False):
             "intro": f"学习关于 {cleaned_title} 的核心专业理论与应用。",
             "content": chap["theory_raw"],
             "quizzes": quizzes,
-            "mindmapHtml": f"""
-            <div class="mindmap-chart">
-              <div class="mm-root">{cleaned_title}</div>
-              <div class="mm-branches">
-                <div class="mm-branch">
-                  <div class="mm-parent-node">核心知识</div>
-                  <div class="mm-leaves">
-                    <div class="mm-leaf-item"><div class="mm-leaf-node">理论概念</div></div>
-                    <div class="mm-leaf-item"><div class="mm-leaf-node">应用实践</div></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            """
+            "mindmapHtml": ""  # 思维导图由 courses_data.js 中的预构建数据提供，不要在此生成通用模板
         })
         
     return processed_chapters
