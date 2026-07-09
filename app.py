@@ -3,9 +3,15 @@ from flask_cors import CORS
 import sqlite3
 import os
 import json
-from sparkai.llm.llm import ChatSparkLLM
-from sparkai.core.messages import ChatMessage
-from bilibili_api import search, sync
+import urllib.request
+import urllib.parse
+try:
+    from sparkai.llm.llm import ChatSparkLLM
+    from sparkai.core.messages import ChatMessage
+    SPARKAI_AVAILABLE = True
+except ImportError:
+    print("警告: sparkai 未安装，AI对话功能不可用。可运行 pip install spark-ai-python 安装。")
+    SPARKAI_AVAILABLE = False
 
 # ============================
 # 1. 配置区（请替换为你的真实凭证）
@@ -28,6 +34,8 @@ DB_PATH = 'lingxi.db'
 # ============================
 def call_xunfei(prompt: str) -> str:
     """调用讯飞星火大模型，返回回复内容"""
+    if not SPARKAI_AVAILABLE:
+        return "AI对话功能暂未启用，请先安装 sparkai 依赖。"
     try:
         spark = ChatSparkLLM(
             spark_api_url="wss://spark-api.xf-yun.com/v3.5/chat",  # 可替换为 v4.0
@@ -91,40 +99,49 @@ def parse_learning_intent(user_input: str) -> dict:
 # 5. B站视频搜索函数
 # ============================
 def search_bilibili_videos(keyword: str, page_size: int = 6) -> list:
+    """直接调用B站公开搜索API，不依赖 bilibili_api 库"""
     try:
-        result = sync(search.search_by_type(
-            keyword,
-            search.SearchObjectType.VIDEO,
-            page=1,
-            page_size=page_size
-        ))
+        encoded_keyword = urllib.parse.quote(keyword)
+        url = f"https://api.bilibili.com/x/web-interface/wbi/search/type?search_type=video&keyword={encoded_keyword}&page=1&page_size={page_size}"
+        req = urllib.request.Request(url, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Referer': 'https://www.bilibili.com'
+        })
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+
+        if data.get('code') != 0:
+            print(f"B站API返回错误: code={data.get('code')}, message={data.get('message')}")
+            return []
+
         videos = []
-        for v in result.get('result', []):
-            # 兼容多种字段名
+        for v in data.get('data', {}).get('result', []):
+            # 清理标题中的高亮标签
             title = v.get('title', '').replace('<em class="keyword">', '').replace('</em>', '')
-            # 封面图：尝试 pic / cover / cover_url
-            pic = v.get('pic') or v.get('cover') or v.get('cover_url') or ''
-            # 播放量：尝试 play / view / click
-            play = v.get('play') or v.get('view') or v.get('click') or 0
+            # 封面图
+            pic = v.get('pic', '')
+            if pic and pic.startswith('//'):
+                pic = 'https:' + pic
+            # 播放量
+            play = v.get('play', 0)
             # 作者
-            author = v.get('author') or v.get('up_name') or 'UP主'
+            author = v.get('author', 'UP主')
             # BV号
-            bvid = v.get('bvid') or v.get('aid') or ''
+            bvid = v.get('bvid', '')
 
             videos.append({
                 "title": title,
                 "bvid": bvid,
-                "play": int(play),
+                "play": int(play) if play else 0,
                 "like": v.get('like', 0),
                 "author": author,
                 "url": f"https://www.bilibili.com/video/{bvid}" if bvid else '',
                 "pic": pic
             })
         videos.sort(key=lambda x: x['play'], reverse=True)
-        return videos
+        return videos[:page_size]
     except Exception as e:
         print(f"B站搜索出错: {e}")
-        # 打印详细错误，方便排查
         import traceback
         traceback.print_exc()
         return []

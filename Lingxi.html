@@ -3681,6 +3681,7 @@
             <h2>通知中心</h2>
             <div style="display: flex; align-items: center; gap: 12px;">
               <button class="noti-clear-btn" onclick="clearNotifications()">全部标记为已读</button>
+              <button class="noti-clear-btn" onclick="deleteAllNotifications()" style="background:#ef4444;color:#fff;">清空消息</button>
               <button class="back-to-chat-btn" onclick="switchMainPage('chat')"
                 style="padding: 6px 12px; font-size: 12.5px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -5271,11 +5272,7 @@
       ]
     };
 
-let myCourses = [
-  { title: 'Python递归从入门到精通', resources: 12, status: '进行中', progress: 0, unlockedChapterIndex: 0, chapters: courseTemplates['Python递归从入门到精通'] },
-  { title: '数据结构基础', resources: 18, status: '进行中', progress: 0, unlockedChapterIndex: 0, chapters: courseTemplates['数据结构基础'] },
-  { title: '算法复杂度分析入门', resources: 8, status: '进行中', progress: 0, unlockedChapterIndex: 0, chapters: courseTemplates['算法复杂度分析入门'] }
-];
+let myCourses = [];
 
 // ==================== AUTH ====================
 function applyAvatar(dataUrl) {
@@ -5856,11 +5853,7 @@ function handleRegister(e) {
     securityQuestion: question,
     securityAnswer: answer,
     profile: null,   // 初始无配置信息，用于判断是否需要显示配置页面
-    myCourses: [
-      { title: 'Python递归从入门到精通', resources: 12, status: '进行中', progress: 0, unlockedChapterIndex: 0, chapters: courseTemplates['Python递归从入门到精通'] },
-      { title: '数据结构基础', resources: 18, status: '进行中', progress: 0, unlockedChapterIndex: 0, chapters: courseTemplates['数据结构基础'] },
-      { title: '算法复杂度分析入门', resources: 8, status: '进行中', progress: 0, unlockedChapterIndex: 0, chapters: courseTemplates['算法复杂度分析入门'] }
-    ],
+    myCourses: [],
     chatHistory: [],
     recentActivities: [],
     learningStats: {
@@ -6821,6 +6814,12 @@ async function performLocalSearch(query) {
         grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
         grid.style.gap = '20px';
         grid.style.marginTop = '16px';
+        // Ensure biliSearchSection exists even when grid already exists
+        if (!document.getElementById('biliSearchSection')) {
+            const biliDiv = document.createElement('div');
+            biliDiv.id = 'biliSearchSection';
+            section.appendChild(biliDiv);
+        }
     }
     grid.innerHTML = html;
 
@@ -6920,16 +6919,23 @@ function renderMyCourses() {
   if (!container) return;
   
   let html = '';
-  myCourses.forEach((c, index) => {
-    html += `
-      <div class="course-item" onclick="enterCourseStudy(${index})" style="position: relative; padding-right: 32px; cursor: pointer;">
-        <button onclick="removeCourse(${index}); event.stopPropagation();" style="position: absolute; right: 10px; top: 12px; background: transparent; color: #cbd5e1; font-size: 16px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#cbd5e1'">×</button>
-        <div class="course-title">${c.title}</div>
-        <div class="course-meta"><span>${c.resources} 个资源</span><span>${c.status}</span><span>${c.progress}%</span></div>
-        <div class="course-progress"><div class="course-progress-fill" style="width:${c.progress}%; background: ${c.progress === 100 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)' : 'linear-gradient(90deg,#6366f1,#818cf8)'}"></div></div>
-      </div>
-    `;
-  });
+  if (myCourses.length === 0) {
+    html = `<div style="text-align:center; padding:40px 20px; color:#94a3b8; font-size:15px; line-height:1.8;">
+      <div style="font-size:40px; margin-bottom:12px;">📚</div>
+      当前暂无课程，快去课程学习中心开启学习之旅吧！
+    </div>`;
+  } else {
+    myCourses.forEach((c, index) => {
+      html += `
+        <div class="course-item" onclick="enterCourseStudy(${index})" style="position: relative; padding-right: 32px; cursor: pointer;">
+          <button onclick="removeCourse(${index}); event.stopPropagation();" style="position: absolute; right: 10px; top: 12px; background: transparent; color: #cbd5e1; font-size: 16px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#cbd5e1'">×</button>
+          <div class="course-title">${c.title}</div>
+          <div class="course-meta"><span>${c.resources} 个资源</span><span>${c.status}</span><span>${c.progress}%</span></div>
+          <div class="course-progress"><div class="course-progress-fill" style="width:${c.progress}%; background: ${c.progress === 100 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)' : 'linear-gradient(90deg,#6366f1,#818cf8)'}"></div></div>
+        </div>
+      `;
+    });
+  }
   container.innerHTML = html;
   
   const countBadge = document.querySelector('#panelCourses .count');
@@ -8373,19 +8379,29 @@ function renderNotifications() {
   
   let html = '';
   let unreadCount = 0;
-  notificationsList.forEach(n => {
-    if (n.unread) unreadCount++;
-    html += `
-      <div class="noti-item ${n.unread ? 'unread' : ''}" onclick="markNotificationRead(${n.id})">
-        <div class="noti-item-icon" style="background:${n.senderBg}">${n.sender}</div>
-        <div class="noti-item-content">
-          <div class="noti-item-title">${escapeHtml(n.title)}</div>
-          <div class="noti-item-desc">${escapeHtml(n.desc)}</div>
-          <div class="noti-item-time">${n.time}</div>
-        </div>
+  if (notificationsList.length === 0) {
+    html = `
+      <div style="text-align:center; padding:60px 20px; color:#94a3b8;">
+        <div style="font-size:40px; margin-bottom:12px;"></div>
+        <div style="font-size:15px; font-weight:500; color:#64748b;">暂无通知消息</div>
+        <div style="font-size:12px; margin-top:6px;">新的通知将在这里显示</div>
       </div>
     `;
-  });
+  } else {
+    notificationsList.forEach(n => {
+      if (n.unread) unreadCount++;
+      html += `
+        <div class="noti-item ${n.unread ? 'unread' : ''}" onclick="markNotificationRead(${n.id})">
+          <div class="noti-item-icon" style="background:${n.senderBg}">${n.sender}</div>
+          <div class="noti-item-content">
+            <div class="noti-item-title">${escapeHtml(n.title)}</div>
+            <div class="noti-item-desc">${escapeHtml(n.desc)}</div>
+            <div class="noti-item-time">${n.time}</div>
+          </div>
+        </div>
+      `;
+    });
+  }
   container.innerHTML = html;
   
   const badge = document.querySelector('.nav-badge');
@@ -8412,6 +8428,13 @@ function clearNotifications() {
   notificationsList.forEach(n => {
     n.unread = false;
   });
+  renderNotifications();
+  saveUserData();
+}
+
+function deleteAllNotifications() {
+  if (notificationsList.length === 0) return;
+  notificationsList = [];
   renderNotifications();
   saveUserData();
 }
