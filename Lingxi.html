@@ -1112,7 +1112,7 @@
         transition: max-height 0.3s ease, border-bottom 0.3s ease, padding 0.3s ease;
       }
 
-      body.sidebar-collapsed .course-chapter-sidebar {
+      .course-chapter-sidebar.collapsed {
         max-height: 0 !important;
         padding-top: 0 !important;
         padding-bottom: 0 !important;
@@ -2093,7 +2093,7 @@
       overflow: hidden;
     }
 
-    body.sidebar-collapsed .course-chapter-sidebar {
+    .course-chapter-sidebar.collapsed {
       width: 0 !important;
       border-right: none !important;
     }
@@ -3496,7 +3496,7 @@
           <div class="chat-input-wrap">
             <textarea id="chatInput" rows="1" placeholder="输入你的学习需求，例如：我想学Python递归..." onkeydown="handleChatKey(event)"
               oninput="autoResize(this)"></textarea>
-            <button class="send-btn" onclick="sendMessage()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            <button class="send-btn" id="chatSendBtn" onclick="handleSendBtnClick()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2">
                 <line x1="22" y1="2" x2="11" y2="13" />
                 <polygon points="22 2 15 22 11 13 2 9 22 2" />
@@ -3774,6 +3774,15 @@
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
                 返回
+              </button>
+              <button class="back-to-chat-btn" onclick="toggleCourseSidebar()"
+                style="padding: 5px 10px; font-size: 11.5px; flex-shrink: 0; background: rgba(139,92,246,0.08); color: #7c3aed; border: 1px solid rgba(139,92,246,0.15); margin-left: 8px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px; display: inline-block; vertical-align: middle;">
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                <span style="vertical-align: middle;">章节目录</span>
               </button>
               <span style="height: 14px; width: 1px; background: #cbd5e1;"></span>
               <button class="study-tab-btn active" id="studyTabLecture" onclick="switchStudyTab('lecture')"
@@ -4204,6 +4213,13 @@
     let currentTab = 'login';
     let userName = '用户';
     let isProcessing = false;
+    let currentAbortController = null;
+    
+    function stopGeneration() {
+      if (currentAbortController) {
+        currentAbortController.abort();
+      }
+    }
     let favoritesList = [];
     let wrongQuestions = [];
     let notificationsList = [];
@@ -6747,6 +6763,197 @@ function switchStudyTab(tab) {
   renderChapterContent();
 }
 
+function toggleCourseSidebar() {
+  const sidebar = document.getElementById('courseChapterSidebar');
+  if (sidebar) {
+    sidebar.classList.toggle('collapsed');
+  }
+}
+
+function postProcessChapterContent(container) {
+  const preTags = container.querySelectorAll('pre');
+  preTags.forEach((pre) => {
+    const codeTag = pre.querySelector('code');
+    if (codeTag) {
+      const codeText = codeTag.innerText;
+      const langClass = codeTag.className || '';
+      
+      let language = null;
+      let displayLang = '代码示例';
+      
+      if (langClass.includes('python') || langClass.includes('py')) {
+        language = 'python';
+        displayLang = 'PYTHON 交互环境';
+      } else if (langClass.includes('java')) {
+        language = 'java';
+        displayLang = 'JAVA 编译运行';
+      } else if (langClass.includes('cpp') || langClass.includes('c++')) {
+        language = 'cpp';
+        displayLang = 'C++ 编译运行';
+      } else if (langClass.includes('clang') || langClass.match(/\blanguage-c\b/) || langClass.includes('c-code')) {
+        language = 'c';
+        displayLang = 'C 编译运行';
+      } else if (codeText.includes('#include <stdio.h>') || codeText.includes('int main(')) {
+        language = 'c';
+        displayLang = 'C 编译运行';
+      } else if (codeText.includes('public class ') || codeText.includes('System.out.print')) {
+        language = 'java';
+        displayLang = 'JAVA 编译运行';
+      } else if (codeText.includes('print(') || codeText.includes('def ')) {
+        language = 'python';
+        displayLang = 'PYTHON 交互环境';
+      }
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'code-sandbox-wrapper';
+      wrapper.style.margin = '16px 0';
+      wrapper.style.border = '1px solid #cbd5e1';
+      wrapper.style.borderRadius = '12px';
+      wrapper.style.overflow = 'hidden';
+      wrapper.style.background = '#1e293b';
+      wrapper.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+      
+      const header = document.createElement('div');
+      header.style.display = 'flex';
+      header.style.justifyContent = 'space-between';
+      header.style.alignItems = 'center';
+      header.style.background = '#0f172a';
+      header.style.padding = '8px 16px';
+      header.style.borderBottom = '1px solid #334155';
+      header.style.color = '#94a3b8';
+      header.style.fontSize = '11px';
+      header.style.fontWeight = '600';
+      header.innerHTML = `<span>${displayLang}</span>`;
+      
+      const output = document.createElement('pre');
+      output.className = 'run-output';
+      output.style.display = 'none';
+      output.style.background = '#020617';
+      output.style.padding = '12px 16px';
+      output.style.margin = '0';
+      output.style.borderTop = '1px solid #334155';
+      output.style.fontSize = '12px';
+      output.style.fontFamily = 'monospace';
+      output.style.whiteSpace = 'pre-wrap';
+      output.style.overflowX = 'auto';
+      
+      if (language) {
+        const runBtn = document.createElement('button');
+        runBtn.innerText = '运行代码';
+        runBtn.style.background = '#8b5cf6';
+        runBtn.style.color = '#ffffff';
+        runBtn.style.border = 'none';
+        runBtn.style.borderRadius = '6px';
+        runBtn.style.padding = '4px 12px';
+        runBtn.style.cursor = 'pointer';
+        runBtn.style.fontWeight = '600';
+        runBtn.style.fontSize = '11px';
+        runBtn.style.transition = 'all 0.2s';
+        runBtn.onmouseover = () => runBtn.style.background = '#7c3aed';
+        runBtn.onmouseout = () => runBtn.style.background = '#8b5cf6';
+        
+        runBtn.onclick = () => {
+          if ((language === 'c' || language === 'cpp' || language === 'java') && !codeText.includes('main')) {
+            output.style.display = 'block';
+            output.innerText = '提示：该代码片段为不完整的代码示例（缺少 main 主函数入口），无法单独编译运行。';
+            output.style.color = '#fbbf24';
+            return;
+          }
+          runBtn.innerText = '运行中...';
+          runBtn.disabled = true;
+          output.style.display = 'block';
+          output.innerText = '正在执行代码，请稍候...';
+          output.style.color = '#94a3b8';
+          
+          fetch('/api/run_code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: codeText, language: language })
+          })
+          .then(res => res.json())
+          .then(data => {
+            runBtn.innerText = '运行代码';
+            runBtn.disabled = false;
+            output.innerText = data.output;
+            if (data.success) {
+              output.style.color = '#34d399';
+            } else {
+              output.style.color = '#f87171';
+            }
+          })
+          .catch(err => {
+            runBtn.innerText = '运行代码';
+            runBtn.disabled = false;
+            output.innerText = '运行失败，请确认后端 API 服务已启动。';
+            output.style.color = '#f87171';
+          });
+        };
+        header.appendChild(runBtn);
+      }
+      
+      wrapper.appendChild(header);
+      
+      const clonedPre = pre.cloneNode(true);
+      clonedPre.style.margin = '0';
+      clonedPre.style.padding = '16px';
+      clonedPre.style.overflowX = 'auto';
+      clonedPre.style.background = 'transparent';
+      const clonedCode = clonedPre.querySelector('code');
+      if (clonedCode) {
+        clonedCode.style.color = '#e2e8f0';
+        clonedCode.style.fontFamily = 'monospace';
+      }
+      wrapper.appendChild(clonedPre);
+      
+      if (language) {
+        wrapper.appendChild(output);
+      }
+      
+      pre.replaceWith(wrapper);
+    }
+  });
+  
+  const tables = container.querySelectorAll('table');
+  tables.forEach(table => {
+    table.setAttribute('border', '0');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+    table.style.margin = '20px 0';
+    table.style.fontSize = '13px';
+    table.style.borderRadius = '8px';
+    table.style.overflow = 'hidden';
+    table.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+    table.style.background = '#ffffff';
+    table.style.border = '1px solid #e2e8f0';
+    
+    table.querySelectorAll('th').forEach(th => {
+      th.style.background = '#f8fafc';
+      th.style.color = '#475569';
+      th.style.fontWeight = '600';
+      th.style.padding = '12px 16px';
+      th.style.borderBottom = '2px solid #cbd5e1';
+      th.style.textAlign = 'left';
+    });
+    
+    table.querySelectorAll('td').forEach(td => {
+      td.style.padding = '12px 16px';
+      td.style.borderBottom = '1px solid #f1f5f9';
+      td.style.color = '#334155';
+    });
+  });
+  
+  const blockquotes = container.querySelectorAll('blockquote');
+  blockquotes.forEach(bq => {
+    bq.style.borderLeft = '4px solid #8b5cf6';
+    bq.style.background = '#f5f3ff';
+    bq.style.padding = '12px 16px';
+    bq.style.margin = '16px 0';
+    bq.style.borderRadius = '0 8px 8px 0';
+    bq.style.color = '#5b21b6';
+    bq.style.fontSize = '13.5px';
+  });
+}
+
 function renderChapterContent() {
   const container = document.getElementById('studyContentContainer');
   if (!container) return;
@@ -6798,7 +7005,9 @@ function renderChapterContent() {
         
         <div class="quiz-feedback success" id="chapterQuizFeedbackSuccess" style="display:none; margin-top:16px; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 14px; border-radius: 8px; font-size: 13px;">
           <strong>回答正确！</strong><br>
-          ${q.analysis}
+          <div class="markdown-body" style="margin-top: 6px;">
+            ${safeMarkdownParse(q.analysis)}
+          </div>
           <div style="margin-top: 12px;">
             <button class="quiz-btn" style="margin-top: 0; padding: 6px 16px; font-size: 12px;" onclick="nextChapterQuizQuestion()">${isLast ? '完成测试，解锁章节' : '下一题'}</button>
           </div>
@@ -6812,14 +7021,18 @@ function renderChapterContent() {
     container.innerHTML = `
       <div class="study-lecture-box" style="max-width: 720px; margin: 0 auto; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid rgba(139,92,246,0.06); padding: 32px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.01);">
         <h2 style="font-size: 18px; font-weight: 700; color: #1e1b4b; margin-bottom: 20px; border-bottom: 1.5px solid rgba(139,92,246,0.06); padding-bottom: 12px;">${ch.title}</h2>
-        <div>
-          ${ch.content}
+        <div id="lectureMarkdownBody" style="line-height: 1.6; color: #334155;">
         </div>
         <div style="margin-top: 32px; text-align: center; border-top: 1px solid rgba(139,92,246,0.06); padding-top: 24px;">
           <button class="quiz-btn" onclick="startChapterQuiz()" style="padding: 12px 36px; font-size: 13.5px;">完成阅读，开始测试</button>
         </div>
       </div>
     `;
+    const bodyContainer = document.getElementById('lectureMarkdownBody');
+    if (bodyContainer) {
+      bodyContainer.innerHTML = safeMarkdownParse(ch.content);
+      postProcessChapterContent(bodyContainer);
+    }
   }
   if (window.MathJax && window.MathJax.typesetPromise) {
     window.MathJax.typesetPromise();
@@ -7113,11 +7326,7 @@ function sendStudyAssistantMessage() {
     const typingEl = document.getElementById(typingId);
     if (typingEl) {
       const bubble = typingEl.querySelector('.msg-bubble');
-      if (typeof marked !== 'undefined') {
-          bubble.innerHTML = `<div class="markdown-body" style="font-size: 12.5px; line-height: 1.5; color: #334155;">${marked.parse(response)}</div>`;
-      } else {
-          bubble.innerHTML = escapeHtml(response).replace(/\n/g, '<br>');
-      }
+      bubble.innerHTML = `<div class="markdown-body" style="font-size: 12.5px; line-height: 1.5; color: #334155;">${safeMarkdownParse(response)}</div>`;
       container.scrollTop = container.scrollHeight;
     }
   });
@@ -7946,7 +8155,50 @@ function clearChatHistory() {
     }
 }
 
-function handleChatKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+function safeMarkdownParse(text) {
+  if (!text) return "";
+  if (typeof marked === 'undefined') return escapeHtml(text).replace(/\n/g, '<br>');
+  // 将半角波浪号 ~ 替换为全角波浪号 ～，防止 markdown 渲染为删除线，且符合可爱的中文语气特征
+  const cleanText = text.replace(/~/g, '～');
+  return marked.parse(cleanText);
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (isProcessing) {
+      stopGeneration();
+    } else {
+      sendMessage();
+    }
+  }
+}
+
+function handleSendBtnClick() {
+  if (isProcessing) {
+    stopGeneration();
+  } else {
+    sendMessage();
+  }
+}
+
+function updateSendBtnState() {
+  const btn = document.getElementById('chatSendBtn');
+  if (!btn) return;
+  if (isProcessing) {
+    btn.style.background = 'linear-gradient(135deg, #ef4444, #f87171)';
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="color:#ffffff;">
+      <rect x="5" y="5" width="14" height="14" rx="2" />
+    </svg>`;
+  } else {
+    btn.style.background = '';
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <line x1="22" y1="2" x2="11" y2="13" />
+        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+      </svg>`;
+  }
+}
 function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
@@ -8103,6 +8355,10 @@ async function sendMessage() {
     const text = inp.value.trim();
     if (!text || isProcessing) return;
     isProcessing = true;
+    updateSendBtnState();
+    
+    currentAbortController = new AbortController();
+    const { signal } = currentAbortController;
 
     const chat = document.getElementById('chatMessages');
     
@@ -8130,12 +8386,14 @@ async function sendMessage() {
         let topic = text;
         let difficulty = "初级";
         let keywords = [];
+        let hideResources = false;
 
         try {
             const chatResp = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text, user_id: currentUserEmail })
+                body: JSON.stringify({ message: text, user_id: currentUserEmail }),
+                signal: signal
             });
             if (chatResp.ok) {
                 const chatData = await chatResp.json();
@@ -8145,13 +8403,18 @@ async function sendMessage() {
                     difficulty = chatData.intent.difficulty || difficulty;
                     keywords = chatData.intent.keywords || keywords;
                 }
+                hideResources = chatData.hide_resources || false;
             }
         } catch (err) {
+            if (err.name === 'AbortError' || signal.aborted) {
+                throw err;
+            }
             console.error('无法连接到后端 /api/chat 服务，将使用前端 Mock 代替。', err);
         }
 
+        if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+
         const analyst = new AnalystAgent();
-        // 如果后端接口返回了解析结果，可以融入/覆盖本地意图
         const intent = analyst.analyze(text);
         if (topic !== text) {
             intent.topic = topic;
@@ -8161,10 +8424,14 @@ async function sendMessage() {
         console.log('分析师结果:', intent);
         updateWF(1);
 
+        if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+
         const searcher = new SearcherAgent();
         const resources = await searcher.search(intent.topic);
         console.log('搜索资源数量:', resources.length);
         updateWF(2);
+
+        if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
 
         const planner = new PlannerAgent();
         const profile = {};
@@ -8196,57 +8463,54 @@ async function sendMessage() {
 
         // 1. 先进行解答（显示大模型建议）
         if (advice) {
-            let parsedAdvice = "";
-            if (typeof marked !== 'undefined') {
-                parsedAdvice = marked.parse(advice);
-            } else {
-                parsedAdvice = escapeHtml(advice).replace(/\n/g, '<br>');
-            }
+            let parsedAdvice = safeMarkdownParse(advice);
             replyHtml += `<div class="ai-advice markdown-body" style="margin-bottom:14px; line-height:1.6; color:#1e293b; font-size:13.5px;">${parsedAdvice}</div>`;
         }
 
         // 2. 给出当前智能体所负责的模块
         if (currentAgent === 'all') {
-            // 全体协同：学习路径 + 资源推荐
-            replyHtml += `<strong>📋 为您规划的学习路径：</strong><div class="learning-path">`;
-            plan.forEach(step => {
-                replyHtml += `<div class="lp-step" style="border-color:#6366f1"><div class="lp-num" style="background:#eef2ff;color:#6366f1">${step.order}</div><div class="lp-text"><strong>${step.type}</strong> — ${step.items.join('；')}</div></div>`;
-            });
-            replyHtml += `</div>`;
-
-            if (resources.length > 0) {
-                replyHtml += `<br><strong>🔍 为您找到的相关资源：</strong><div class="resource-grid">`;
-                resources.slice(0, 4).forEach(r => {
-                    let icon = '📄';
-                    let dataAttrs = '';
-                    if (r.type === 'bilibili') {
-                        icon = '▶️';
-                        dataAttrs = `data-type="bilibili" data-url="${r.url}"`;
-                    } else if (r.type === 'course') {
-                        icon = '📚';
-                        dataAttrs = `data-type="course" data-title="${escapeHtml(r.title)}"`;
-                    } else if (r.type === 'chapter') {
-                        icon = '📖';
-                        const parts = r.title.split(' — ');
-                        if (parts.length === 2) {
-                            const courseTitle = parts[0].trim();
-                            const chapterTitle = parts[1].trim();
-                            dataAttrs = `data-type="chapter" data-course="${escapeHtml(courseTitle)}" data-chapter="${escapeHtml(chapterTitle)}"`;
-                        } else {
-                            dataAttrs = `data-type="chapter" data-error="true"`;
-                        }
-                    } else if (r.type === 'question') {
-                        icon = '❓';
-                        dataAttrs = `data-type="question"`;
-                    } else {
-                        icon = '📄';
-                        dataAttrs = `data-type="other" data-url="${r.url}"`;
-                    }
-                    replyHtml += `<div class="resource-card" ${dataAttrs} style="cursor:pointer;"><div class="rc-icon" style="background:#f1f5f9;color:#6366f1">${icon}</div><div class="rc-title">${escapeHtml(r.title)}</div><div class="rc-type">${r.type}</div></div>`;
+            if (!hideResources) {
+                // 全体协同：学习路径 + 资源推荐
+                replyHtml += `<strong>📋 为您规划的学习路径：</strong><div class="learning-path">`;
+                plan.forEach(step => {
+                    replyHtml += `<div class="lp-step" style="border-color:#6366f1"><div class="lp-num" style="background:#eef2ff;color:#6366f1">${step.order}</div><div class="lp-text"><strong>${step.type}</strong> — ${step.items.join('；')}</div></div>`;
                 });
                 replyHtml += `</div>`;
-            } else {
-                replyHtml += `<br>😅 暂时没找到相关资源，试试换个关键词吧。`;
+
+                if (resources.length > 0) {
+                    replyHtml += `<br><strong>🔍 为您找到的相关资源：</strong><div class="resource-grid">`;
+                    resources.slice(0, 4).forEach(r => {
+                        let icon = '📄';
+                        let dataAttrs = '';
+                        if (r.type === 'bilibili') {
+                            icon = '▶️';
+                            dataAttrs = `data-type="bilibili" data-url="${r.url}"`;
+                        } else if (r.type === 'course') {
+                            icon = '📚';
+                            dataAttrs = `data-type="course" data-title="${escapeHtml(r.title)}"`;
+                        } else if (r.type === 'chapter') {
+                            icon = '📖';
+                            const parts = r.title.split(' — ');
+                            if (parts.length === 2) {
+                                const courseTitle = parts[0].trim();
+                                const chapterTitle = parts[1].trim();
+                                dataAttrs = `data-type="chapter" data-course="${escapeHtml(courseTitle)}" data-chapter="${escapeHtml(chapterTitle)}"`;
+                            } else {
+                                dataAttrs = `data-type="chapter" data-error="true"`;
+                            }
+                        } else if (r.type === 'question') {
+                            icon = '❓';
+                            dataAttrs = `data-type="question"`;
+                        } else {
+                            icon = '📄';
+                            dataAttrs = `data-type="other" data-url="${r.url}"`;
+                        }
+                        replyHtml += `<div class="resource-card" ${dataAttrs} style="cursor:pointer;"><div class="rc-icon" style="background:#f1f5f9;color:#6366f1">${icon}</div><div class="rc-title">${escapeHtml(r.title)}</div><div class="rc-type">${r.type}</div></div>`;
+                    });
+                    replyHtml += `</div>`;
+                } else {
+                    replyHtml += `<br>😅 暂时没找到相关资源，试试换个关键词吧。`;
+                }
             }
         } else if (currentAgent === 'analyst') {
             // 学习分析师：展示分析诊断模块
@@ -8306,20 +8570,30 @@ async function sendMessage() {
 
         updateWF(4);
         if (activeChatHistoryIndex === null) {
-            addChatHistoryItem(text);
+            window.addChatHistoryItem(text);
         } else {
             saveUserData();
         }
-        addRecentActivityItem('启动了学习规划');
+        window.addRecentActivityItem('启动了学习规划');
 
     } catch (e) {
-        console.error('处理失败:', e);
-        const thinking = document.getElementById('thinking');
-        if (thinking) thinking.remove();
-        chat.innerHTML += `<div class="msg assistant"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">!</div><div><div class="msg-sender">系统提示</div><div class="msg-bubble">处理请求时发生错误，请稍后再试。</div></div></div>`;
+        if (e.name === 'AbortError' || signal.aborted) {
+            const thinking = document.getElementById('thinking');
+            if (thinking) thinking.remove();
+            
+            chat.innerHTML += `<div class="msg assistant"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">❌</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble" style="background:#fef2f2; color:#b91c1c; border:1.5px solid #fee2e2;">已终止回答生成。</div></div></div>`;
+            chat.scrollTop = chat.scrollHeight;
+        } else {
+            console.error('处理失败:', e);
+            const thinking = document.getElementById('thinking');
+            if (thinking) thinking.remove();
+            chat.innerHTML += `<div class="msg assistant"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">!</div><div><div class="msg-sender">系统提示</div><div class="msg-bubble">处理请求时发生错误，请稍后再试。</div></div></div>`;
+        }
+    } finally {
+        isProcessing = false;
+        currentAbortController = null;
+        updateSendBtnState();
     }
-
-    isProcessing = false;
 }
 
 // 全局大模型接口：科大讯飞主对话智能体接入点 (为后期模型接入留好接口)
@@ -9336,11 +9610,7 @@ async function sendGlobalFloatingChatMessage() {
             if (resp.ok) {
                 const data = await resp.json();
                 const responseText = data.advice || "未能获取到智能助手的回答。";
-                if (typeof marked !== 'undefined') {
-                    bubble.innerHTML = `<div class="markdown-body" style="font-size: 12px; line-height: 1.5; color: #334155;">${marked.parse(responseText)}</div>`;
-                } else {
-                    bubble.innerHTML = escapeHtml(responseText).replace(/\n/g, '<br>');
-                }
+                bubble.innerHTML = `<div class="markdown-body" style="font-size: 12px; line-height: 1.5; color: #334155;">${safeMarkdownParse(responseText)}</div>`;
             } else {
                 bubble.textContent = "智能助手服务响应异常，请稍后再试。";
             }

@@ -49,18 +49,25 @@ def call_xunfei(prompt: str) -> str:
 # ============================
 def parse_learning_intent(user_input: str) -> dict:
     """
-    提取用户输入中的学习主题、难度、偏好
-    返回字典: {"topic": str, "difficulty": str, "keywords": list}
+    提取用户输入中的意图，包括主题、难度、关键词以及意图类型
+    返回字典: {"topic": str, "difficulty": str, "keywords": list, "intent_type": "social"|"problem"|"study"}
     """
     prompt = f"""
-    你是一个学习助手，请分析以下用户输入，提取学习需求。
-    输出格式为JSON：{{"topic": "主题", "difficulty": "初级/中级/高级", "keywords": ["关键词1","关键词2"]}}
+    你是一个意图解析助手。请根据用户的输入，判断并提取意图。
+    请输出JSON格式：
+    {{"topic": "提问主题或学习主题", "difficulty": "初级/中级/高级", "keywords": ["关键词1", "关键词2"], "intent_type": "social" / "problem" / "study"}}
+    
+    【分类规则】：
+    - 如果用户是在表达感谢、喜欢、问候、打招呼、闲聊等（例如“谢谢你”、“喜欢你”、“你好呀”、“真棒”、“你好”），分类为 "social"。
+    - 如果用户是在提问具体的题目、解答、计算、代码报错、代码编写、概念解释等（例如“求函数...”、“写一个递归”、“这段代码为什么报错”、“求极限”），分类为 "problem"。
+    - 如果用户表达了想系统地学习某个学科、学科知识结构（例如“我想学Python”、“推荐一下算法的路线”），分类为 "study"。
+    
     用户输入：{user_input}
     """
     result = call_xunfei(prompt)
     if not result:
         # 如果讯飞调用失败，使用默认值
-        return {"topic": user_input, "difficulty": "初级", "keywords": []}
+        return {"topic": user_input, "difficulty": "初级", "keywords": [], "intent_type": "study"}
 
     # 尝试解析 JSON
     try:
@@ -70,7 +77,14 @@ def parse_learning_intent(user_input: str) -> dict:
         return json.loads(clean)
     except:
         # 解析失败则返回简单结构
-        return {"topic": user_input, "difficulty": "初级", "keywords": []}
+        # 简单做个规则兜底，防止调用失败导致判定不准
+        intent_type = "study"
+        lower_input = user_input.lower()
+        if any(w in lower_input for w in ["谢谢", "感谢", "喜欢", "你好", "哈喽", "hello", "hi", "真棒", "厉害"]):
+            intent_type = "social"
+        elif any(w in lower_input for w in ["求函数", "极值", "单调", "解方程", "求导", "极限", "计算", "代码", "报错", "实现", "怎么做"]):
+            intent_type = "problem"
+        return {"topic": user_input, "difficulty": "初级", "keywords": [], "intent_type": intent_type}
 
 
 # ============================
@@ -194,28 +208,54 @@ def chat():
 
     # 1. 解析意图
     intent = parse_learning_intent(user_input)
+    intent_type = intent.get('intent_type', 'study')
+    
+    # 检测用户是否有明确看视频、搜视频的需求
+    has_video_request = any(w in user_input for w in ["视频", "看", "播放", "b站", "B站", "推荐一下视频", "看视频"])
 
-    # 2. 根据主题搜索B站视频
-    topic = intent.get('topic', user_input)
-    videos = search_bilibili_videos(topic, page_size=6)
+    # 2. 根据主题搜索B站视频 (如果是社交意图且没有看视频需求，不搜索视频，不返回相关内容)
+    videos = []
+    if intent_type != 'social' or has_video_request:
+        topic = intent.get('topic', user_input)
+        videos = search_bilibili_videos(topic, page_size=6)
 
     # 3. 生成解答或学习建议
-    recommend_prompt = f"""你是一个温柔、耐心的个性化学习助手“灵析”。请根据用户的输入进行回答。
+    if intent_type == 'problem':
+        # 针对题目解答：专业、严谨、步骤清晰，绝对不要加可爱的颜文字和语气词
+        recommend_prompt = f"""你是一个专业、严谨且耐心的计算机与数学学习导师。请针对用户提出的具体题目、计算或技术问题，给出非常详细、步骤清晰、逻辑严密的讲解与答复。
 在回答时，请遵循以下规则：
-1. 语气一定要温和友好、耐心且有温度，像一位贴心且充满亲和力的学长或学姐，拒绝冷冰冰的机械化官方回复。
-2. 内容要简炼，重点突出，不要有太多无意义的啰嗦和废话。
-3. 在合适且轻松的对话语境中，可以在句中或句尾自然地加入一些可爱的颜文字表情（例如 ^_^、(๑•̀ㅂ•́)و✧、(*^▽^*)）或表情符号来活跃气氛；如果用户在进行严肃的报错咨询或代码纠错提问，则保持专注与专业，不要使用任何表情。
-4. 如果用户是在提问具体的知识点、进行计算、请求代码编写/纠错，或者只是普通的交流闲聊，请直接、温和地解答。
-5. 如果用户表达了明确的学习某个主题的意图，请提供针对该主题的学习建议、学习要点与策略。
+1. 语气一定要专业、严谨、专注且清晰，拒绝任何随意的敷衍。
+2. 绝对不能使用任何可爱的颜文字表情（例如：(๑•ㅂ•)9✧、^_^、(*^▽^*)）或可爱的表情符号，也不要使用口语化的语气词（如“呀”、“哒”、“呢”）。
+3. 详细给出解题步骤、推导过程或代码说明，引导用户彻底理解。
 
 用户输入：{user_input}"""
+    elif intent_type == 'social':
+        # 针对日常问候、表达喜爱和感谢：元气满满、极其可爱温和，用大量颜文字与可爱表情，不生成路径
+        recommend_prompt = f"""你是一个非常活泼可爱、温暖贴心的智能学习助手“灵析”。用户正在向你表达问候、感谢、喜爱或进行日常轻松闲聊。请给予最热情、活泼可爱的回复。
+在回答时，请遵循以下规则：
+1. 语气一定要非常活泼可爱、温暖亲切，多使用语气词（如“呀”、“哒”、“呢”、“哟”）。
+2. 在句中或句尾自然地加入一些活泼可爱的颜文字表情（例如：(๑•ㅂ•)9✧、( ^▽^ )、(*^▽^*)、(๑＞◡＜๑)）以及可爱的表情符号，活跃对话气氛！
+3. 礼貌且元气满满地回应用户的喜爱或感谢，让他觉得你十分贴心。
+
+用户输入：{user_input}"""
+    else:
+        # 针对学习建议：温和友好，适度活泼
+        recommend_prompt = f"""你是一个温和友好、耐心且有温度的个性化学习助手“灵析”。用户表达了学习某些主题的意图或获取学习建议。请给出温和亲切的学习建议。
+在回答时，请遵循以下规则：
+1. 语气温和友好、耐心，像一位贴心且充满亲和力的学长或学姐。
+2. 内容要简炼，重点突出，不要有太多无意义的啰嗦。
+3. 可以在句中或句尾自然地加入一些颜文字表情（例如：(๑•ㅂ•)9✧、^_^）或表情符号来活跃气氛。
+
+用户输入：{user_input}"""
+
     advice = call_xunfei(recommend_prompt)
 
     # 4. 返回结果
     return jsonify({
         "intent": intent,
         "videos": videos,
-        "advice": advice
+        "advice": advice,
+        "hide_resources": (intent_type == 'social' and not has_video_request)
     })
 
 
@@ -290,18 +330,16 @@ def unified_search():
     conn.close()
 
     # 4. 搜索B站视频
-    # 4. 搜索B站视频
     bili_videos = search_bilibili_videos(keyword, page_size=6)
     for v in bili_videos:
-        print(f"DEBUG: {v['title']} -> pic: {v['pic']}, play: {v['play']}")
         results.append({
             "type": "bilibili",
             "title": v['title'],
-            "author": v['author'],  # 新增：作者
-            "play": v['play'],  # 新增：播放量
+            "author": v['author'],
+            "play": v['play'],
             "description": f"{v['author']} · 播放 {v['play']}",
             "url": v['url'],
-            "extra": v['pic']  # 封面图
+            "extra": v['pic']
         })
 
     # 可按类型排序，将本地资源排在前面（可选）
@@ -335,6 +373,115 @@ def search_questions():
 
     conn.close()
     return jsonify({"questions": [dict(row) for row in rows]})
+
+@app.route('/api/run_code', methods=['POST'])
+def run_code():
+    data = request.json or {}
+    code = data.get('code', '')
+    language = data.get('language', 'python').lower()
+    
+    import subprocess
+    import tempfile
+    import os
+    import re
+    
+    if language in ['python', 'py']:
+        import sys
+        import io
+        import traceback
+        old_stdout = sys.stdout
+        redirected_output = sys.stdout = io.StringIO()
+        try:
+            local_scope = {}
+            exec(code, {}, local_scope)
+            sys.stdout = old_stdout
+            output = redirected_output.getvalue()
+            return jsonify({"success": True, "output": output or "运行成功（无输出结果）。"})
+        except Exception as e:
+            sys.stdout = old_stdout
+            error_output = traceback.format_exc()
+            lines = error_output.split('\n')
+            cleaned_lines = []
+            for line in lines:
+                if "File \"<string>\"" in line or line.startswith("Traceback") or "exec(code" in line:
+                    continue
+                cleaned_lines.append(line)
+            output = "\n".join(cleaned_lines).strip()
+            return jsonify({"success": False, "output": output})
+            
+    elif language in ['c', 'cpp']:
+        temp_dir = tempfile.gettempdir()
+        source_file = os.path.join(temp_dir, "temp_code.c" if language == 'c' else "temp_code.cpp")
+        exe_file = os.path.join(temp_dir, "temp_code.exe")
+        
+        if os.path.exists(exe_file):
+            try: os.remove(exe_file)
+            except: pass
+            
+        with open(source_file, "w", encoding="utf-8") as f:
+            f.write(code)
+            
+        compiler = "gcc" if language == 'c' else "g++"
+        try:
+            compile_process = subprocess.run(
+                [compiler, source_file, "-o", exe_file],
+                capture_output=True,
+                text=True
+            )
+            if compile_process.returncode != 0:
+                return jsonify({"success": False, "output": f"编译错误：\n{compile_process.stderr or compile_process.stdout}"})
+        except FileNotFoundError:
+            return jsonify({"success": False, "output": f"未在服务器上找到 {compiler} 编译器。请先安装 GCC/G++。"})
+            
+        try:
+            run_process = subprocess.run(
+                [exe_file],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            return jsonify({"success": run_process.returncode == 0, "output": run_process.stdout + run_process.stderr})
+        except subprocess.TimeoutExpired:
+            return jsonify({"success": False, "output": "执行超时（限时5秒）。"})
+        except Exception as e:
+            return jsonify({"success": False, "output": f"执行错误：\n{str(e)}"})
+        
+    elif language in ['java']:
+        class_match = re.search(r'public\s+class\s+(\w+)', code)
+        class_name = class_match.group(1) if class_match else "Main"
+        
+        temp_dir = tempfile.gettempdir()
+        source_file = os.path.join(temp_dir, f"{class_name}.java")
+        
+        with open(source_file, "w", encoding="utf-8") as f:
+            f.write(code)
+            
+        try:
+            compile_process = subprocess.run(
+                ["javac", source_file],
+                capture_output=True,
+                text=True
+            )
+            if compile_process.returncode != 0:
+                return jsonify({"success": False, "output": f"编译错误：\n{compile_process.stderr or compile_process.stdout}"})
+        except FileNotFoundError:
+            return jsonify({"success": False, "output": "未在服务器上找到 javac 编译器。请先安装 JDK。"})
+            
+        try:
+            run_process = subprocess.run(
+                ["java", "-cp", temp_dir, class_name],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            return jsonify({"success": run_process.returncode == 0, "output": run_process.stdout + run_process.stderr})
+        except subprocess.TimeoutExpired:
+            return jsonify({"success": False, "output": "执行超时（限时5秒）。"})
+        except Exception as e:
+            return jsonify({"success": False, "output": f"执行错误：\n{str(e)}"})
+        
+    else:
+        return jsonify({"success": False, "output": f"暂不支持 {language} 代码的运行环境。"})
 
 # ============================
 # 8. 启动服务
