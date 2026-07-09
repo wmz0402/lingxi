@@ -75,7 +75,7 @@ def parse_learning_intent(user_input: str) -> dict:
         if clean.startswith('json'):
             clean = clean[4:].strip()
         return json.loads(clean)
-    except:
+    except Exception:
         # 解析失败则返回简单结构
         # 简单做个规则兜底，防止调用失败导致判定不准
         intent_type = "study"
@@ -314,8 +314,8 @@ def unified_search():
     # 3. 搜索习题（题目或选项）
     questions = conn.execute(
         """SELECT id, question, answer, chapter_id FROM question 
-           WHERE question LIKE ? OR optionA LIKE ? OR optionB LIKE ? 
-           OR optionC LIKE ? OR optionD LIKE ?""",
+           WHERE question LIKE ? OR option_a LIKE ? OR option_b LIKE ? 
+           OR option_c LIKE ? OR option_d LIKE ?""",
         (f'%{keyword}%', f'%{keyword}%', f'%{keyword}%', f'%{keyword}%', f'%{keyword}%')
     ).fetchall()
     for q in questions:
@@ -416,7 +416,7 @@ def run_code():
         
         if os.path.exists(exe_file):
             try: os.remove(exe_file)
-            except: pass
+            except Exception: pass
             
         with open(source_file, "w", encoding="utf-8") as f:
             f.write(code)

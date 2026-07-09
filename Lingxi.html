@@ -3004,7 +3004,9 @@
     }
   </style>
 </head>
-<!-- ===== 做题模态框 ===== -->
+<body>
+
+<!-- ===== 做题模态框（移至 body 内） ===== -->
 <div id="quizModal"
   style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(8px); z-index:1000; align-items:center; justify-content:center; padding:20px;">
   <div
@@ -3037,8 +3039,6 @@
     </div>
   </div>
 </div>
-
-<body>
 
   <!-- ==================== PAGE 1: AUTH (SPLIT LAYOUT) ==================== -->
   <div id="authPage" class="page">
@@ -5582,41 +5582,6 @@ function renderCourseBoard() {
   container.innerHTML = html;
 }
 
-function startOrSubscribeCourse(categoryName, courseTitle) {
-  let subIdx = myCourses.findIndex(c => c.title === courseTitle);
-  if (subIdx === -1) {
-    const categoryData = ALL_COURSES_DATA.find(mod => mod.category === categoryName);
-    const courseData = categoryData ? categoryData.courses.find(c => c.title === courseTitle) : null;
-    if (!courseData) return;
-    
-    // 订阅课程并补充数据
-    myCourses.push({
-      title: courseData.title,
-      resources: courseData.chapters.length * 5,
-      status: '进行中',
-      progress: 0,
-      unlockedChapterIndex: 0,
-      chapters: courseData.chapters
-    });
-    saveUserData();
-    renderMyCourses();
-    subIdx = myCourses.length - 1;
-  }
-  
-  // 进入学习
-  enterCourseStudy(subIdx);
-}
-
-function unsubscribeCourse(categoryName, courseTitle, event) {
-  if (event) event.stopPropagation();
-  if (confirm(`确定要退订课程“${courseTitle}”吗？退订后将清除该课程的进度和缓存。`)) {
-    myCourses = myCourses.filter(c => c.title !== courseTitle);
-    saveUserData();
-    renderMyCourses();
-    renderCourseBoard();
-  }
-}
-
 
 function startTransition() {
     try {
@@ -6293,36 +6258,6 @@ function quickSearch(tag) {
 function handleSearchKey(e) {
   if (e.key === 'Enter') {
     performSearch(e.target.value.trim());
-  }
-}
-
-function enterCourseStudySearch(courseTitle, chapterTitle, tab) {
-  let cIndex = myCourses.findIndex(c => c.title === courseTitle);
-  if (cIndex === -1) {
-    addCourse(courseTitle);
-    cIndex = myCourses.findIndex(c => c.title === courseTitle);
-  }
-  
-  if (cIndex !== -1) {
-    const course = myCourses[cIndex];
-    const chIndex = course.chapters.findIndex(ch => ch.title === chapterTitle);
-    if (chIndex !== -1) {
-      if (chIndex > course.unlockedChapterIndex) {
-        alert(`《${course.title}》的该章节目前处于锁定状态，请按顺序先完成前面章节的学习与测试以解锁！`);
-        return;
-      }
-      activeCourseIndex = cIndex;
-      activeChapterIndex = chIndex;
-      activeStudyTab = tab;
-      activeChapterQuizState = 'unsubmitted';
-      
-      switchMainPage('courseStudy');
-      document.getElementById('studyCourseHeaderTitle').textContent = course.title;
-      document.getElementById('studyProgressBadge').textContent = `当前进度: ${course.progress}%`;
-      renderChaptersList();
-      renderChapterContent();
-      return;
-    }
   }
 }
 
@@ -7338,16 +7273,6 @@ function handleStudyAssistantKey(e) {
     }
 }
 
-function clearNotifications() {
-    document.querySelectorAll('.noti-item').forEach(item => {
-        item.classList.remove('unread');
-    });
-    const badge = document.querySelector('.nav-badge');
-    if (badge) {
-        badge.style.display = 'none';
-    }
-}
-
 // ============================================================
 // 1. 事件委托：处理所有资源卡片点击（只保留这一个）
 // ============================================================
@@ -7525,22 +7450,6 @@ function toggleSidebar() {
     const isCollapsed = sidebar.classList.contains('collapsed');
     localStorage.setItem('sidebar_collapsed', isCollapsed);
     document.body.classList.toggle('sidebar-collapsed', isCollapsed);
-}
-
-// ============================================================
-// 4. 右侧面板切换（如果还存在）
-// ============================================================
-function switchPanel(btn, panel) {
-    document.querySelectorAll('.panel-tabs button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('panelProfile').style.display = panel === 'profile' ? 'block' : 'none';
-    document.getElementById('panelFavorites').style.display = panel === 'favorites' ? 'block' : 'none';
-    document.getElementById('panelCourses').style.display = panel === 'courses' ? 'block' : 'none';
-    document.getElementById('panelWrongs').style.display = panel === 'wrongs' ? 'block' : 'none';
-
-    if (panel === 'wrongs') {
-        renderWrongs();
-    }
 }
 
 // ============================================================
@@ -8108,20 +8017,6 @@ function sendQuickSuggest(text) {
     inp.value = text;
     sendMessage();
   }
-}
-
-function enterCourseByTitle(courseTitle) {
-    // 根据课程名查找课程索引
-    const index = myCourses.findIndex(c => c.title === courseTitle);
-    if (index !== -1) {
-        enterCourseStudy(index);
-    } else {
-        alert(`未找到课程“${courseTitle}”，可先通过搜索添加。`);
-        // 自动跳转到搜索页面并填入关键词
-        switchMainPage('search');
-        document.getElementById('searchInput').value = courseTitle;
-        performSearch(courseTitle);
-    }
 }
 
 function newChat() {
@@ -9115,9 +9010,6 @@ function openQuizModal(qData) {
         alert('打开题目失败，请重试');
     }
 }
-function closeQuizModal() {
-    document.getElementById('quizModal').style.display = 'none';
-}
 // 兼容不同数据格式
 function openQuizModalFromQuestion(data) {
     try {
@@ -9140,98 +9032,10 @@ function openQuizModalFromQuestion(data) {
 
 function closeQuizModal() {
     document.getElementById('quizModal').style.display = 'none';
-}
-
-// 兼容不同数据格式的入口函数
-function openQuizModalFromQuestion(data) {
-    try {
-        let q = data;
-        if (typeof data === 'string') {
-            q = JSON.parse(data);
-        }
-        // 如果是数组格式 [option_a, option_b, option_c, option_d] 转成对象
-        if (Array.isArray(q)) {
-            q = {
-                subject: '题库',
-                fullQuestion: q[0] || '题目',
-                options: q.slice(1, 5),
-                answer: q[5] || 'A',
-                analysis: q[6] || ''
-            };
-        }
-        // 兼容后端返回的格式
-        if (!q.options && q.option_a) {
-            q.options = [q.option_a, q.option_b, q.option_c, q.option_d];
-        }
-        if (!q.fullQuestion && q.question) {
-            q.fullQuestion = q.question;
-        }
-        openQuizModal(q);
-    } catch(e) {
-        console.error('解析题目数据失败:', e);
-        alert('打开题目失败，请重试');
-    }
-}
-
-function closeQuizModal() {
-    document.getElementById('quizModal').style.display = 'none';
-}
-
-function closeQuizModal() {
-    document.getElementById('quizModal').style.display = 'none';
     currentQuizData = null;
     currentQuizAnswered = false;
 }
 
-function selectQuizOption(btn, index) {
-    if (currentQuizAnswered) return;
-
-    const q = currentQuizData;
-    const isCorrect = (q.options[index] === q.options[q.answer.charCodeAt(0) - 65]);
-    // 或直接用答案字母判断
-    const labels = ['A', 'B', 'C', 'D'];
-    const selectedLetter = labels[index];
-    const isCorrectByLetter = (selectedLetter === q.answer);
-
-    // 禁用所有选项
-    const allBtns = document.querySelectorAll('#quizModalOptions button');
-    allBtns.forEach(b => b.style.cursor = 'default');
-    currentQuizAnswered = true;
-
-    // 高亮选中的选项
-    allBtns.forEach(b => {
-        if (b === btn) {
-            b.style.borderColor = isCorrectByLetter ? '#10b981' : '#ef4444';
-            b.style.background = isCorrectByLetter ? '#ecfdf5' : '#fef2f2';
-        } else {
-            b.style.borderColor = '#e2e8f0';
-            b.style.background = '#f8fafc';
-        }
-    });
-
-    // 显示反馈
-    const feedback = document.getElementById('quizModalFeedback');
-    feedback.style.display = 'block';
-    if (isCorrectByLetter) {
-        feedback.innerHTML = `<strong>✅ 回答正确！</strong> 太棒了！`;
-        feedback.style.background = '#ecfdf5';
-        feedback.style.color = '#065f46';
-        feedback.style.border = '1px solid #a7f3d0';
-        // 显示继续按钮
-        document.getElementById('quizModalNextBtn').style.display = 'inline-block';
-    } else {
-        feedback.innerHTML = `
-            <strong>❌ 回答错误。</strong><br>
-            正确答案是 <strong>${q.answer}</strong><br><br>
-            <strong>📖 解析：</strong>${q.analysis || '暂无解析'}
-        `;
-        feedback.style.background = '#fef2f2';
-        feedback.style.color = '#991b1b';
-        feedback.style.border = '1px solid #fecaca';
-        // 错误时不显示继续，只显示关闭
-        document.getElementById('quizModalNextBtn').style.display = 'none';
-    }
-}
 // ===== 题库中心函数 =====
 let currentSubject = '';
 let allQuestions = [];
@@ -9338,16 +9142,6 @@ function selectSubject(subject) {
         `;
     });
     container.innerHTML = html;
-}
-
-function openQuizModalFromQuestion(dataStr) {
-    try {
-        const q = JSON.parse(dataStr);
-        openQuizModal(q);
-    } catch(e) {
-        console.error('解析题目数据失败:', e);
-        alert('打开题目失败，请重试');
-    }
 }
 
 // ===== 左右边栏及课程助教面板手动拖拽调整宽度逻辑 =====

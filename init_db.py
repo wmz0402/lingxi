@@ -39,17 +39,17 @@ def init_database():
     );
     ''')
     
-    # 3. 创建 question 表
+    # 3. 创建 question 表（字段名与 question_bank 统一为 option_a/b/c/d）
     cursor.execute('''
     CREATE TABLE question (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         chapter_id INTEGER NOT NULL,
         type TEXT NOT NULL,
         question TEXT NOT NULL,
-        optionA TEXT NOT NULL,
-        optionB TEXT NOT NULL,
-        optionC TEXT NOT NULL,
-        optionD TEXT NOT NULL,
+        option_a TEXT NOT NULL,
+        option_b TEXT NOT NULL,
+        option_c TEXT NOT NULL,
+        option_d TEXT NOT NULL,
         answer TEXT NOT NULL,
         analysis TEXT,
         FOREIGN KEY (chapter_id) REFERENCES chapter(id) ON DELETE CASCADE
@@ -91,7 +91,7 @@ def init_database():
       ("单选题", "利用递归计算阶乘 fact(5) 时，在到达最深处 fact(1) 时，调用栈中会有几个 fact 函数帧？", "3个", "4个", "5个", "6个", "C", "解析：依次压入 fact(5), fact(4), fact(3), fact(2), fact(1)，共 5 个函数活动记录。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
         
     # 1.2 常见分治策略应用
     cursor.execute('''
@@ -108,7 +108,7 @@ def init_database():
       ("单选题", "下列哪个算法最不适合使用分治递归策略解决？", "顺序查找一个无序数组中的某个值", "归并排序", "汉诺塔移动步骤", "二叉树前序遍历", "A", "解析：顺序查找迭代一次循环即可，不需要使用递归增加多余的栈空间开销。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
     # 1.3 递归深度优化与记忆化
     cursor.execute('''
@@ -125,7 +125,7 @@ def init_database():
       ("单选题", "下列关于尾递归优化在不同编程语言中支持情况的陈述，错误的是？", "Scheme 规范强制要求必须支持尾递归优化", "Python 默认不支持且官方不推荐尾递归优化", "JavaScript 引擎在严格模式下要求支持尾递归优化", "Java 虚拟机规范强制所有 JVM 实现都必须默认开启尾递归优化", "D", "解析：Java 虚拟机由于安全和异常调用栈还原等考虑，默认并不支持或开启尾递归优化。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
 
     # ==================== 2. 高等数学基础 ====================
@@ -148,7 +148,7 @@ def init_database():
       ("单选题", "夹逼定理（Squeeze Theorem）用于求极限时，其核心要求是？", "目标函数被上下两个极限相等的函数夹在中间", "左右两边的函数必须是常数", "中间函数必须是单调有界的", "函数必须存在拐点", "A", "解析：若 g(x) <= f(x) <= h(x)，且当 x->x0 时 g(x) 和 h(x) 极限都为 L，则 f(x) 极限也是 L。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
     # 2.2 导数与微分变化率
     cursor.execute('''
@@ -165,7 +165,7 @@ def init_database():
       ("单选题", "对于复合函数 y = f(g(x))，求导时应采用哪个核心法则？", "乘积求导法则", "商的求导法则", "链式法则（Chain Rule）", "分部积分法则", "C", "解析：复合函数求导必须使用链式法则，即 dy/dx = f'(g(x)) * g'(x)。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
     # 2.3 积分学与牛顿-莱布尼茨公式
     cursor.execute('''
@@ -182,7 +182,7 @@ def init_database():
       ("单选题", "几何上，定积分的几何意义是求？", "切线的斜率", "曲线段的长度", "曲线与 x 轴所围图形的代数和面积", "旋转体的表面积", "C", "解析：定积分的几何意义是曲线与 x 轴在积分区间内围成的曲边梯形的“有向面积”代数和。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
 
     # ==================== 3. 数据结构基础 ====================
@@ -205,7 +205,7 @@ def init_database():
       ("单选题", "顺序表在插入元素时，为了腾出插入空间，最坏情况下需要移动多少个元素？", "0个", "1个", "n个", "n/2个", "C", "解析：最坏情况是在顺序表头部（下标0）插入，此时必须把已有的 n 个元素全部向后移动一位。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
     # 3.2 二叉树遍历与平衡树
     cursor.execute('''
@@ -222,7 +222,7 @@ def init_database():
       ("单选题", "一棵完全二叉树的节点总数为 15，则该二叉树的高度（深度）是多少？", "3", "4", "5", "15", "B", "解析：高度为 4 的完全二叉树最多有 2^4 - 1 = 15 个节点，因此高度是 4。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
 
     # ==================== 4. 大学英语进阶 ====================
@@ -245,7 +245,7 @@ def init_database():
       ("单选题", "单词 'predecessor'（前任，前辈）的前缀 'pre-' 代表什么含义？", "在...之前", "相反", "过度", "共同", "A", "解析：'pre-' 表示在...之前（before），如 predict（预言）、prewar（战前的）。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
     # 4.2 长难句结构剖析
     cursor.execute('''
@@ -262,7 +262,7 @@ def init_database():
       ("单选题", "定语从句中，若关系代词在从句中作介词的宾语，通常可以将介词提到关系代词之前。此时关系代词只能用？", "who 或 that", "whom 或 which", "whose 或 that", "why 或 which", "B", "解析：介词后必须接宾格形式，指人时用 whom，指物时用 which，如 'with whom' 或 'in which'。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
     # 4.3 阅读解题法
     cursor.execute('''
@@ -279,7 +279,7 @@ def init_database():
       ("单选题", "在判断作者对某一事物的态度（Attitude）时，若选项中出现以下词汇，通常是不予考虑的错误项？", "biased（偏见的 / 主观偏激的）", "objective（客观的）", "critical（批判的）", "supportive（支持的）", "A", "解析：学术阅读的文章通常要求态度客观理智， biased（偏见的）过于主观，一般不是正确选项。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
         
     # ==================== 5. Python面向对象编程 ====================
     cursor.execute("INSERT INTO course (name, cover, description) VALUES (?, ?, ?);", 
@@ -301,7 +301,7 @@ def init_database():
       ("单选题", "关于 Python 中的静态方法，下面哪项描述是正确的？", "必须有 self 参数", "必须使用 @staticmethod 装饰器声明", "能够直接访问实例属性", "无法通过类名直接调用", "B", "解析：静态方法使用 @staticmethod 装饰，没有 self 或 cls 参数，可以直接通过类名或实例调用。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
     # 5.2 继承与多态
     cursor.execute('''
@@ -318,7 +318,7 @@ def init_database():
       ("单选题", "关于 Python 中的方法重写（Overriding），哪项是正确的？", "必须使用 override 关键字", "子类方法的参数列表必须完全和父类一致", "子类只需定义同名方法即可覆盖父类同名方法", "重写后父类方法将永远无法被子类访问", "C", "解析：Python 是动态语言，子类中直接定义同名方法即实现方法覆盖。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
     # 5.3 魔法方法与元编程
     cursor.execute('''
@@ -335,7 +335,7 @@ def init_database():
       ("单选题", "所有类的默认元类（即创建类本身的类）是哪个内置类型？", "type", "object", "class", "meta", "A", "解析：内置的 type 是 Python 的元类蓝图，一切普通的 class 都是 type 的实例。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
 
     # ==================== 6. 计算机网络基础 ====================
@@ -358,7 +358,7 @@ def init_database():
       ("单选题", "经典五层协议中，将比特流封装成帧（Framing）并执行差错校验的是？", "物理层", "数据链路层", "网络层", "传输层", "B", "解析：数据链路层负责成帧、差错控制和流量控制。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
     # 6.2 TCP/IP 传输层协议详解
     cursor.execute('''
@@ -375,7 +375,7 @@ def init_database():
       ("单选题", "关于 UDP 校验和的叙述中，正确的是？", "强制必须启用", "校验和计算只涵盖 UDP 头部", "引入伪首部来校验网络层 IP 地址信息", "发现错误时会自动重传", "C", "解析：UDP 计算校验和时会引入 12 字节的 IP 伪首部以增强整体校验强度。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
     # 6.3 应用层协议与万维网
     cursor.execute('''
@@ -392,7 +392,7 @@ def init_database():
       ("单选题", "为了在无状态的 HTTP 协议下保持用户的登录状态，现代网站最常用的客户端机制是？", "Session", "Cookie / Token", "LocalStorage", "URL Params", "B", "解析：通过在客户端存储 Cookie（或 Authorization Token 令牌），服务器可以在后续请求中识别用户身份。")
     ]
     for q in questions:
-        cursor.execute("INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
+        cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
     conn.commit()
     conn.close()
