@@ -3117,6 +3117,34 @@
   </div>
 </div>
 
+<!-- ===== 通用确认弹窗 ===== -->
+<div id="confirmModal"
+  style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.45); backdrop-filter:blur(6px); z-index:1100; align-items:center; justify-content:center; padding:20px;">
+  <div
+    style="background:rgba(255,255,255,0.97); border-radius:18px; max-width:380px; width:100%; padding:28px 28px 22px; box-shadow:0 16px 48px rgba(0,0,0,0.15); text-align:center;">
+    <div id="confirmModalIcon" style="font-size:36px; margin-bottom:12px;">⚠️</div>
+    <div id="confirmModalTitle" style="font-size:16px; font-weight:700; color:#1e293b; margin-bottom:8px;">确认操作</div>
+    <div id="confirmModalMessage" style="font-size:13.5px; color:#64748b; line-height:1.6; margin-bottom:22px;">确定要执行此操作吗？</div>
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button onclick="closeConfirmModal(false)"
+        style="padding:9px 28px; border-radius:10px; background:#f1f5f9; color:#64748b; font-size:13px; font-weight:600; border:none; cursor:pointer; transition:background 0.2s;">取消</button>
+      <button id="confirmModalOkBtn" onclick="closeConfirmModal(true)"
+        style="padding:9px 28px; border-radius:10px; background:linear-gradient(135deg,#ef4444,#f87171); color:#fff; font-size:13px; font-weight:600; border:none; cursor:pointer; transition:opacity 0.2s;">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 学习风格详情弹窗 ===== -->
+<div id="learningStyleDetailModal"
+  style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.45); backdrop-filter:blur(6px); z-index:1100; align-items:center; justify-content:center; padding:20px;">
+  <div
+    style="background:rgba(255,255,255,0.97); border-radius:18px; max-width:440px; width:100%; max-height:80vh; overflow-y:auto; padding:28px 28px 22px; box-shadow:0 16px 48px rgba(0,0,0,0.15); position:relative;">
+    <button onclick="closeLearningStyleDetail()"
+      style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:22px; color:#94a3b8; cursor:pointer;">&times;</button>
+    <div id="learningStyleDetailContent"></div>
+  </div>
+</div>
+
   <!-- ==================== PAGE 1: AUTH (SPLIT LAYOUT) ==================== -->
   <div id="authPage" class="page">
     <!-- LEFT: Form Card -->
@@ -5709,7 +5737,6 @@ function handleLogin(e) {
     });
     activeChatHistoryIndex = chatHistory.length > 0 ? 0 : null; // 默认选中首个
 
-    chatHistory = users[matchedUserKey].chatHistory || [];
     recentActivities = users[matchedUserKey].recentActivities || [];
     learningStats = users[matchedUserKey].learningStats || { days: 1, completedResources: 0, hours: 0.0, favorites: 0 };
     userProfileDimensions = users[matchedUserKey].userProfileDimensions || { basic: 0, algo: 0, data: 0, problem: 0, self: 0, project: 0 };
@@ -5779,9 +5806,11 @@ function startSession() {
 }
 
 function logout() {
-    localStorage.removeItem('lingxi_current_user');
-    sessionStorage.removeItem('lingxi_current_user');
-    window.location.reload();
+    if (confirm('确定要退出登录吗？退出后需要重新登录才能访问个人数据。')) {
+        localStorage.removeItem('lingxi_current_user');
+        sessionStorage.removeItem('lingxi_current_user');
+        window.location.reload();
+    }
 }
 
 function handleRegister(e) {
@@ -6385,7 +6414,7 @@ function showResource(title, type) {
       }
     }
     if (foundContent) {
-      contentHtml = `<div class="resource-doc-content" style="line-height:1.7;color:#334155;">${foundContent}</div>`;
+      contentHtml = `<div class="resource-doc-content" style="line-height:1.7;color:#334155;">${safeMarkdownParse(foundContent)}</div>`;
     } else {
       contentHtml = `<div style="text-align:center;padding:40px;color:#94a3b8;"><div style="font-size:14px;">该章节的讲解内容暂不可用</div></div>`;
     }
@@ -7081,12 +7110,38 @@ function addCourse(title) {
   alert(`成功加入课程：《${title}》！`);
 }
 
+// ===== 通用确认弹窗逻辑 =====
+let _confirmModalCallback = null;
+
+function showConfirmModal(title, message, onConfirm, icon) {
+  document.getElementById('confirmModalTitle').textContent = title;
+  document.getElementById('confirmModalMessage').textContent = message;
+  document.getElementById('confirmModalIcon').textContent = icon || '⚠️';
+  document.getElementById('confirmModal').style.display = 'flex';
+  _confirmModalCallback = onConfirm;
+}
+
+function closeConfirmModal(confirmed) {
+  document.getElementById('confirmModal').style.display = 'none';
+  if (confirmed && typeof _confirmModalCallback === 'function') {
+    _confirmModalCallback();
+    _confirmModalCallback = null;
+  }
+}
+
 function removeCourse(index) {
   const title = myCourses[index].title;
-  myCourses.splice(index, 1);
-  renderMyCourses();
-  saveUserData();
-  alert(`已移出课程：《${title}》。`);
+  showConfirmModal(
+    '移除课程',
+    `确定要将课程《${title}》从我的课程中移除吗？移除后学习进度将被清除。`,
+    function() {
+      myCourses.splice(index, 1);
+      renderMyCourses();
+      saveUserData();
+      addRecentActivityItem('移除了课程《' + title + '》');
+    },
+    '📚'
+  );
 }
 
 // ==================== COURSE STUDY PANEL INTERACTION ====================
@@ -7358,6 +7413,60 @@ function postProcessChapterContent(container) {
               wrapped += '    }\n';
               wrapped += '}\n';
               codeToSend = wrapped;
+            }
+          } else if (language === 'python') {
+            // For Python, ensure there's visible output by adding print statements if needed
+            // If the code doesn't contain print statements or seems like it won't show output, wrap it appropriately
+            const hasPrintStatement = /print\(/.test(codeText);
+            const hasReturnStatement = /return\s+/.test(codeText);
+            const hasFunctionDefinition = /def\s+\w+\s*\(/.test(codeText);
+            const hasClassDefinition = /class\s+\w+\s*[:\(]/.test(codeText);
+            
+            // If it's just expressions or calculations without print, wrap in print statements
+            if (!hasPrintStatement && (hasReturnStatement || !hasFunctionDefinition && !hasClassDefinition)) {
+              // Check if it's a simple expression that could be printed
+              const trimmedCode = codeText.trim();
+              const lines = trimmedCode.split('\n');
+              const processedLines = [];
+              
+              for (const line of lines) {
+                const trimmedLine = line.trim();
+                
+                // Skip empty lines, comments, and control structures
+                if (trimmedLine === '' || trimmedLine.startsWith('#') || 
+                    trimmedLine.startsWith('if ') || trimmedLine.startsWith('elif ') || 
+                    trimmedLine.startsWith('else:') || trimmedLine.startsWith('for ') || 
+                    trimmedLine.startsWith('while ') || trimmedLine.startsWith('def ') || 
+                    trimmedLine.startsWith('class ') || trimmedLine.startsWith('try:') || 
+                    trimmedLine.startsWith('except ') || trimmedLine.startsWith('with ')) {
+                  processedLines.push(line);
+                } else {
+                  // If it's a simple assignment or expression, add a print statement after it
+                  if (trimmedLine.includes('=')) {
+                    // For assignments, print the assigned variable
+                    const assignmentMatch = trimmedLine.match(/^(\w+)\s*=/);
+                    if (assignmentMatch) {
+                      const varName = assignmentMatch[1];
+                      processedLines.push(line);
+                      processedLines.push(`print(${varName})`);
+                    } else {
+                      processedLines.push(line);
+                    }
+                  } else if (!trimmedLine.includes('def ') && !trimmedLine.includes('class ')) {
+                    // For expressions that aren't assignments, print them directly
+                    processedLines.push(line);
+                    processedLines.push(`print(${trimmedLine})`);
+                  } else {
+                    processedLines.push(line);
+                  }
+                }
+              }
+              
+              if (processedLines.some(line => line.includes('print('))) {
+                codeToSend = processedLines.join('\n');
+              } else {
+                codeToSend = codeText; // Use original if our logic didn't add any prints
+              }
             }
           }
 
@@ -7726,9 +7835,143 @@ function updateLearningStyle() {
 
   // 渲染标签（最多显示5个）
   const displayTags = tags.slice(0, 5);
-  container.innerHTML = displayTags.map(t =>
-    `<span style="padding:5px 12px;border-radius:20px;background:${t.bg};color:${t.color};font-size:12px;font-weight:500;transition:all 0.3s ease">${t.text}</span>`
+  container.innerHTML = displayTags.map((t, i) =>
+    `<span onclick="showLearningStyleDetail(${i})" style="padding:5px 12px;border-radius:20px;background:${t.bg};color:${t.color};font-size:12px;font-weight:500;transition:all 0.3s ease;cursor:pointer;user-select:none;" title="点击查看详细说明">${t.text}</span>`
   ).join('');
+  // 缓存当前标签数据供详情弹窗使用
+  window._currentLearningTags = displayTags;
+}
+
+// ===== 学习风格详情弹窗 =====
+const _learningStyleDetailMap = {
+  '视觉型学习者': {
+    desc: '你倾向于通过图像、图表和可视化内容来理解知识。',
+    advice: '建议多使用思维导图、流程图和配色笔记来辅助学习，尝试将文字内容转化为图形表达。'
+  },
+  '逻辑推理型': {
+    desc: '你擅长通过逻辑分析和推理来掌握新知识，喜欢追根溯源。',
+    advice: '建议多做证明题和推导练习，尝试用「为什么」的方式深入理解每个知识点的来龙去脉。'
+  },
+  '实践动手型': {
+    desc: '你喜欢通过实际操作和项目实践来学习，在做中学效率最高。',
+    advice: '建议多参与编程项目、实验操作和案例分析，将理论知识应用到实际场景中去。'
+  },
+  '自主探索型': {
+    desc: '你善于独立学习和自我驱动，喜欢按照自己的节奏探索知识。',
+    advice: '建议制定个人学习计划，利用在线资源和开源项目进行自主学习，同时注意与他人交流碰撞。'
+  },
+  '综合型学习者': {
+    desc: '你的学习方式比较均衡，能灵活适应不同的学习场景和要求。',
+    advice: '建议根据不同学科特点灵活调整学习策略，发挥综合优势，同时注意发展自己的专长方向。'
+  },
+  '偏好实例教学': {
+    desc: '你更喜欢通过具体的例子和案例来理解抽象概念。',
+    advice: '建议在学習时多找实际案例对照，用「举个例子」的方式向自己解释新概念。'
+  },
+  '偏好理论推导': {
+    desc: '你更喜欢从原理出发，通过推导和论证来建立知识体系。',
+    advice: '建议注重公式推导和定理证明，尝试自己从第一性原理出发构建知识框架。'
+  },
+  '偏好结构化学习': {
+    desc: '你喜欢有条理、有层次的学习方式，擅长整理和归纳知识。',
+    advice: '建议使用大纲、表格和分类树来组织学习内容，建立清晰的知识结构。'
+  },
+  '高强度学习': {
+    desc: '你的学习活跃度很高，投入大量时间和精力进行学习。',
+    advice: '高强度学习值得肯定，但也要注意劳逸结合，适当休息以避免倦怠。'
+  },
+  '稳步进阶': {
+    desc: '你保持着稳定的学习节奏，循序渐进地提升能力。',
+    advice: '当前的节奏很好，建议保持并适当挑战更高难度的内容来加速成长。'
+  },
+  '中等节奏': {
+    desc: '你的学习频率适中，有时间消化和吸收所学内容。',
+    advice: '可以尝试适当增加练习频率，利用间隔重复法来巩固记忆。'
+  },
+  '轻松探索': {
+    desc: '你目前处于轻松探索阶段，以了解和体验为主。',
+    advice: '建议找到自己感兴趣的方向后逐步加大投入，培养持续学习的习惯。'
+  },
+  '编程基础专长': {
+    desc: '你在编程基础方面表现突出，对语法、数据类型和基本结构掌握扎实。',
+    advice: '基础扎实是好事，建议开始挑战算法和数据结构，向更高层次进阶。'
+  },
+  '算法思维专长': {
+    desc: '你在算法分析和设计方面有明显优势，善于思考最优解。',
+    advice: '建议多参加算法竞赛或刷 LeetCode，同时关注算法在实际项目中的应用。'
+  },
+  '数据结构专长': {
+    desc: '你对数据结构的理解和应用能力很强，善于选择合适的数据组织方式。',
+    advice: '建议深入学习高级数据结构如红黑树、图等，并理解其在系统底层的应用。'
+  },
+  '问题分析专长': {
+    desc: '你擅长拆解和分析复杂问题，能快速定位关键矛盾。',
+    advice: '建议多接触系统性问题，锻炼从需求分析到解决方案设计的完整能力。'
+  },
+  '自主学习专长': {
+    desc: '你有很强的自我驱动学习能力，能高效利用各种资源独立学习。',
+    advice: '建议将自主学习能力与团队协作结合，尝试带领他人一起学习。'
+  },
+  '项目实践专长': {
+    desc: '你在项目开发和实践操作方面经验丰富，善于将知识转化为成果。',
+    advice: '建议挑战更复杂的全栈项目，关注工程化、代码质量和团队协作。'
+  },
+  '进阶学习者': {
+    desc: '你的综合能力评估达到进阶水平，各维度都有不错的表现。',
+    advice: '建议设定更具挑战性的目标，如参与开源项目、竞赛或深入研究某个专题。'
+  },
+  '成长期学习者': {
+    desc: '你正处于快速成长阶段，各项能力都在稳步提升中。',
+    advice: '保持当前的学习势头，重点关注薄弱环节的补强和优势方向的深化。'
+  },
+  '新手学习者': {
+    desc: '你目前处于学习起步阶段，正在建立基础知识体系。',
+    advice: '建议从基础课程开始，循序渐进，不要急于求成，打好基础最重要。'
+  }
+};
+
+function showLearningStyleDetail(tagIndex) {
+  const tags = window._currentLearningTags;
+  if (!tags || !tags[tagIndex]) return;
+  const tag = tags[tagIndex];
+  const detail = _learningStyleDetailMap[tag.text];
+  const d = userProfileDimensions;
+  const dimNames = { basic: '编程基础', algo: '算法思维', data: '数据结构', problem: '问题解决', self: '自主学习', project: '项目实践' };
+
+  let dimBarsHtml = '';
+  for (const [key, label] of Object.entries(dimNames)) {
+    const val = d[key];
+    dimBarsHtml += `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:11px;color:#64748b;width:56px;text-align:right;flex-shrink:0;">${label}</span>
+        <div style="flex:1;height:7px;background:#f1f5f9;border-radius:4px;overflow:hidden;">
+          <div style="height:100%;width:${val}%;background:linear-gradient(90deg,${tag.color},${tag.color}88);border-radius:4px;transition:width 0.5s ease;"></div>
+        </div>
+        <span style="font-size:11px;color:${tag.color};font-weight:600;width:28px;">${val}%</span>
+      </div>`;
+  }
+
+  const content = document.getElementById('learningStyleDetailContent');
+  content.innerHTML = `
+    <div style="text-align:center;margin-bottom:18px;">
+      <span style="display:inline-block;padding:6px 18px;border-radius:20px;background:${tag.bg};color:${tag.color};font-size:14px;font-weight:600;">${tag.text}</span>
+    </div>
+    <div style="background:#f8fafc;border-radius:12px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;">📋 特征说明</div>
+      <div style="font-size:13px;color:#334155;line-height:1.7;">${detail ? detail.desc : '这是你的学习风格标签之一。'}</div>
+    </div>
+    <div style="background:#f8fafc;border-radius:12px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;">💡 学习建议</div>
+      <div style="font-size:13px;color:#334155;line-height:1.7;">${detail ? detail.advice : '继续保持多元化的学习探索，找到最适合自己的方式。'}</div>
+    </div>
+    <div style="font-size:12px;font-weight:600;color:#475569;margin-bottom:10px;">📊 能力维度概览</div>
+    ${dimBarsHtml}
+  `;
+  document.getElementById('learningStyleDetailModal').style.display = 'flex';
+}
+
+function closeLearningStyleDetail() {
+  document.getElementById('learningStyleDetailModal').style.display = 'none';
 }
 
 // 预留给科大讯飞智能体的能力指标评估更新接口
@@ -7894,6 +8137,20 @@ window.loadChatHistoryItem = function(index) {
   switchMainPage('chat');
 }
 
+function formatActivityTime(isoStr) {
+  const date = new Date(isoStr);
+  const now = new Date();
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  const isToday = date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const isYesterday = date.getFullYear() === yesterday.getFullYear() && date.getMonth() === yesterday.getMonth() && date.getDate() === yesterday.getDate();
+  if (isToday) return '今天 ' + hh + ':' + mm;
+  if (isYesterday) return '昨天 ' + hh + ':' + mm;
+  return (date.getMonth() + 1) + '/' + date.getDate() + ' ' + hh + ':' + mm;
+}
+
 function renderRecentActivities() {
   const container = document.getElementById('recentActivitiesList');
   if (!container) return;
@@ -7903,7 +8160,8 @@ function renderRecentActivities() {
   }
   let html = '';
   recentActivities.forEach(item => {
-    html += `<div>${escapeHtml(item.time)} — ${escapeHtml(item.action)}</div>`;
+    const timeDisplay = item.timestamp ? formatActivityTime(item.timestamp) : (item.time || '');
+    html += `<div style="padding:3px 0;border-bottom:1px solid #f1f5f9;"><span style="color:#94a3b8;font-size:11px;margin-right:6px;">${escapeHtml(timeDisplay)}</span><span style="color:#475569;font-size:12px;">${escapeHtml(item.action)}</span></div>`;
   });
   container.innerHTML = html;
 }
@@ -7924,8 +8182,8 @@ window.addChatHistoryItem = function(title) {
 };
 
 window.addRecentActivityItem = function(actionText) {
-  const timeStr = '今天 ' + new Date().toTimeString().split(' ')[0].substring(0, 5);
-  recentActivities.unshift({ time: timeStr, action: actionText });
+  const timestamp = new Date().toISOString();
+  recentActivities.unshift({ timestamp: timestamp, action: actionText });
   if (recentActivities.length > 5) recentActivities.pop();
   renderRecentActivities();
   saveUserData();
@@ -8584,21 +8842,31 @@ function favoriteCurrentChapter() {
   
   const existingIndex = favoritesList.findIndex(f => f.title === favTitle && f.type === favType);
   if (existingIndex !== -1) {
-    favoritesList.splice(existingIndex, 1);
-    alert('已取消收藏当前章节！');
+    showConfirmModal(
+      '取消收藏',
+      `当前章节「${favTitle}」已在收藏列表中，确定要取消收藏吗？`,
+      function() {
+        favoritesList.splice(existingIndex, 1);
+        learningStats.favorites = favoritesList.length;
+        renderFavorites();
+        renderLearningStats();
+        saveUserData();
+        updateFavoriteBtnState();
+      },
+      '⭐'
+    );
   } else {
     favoritesList.push({
       title: favTitle,
       type: favType
     });
-    alert('成功收藏当前章节！');
+    learningStats.favorites = favoritesList.length;
+    renderFavorites();
+    renderLearningStats();
+    saveUserData();
+    updateFavoriteBtnState();
+    addRecentActivityItem('收藏了章节「' + favTitle + '」');
   }
-  learningStats.favorites = favoritesList.length;
-  
-  renderFavorites();
-  renderLearningStats();
-  saveUserData();
-  updateFavoriteBtnState();
 }
 
 function updateFavoriteBtnState() {
@@ -8681,11 +8949,19 @@ function renderFavorites() {
 }
 
 function removeFavorite(index) {
-  favoritesList.splice(index, 1);
-  learningStats.favorites = favoritesList.length;
-  renderFavorites();
-  renderLearningStats();
-  saveUserData();
+  const fav = favoritesList[index];
+  showConfirmModal(
+    '取消收藏',
+    `确定要将「${fav.title}」从收藏列表中移除吗？`,
+    function() {
+      favoritesList.splice(index, 1);
+      learningStats.favorites = favoritesList.length;
+      renderFavorites();
+      renderLearningStats();
+      saveUserData();
+    },
+    '⭐'
+  );
 }
 
 function recordWrongQuestion(courseTitle, chapterTitle, q) {
