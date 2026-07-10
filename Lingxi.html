@@ -4045,13 +4045,8 @@
             </div>
           </div>
           <div class="panel-section-header"><span>学习风格</span></div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px">
-            <span
-              style="padding:5px 12px;border-radius:20px;background:#eef2ff;color:#4f46e5;font-size:12px;font-weight:500">视觉型学习者</span>
-            <span
-              style="padding:5px 12px;border-radius:20px;background:#ecfdf5;color:#059669;font-size:12px;font-weight:500">偏好实例教学</span>
-            <span
-              style="padding:5px 12px;border-radius:20px;background:#fef3c7;color:#d97706;font-size:12px;font-weight:500">中等节奏</span>
+          <div id="learningStyleTags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px">
+            <span style="padding:5px 12px;border-radius:20px;background:#eef2ff;color:#4f46e5;font-size:12px;font-weight:500">探索中...</span>
           </div>
           <div class="panel-section-header"><span>最近活跃</span></div>
           <div id="recentActivitiesList" style="font-size:12px;color:#64748b;line-height:1.8">
@@ -5626,18 +5621,22 @@ function saveUserData() {
         }
     }
 
-    let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
-    if (users[currentUserEmail]) {
-        users[currentUserEmail].myCourses = myCourses;
-        users[currentUserEmail].chatHistory = chatHistory;
-        users[currentUserEmail].recentActivities = recentActivities;
-        users[currentUserEmail].learningStats = learningStats;
-        users[currentUserEmail].userProfileDimensions = userProfileDimensions;
-        users[currentUserEmail].favoritesList = favoritesList;
-        users[currentUserEmail].wrongQuestions = wrongQuestions;
-        users[currentUserEmail].notificationsList = notificationsList;
-        users[currentUserEmail].avatar = uploadedAvatarDataUrl; // 必须包含
-        localStorage.setItem('lingxi_users', JSON.stringify(users));
+    try {
+        let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+        if (users[currentUserEmail]) {
+            users[currentUserEmail].myCourses = myCourses;
+            users[currentUserEmail].chatHistory = chatHistory;
+            users[currentUserEmail].recentActivities = recentActivities;
+            users[currentUserEmail].learningStats = learningStats;
+            users[currentUserEmail].userProfileDimensions = userProfileDimensions;
+            users[currentUserEmail].favoritesList = favoritesList;
+            users[currentUserEmail].wrongQuestions = wrongQuestions;
+            users[currentUserEmail].notificationsList = notificationsList;
+            users[currentUserEmail].avatar = uploadedAvatarDataUrl;
+            localStorage.setItem('lingxi_users', JSON.stringify(users));
+        }
+    } catch (e) {
+        console.warn('saveUserData: localStorage 保存失败（可能容量不足）:', e);
     }
 }
 
@@ -7638,6 +7637,98 @@ function renderUserProfileDimensions() {
   updateDim('dimValProblem', 'dimBarProblem', userProfileDimensions.problem);
   updateDim('dimValSelf', 'dimBarSelf', userProfileDimensions.self);
   updateDim('dimValProject', 'dimBarProject', userProfileDimensions.project);
+  updateLearningStyle();
+}
+
+// ===== 学习风格动态评估系统 =====
+function updateLearningStyle() {
+  const container = document.getElementById('learningStyleTags');
+  if (!container) return;
+
+  const d = userProfileDimensions;
+  const totalActivity = d.basic + d.algo + d.data + d.problem + d.self + d.project;
+
+  // 如果完全没有活动数据，显示默认提示
+  if (totalActivity === 0) {
+    container.innerHTML = '<span style="padding:5px 12px;border-radius:20px;background:#eef2ff;color:#4f46e5;font-size:12px;font-weight:500">探索中...</span>';
+    return;
+  }
+
+  const tags = [];
+
+  // 1. 学习方式偏好（根据最高维度判断）
+  const dims = { basic: d.basic, algo: d.algo, data: d.data, problem: d.problem, self: d.self, project: d.project };
+  const maxDim = Object.entries(dims).reduce((a, b) => b[1] > a[1] ? b : a);
+  const maxDimName = maxDim[0];
+  const maxDimVal = maxDim[1];
+
+  // 学习方式标签
+  if (maxDimName === 'basic' || maxDimName === 'data') {
+    tags.push({ text: '视觉型学习者', bg: '#eef2ff', color: '#4f46e5' });
+  } else if (maxDimName === 'algo' || maxDimName === 'problem') {
+    tags.push({ text: '逻辑推理型', bg: '#fef3c7', color: '#d97706' });
+  } else if (maxDimName === 'project') {
+    tags.push({ text: '实践动手型', bg: '#ecfdf5', color: '#059669' });
+  } else if (maxDimName === 'self') {
+    tags.push({ text: '自主探索型', bg: '#fdf2f8', color: '#db2777' });
+  } else {
+    tags.push({ text: '综合型学习者', bg: '#eef2ff', color: '#4f46e5' });
+  }
+
+  // 2. 内容偏好标签（根据第二高维度和具体组合）
+  const sortedDims = Object.entries(dims).sort((a, b) => b[1] - a[1]);
+  if (sortedDims[0][1] > 0) {
+    if (d.basic >= 20 || d.project >= 20) {
+      tags.push({ text: '偏好实例教学', bg: '#ecfdf5', color: '#059669' });
+    } else if (d.algo >= 20 || d.problem >= 20) {
+      tags.push({ text: '偏好理论推导', bg: '#fef3c7', color: '#d97706' });
+    } else if (d.data >= 20) {
+      tags.push({ text: '偏好结构化学习', bg: '#f0f9ff', color: '#0284c7' });
+    } else {
+      tags.push({ text: '偏好实例教学', bg: '#ecfdf5', color: '#059669' });
+    }
+  }
+
+  // 3. 学习节奏标签（根据总体活跃度）
+  if (totalActivity >= 80) {
+    tags.push({ text: '高强度学习', bg: '#fef2f2', color: '#dc2626' });
+  } else if (totalActivity >= 40) {
+    tags.push({ text: '稳步进阶', bg: '#ecfdf5', color: '#059669' });
+  } else if (totalActivity >= 15) {
+    tags.push({ text: '中等节奏', bg: '#fef3c7', color: '#d97706' });
+  } else {
+    tags.push({ text: '轻松探索', bg: '#f5f3ff', color: '#7c3aed' });
+  }
+
+  // 4. 专长方向标签（当某个维度明显突出时）
+  if (maxDimVal >= 30 && maxDimVal > sortedDims[1][1] * 1.5) {
+    const focusMap = {
+      basic: '编程基础专长', algo: '算法思维专长', data: '数据结构专长',
+      problem: '问题分析专长', self: '自主学习专长', project: '项目实践专长'
+    };
+    const focusColors = {
+      basic: '#eef2ff,#4f46e5', algo: '#fef3c7,#d97706', data: '#f0f9ff,#0284c7',
+      problem: '#ecfdf5,#059669', self: '#fdf2f8,#db2777', project: '#f5f3ff,#7c3aed'
+    };
+    const [bg, color] = (focusColors[maxDimName] || '#eef2ff,#4f46e5').split(',');
+    tags.push({ text: focusMap[maxDimName] || '综合专长', bg, color });
+  }
+
+  // 5. 学习阶段标签
+  const avgScore = totalActivity / 6;
+  if (avgScore >= 50) {
+    tags.push({ text: '进阶学习者', bg: '#fef2f2', color: '#dc2626' });
+  } else if (avgScore >= 20) {
+    tags.push({ text: '成长期学习者', bg: '#f0f9ff', color: '#0284c7' });
+  } else if (totalActivity > 0) {
+    tags.push({ text: '新手学习者', bg: '#f5f3ff', color: '#7c3aed' });
+  }
+
+  // 渲染标签（最多显示5个）
+  const displayTags = tags.slice(0, 5);
+  container.innerHTML = displayTags.map(t =>
+    `<span style="padding:5px 12px;border-radius:20px;background:${t.bg};color:${t.color};font-size:12px;font-weight:500;transition:all 0.3s ease">${t.text}</span>`
+  ).join('');
 }
 
 // 预留给科大讯飞智能体的能力指标评估更新接口
@@ -7740,15 +7831,53 @@ function renderChatHistory() {
     const titleText = typeof item === 'string' ? item : item.title;
     const isActive = activeChatHistoryIndex === index;
     html += `
-      <div style="font-size:13px;color:${isActive ? '#6d28d9' : '#64748b'};padding:8px 12px;border-radius:10px;background:${isActive ? 'rgba(99,102,241,0.06)' : 'transparent'};margin-bottom:6px;cursor:pointer;font-weight:${isActive ? '600' : 'normal'}" 
-           onmouseover="this.style.background='rgba(99,102,241,0.08)'" 
-           onmouseout="this.style.background='${isActive ? 'rgba(99,102,241,0.06)' : 'transparent'}'"
+      <div style="font-size:13px;color:${isActive ? '#6d28d9' : '#64748b'};padding:8px 12px;border-radius:10px;background:${isActive ? 'rgba(99,102,241,0.06)' : 'transparent'};margin-bottom:6px;cursor:pointer;font-weight:${isActive ? '600' : 'normal'};display:flex;align-items:center;justify-content:space-between;gap:8px;" 
+           onmouseover="this.style.background='rgba(99,102,241,0.08)';this.querySelector('.history-actions').style.opacity='1'" 
+           onmouseout="this.style.background='${isActive ? 'rgba(99,102,241,0.06)' : 'transparent'}';this.querySelector('.history-actions').style.opacity='0'"
            onclick="loadChatHistoryItem(${index})">
-        ${escapeHtml(titleText)}
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(titleText)}</span>
+        <div class="history-actions" style="display:flex;gap:4px;opacity:0;transition:opacity 0.2s;flex-shrink:0;" onclick="event.stopPropagation()">
+          <button onclick="renameChatHistory(${index})" style="background:transparent;border:none;cursor:pointer;padding:2px 4px;border-radius:4px;color:#94a3b8;font-size:12px;" onmouseover="this.style.background='rgba(99,102,241,0.1)';this.style.color='#6366f1'" onmouseout="this.style.background='transparent';this.style.color='#94a3b8'" title="重命名">✏️</button>
+          <button onclick="deleteChatHistory(${index})" style="background:transparent;border:none;cursor:pointer;padding:2px 4px;border-radius:4px;color:#94a3b8;font-size:12px;" onmouseover="this.style.background='rgba(239,68,68,0.1)';this.style.color='#ef4444'" onmouseout="this.style.background='transparent';this.style.color='#94a3b8'" title="删除">🗑️</button>
+        </div>
       </div>
     `;
   });
   container.innerHTML = html;
+}
+
+window.renameChatHistory = function(index) {
+  const item = chatHistory[index];
+  if (!item) return;
+  const currentTitle = typeof item === 'string' ? item : item.title;
+  const newTitle = prompt('请输入新的对话名称:', currentTitle);
+  if (newTitle !== null && newTitle.trim() !== '') {
+    if (typeof item === 'string') {
+      chatHistory[index] = { title: newTitle.trim(), html: '' };
+    } else {
+      item.title = newTitle.trim();
+    }
+    renderChatHistory();
+    saveUserData();
+  }
+}
+
+window.deleteChatHistory = function(index) {
+  if (!confirm('确定要删除这条对话记录吗？')) return;
+  chatHistory.splice(index, 1);
+  if (activeChatHistoryIndex === index) {
+    activeChatHistoryIndex = chatHistory.length > 0 ? 0 : null;
+    if (activeChatHistoryIndex !== null) {
+      loadChatHistoryItem(activeChatHistoryIndex);
+    } else {
+      const chatMessages = document.getElementById('chatMessages');
+      if (chatMessages) chatMessages.innerHTML = '';
+    }
+  } else if (activeChatHistoryIndex > index) {
+    activeChatHistoryIndex--;
+  }
+  renderChatHistory();
+  saveUserData();
 }
 
 window.loadChatHistoryItem = function(index) {
@@ -8939,7 +9068,7 @@ async function sendMessage() {
         avatarStyleHtml = `background:linear-gradient(135deg,#818cf8,#a78bfa);`;
     }
 
-    chat.innerHTML += `<div class="msg user"><div class="msg-avatar" style="${avatarStyleHtml}">${avatarText}</div><div><div class="msg-sender">${escapeHtml(userName)}</div><div class="msg-bubble">${escapeHtml(text)}</div></div></div>`;
+    chat.insertAdjacentHTML('beforeend', `<div class="msg user"><div class="msg-avatar" style="${avatarStyleHtml}">${avatarText}</div><div><div class="msg-sender">${escapeHtml(userName)}</div><div class="msg-bubble">${escapeHtml(text)}</div></div></div>`);
     inp.value = '';
     inp.style.height = 'auto';
     chat.scrollTop = chat.scrollHeight;
@@ -8947,7 +9076,7 @@ async function sendMessage() {
     // 能力画像：对话学习追踪
     trackChatInteraction(text);
 
-    chat.innerHTML += `<div class="msg assistant" id="thinking"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div></div>`;
+    chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" id="thinking"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div></div>`);
     chat.scrollTop = chat.scrollHeight;
 
     try {
@@ -9135,29 +9264,33 @@ async function sendMessage() {
         }
 
         replyHtml += `</div></div></div>`;
-        chat.innerHTML += replyHtml;
+        chat.insertAdjacentHTML('beforeend', replyHtml);
         chat.scrollTop = chat.scrollHeight;
 
         updateWF(4);
-        if (activeChatHistoryIndex === null) {
-            window.addChatHistoryItem(text);
-        } else {
-            saveUserData();
+        try {
+            if (activeChatHistoryIndex === null) {
+                window.addChatHistoryItem(text);
+            } else {
+                saveUserData();
+            }
+        } catch (saveErr) {
+            console.warn('保存对话历史失败（可能是 localStorage 容量不足）:', saveErr);
         }
-        window.addRecentActivityItem('启动了学习规划');
+        try { window.addRecentActivityItem('启动了学习规划'); } catch(e) { console.warn('添加活跃记录失败:', e); }
 
     } catch (e) {
         if (e.name === 'AbortError' || signal.aborted) {
             const thinking = document.getElementById('thinking');
             if (thinking) thinking.remove();
-            
-            chat.innerHTML += `<div class="msg assistant"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">❌</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble" style="background:#fef2f2; color:#b91c1c; border:1.5px solid #fee2e2;">已终止回答生成。</div></div></div>`;
+
+            chat.insertAdjacentHTML('beforeend', `<div class="msg assistant"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">❌</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble" style="background:#fef2f2; color:#b91c1c; border:1.5px solid #fee2e2;">已终止回答生成。</div></div></div>`);
             chat.scrollTop = chat.scrollHeight;
         } else {
-            console.error('处理失败:', e);
+            console.error('处理失败:', e, e.stack);
             const thinking = document.getElementById('thinking');
             if (thinking) thinking.remove();
-            chat.innerHTML += `<div class="msg assistant"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">!</div><div><div class="msg-sender">系统提示</div><div class="msg-bubble">处理请求时发生错误，请稍后再试。</div></div></div>`;
+            chat.insertAdjacentHTML('beforeend', `<div class="msg assistant"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">!</div><div><div class="msg-sender">系统提示</div><div class="msg-bubble">处理请求时发生错误，请稍后再试。</div></div></div>`);
         }
     } finally {
         isProcessing = false;
@@ -9341,11 +9474,17 @@ function updateLearningHours() {
 
 function updateWF(step) {
   const s = [document.getElementById('wf1'), document.getElementById('wf2'), document.getElementById('wf3')];
-  s.forEach((el, i) => { el.classList.remove('step-done','step-active','step-pending'); if(i < step-1) el.classList.add('step-done'); else if(i === step-1) el.classList.add(step>=4?'step-done':'step-active'); else el.classList.add(step>=4?'step-done':'step-pending'); });
-  if(step>=4) s.forEach(el => { el.classList.remove('step-active','step-pending'); el.classList.add('step-done'); });
-  if(step>=1) s[0].querySelector('.step-desc').textContent='画像分析完成';
-  if(step>=2) s[1].querySelector('.step-desc').textContent = step>=3?'资源生成完成':'正在生成资源...';
-  if(step>=3) s[2].querySelector('.step-desc').textContent = step>=4?'路径规划完成':'正在规划路径...';
+  s.forEach((el, i) => {
+    if (!el) return;
+    el.classList.remove('step-done','step-active','step-pending');
+    if(i < step-1) el.classList.add('step-done');
+    else if(i === step-1) el.classList.add(step>=4?'step-done':'step-active');
+    else el.classList.add(step>=4?'step-done':'step-pending');
+  });
+  if(step>=4) s.forEach(el => { if(el) { el.classList.remove('step-active','step-pending'); el.classList.add('step-done'); } });
+  if(step>=1 && s[0]) { const desc = s[0].querySelector('.step-desc'); if(desc) desc.textContent='画像分析完成'; }
+  if(step>=2 && s[1]) { const desc = s[1].querySelector('.step-desc'); if(desc) desc.textContent = step>=3?'资源生成完成':'正在生成资源...'; }
+  if(step>=3 && s[2]) { const desc = s[2].querySelector('.step-desc'); if(desc) desc.textContent = step>=4?'路径规划完成':'正在规划路径...'; }
 }
 
 document.addEventListener('visibilitychange', function() {

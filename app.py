@@ -5,6 +5,10 @@ import os
 import json
 import urllib.request
 import urllib.parse
+
+# 基于脚本所在目录的绝对路径，确保无论从哪个目录启动都能找到文件
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 try:
     from sparkai.llm.llm import ChatSparkLLM
     from sparkai.core.messages import ChatMessage
@@ -26,7 +30,7 @@ SPARK_API_KEY = os.getenv("SPARK_API_KEY", "f170f6f6fa1843d7a520bd4b5010674b")
 app = Flask(__name__)
 CORS(app)  # 允许跨域
 
-DB_PATH = 'lingxi.db'
+DB_PATH = os.path.join(BASE_DIR, 'lingxi.db')
 
 
 # ============================
@@ -35,21 +39,77 @@ DB_PATH = 'lingxi.db'
 def call_xunfei(prompt: str) -> str:
     """调用讯飞星火大模型，返回回复内容"""
     if not SPARKAI_AVAILABLE:
-        return "AI对话功能暂未启用，请先安装 sparkai 依赖。"
+        return generate_fallback_response(prompt)
     try:
-        spark = ChatSparkLLM(
-            spark_api_url="wss://spark-api.xf-yun.com/v3.5/chat",  # 可替换为 v4.0
-            spark_app_id=SPARK_APP_ID,
-            spark_api_key=SPARK_API_KEY,
-            spark_api_secret=SPARK_API_SECRET,
-            spark_llm_domain="generalv3.5",  # 或 "4.0Ultra"
-        )
-        messages = [ChatMessage(role="user", content=prompt)]
-        response = spark.generate([messages])
-        return response.generations[0][0].text.strip()
+        import threading
+
+        result_container = {"response": ""}
+        error_container = {"error": None}
+
+        def _call():
+            try:
+                spark = ChatSparkLLM(
+                    spark_api_url="wss://spark-api.xf-yun.com/v3.5/chat",
+                    spark_app_id=SPARK_APP_ID,
+                    spark_api_key=SPARK_API_KEY,
+                    spark_api_secret=SPARK_API_SECRET,
+                    spark_llm_domain="generalv3.5",
+                )
+                messages = [ChatMessage(role="user", content=prompt)]
+                response = spark.generate([messages])
+                result_container["response"] = response.generations[0][0].text.strip()
+            except Exception as e:
+                error_container["error"] = e
+
+        thread = threading.Thread(target=_call)
+        thread.start()
+        thread.join(timeout=15)  # 最多等15秒
+
+        if thread.is_alive():
+            print("讯飞调用超时（15秒），使用回退响应")
+            return generate_fallback_response(prompt)
+
+        if error_container["error"]:
+            raise error_container["error"]
+
+        return result_container["response"]
     except Exception as e:
         print(f"讯飞调用失败: {e}")
-        return ""
+        return generate_fallback_response(prompt)
+
+
+def generate_fallback_response(prompt: str) -> str:
+    """当讯飞API不可用时，根据提示词内容生成有意义的回退响应"""
+    prompt_lower = prompt.lower()
+
+    # 社交意图回退
+    if any(w in prompt_lower for w in ["问候", "感谢", "喜爱", "闲聊", "打招呼"]):
+        return "你好呀！(๑•ㅂ•)9✧ 我是灵析学习助手，很高兴见到你！虽然AI大脑暂时在维护中，但我依然可以帮你搜索B站学习视频、浏览课程资源哦～有什么想学的尽管告诉我吧！( ^▽^ )"
+
+    # 题目解答意图回退
+    if any(w in prompt_lower for w in ["题目", "解答", "计算", "问题", "步骤"]):
+        # 从prompt中提取用户原始输入
+        user_q = prompt.split("用户输入：")[-1].strip() if "用户输入：" in prompt else ""
+        return (
+            f"关于你的问题「{user_q}」，AI导师正在升级中，暂时无法给出详细解答。"
+            f"不过你可以：\n"
+            f"1. 在左侧课程面板中查找相关课程和章节，里面有详细的知识点讲解\n"
+            f"2. 我可以帮你搜索B站上的相关教学视频\n"
+            f"3. 尝试在搜索框中搜索关键词，找到更多学习资源\n\n"
+            f"等AI功能恢复后，我会为你提供更详细的解答！"
+        )
+
+    # 学习建议意图回退
+    user_q = prompt.split("用户输入：")[-1].strip() if "用户输入：" in prompt else ""
+    topic = user_q if user_q else "你感兴趣的主题"
+    return (
+        f"关于学习「{topic}」，AI学习规划师暂时在维护中。"
+        f"不过我有几个建议：\n"
+        f"1. 你可以在课程面板中浏览相关课程，我们有很多优质课程资源\n"
+        f"2. 我可以帮你搜索B站上的教学视频，那里有很多优秀的UP主讲解\n"
+        f"3. 建议从基础概念入手，循序渐进地学习\n\n"
+        f"需要我帮你搜索相关视频资源吗？"
+    )
 
 
 # ============================
@@ -164,7 +224,7 @@ def get_db_connection():
 @app.route('/', methods=['GET'])
 def index():
     try:
-        with open('Lingxi.html', 'r', encoding='utf-8') as f:
+        with open(os.path.join(BASE_DIR, 'Lingxi.html'), 'r', encoding='utf-8') as f:
             return f.read()
     except FileNotFoundError:
         return "Lingxi.html 文件未找到，请确保它在同一目录下。", 404
@@ -172,7 +232,7 @@ def index():
 
 @app.route('/<path:path>', methods=['GET'])
 def serve_file(path):
-    return send_from_directory('.', path)
+    return send_from_directory(BASE_DIR, path)
 
 
 # 7.1 获取所有课程
