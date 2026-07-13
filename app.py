@@ -655,7 +655,8 @@ def chat():
     quiz_topic = data.get('quiz_topic', '').strip()  # 出题主题
     quiz_count = data.get('quiz_count', '5').strip()  # 题目数量
     quiz_difficulty = data.get('quiz_difficulty', '中级').strip()  # 难度
-    print(f"[DEBUG] /api/chat 收到: message='{user_input[:50]}', doc_context长度={len(doc_context)}, is_mindmap={is_mindmap}, is_code_fix={is_code_fix}, is_quiz_gen={is_quiz_gen}")
+    agent = data.get('agent', '')  # 前端智能体角色
+    print(f"[DEBUG] /api/chat 收到: message='{user_input[:50]}', agent={agent}, doc_context长度={len(doc_context)}, is_mindmap={is_mindmap}, is_code_fix={is_code_fix}, is_quiz_gen={is_quiz_gen}")
     if not user_input:
         return jsonify({"error": "消息不能为空"}), 400
 
@@ -663,6 +664,7 @@ def chat():
     clean_question = extract_user_question(user_input)
 
     history = data.get('history', [])
+    print(f"[DEBUG] /api/chat history len={len(history)}, last_msg={history[-1] if history else 'EMPTY'}")
     system_prompt = "你是一个温和友好、智慧的学习助手。"
 
     # 优先处理图片识别
@@ -839,6 +841,17 @@ def chat():
 7. 错误选项应当有一定的迷惑性，但不能存在争议
 
 请直接输出 JSON 数组，不要有任何其他多余文字或说明。""" + ANTI_LEAK
+    elif agent == 'planner':
+        # 路径规划师：对话式逐步指引，像真人导师一样
+        system_prompt = f"""你是一位经验丰富、耐心细致的学习导师"路径规划师"。你的任务是针对用户的学习需求，一步一步地给出具体、可操作的学习指引。
+在回答时，请严格遵循以下规则：
+1. 【对话式指引】不要列出静态的表格或列表，而要像真人老师一样，用自然语言一步步告诉用户"现在该做什么"。
+2. 【每一步四要素】每步都要包含：①做什么（具体行动）②为什么（这一步的意义）③怎么做（具体方法和资源）④预期效果（做完后应达到什么水平）。
+3. 【循序渐进】先打基础，再深入，最后综合应用。不要一次给出所有内容。
+4. 【鼓励互动】在回复末尾明确提示用户："完成这一步后，可以回复'已完成'或'下一步'，我会继续给你下一步的指引。"
+5. 【个性化】如果用户提到已完成某一步，直接给出下一步，不要重复之前的内容。
+6. 语气亲切、鼓励，像一位耐心的学长/学姐。"""
+        recommend_prompt = system_prompt + f"\n\n{DOC_CONTEXT_BLOCK}用户输入：{clean_question}" + ANTI_LEAK
     elif intent_type == 'problem':
         # 针对题目解答：专业、严谨、步骤清晰，绝对不要加可爱的颜文字和语气词
         system_prompt = f"""你是一个专业、严谨且耐心的计算机与数学学习导师。请针对用户提出的具体题目、计算或技术问题，给出非常详细、步骤清晰、逻辑严密的讲解与答复。
@@ -866,17 +879,45 @@ def chat():
 4. 所有数学公式都必须使用 LaTeX 格式，且在 Markdown 里严格使用数学包裹符号：行间（独立一行显示）公式必须使用双美元符号 $$ 包裹，行内公式使用单美元符号 $ 包裹。绝对不能使用方括号 [ ]、\\( \\) 或 \\[ \\] 来包裹公式。"""
         recommend_prompt = system_prompt + f"\n\n{DOC_CONTEXT_BLOCK}用户输入：{clean_question}" + ANTI_LEAK
 
-    # 统一拼装大模型调用消息：System 设定 -> 历史上下文（不含当前消息） -> 当前最新提问的 recommend_prompt 约束
+    # 统一拼装大模型调用消息：
+    # 1. System 设定
+    # 2. 历史上下文（不含当前消息）
+    # 3. 当前用户问题（只包含问题，不要重复system prompt）
     messages_list = [{"role": "system", "content": system_prompt + ANTI_LEAK}]
-    for msg in history:
-        messages_list.append({
-            "role": msg.get("role", "user"),
-            "content": msg.get("content", "")
-        })
+    
+    # 添加历史消息（只保留最近5条，避免上下文过长）
+    recent_history = history[-5:] if len(history) > 5 else history
+    for msg in recent_history:
+        content = msg.get("content", "")
+        # 过滤掉欢迎消息和太短的初始化消息
+        if content and len(content) > 20 and "新的对话已开始" not in content and "请告诉我你想学什么" not in content:
+            messages_list.append({
+                "role": msg.get("role", "user"),
+                "content": content
+            })
+    
+    # 【关键修复】用户消息只包含问题内容，不要重复system prompt
+    # recommend_prompt 已经包含了system_prompt，所以这里只取用户问题部分
+    user_content = f"{DOC_CONTEXT_BLOCK}用户输入：{clean_question}" + ANTI_LEAK
     messages_list.append({
         "role": "user",
-        "content": recommend_prompt
+        "content": user_content
     })
+    
+    # 调试：打印实际发送给讯飞的messages
+    print(f"[DEBUG] 发送给讯飞的messages数量: {len(messages_list)}")
+    for i, m in enumerate(messages_list):
+        role = m.get('role', 'unknown')
+        content = m.get("content", "")
+        if role == 'system':
+            content_preview = content[:80] + "..."
+        elif role == 'user':
+            # user消息只显示前60字符，避免显示完整的prompt
+            content_preview = content[:60] + "..." if len(content) > 60 else content
+        else:
+            content_preview = content[:60] + "..." if len(content) > 60 else content
+        print(f"[DEBUG] msg[{i}] role={role}, content={content_preview}")
+    
     advice = call_xunfei_with_history(messages_list)
 
     # 4. 返回结果

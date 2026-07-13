@@ -3838,28 +3838,28 @@
         <div class="sidebar-section">
           <div class="sidebar-section-title">协同工作流</div>
           <div class="workflow-card">
-            <div class="workflow-step step-done" id="wf1" onclick="selectAgentByType('analyst')" style="cursor:pointer;" title="点击切换到学习分析师">
-              <div class="step-dot" style="background:#3b82f6"><svg width="12" height="12" viewBox="0 0 24 24"
+            <div class="workflow-step step-pending" id="wf1" onclick="selectAgentByType('analyst')" style="cursor:pointer;" title="点击切换到学习分析师">
+              <div class="step-dot" style="background:#94a3b8"><svg width="12" height="12" viewBox="0 0 24 24"
                   fill="none" stroke="#fff" stroke-width="3">
-                  <polyline points="20 6 9 17 4 12" />
+                  <circle cx="12" cy="12" r="4" />
                 </svg></div>
               <div class="step-text">
                 <div class="step-label">学习分析师</div>
-                <div class="step-desc">分析用户画像...</div>
+                <div class="step-desc">等待任务...</div>
               </div>
             </div>
-            <div class="workflow-step step-active" id="wf2" onclick="selectAgentByType('generator')" style="cursor:pointer;" title="点击切换到资源生成师">
-              <div class="step-dot" style="background:#10b981"><svg width="12" height="12" viewBox="0 0 24 24"
+            <div class="workflow-step step-pending" id="wf2" onclick="selectAgentByType('generator')" style="cursor:pointer;" title="点击切换到资源生成师">
+              <div class="step-dot" style="background:#94a3b8"><svg width="12" height="12" viewBox="0 0 24 24"
                   fill="none" stroke="#fff" stroke-width="3">
                   <circle cx="12" cy="12" r="4" />
                 </svg></div>
               <div class="step-text">
                 <div class="step-label">资源生成师</div>
-                <div class="step-desc">生成学习资源...</div>
+                <div class="step-desc">等待任务...</div>
               </div>
             </div>
             <div class="workflow-step step-pending" id="wf3" onclick="selectAgentByType('planner')" style="cursor:pointer;" title="点击切换到路径规划师">
-              <div class="step-dot" style="background:#f59e0b"><svg width="12" height="12" viewBox="0 0 24 24"
+              <div class="step-dot" style="background:#94a3b8"><svg width="12" height="12" viewBox="0 0 24 24"
                   fill="none" stroke="#fff" stroke-width="3">
                   <circle cx="12" cy="12" r="4" />
                 </svg></div>
@@ -4185,6 +4185,16 @@
               <button type="submit" class="setting-btn-save">保存更改</button>
             </div>
           </form>
+          <!-- 注销账号 -->
+          <div style="margin-top:32px; padding-top:20px; border-top:1px solid #e2e8f0;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+              <div>
+                <div style="font-size:14px; font-weight:600; color:#ef4444;">注销账号</div>
+                <div style="font-size:12px; color:#94a3b8; margin-top:2px;">永久删除您的账号及所有学习数据，此操作不可恢复</div>
+              </div>
+              <button type="button" onclick="deleteAccount()" style="flex-shrink:0; padding:8px 20px; border-radius:8px; font-size:13px; font-weight:500; color:#fff; background:#ef4444; border:none; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">注销账号</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -6187,6 +6197,10 @@ function handleLogin(e) {
 
     recentActivities = users[matchedUserKey].recentActivities || [];
     learningStats = users[matchedUserKey].learningStats || { days: 1, completedResources: 0, hours: 0.0, favorites: 0 };
+    // 数据校验：如果旧数据时长不合理（超过天数*8小时/天），重置为0
+    if (learningStats.days > 0 && learningStats.hours > learningStats.days * 8) {
+      learningStats.hours = 0;
+    }
     // 旧数据兼容：如果没有 firstLoginDate，根据 days 反推
     if (!learningStats.firstLoginDate && learningStats.days > 0) {
       const d = new Date();
@@ -6293,6 +6307,33 @@ function logout() {
         sessionStorage.removeItem('lingxi_current_user');
         window.location.reload();
     }
+}
+
+function deleteAccount() {
+    // 二次确认：输入用户名确认
+    const input = prompt('⚠️ 注销账号将永久删除您的所有数据（学习记录、收藏、错题本、画像等），此操作不可恢复！\n\n请输入您的用户名以确认注销：');
+    if (!input) return;
+    if (input.trim() !== userName) {
+        alert('用户名不匹配，注销已取消。');
+        return;
+    }
+    // 三次确认
+    if (!confirm('最后确认：您真的要永久注销账号 "' + userName + '" 吗？所有数据将被删除且无法恢复！')) {
+        return;
+    }
+    // 执行注销
+    let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+    if (currentUserEmail && users[currentUserEmail]) {
+        delete users[currentUserEmail];
+        localStorage.setItem('lingxi_users', JSON.stringify(users));
+    }
+    // 清除会话
+    localStorage.removeItem('lingxi_current_user');
+    sessionStorage.removeItem('lingxi_current_user');
+    // 清除该用户上传的文件缓存引用（可选）
+    uploadedAvatarDataUrl = null;
+    alert('账号已成功注销，感谢您使用灵析。');
+    window.location.reload();
 }
 
 function handleRegister(e) {
@@ -6408,6 +6449,9 @@ function handleRegister(e) {
   chatHistory = users[email].chatHistory || [];
   recentActivities = users[email].recentActivities || [];
   learningStats = users[email].learningStats || { days: 1, completedResources: 0, hours: 0.0, favorites: 0 };
+  if (learningStats.days > 0 && learningStats.hours > learningStats.days * 8) {
+    learningStats.hours = 0;
+  }
   if (!learningStats.firstLoginDate && learningStats.days > 0) {
     const d = new Date();
     d.setDate(d.getDate() - learningStats.days + 1);
@@ -8198,7 +8242,17 @@ function renderLearningStats() {
   
   if (daysEl) daysEl.textContent = learningStats.days;
   if (resEl) resEl.textContent = learningStats.completedResources;
-  if (hoursEl) hoursEl.textContent = learningStats.hours.toFixed(1);
+  // 时长格式化：大于1小时显示"X小时X分钟"，否则显示"X分钟"
+  if (hoursEl) {
+    const totalMinutes = Math.round(learningStats.hours * 60);
+    if (totalMinutes >= 60) {
+      const h = Math.floor(totalMinutes / 60);
+      const m = totalMinutes % 60;
+      hoursEl.textContent = m > 0 ? h + 'h' + m + 'm' : h + 'h';
+    } else {
+      hoursEl.textContent = totalMinutes + 'm';
+    }
+  }
   if (favEl) favEl.textContent = learningStats.favorites;
 }
 
@@ -9212,7 +9266,6 @@ function sendStudyAssistantMessage() {
   clearChatImage(null, 'study');
   
   const container = document.getElementById('studyAssistantMessages');
-  const history = getChatHistoryContext('studyAssistantMessages');
   
   let avatarStyleHtml = '';
   let avatarText = userName.charAt(0).toUpperCase();
@@ -9244,6 +9297,9 @@ function sendStudyAssistantMessage() {
   
   input.value = '';
   container.scrollTop = container.scrollHeight;
+  
+  // 【修复】用户消息渲染到DOM后再获取历史记录
+  const history = getChatHistoryContext('studyAssistantMessages');
   
   // 每次交互累计少量时长（约1分钟），精确时长由 updateLearningHours 计算
   learningStats.hours += 1 / 60;
@@ -10732,6 +10788,7 @@ async function sendMindmapGenerate() {
     chat.scrollTop = chat.scrollHeight;
 
     // 调用 /api/chat，带脑图生成标记
+    const mindmapHistory = getChatHistoryContext('chatMessages');
     const chatResp = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -10739,7 +10796,8 @@ async function sendMindmapGenerate() {
         message: '请帮我生成关于【' + topic + '】的思维脑图',
         user_id: (typeof currentUserEmail !== 'undefined') ? currentUserEmail : 'default',
         doc_context: '',
-        is_mindmap: true
+        is_mindmap: true,
+        history: mindmapHistory
       })
     });
 
@@ -10922,6 +10980,7 @@ async function sendCodeFix() {
 
     // 调用 /api/chat，把代码内容放在 doc_context 里，用专门的代码纠错 prompt
     const codeContext = `【以下是用户上传的代码文件】\n${allCode}\n【代码文件结束】`;
+    const codeFixHistory = getChatHistoryContext('chatMessages');
     const chatResp = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -10929,7 +10988,8 @@ async function sendCodeFix() {
         message: (requirement || '帮我检查并纠错以下代码') + '（共 ' + fileNames.length + ' 个文件：' + fileNames.join(', ') + '）',
         user_id: (typeof currentUserEmail !== 'undefined') ? currentUserEmail : 'default',
         doc_context: codeContext,
-        is_code_fix: true
+        is_code_fix: true,
+        history: codeFixHistory
       })
     });
 
@@ -11029,6 +11089,7 @@ async function sendQuizGenerate() {
     chat.scrollTop = chat.scrollHeight;
 
     // 调用 /api/chat，带 is_quiz_gen=true
+    const quizHistory = getChatHistoryContext('chatMessages');
     const chatResp = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -11038,7 +11099,8 @@ async function sendQuizGenerate() {
         is_quiz_gen: true,
         quiz_topic: topic,
         quiz_count: count,
-        quiz_difficulty: difficulty
+        quiz_difficulty: difficulty,
+        history: quizHistory
       })
     });
 
@@ -11346,32 +11408,60 @@ function safeMarkdownParse(text) {
 function getChatHistoryContext(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return [];
-    
+
     const messages = [];
-    const msgElements = container.querySelectorAll('.msg');
-    msgElements.forEach(el => {
-        if (el.id === 'thinking' || el.querySelector('.typing-indicator')) return;
-        
+    const msgElements = Array.from(container.querySelectorAll('.msg'));
+    // 跳过 thinking/typing 元素
+    const validElements = msgElements.filter(el => el.id !== 'thinking' && !el.querySelector('.typing-indicator'));
+
+    // 最后一条如果是 user 消息，说明是当前正在发送的，从 history 中排除
+    if (validElements.length > 0 && validElements[validElements.length - 1].classList.contains('user')) {
+        validElements.pop();
+    }
+
+    validElements.forEach(el => {
         const isUser = el.classList.contains('user');
         const role = isUser ? 'user' : 'assistant';
-        
         let content = '';
-        const bubble = el.querySelector('.msg-bubble');
-        if (bubble) {
-            const clone = bubble.cloneNode(true);
-            const imgs = clone.querySelectorAll('img');
-            imgs.forEach(img => img.remove());
-            content = clone.textContent.trim();
+
+        if (role === 'assistant') {
+            // 优先提取大模型实际回复（.ai-advice），过滤前端结构化噪音
+            const aiAdvice = el.querySelector('.ai-advice');
+            if (aiAdvice) {
+                content = aiAdvice.textContent.trim();
+            } else {
+                // fallback：提取整个 bubble 但过滤噪音
+                const bubble = el.querySelector('.msg-bubble');
+                if (bubble) {
+                    const clone = bubble.cloneNode(true);
+                    const noiseSelectors = ['.resource-card', '.resource-grid', '.learning-path', '.lp-step',
+                        '.analyst-report', '.search-results-section', '.search-tags',
+                        '.search-results-grid', 'button', 'img', 'svg', '.rc-icon', '.workflow-card'];
+                    noiseSelectors.forEach(sel => {
+                        clone.querySelectorAll(sel).forEach(n => n.remove());
+                    });
+                    content = clone.textContent.trim();
+                }
+            }
+        } else {
+            // user 消息直接取 bubble 纯文本
+            const bubble = el.querySelector('.msg-bubble');
+            if (bubble) content = bubble.textContent.trim();
         }
-        
-        if (content) {
-            messages.push({
-                role: role,
-                content: content
-            });
+
+        content = content.replace(/\s+/g, ' ').trim();
+        if (role === 'assistant' && content.length > 500) {
+            content = content.substring(0, 500) + '...(内容已省略)';
+        }
+
+        if (content && content.length > 2) {
+            messages.push({ role: role, content: content });
         }
     });
-    return messages.slice(-15);
+
+    console.log('[getChatHistoryContext] extracted', messages.length, 'messages:', messages.map(m => ({role: m.role, content: m.content.substring(0, 60) + '...'})));
+    // 只返回最近6条消息，避免上下文过长
+    return messages.slice(-6);
 }
 
 async function handleChatImageSelect(event, type) {
@@ -11529,57 +11619,99 @@ class SearcherAgent {
 }
 
 class PlannerAgent {
-    plan(results, profile) {
-        // 规划学习路径：按资源类型排序，生成步骤
+    plan(results, profile, topic) {
+        // 规划学习路径：根据资源类型、学习画像和主题生成5步个性化路径
         const videos = results.filter(r => r.type === 'bilibili');
         const courses = results.filter(r => r.type === 'course');
         const chapters = results.filter(r => r.type === 'chapter');
         const questions = results.filter(r => r.type === 'question');
-        // 还可以增加其他类型（如 code, reading）
+        const weakTopics = (profile && profile.weakTopics) ? profile.weakTopics : [];
+        const interests = (profile && profile.interests) ? profile.interests : [];
 
         const steps = [];
+        let order = 0;
 
-        // 第一步：推荐视频（最多2个）
+        // 第一步：预热 — 视频
+        order++;
         if (videos.length > 0) {
             steps.push({
-                order: steps.length + 1,
-                type: '视频',
-                items: videos.slice(0, 2).map(v => v.title)
+                order: order,
+                type: '预热',
+                items: videos.slice(0, 2).map(v => v.title),
+                tip: '先通过视频建立直观认识，快速了解核心概念'
+            });
+        } else {
+            steps.push({
+                order: order,
+                type: '预热',
+                items: [topic ? `搜索"${topic}"相关视频` : '搜索入门视频建立直观认识'],
+                tip: '先通过视频建立直观认识，快速了解核心概念'
             });
         }
 
-        // 第二步：推荐课程/章节
-        if (courses.length > 0) {
-            steps.push({
-                order: steps.length + 1,
-                type: '课程',
-                items: courses.slice(0, 2).map(c => c.title)
-            });
-        } else if (chapters.length > 0) {
-            steps.push({
-                order: steps.length + 1,
-                type: '章节',
-                items: chapters.slice(0, 2).map(ch => ch.title)
-            });
+        // 第二步：学习 — 课程/章节
+        order++;
+        const learnItems = courses.length > 0
+            ? courses.slice(0, 2).map(c => c.title)
+            : chapters.length > 0
+                ? chapters.slice(0, 2).map(ch => ch.title)
+                : [topic ? `搜索"${topic}"系统课程` : '搜索系统课程进行深入学习'];
+        let learnTip = '系统学习知识点，建立完整知识框架';
+        if (weakTopics.length > 0) {
+            learnTip += `，重点关注薄弱领域：${weakTopics.slice(0, 2).join('、')}`;
         }
+        steps.push({
+            order: order,
+            type: '学习',
+            items: learnItems,
+            tip: learnTip
+        });
 
-        // 第三步：推荐习题
+        // 第三步：巩固 — 习题
+        order++;
         if (questions.length > 0) {
             steps.push({
-                order: steps.length + 1,
-                type: '习题',
-                items: questions.slice(0, 2).map(q => q.title)
+                order: order,
+                type: '巩固',
+                items: questions.slice(0, 2).map(q => q.title),
+                tip: '通过习题检验学习成果，查漏补缺'
+            });
+        } else {
+            steps.push({
+                order: order,
+                type: '巩固',
+                items: [topic ? `搜索"${topic}"配套习题` : '搜索配套习题进行巩固练习'],
+                tip: '通过习题检验学习成果，查漏补缺'
             });
         }
 
-        // 如果没有任何资源，给出一个默认步骤
-        if (steps.length === 0) {
-            steps.push({
-                order: 1,
-                type: '建议',
-                items: ['请尝试输入更具体的学习主题，如“Python递归”']
-            });
+        // 第四步：突破 — 针对薄弱点
+        order++;
+        const weakItems = weakTopics.length > 0
+            ? weakTopics.slice(0, 3).map(w => `重点突破：${w}`)
+            : [topic ? `回顾"${topic}"中的难点` : '回顾当前主题中的难点'];
+        let breakTip = '聚焦薄弱环节，针对性强化训练';
+        if (interests.length > 0) {
+            breakTip += `，结合你感兴趣的领域：${interests.slice(0, 2).join('、')}`;
         }
+        steps.push({
+            order: order,
+            type: '突破',
+            items: weakItems,
+            tip: breakTip
+        });
+
+        // 第五步：提升 — 拓展
+        order++;
+        const expandItems = interests.length > 0
+            ? interests.slice(0, 2).map(i => `拓展方向：${i}`)
+            : [topic ? `探索"${topic}"的进阶方向` : '探索进阶方向，拓展知识边界'];
+        steps.push({
+            order: order,
+            type: '提升',
+            items: expandItems,
+            tip: '在掌握基础后探索进阶内容，形成更深入的理解'
+        });
 
         return steps;
     }
@@ -11636,16 +11768,15 @@ async function sendMessage() {
     const text = inp.value.trim();
     if (!text && !chatSelectedImagePath || isProcessing) return;
 
-    // 获取当前会话上下文历史记录（不含当前提问）
-    const history = getChatHistoryContext('chatMessages');
-
     // 捕获并清空已选择的图片
     const currentImagePath = chatSelectedImagePath;
     clearChatImage(null, 'chat');
 
     isProcessing = true;
     updateSendBtnState();
-    
+
+    // 重置工作流状态为全部等待
+    updateWF(0);
     currentAbortController = new AbortController();
     const { signal } = currentAbortController;
 
@@ -11666,10 +11797,15 @@ async function sendMessage() {
         userMsgBubbleHtml += `<br><img src="${currentImagePath}" style="max-width: 200px; max-height: 200px; border-radius: 8px; margin-top: 8px; display: block; cursor: pointer;" onclick="window.open('${currentImagePath}')">`;
     }
 
+    // 先添加用户消息到DOM
     chat.insertAdjacentHTML('beforeend', `<div class="msg user"><div class="msg-avatar" style="${avatarStyleHtml}">${avatarText}</div><div><div class="msg-sender">${escapeHtml(userName)}</div><div class="msg-bubble">${userMsgBubbleHtml}</div></div></div>`);
     inp.value = '';
     inp.style.height = 'auto';
     chat.scrollTop = chat.scrollHeight;
+
+    // 【修复】用户消息渲染到DOM后再获取历史记录，确保上下文连续
+    const history = getChatHistoryContext('chatMessages');
+    console.log('[sendMessage] 历史记录数量:', history.length, history.map(h => h.role + ':' + h.content.substring(0, 30)));
 
     // 画像查询入口
     const profileQueryPatterns = [
@@ -11722,16 +11858,32 @@ async function sendMessage() {
         const docContext = window._pendingDocContext || '';
         window._pendingDocContext = '';
 
+        // 根据当前智能体包装 message，给大模型角色指示
+        let promptMessage = text;
+        if (currentAgent === 'planner') {
+            promptMessage = `【角色：路径规划师】用户的问题是："${text}"。请你以一位学习导师的身份，一步一步地告诉用户该怎么做。要求：
+1. 不要只列出一个静态的学习路径表格，而要像真人老师一样逐步指引；
+2. 每一步都要明确告诉用户：①现在该做什么 ②为什么要做这一步 ③具体怎么做 ④预期达到什么效果；
+3. 用对话式、鼓励性的语气，每步之间用自然语言衔接；
+4. 在回复末尾提示用户：完成某一步后可以回复"已完成第X步"或"下一步"来继续；
+5. 如果用户说"已完成"或"下一步"，请继续给出下一步的详细指引。`;
+        } else if (currentAgent === 'analyst') {
+            promptMessage = `【角色：学习分析师】用户的问题是："${text}"。请深入分析用户的学习情况，给出具体的诊断报告和改进建议，不要泛泛而谈。`;
+        } else if (currentAgent === 'generator') {
+            promptMessage = `【角色：资源生成师】用户的问题是："${text}"。请为用户生成或推荐针对性的学习资源，包括具体的学习材料、练习题或项目建议。`;
+        }
+
         try {
             const chatResp = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    message: text,
+                    message: promptMessage,
                     user_id: currentUserEmail,
                     image_path: currentImagePath || '',
                     doc_context: docContext,
-                    history: history
+                    history: history,
+                    agent: currentAgent
                 }),
                 signal: signal
             });
@@ -11762,7 +11914,7 @@ async function sendMessage() {
             intent.keywords = keywords;
         }
         console.log('分析师结果:', intent);
-        updateWF(1);
+        if (currentAgent === 'all' || currentAgent === 'analyst') updateWF(currentAgent === 'analyst' ? 1 : 1, currentAgent === 'analyst' ? 'analyst' : null);
 
         if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
 
@@ -11775,15 +11927,14 @@ async function sendMessage() {
         } else {
             console.log('文档诊断模式：跳过B站搜索');
         }
-        updateWF(2);
+        updateWF(currentAgent === 'all' ? 2 : (currentAgent === 'generator' ? 1 : 0), currentAgent === 'generator' ? 'generator' : null);
 
         if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
 
         const planner = new PlannerAgent();
-        const profile = {};
-        const plan = planner.plan(resources, profile);
+        const plan = planner.plan(resources, userProfileDimensions, topic);
         console.log('规划步骤:', plan);
-        updateWF(3);
+        updateWF(currentAgent === 'all' ? 3 : (currentAgent === 'planner' ? 1 : 0), currentAgent === 'planner' ? 'planner' : null);
 
         const thinking = document.getElementById('thinking');
         if (thinking) thinking.remove();
@@ -11816,47 +11967,68 @@ async function sendMessage() {
         // 2. 给出当前智能体所负责的模块
         if (currentAgent === 'all') {
             if (!hideResources) {
-                // 全体协同：学习路径 + 资源推荐
-                bubbleContent += `<strong>📋 为您规划的学习路径：</strong><div class="learning-path">`;
-                plan.forEach(step => {
-                    bubbleContent += `<div class="lp-step" style="border-color:#6366f1"><div class="lp-num" style="background:#eef2ff;color:#6366f1">${step.order}</div><div class="lp-text"><strong>${step.type}</strong> — ${step.items.join('；')}</div></div>`;
-                });
-                bubbleContent += `</div>`;
+                // 全体协同：三个智能体分区块展示
+                bubbleContent += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:2px solid #e2e8f0;">
+                  <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;">协</div>
+                  <div><strong>多智能体协同工作完成</strong><div style="font-size:11.5px;color:#94a3b8;">学习分析师 · 资源生成师 · 路径规划师 已联合为你服务</div></div>
+                </div>`;
 
+                // 区块1：学习分析师
+                bubbleContent += `<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px;margin-bottom:10px;">
+                  <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                    <div style="width:22px;height:22px;border-radius:50%;background:#0ea5e9;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;">析</div>
+                    <strong style="color:#0369a1;font-size:13px;">学习分析师 · 画像诊断</strong>
+                  </div>
+                  <div style="font-size:12.5px;color:#0c4a6e;line-height:1.6;">
+                    <div style="margin-bottom:4px;"><strong>🎯 分析主题：</strong>${escapeHtml(intent.topic || topic)}</div>
+                    <div style="margin-bottom:4px;"><strong>📈 推荐难度：</strong>${escapeHtml(intent.difficulty || '中级')}</div>
+                    <div style="margin-bottom:4px;"><strong>🔑 关键词：</strong>${escapeHtml((intent.keywords || []).join('、') || '无')}</div>
+                    <div><strong>📋 学习建议：</strong>基于你的画像，建议从基础概念入手，逐步深入。当前${userProfileDimensions && userProfileDimensions.knowledge && userProfileDimensions.knowledge.weakTopics && userProfileDimensions.knowledge.weakTopics.length > 0 ? '薄弱知识点包括：' + userProfileDimensions.knowledge.weakTopics.slice(0, 3).join('、') : '暂无薄弱知识点记录，建议系统学习该主题'}。</div>
+                  </div>
+                </div>`;
+
+                // 区块2：资源生成师
                 if (resources.length > 0) {
-                    bubbleContent += `<br><strong>🔍 为您找到的相关资源：</strong><div class="resource-grid">`;
+                    bubbleContent += `<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:10px;">
+                      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                        <div style="width:22px;height:22px;border-radius:50%;background:#22c55e;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;">源</div>
+                        <strong style="color:#15803d;font-size:13px;">资源生成师 · 资源推荐</strong>
+                        <span style="font-size:11px;color:#86efac;background:#166534;padding:1px 8px;border-radius:10px;">找到 ${resources.length} 个资源</span>
+                      </div>
+                      <div class="resource-grid">`;
                     resources.slice(0, 4).forEach(r => {
                         let icon = '📄';
                         let dataAttrs = '';
-                        if (r.type === 'bilibili') {
-                            icon = '▶️';
-                            dataAttrs = `data-type="bilibili" data-url="${r.url}"`;
-                        } else if (r.type === 'course') {
-                            icon = '📚';
-                            dataAttrs = `data-type="course" data-title="${escapeHtml(r.title)}"`;
-                        } else if (r.type === 'chapter') {
+                        if (r.type === 'bilibili') { icon = '▶️'; dataAttrs = `data-type="bilibili" data-url="${r.url}"`; }
+                        else if (r.type === 'course') { icon = '📚'; dataAttrs = `data-type="course" data-title="${escapeHtml(r.title)}"`; }
+                        else if (r.type === 'chapter') {
                             icon = '📖';
                             const parts = r.title.split(' — ');
-                            if (parts.length === 2) {
-                                const courseTitle = parts[0].trim();
-                                const chapterTitle = parts[1].trim();
-                                dataAttrs = `data-type="chapter" data-course="${escapeHtml(courseTitle)}" data-chapter="${escapeHtml(chapterTitle)}"`;
-                            } else {
-                                dataAttrs = `data-type="chapter" data-error="true"`;
-                            }
-                        } else if (r.type === 'question') {
-                            icon = '❓';
-                            dataAttrs = `data-type="question"`;
-                        } else {
-                            icon = '📄';
-                            dataAttrs = `data-type="other" data-url="${r.url}"`;
-                        }
+                            if (parts.length === 2) { dataAttrs = `data-type="chapter" data-course="${escapeHtml(parts[0].trim())}" data-chapter="${escapeHtml(parts[1].trim())}"`; }
+                            else { dataAttrs = `data-type="chapter" data-error="true"`; }
+                        } else if (r.type === 'question') { icon = '❓'; dataAttrs = `data-type="question"`; }
+                        else { icon = '📄'; dataAttrs = `data-type="other" data-url="${r.url}"`; }
                         bubbleContent += `<div class="resource-card" ${dataAttrs} style="cursor:pointer;"><div class="rc-icon" style="background:#f1f5f9;color:#6366f1">${icon}</div><div class="rc-title">${escapeHtml(r.title)}</div><div class="rc-type">${r.type}</div></div>`;
                     });
-                    bubbleContent += `</div>`;
-                } else {
-                    bubbleContent += `<br>😅 暂时没找到相关资源，试试换个关键词吧。`;
+                    bubbleContent += `</div></div>`;
                 }
+
+                // 区块3：路径规划师
+                bubbleContent += `<div style="background:#fefce8;border:1px solid #fde047;border-radius:10px;padding:12px;margin-bottom:10px;">
+                  <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                    <div style="width:22px;height:22px;border-radius:50%;background:#eab308;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;">规</div>
+                    <strong style="color:#a16207;font-size:13px;">路径规划师 · 学习路径</strong>
+                  </div>
+                  <p style="color:#78716c;font-size:11.5px;margin:0 0 8px;">建议按以下顺序逐步学习：</p>
+                  <div class="learning-path">`;
+                plan.forEach(step => {
+                    const tipHtml = step.tip ? `<div style="color:#a8a29e;font-size:11px;margin-top:2px;padding-left:2px;">💡 ${step.tip}</div>` : '';
+                    bubbleContent += `<div class="lp-step" style="border-color:#eab308"><div class="lp-num" style="background:#fef9c3;color:#a16207">${step.order}</div><div class="lp-text"><strong>${step.type}</strong><div style="font-size:12px;color:#44403c;margin-top:2px;">${step.items.join('；')}</div>${tipHtml}</div></div>`;
+                });
+                bubbleContent += `</div></div>`;
+
+                // 总结提示
+                bubbleContent += `<div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;padding:10px 12px;font-size:12px;color:#64748b;text-align:center;">💡 你可以点击上方资源卡片开始学习，或继续向我提问获取更详细的指导</div>`;
             }
         } else if (currentAgent === 'analyst') {
             // 学习分析师：展示分析诊断模块
@@ -11903,9 +12075,10 @@ async function sendMessage() {
             }
         } else if (currentAgent === 'planner') {
             // 路径规划师：学习路径规划
-            bubbleContent += `<strong>📋 路径规划师定制学习路径：</strong><div class="learning-path">`;
+            bubbleContent += `<strong>📋 路径规划师为您定制的学习路径：</strong><p style="color:#64748b;font-size:12px;margin:6px 0 10px;">以下是根据你的学习画像和资源匹配生成的个性化路径，建议按顺序执行：</p><div class="learning-path">`;
             plan.forEach(step => {
-                bubbleContent += `<div class="lp-step" style="border-color:#f59e0b"><div class="lp-num" style="background:#fef3c7;color:#d97706">${step.order}</div><div class="lp-text"><strong>${step.type}</strong> — ${step.items.join('；')}</div></div>`;
+                const tipHtml = step.tip ? `<div style="color:#94a3b8;font-size:11.5px;margin-top:3px;padding-left:2px;">💡 ${step.tip}</div>` : '';
+                bubbleContent += `<div class="lp-step" style="border-color:#f59e0b"><div class="lp-num" style="background:#fef3c7;color:#d97706">${step.order}</div><div class="lp-text"><strong>${step.type}</strong><div style="font-size:12.5px;color:#334155;margin-top:2px;">${step.items.join('；')}</div>${tipHtml}</div></div>`;
             });
             bubbleContent += `</div>`;
         }
@@ -11922,7 +12095,8 @@ async function sendMessage() {
         chat.insertAdjacentHTML('beforeend', replyHtml);
         chat.scrollTop = chat.scrollHeight;
 
-        updateWF(4);
+        if (currentAgent === 'all') updateWF(4);
+        else if (currentAgent === 'analyst' || currentAgent === 'generator' || currentAgent === 'planner') updateWF(4, currentAgent);
         try {
             if (activeChatHistoryIndex === null) {
                 window.addChatHistoryItem(text);
@@ -12135,19 +12309,60 @@ function updateLearningHours() {
     sessionStartTime = now; // 重置起始时间
 }
 
-function updateWF(step) {
+function updateWF(step, agentOnly) {
   const s = [document.getElementById('wf1'), document.getElementById('wf2'), document.getElementById('wf3')];
+  const colors = ['#3b82f6', '#10b981', '#f59e0b'];
+  const doneSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12" /></svg>';
+  const activeSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><circle cx="12" cy="12" r="4" /></svg>';
+  const pendingSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><circle cx="12" cy="12" r="4" /></svg>';
+
+  // agentOnly 模式：只更新指定智能体的步骤，其余显示"未参与"
+  if (agentOnly) {
+    const idx = agentOnly === 'analyst' ? 0 : agentOnly === 'generator' ? 1 : 2;
+    s.forEach((el, i) => {
+      if (!el) return;
+      const dot = el.querySelector('.step-dot');
+      el.classList.remove('step-done','step-active','step-pending');
+      if (i === idx) {
+        el.classList.add(step >= 4 ? 'step-done' : 'step-active');
+        if (dot) { dot.style.background = colors[i]; dot.innerHTML = step >= 4 ? doneSvg : activeSvg; }
+      } else {
+        el.classList.add('step-pending');
+        if (dot) { dot.style.background = '#94a3b8'; dot.innerHTML = pendingSvg; }
+      }
+    });
+    const descs = [s[0]&&s[0].querySelector('.step-desc'), s[1]&&s[1].querySelector('.step-desc'), s[2]&&s[2].querySelector('.step-desc')];
+    if (descs[idx]) descs[idx].textContent = step >= 4 ? '任务完成' : '正在处理...';
+    [0,1,2].filter(function(x){return x!==idx;}).forEach(function(x){ if(descs[x]) descs[x].textContent = '未参与'; });
+    return;
+  }
+
+  // 全流程模式（all）
   s.forEach((el, i) => {
     if (!el) return;
+    const dot = el.querySelector('.step-dot');
     el.classList.remove('step-done','step-active','step-pending');
-    if(i < step-1) el.classList.add('step-done');
-    else if(i === step-1) el.classList.add(step>=4?'step-done':'step-active');
-    else el.classList.add(step>=4?'step-done':'step-pending');
+    if (step >= 4) {
+      el.classList.add('step-done');
+      if (dot) { dot.style.background = colors[i]; dot.innerHTML = doneSvg; }
+    } else if (i < step - 1) {
+      el.classList.add('step-done');
+      if (dot) { dot.style.background = colors[i]; dot.innerHTML = doneSvg; }
+    } else if (i === step - 1) {
+      el.classList.add('step-active');
+      if (dot) { dot.style.background = colors[i]; dot.innerHTML = activeSvg; }
+    } else {
+      el.classList.add('step-pending');
+      if (dot) { dot.style.background = '#94a3b8'; dot.innerHTML = pendingSvg; }
+    }
   });
-  if(step>=4) s.forEach(el => { if(el) { el.classList.remove('step-active','step-pending'); el.classList.add('step-done'); } });
-  if(step>=1 && s[0]) { const desc = s[0].querySelector('.step-desc'); if(desc) desc.textContent='画像分析完成'; }
-  if(step>=2 && s[1]) { const desc = s[1].querySelector('.step-desc'); if(desc) desc.textContent = step>=3?'资源生成完成':'正在生成资源...'; }
-  if(step>=3 && s[2]) { const desc = s[2].querySelector('.step-desc'); if(desc) desc.textContent = step>=4?'路径规划完成':'正在规划路径...'; }
+
+  const desc0 = s[0] && s[0].querySelector('.step-desc');
+  const desc1 = s[1] && s[1].querySelector('.step-desc');
+  const desc2 = s[2] && s[2].querySelector('.step-desc');
+  if (desc0) desc0.textContent = step >= 1 ? '画像分析完成' : '等待任务...';
+  if (desc1) desc1.textContent = step >= 2 ? '资源生成完成' : (step >= 1 ? '正在生成资源...' : '等待任务...');
+  if (desc2) desc2.textContent = step >= 4 ? '路径规划完成' : (step >= 3 ? '路径规划完成' : (step >= 2 ? '正在规划路径...' : '等待任务...'));
 }
 
 document.addEventListener('visibilitychange', function() {
@@ -12195,6 +12410,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 recentActivities = users[currentUserEmail].recentActivities || [];
                 learningStats = users[currentUserEmail].learningStats || { days: 1, completedResources: 0, hours: 0.0, favorites: 0 };
+                if (learningStats.days > 0 && learningStats.hours > learningStats.days * 8) {
+                  learningStats.hours = 0;
+                }
                 if (!learningStats.firstLoginDate && learningStats.days > 0) {
                   const d = new Date();
                   d.setDate(d.getDate() - learningStats.days + 1);
@@ -12933,6 +13151,9 @@ async function sendGlobalFloatingChatMessage() {
     `;
     container.scrollTop = container.scrollHeight;
 
+    // 【修复】用户消息渲染到DOM后再获取历史记录，确保上下文连续
+    const history = getChatHistoryContext('globalFloatingChatMessages');
+
     // 组装非课程学习场景下的 Prompt，包含相同人设约束
     const prompt = `【指令】
 1. 请以活泼可爱、亲切自然的语气回答用户，拒绝机械冷冰冰的格式。在句中或句尾自然地加入一些可爱的颜文字表情（如 ^_^、(๑•̀ㅂ•́)و✧、(*^▽^*)）或表情符号来活跃气氛。
@@ -12945,7 +13166,7 @@ async function sendGlobalFloatingChatMessage() {
         const resp = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: prompt, user_id: currentUserEmail })
+            body: JSON.stringify({ message: prompt, user_id: currentUserEmail, history: history })
         });
         const typingEl = document.getElementById(typingId);
         if (typingEl) {
