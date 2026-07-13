@@ -82,6 +82,56 @@ def call_xunfei(prompt: str) -> str:
         return generate_fallback_response(prompt)
 
 
+def call_xunfei_with_history(messages_list: list) -> str:
+    """调用讯飞星火大模型，支持发送历史会话上下文进行多轮对话"""
+    if not SPARKAI_AVAILABLE:
+        last_msg = messages_list[-1].get("content", "") if messages_list else ""
+        return generate_fallback_response(last_msg)
+    try:
+        import threading
+
+        result_container = {"response": ""}
+        error_container = {"error": None}
+
+        def _call():
+            try:
+                spark = ChatSparkLLM(
+                    spark_api_url="wss://spark-api.xf-yun.com/chat/pro-128k",
+                    spark_app_id=SPARK_APP_ID,
+                    spark_api_key=SPARK_API_KEY,
+                    spark_api_secret=SPARK_API_SECRET,
+                    spark_llm_domain="pro-128k",
+                )
+                spark_messages = []
+                for msg in messages_list:
+                    role = msg.get("role", "user")
+                    content = msg.get("content", "")
+                    spark_messages.append(ChatMessage(role=role, content=content))
+                
+                response = spark.generate([spark_messages])
+                result_container["response"] = response.generations[0][0].text.strip()
+            except Exception as e:
+                error_container["error"] = e
+
+        thread = threading.Thread(target=_call)
+        thread.start()
+        thread.join(timeout=15)  # 最多等15秒
+
+        if thread.is_alive():
+            print("讯飞多轮会话调用超时（15秒），使用回退响应")
+            last_msg = messages_list[-1].get("content", "") if messages_list else ""
+            return generate_fallback_response(last_msg)
+
+        if error_container["error"]:
+            raise error_container["error"]
+
+        return result_container["response"]
+    except Exception as e:
+        print(f"讯飞多轮会话调用失败: {e}")
+        last_msg = messages_list[-1].get("content", "") if messages_list else ""
+        return generate_fallback_response(last_msg)
+
+
 def call_xunfei_image(image_path: str, prompt: str) -> str:
     """调用讯飞星火图像理解接口，返回图像识别和问答的内容"""
     import base64
@@ -612,12 +662,24 @@ def chat():
     # 0. 剥离前端嵌入的【指令】【学习上下文】块，提取用户原始提问
     clean_question = extract_user_question(user_input)
 
+    history = data.get('history', [])
+    
+
     # 优先处理图片识别
     if image_path:
         filename = os.path.basename(image_path)
         safe_path = os.path.join(BASE_DIR, 'static', 'uploads', filename)
         if os.path.exists(safe_path):
-            advice = call_xunfei_image(safe_path, clean_question)
+            prompt_text = clean_question
+            if history:
+                context_lines = []
+                for msg in history:
+                    role_label = "用户" if msg.get("role") == "user" else "助手"
+                    context_lines.append(f"{role_label}: {msg.get('content')}")
+                if context_lines:
+                    context = "\n".join(context_lines)
+                    prompt_text = f"【历史对话参考】：\n{context}\n\n【当前提问】：\n{clean_question}"
+            advice = call_xunfei_image(safe_path, prompt_text)
             return jsonify({
                 "intent": {"topic": "图片识别", "difficulty": "中级", "keywords": [], "intent_type": "problem"},
                 "videos": [],
@@ -625,9 +687,30 @@ def chat():
                 "hide_resources": True
             })
 
-    # 1. 解析意图（使用纯净的用户提问，避免指令内容干扰意图判断）
-    intent = parse_learning_intent(clean_question)
+    # 1. 解析意图（使用纯净的用户提问，若提问极短且有历史，则合并历史提问背景以精准分类）
+    intent_context = clean_question
+    if history and len(clean_question) < 15:
+        user_queries = [h.get("content", "") for h in history if h.get("role") == "user"]
+        if user_queries:
+            intent_context = f"【历史提问】：{user_queries[-1]}\n【当前追问】：{clean_question}"
+
+    intent = parse_learning_intent(intent_context)
     intent_type = intent.get('intent_type', 'study')
+
+    # 智能继承数学/代码解题上下文：如果历史回复里带有数学公式或代码块，且用户当前的提问较短或包含追问特征，自动继承为 problem
+    if history and intent_type != 'problem':
+        has_math_or_code_in_history = False
+        for msg in history:
+            if msg.get("role") == "assistant":
+                c = msg.get("content", "")
+                if any(ind in c for ind in ["$$", "$", "\\begin", "\\frac", "\\lambda", "\\partial", "\\quad", "```"]):
+                    has_math_or_code_in_history = True
+                    break
+        if has_math_or_code_in_history:
+            followup_keywords = ["详细", "多", "为什么", "然后", "第", "怎么", "解释", "懂", "明白", "写", "解", "推导", "步骤", "这", "那", "它", "讲", "说"]
+            if len(clean_question) < 30 or any(kw in clean_question for kw in followup_keywords):
+                intent_type = 'problem'
+                intent['intent_type'] = 'problem'
 
     # 检测用户是否有明确看视频、搜视频的需求
     has_video_request = any(w in clean_question for w in ["视频", "看", "播放", "b站", "B站", "推荐一下视频", "看视频"])
@@ -758,36 +841,43 @@ def chat():
 请直接输出 JSON 数组，不要有任何其他多余文字或说明。""" + ANTI_LEAK
     elif intent_type == 'problem':
         # 针对题目解答：专业、严谨、步骤清晰，绝对不要加可爱的颜文字和语气词
-        recommend_prompt = f"""你是一个专业、严谨且耐心的计算机与数学学习导师。请针对用户提出的具体题目、计算或技术问题，给出非常详细、步骤清晰、逻辑严密的讲解与答复。
+        system_prompt = f"""你是一个专业、严谨且耐心的计算机与数学学习导师。请针对用户提出的具体题目、计算或技术问题，给出非常详细、步骤清晰、逻辑严密的讲解与答复。
 在回答时，请遵循以下规则：
 1. 语气一定要专业、严谨、专注且清晰，拒绝任何随意的敷衍。
 2. 绝对不能使用任何可爱的颜文字表情（例如：(๑•ㅂ•)9✧、^_^、(*^▽^*)）或可爱的表情符号，也不要使用口语化的语气词（如"呀"、"哒"、"呢"）。
 3. 详细给出解题步骤、推导过程或代码说明，引导用户彻底理解。
-
-{DOC_CONTEXT_BLOCK}
-用户输入：{clean_question}""" + ANTI_LEAK
+4. 所有数学公式都必须使用 LaTeX 格式，且在 Markdown 里严格使用数学包裹符号：行间（独立一行显示）公式必须使用双美元符号 $$ 包裹（例如：$$f(x) = x^2$$），行内（嵌入文本中显示）公式必须使用单美元符号 $ 包裹（例如：$f(x)$）。绝对不能使用方括号 [ ]、\\( \\) 或 \\[ \\] 来包裹公式。"""
+        recommend_prompt = system_prompt + f"\n\n{DOC_CONTEXT_BLOCK}用户输入：{clean_question}" + ANTI_LEAK
     elif intent_type == 'social':
         # 针对日常问候、表达喜爱和感谢：元气满满、极其可爱温和，用大量颜文字与可爱表情，不生成路径
-        recommend_prompt = f"""你是一个非常活泼可爱、温暖贴心的智能学习助手"灵析"。用户正在向你表达问候、感谢、喜爱或进行日常轻松闲聊。请给予最热情、活泼可爱的回复。
-In回答时，请遵循以下规则：
+        system_prompt = f"""你是一个非常活泼可爱、温暖贴心的智能学习助手"灵析"。用户正在向你表达问候、感谢、喜爱或进行日常轻松闲聊。请给予最热情、活泼可爱的回复。
+在回答时，请遵循以下规则：
 1. 语气一定要非常活泼可爱、温暖亲切，多使用语气词（如"呀"、"哒"、"呢"、"哟"）。
 2. 在句中或句尾自然地加入一些活泼可爱的颜文字表情（例如：(๑•ㅂ•)9✧、( ^▽^ )、(*^▽^*)、(๑＞◡＜๑)）以及可爱的表情符号，活跃对话气氛！
-3. 礼貌且元气满满地回应用户的喜爱或感谢，让他觉得你十分贴心。
-
-{DOC_CONTEXT_BLOCK}
-用户输入：{clean_question}""" + ANTI_LEAK
+3. 礼貌且元气满满地回应用户的喜爱或感谢，让他觉得你十分贴心。"""
+        recommend_prompt = system_prompt + f"\n\n{DOC_CONTEXT_BLOCK}用户输入：{clean_question}" + ANTI_LEAK
     else:
         # 针对学习建议：温和友好，适度活泼
-        recommend_prompt = f"""你是一个温和友好、耐心且有温度的个性化学习助手"灵析"。用户表达了学习某些主题的意图或获取学习建议。请给出温和亲切的学习建议。
+        system_prompt = f"""你是一个温和友好、耐心且有温度的个性化学习助手"灵析"。用户表达了学习某些主题的意图或获取学习建议。请给出温和亲切的学习建议。
 在回答时，请遵循以下规则：
 1. 语气温和友好、耐心，像一位贴心且充满亲和力的学长或学姐。
 2. 内容要简炼，重点突出，不要有太多无意义的啰嗦。
-3. 可以在句中或句尾自然地加入一些颜文字表情（例如：(๑•ㅂ•)9✧、^_^）或表情符号来活跃气氛。
+3. 可以在句中或句尾自然地加入一些颜文字表情（例如：(๑•ㅂ•)9✧、^_^）或表情符号来活跃气氛.
+4. 所有数学公式都必须使用 LaTeX 格式，且在 Markdown 里严格使用数学包裹符号：行间（独立一行显示）公式必须使用双美元符号 $$ 包裹，行内公式使用单美元符号 $ 包裹。绝对不能使用方括号 [ ]、\\( \\) 或 \\[ \\] 来包裹公式。"""
+        recommend_prompt = system_prompt + f"\n\n{DOC_CONTEXT_BLOCK}用户输入：{clean_question}" + ANTI_LEAK
 
-{DOC_CONTEXT_BLOCK}
-用户输入：{clean_question}""" + ANTI_LEAK
-
-    advice = call_xunfei(recommend_prompt)
+    # 统一拼装大模型调用消息：System 设定 -> 历史上下文（不含当前消息） -> 当前最新提问的 recommend_prompt 约束
+    messages_list = [{"role": "system", "content": system_prompt + ANTI_LEAK}]
+    for msg in history:
+        messages_list.append({
+            "role": msg.get("role", "user"),
+            "content": msg.get("content", "")
+        })
+    messages_list.append({
+        "role": "user",
+        "content": recommend_prompt
+    })
+    advice = call_xunfei_with_history(messages_list)
 
     # 4. 返回结果
     # 文档诊断模式：隐藏资源推荐和学习路径

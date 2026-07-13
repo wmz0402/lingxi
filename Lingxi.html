@@ -4303,11 +4303,17 @@
               </div>
             </div>
           </div>
+          <div class="chat-image-preview" id="studyChatImagePreview" style="padding: 0 14px; background: rgba(255,255,255,0.55);"></div>
+          <input type="file" id="studyChatImageFileInput" accept="image/*" style="display:none" onchange="handleChatImageSelect(event, 'study')">
           <div
             style="padding: 10px 14px; border-top: 1px solid rgba(139,92,246,0.05); background: rgba(255,255,255,0.55); backdrop-filter: blur(20px);">
             <div
               style="display: flex; gap: 6px; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 6px 10px; align-items: center;">
-              <input type="text" id="studyAssistantInput" placeholder="输入问题..."
+              <button onclick="document.getElementById('studyChatImageFileInput').click()" title="上传图片"
+                style="background: transparent; border: none; outline: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </button>
+              <input type="text" id="studyAssistantInput" placeholder="输入问题或粘贴截图..."
                 onkeydown="handleStudyAssistantKey(event)"
                 style="flex: 1; font-size: 12px; background: transparent; height: 24px; border:none; outline:none;">
               <button onclick="sendStudyAssistantMessage()"
@@ -4693,6 +4699,8 @@
     let userName = '用户';
     let isProcessing = false;
     let currentAbortController = null;
+    let chatSelectedImagePath = null;
+    let studyChatSelectedImagePath = null;
     
     function stopGeneration() {
       if (currentAbortController) {
@@ -7599,7 +7607,7 @@ let activeChapterQuizSelectedEl = null;
 let activeChapterQuizIndex = 0;
 
 // Global Callback Hook for iFlytek Agent (科大讯飞智能体接口预留)
-window.callIflytekAgent = async function(message, callback) {
+window.callIflytekAgent = async function(message, callback, imagePath, passedHistory) {
   console.log("科大讯飞智能体接口收到提问: ", message);
   
   const course = activeCourseIndex !== null ? myCourses[activeCourseIndex] : null;
@@ -7618,11 +7626,18 @@ window.callIflytekAgent = async function(message, callback) {
 【用户提问】${message}`;
   }
   
+  const history = passedHistory || getChatHistoryContext('studyAssistantMessages');
+  
   try {
       const resp = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: prompt, user_id: currentUserEmail })
+          body: JSON.stringify({
+              message: prompt,
+              user_id: currentUserEmail,
+              image_path: imagePath || '',
+              history: history
+          })
       });
       if (resp.ok) {
           const data = await resp.json();
@@ -9173,9 +9188,13 @@ function advanceCourseChapter() {
 function sendStudyAssistantMessage() {
   const input = document.getElementById('studyAssistantInput');
   const text = input.value.trim();
-  if (!text) return;
+  if (!text && !studyChatSelectedImagePath) return;
+  
+  const currentImagePath = studyChatSelectedImagePath;
+  clearChatImage(null, 'study');
   
   const container = document.getElementById('studyAssistantMessages');
+  const history = getChatHistoryContext('studyAssistantMessages');
   
   let avatarStyleHtml = '';
   let avatarText = userName.charAt(0).toUpperCase();
@@ -9186,6 +9205,11 @@ function sendStudyAssistantMessage() {
       avatarStyleHtml = `background:linear-gradient(135deg,#818cf8,#a78bfa);`;
   }
 
+  let bubbleHtml = escapeHtml(text);
+  if (currentImagePath) {
+      bubbleHtml += `<br><img src="${currentImagePath}" style="max-width: 150px; max-height: 150px; border-radius: 8px; margin-top: 6px; display: block; cursor: pointer;" onclick="window.open('${currentImagePath}')">`;
+  }
+
   container.innerHTML += `
     <div class="msg user" style="max-width: 100%; align-self: flex-end; flex-direction: row-reverse; gap: 8px;">
       <div class="msg-avatar" style="${avatarStyleHtml} font-size: 11px; width: 28px; height: 28px; border-radius: 8px; display:flex; align-items:center; justify-content:center;">
@@ -9194,7 +9218,7 @@ function sendStudyAssistantMessage() {
       <div>
         <div class="msg-sender" style="font-size: 10px; text-align: right;">${escapeHtml(userName)}</div>
         <div class="msg-bubble" style="padding: 10px 12px; font-size: 12.5px; line-height: 1.5; background: linear-gradient(135deg, #7c3aed, #8b5cf6); color: #fff; border-radius: 12px; border-top-right-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-          ${escapeHtml(text)}
+          ${bubbleHtml}
         </div>
       </div>
     </div>
@@ -9228,8 +9252,11 @@ function sendStudyAssistantMessage() {
       const bubble = typingEl.querySelector('.msg-bubble');
       bubble.innerHTML = `<div class="markdown-body" style="font-size: 12.5px; line-height: 1.5; color: #334155;">${safeMarkdownParse(response)}</div>`;
       container.scrollTop = container.scrollHeight;
+      if (window.MathJax && window.MathJax.typesetPromise) {
+          window.MathJax.typesetPromise();
+      }
     }
-  });
+  }, currentImagePath, history);
 }
 
 function handleStudyAssistantKey(e) {
@@ -11241,9 +11268,151 @@ function clearChatHistory() {
 function safeMarkdownParse(text) {
   if (!text) return "";
   if (typeof marked === 'undefined') return escapeHtml(text).replace(/\n/g, '<br>');
-  // 将半角波浪号 ~ 替换为全角波浪号 ～，防止 markdown 渲染为删除线，且符合可爱的中文语气特征
-  const cleanText = text.replace(/~/g, '～');
-  return marked.parse(cleanText);
+  
+  const mathBlocks = [];
+  const mathInlines = [];
+  
+  // 1. 保护行间公式 \[...\] 与 $$...$$
+  let cleanText = text.replace(/\\\[([\s\S]+?)\\\]/g, (match, formula) => {
+      const id = mathBlocks.length;
+      mathBlocks.push(formula);
+      return `MATHBLOCKID${id}`;
+  });
+  cleanText = cleanText.replace(/\$\$([\s\S]+?)\$\$/g, (match, formula) => {
+      const id = mathBlocks.length;
+      mathBlocks.push(formula);
+      return `MATHBLOCKID${id}`;
+  });
+  
+  // 2. 保护行内公式 \(...\) 与 $...$
+  cleanText = cleanText.replace(/\\\(([\s\S]+?)\\\)/g, (match, formula) => {
+      const id = mathInlines.length;
+      mathInlines.push(formula);
+      return `MATHINLINEID${id}`;
+  });
+  cleanText = cleanText.replace(/\$([^\$\n]+?)\$/g, (match, formula) => {
+      const id = mathInlines.length;
+      mathInlines.push(formula);
+      return `MATHINLINEID${id}`;
+  });
+  
+  // 将半角波浪号 ~ 替换为全角波浪号 ～，防止 markdown 渲染为删除线
+  cleanText = cleanText.replace(/~/g, '～');
+  
+  // 执行 Markdown 解析
+  let html = marked.parse(cleanText);
+  
+  // 3. 还原行间公式（统一使用 $$ 包裹，让 MathJax 100% 稳定解析）
+  html = html.replace(/MATHBLOCKID(\d+)/g, (match, id) => {
+      const formula = mathBlocks[parseInt(id)];
+      return `$$${formula}$$`;
+  });
+  
+  // 4. 还原行内公式（统一使用 $ 包裹）
+  html = html.replace(/MATHINLINEID(\d+)/g, (match, id) => {
+      const formula = mathInlines[parseInt(id)];
+      return `$${formula}$`;
+  });
+  
+  return html;
+}
+
+function getChatHistoryContext(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return [];
+    
+    const messages = [];
+    const msgElements = container.querySelectorAll('.msg');
+    msgElements.forEach(el => {
+        if (el.id === 'thinking' || el.querySelector('.typing-indicator')) return;
+        
+        const isUser = el.classList.contains('user');
+        const role = isUser ? 'user' : 'assistant';
+        
+        let content = '';
+        const bubble = el.querySelector('.msg-bubble');
+        if (bubble) {
+            const clone = bubble.cloneNode(true);
+            const imgs = clone.querySelectorAll('img');
+            imgs.forEach(img => img.remove());
+            content = clone.textContent.trim();
+        }
+        
+        if (content) {
+            messages.push({
+                role: role,
+                content: content
+            });
+        }
+    });
+    return messages.slice(-15);
+}
+
+async function handleChatImageSelect(event, type) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        alert('请选择有效的图片文件！');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const isStudy = (type === 'study');
+    const previewId = isStudy ? 'studyChatImagePreview' : 'chatImagePreview';
+    const previewEl = document.getElementById(previewId);
+
+    try {
+        previewEl.innerHTML = `<span style="font-size:12px; color:#64748b;">正在上传图片...</span>`;
+        
+        const resp = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (resp.ok) {
+            const data = await resp.json();
+            if (isStudy) {
+                studyChatSelectedImagePath = data.image_path;
+            } else {
+                chatSelectedImagePath = data.image_path;
+            }
+            previewEl.innerHTML = `
+                <div class="preview-item" style="position:relative; display:inline-block; margin-top:8px;">
+                    <img src="${data.image_path}" style="max-width:80px; max-height:80px; border-radius:6px; border:1px solid #e2e8f0;">
+                    <span onclick="clearChatImage(event, '${type}')" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; cursor:pointer; font-weight:bold;">×</span>
+                </div>
+            `;
+        } else {
+            const errData = await resp.json();
+            previewEl.innerHTML = '';
+            alert('图片上传失败: ' + (errData.error || '未知错误'));
+        }
+    } catch (err) {
+        console.error('图片上传出错:', err);
+        if (previewEl) previewEl.innerHTML = '';
+        alert('连接上传接口失败，请检查网络。');
+    }
+}
+
+function clearChatImage(event, type) {
+    if (event) event.stopPropagation();
+    const isStudy = (type === 'study');
+    if (isStudy) {
+        studyChatSelectedImagePath = null;
+        const el = document.getElementById('studyChatImagePreview');
+        if (el) el.innerHTML = '';
+        const fileInp = document.getElementById('studyChatImageFileInput');
+        if (fileInp) fileInp.value = '';
+    } else {
+        chatSelectedImagePath = null;
+        const el = document.getElementById('chatImagePreview');
+        if (el) el.innerHTML = '';
+        const fileInp = document.getElementById('chatImageFileInput');
+        if (fileInp) fileInp.value = '';
+    }
 }
 
 function handleChatKey(e) {
@@ -11439,7 +11608,15 @@ function enterCourseStudySearch(courseTitle, chapterTitle, tab, autoQuiz = false
 async function sendMessage() {
     const inp = document.getElementById('chatInput');
     const text = inp.value.trim();
-    if (!text || isProcessing) return;
+    if (!text && !chatSelectedImagePath || isProcessing) return;
+
+    // 获取当前会话上下文历史记录（不含当前提问）
+    const history = getChatHistoryContext('chatMessages');
+
+    // 捕获并清空已选择的图片
+    const currentImagePath = chatSelectedImagePath;
+    clearChatImage(null, 'chat');
+
     isProcessing = true;
     updateSendBtnState();
     
@@ -11458,7 +11635,12 @@ async function sendMessage() {
         avatarStyleHtml = `background:linear-gradient(135deg,#818cf8,#a78bfa);`;
     }
 
-    chat.insertAdjacentHTML('beforeend', `<div class="msg user"><div class="msg-avatar" style="${avatarStyleHtml}">${avatarText}</div><div><div class="msg-sender">${escapeHtml(userName)}</div><div class="msg-bubble">${renderUserMessageWithAttachments(text)}</div></div></div>`);
+    let userMsgBubbleHtml = renderUserMessageWithAttachments(text);
+    if (currentImagePath) {
+        userMsgBubbleHtml += `<br><img src="${currentImagePath}" style="max-width: 200px; max-height: 200px; border-radius: 8px; margin-top: 8px; display: block; cursor: pointer;" onclick="window.open('${currentImagePath}')">`;
+    }
+
+    chat.insertAdjacentHTML('beforeend', `<div class="msg user"><div class="msg-avatar" style="${avatarStyleHtml}">${avatarText}</div><div><div class="msg-sender">${escapeHtml(userName)}</div><div class="msg-bubble">${userMsgBubbleHtml}</div></div></div>`);
     inp.value = '';
     inp.style.height = 'auto';
     chat.scrollTop = chat.scrollHeight;
@@ -11518,7 +11700,13 @@ async function sendMessage() {
             const chatResp = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text, user_id: currentUserEmail, doc_context: docContext }),
+                body: JSON.stringify({
+                    message: text,
+                    user_id: currentUserEmail,
+                    image_path: currentImagePath || '',
+                    doc_context: docContext,
+                    history: history
+                }),
                 signal: signal
             });
             if (chatResp.ok) {
@@ -12136,6 +12324,65 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             makeElfDraggable(elf);
         }
+
+        // 绑定截图粘贴直接上传事件
+        const bindPasteListener = (inputId, uploadType) => {
+            const inputEl = document.getElementById(inputId);
+            if (!inputEl) return;
+            inputEl.addEventListener('paste', async function(e) {
+                const items = (e.clipboardData || window.clipboardData).items;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') !== -1) {
+                        const file = items[i].getAsFile();
+                        if (!file) continue;
+                        
+                        const formData = new FormData();
+                        formData.append('image', file);
+                        
+                        const previewId = (uploadType === 'study') ? 'studyChatImagePreview' : 'chatImagePreview';
+                        const previewEl = document.getElementById(previewId);
+                        if (previewEl) {
+                            previewEl.innerHTML = `<span style="font-size:12px; color:#64748b;">正在上传截图...</span>`;
+                        }
+                        
+                        try {
+                            const resp = await fetch('/api/upload', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            if (resp.ok) {
+                                const data = await resp.json();
+                                if (uploadType === 'study') {
+                                    studyChatSelectedImagePath = data.image_path;
+                                } else {
+                                    chatSelectedImagePath = data.image_path;
+                                }
+                                if (previewEl) {
+                                    previewEl.innerHTML = `
+                                        <div class="preview-item" style="position:relative; display:inline-block; margin-top:8px;">
+                                            <img src="${data.image_path}" style="max-width:80px; max-height:80px; border-radius:6px; border:1px solid #e2e8f0;">
+                                            <span onclick="clearChatImage(event, '${uploadType}')" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; cursor:pointer; font-weight:bold;">×</span>
+                                        </div>
+                                    `;
+                                }
+                            } else {
+                                if (previewEl) previewEl.innerHTML = '';
+                                alert('截图上传失败');
+                            }
+                        } catch (err) {
+                            console.error('截图上传错误:', err);
+                            if (previewEl) previewEl.innerHTML = '';
+                            alert('连接上传接口失败，请检查网络。');
+                        }
+                        e.preventDefault();
+                        break;
+                    }
+                }
+            });
+        };
+        
+        bindPasteListener('chatInput', 'chat');
+        bindPasteListener('studyAssistantInput', 'study');
 
         // 聚焦登录框
         setTimeout(function() {

@@ -423,7 +423,7 @@ def sync_to_db(all_data):
                 
                 for q in chap["quizzes"]:
                     cursor.execute(
-                        """INSERT INTO question (chapter_id, type, question, optionA, optionB, optionC, optionD, answer, analysis)
+                        """INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis)
                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);""",
                         (chapter_id, "单选题", q["question"], q["options"][0]["text"], q["options"][1]["text"],
                          q["options"][2]["text"], q["options"][3]["text"], q["answer"], q["analysis"])
