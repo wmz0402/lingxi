@@ -3079,6 +3079,361 @@
       line-height: 1.5;
       white-space: pre-wrap;
     }
+
+    /* ===== 文档诊断弹窗样式 ===== */
+    .doc-diagnose-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    .doc-diagnose-overlay.active {
+      display: flex;
+    }
+
+    .doc-diagnose-modal {
+      width: 560px;
+      max-width: 92vw;
+      max-height: 80vh;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(139,92,246,0.08);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .doc-diagnose-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .doc-diagnose-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+    .doc-diagnose-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      color: #94a3b8;
+      transition: all 0.2s;
+    }
+    .doc-diagnose-close:hover {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .doc-diagnose-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .doc-upload-zone {
+      border: 2px dashed #e2e8f0;
+      border-radius: 12px;
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.25s;
+      background: #fafafa;
+    }
+    .doc-upload-zone:hover {
+      border-color: #a78bfa;
+      background: #f5f3ff;
+    }
+    .doc-upload-zone.drag-over {
+      border-color: #7c3aed;
+      background: #ede9fe;
+      transform: scale(1.01);
+    }
+    .doc-upload-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #f5f3ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .doc-upload-zone:hover .doc-upload-icon {
+      background: #ede9fe;
+    }
+    .doc-upload-text {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #64748b;
+    }
+    .doc-upload-zone:hover .doc-upload-text {
+      color: #7c3aed;
+    }
+    .doc-upload-hint {
+      font-size: 11.5px;
+      color: #94a3b8;
+    }
+
+    .doc-file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .doc-file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      animation: fadeIn 0.2s ease;
+    }
+    .doc-file-item-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #ede9fe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #7c3aed;
+      flex-shrink: 0;
+    }
+    .doc-file-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .doc-file-item-name {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #334155;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .doc-file-item-size {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .doc-file-item-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      color: #cbd5e1;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .doc-file-item-remove:hover {
+      color: #ef4444;
+      background: #fef2f2;
+    }
+
+    .doc-requirement-area textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 13.5px;
+      color: #334155;
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.6;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-sizing: border-box;
+    }
+    .doc-requirement-area textarea:focus {
+      outline: none;
+      border-color: #a78bfa;
+      box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.12);
+    }
+    .doc-requirement-area textarea::placeholder {
+      color: #b0b8c8;
+    }
+
+    .doc-diagnose-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 14px 20px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .doc-diagnose-cancel-btn {
+      padding: 8px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #64748b;
+      background: #f1f5f9;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .doc-diagnose-cancel-btn:hover {
+      background: #e2e8f0;
+      color: #475569;
+    }
+    .doc-diagnose-send-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 22px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 2px 10px rgba(124, 58, 237, 0.2);
+    }
+    .doc-diagnose-send-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+    }
+    .doc-diagnose-send-btn:active {
+      transform: translateY(0);
+    }
+    .doc-diagnose-send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* 文件上传进度条 */
+    .doc-file-item-progress {
+      width: 100%;
+      height: 3px;
+      background: #e2e8f0;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .doc-file-item-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #7c3aed, #a78bfa);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    /* 移动端响应式 */
+    @media (max-width: 768px) {
+      .doc-diagnose-modal {
+        width: 96vw;
+        max-height: 88vh;
+        border-radius: 14px;
+      }
+      .doc-diagnose-body {
+        padding: 16px;
+      }
+      .doc-upload-zone {
+        padding: 20px 16px;
+      }
+    }
+
+    /* ===== 聊天附件卡片样式 ===== */
+    .chat-attachment-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .chat-attachment-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid;
+    }
+    .chat-attachment-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .chat-attachment-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .chat-attachment-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: #334155;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chat-attachment-meta {
+      font-size: 10.5px;
+      color: #94a3b8;
+      margin-top: 1px;
+    }
+
+    /* ===== 脑图弹窗样式 ===== */
+    .mindmap-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .mindmap-overlay.active {
+      display: flex;
+    }
+    .mindmap-modal {
+      background: #fff;
+      border-radius: 20px;
+      width: 480px;
+      max-width: 92vw;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.18);
+      overflow: hidden;
+      animation: modalIn 0.25s ease;
+    }
   </style>
 </head>
 <body>
@@ -3483,7 +3838,7 @@
         <div class="sidebar-section">
           <div class="sidebar-section-title">协同工作流</div>
           <div class="workflow-card">
-            <div class="workflow-step step-done" id="wf1">
+            <div class="workflow-step step-done" id="wf1" onclick="selectAgentByType('analyst')" style="cursor:pointer;" title="点击切换到学习分析师">
               <div class="step-dot" style="background:#3b82f6"><svg width="12" height="12" viewBox="0 0 24 24"
                   fill="none" stroke="#fff" stroke-width="3">
                   <polyline points="20 6 9 17 4 12" />
@@ -3493,7 +3848,7 @@
                 <div class="step-desc">分析用户画像...</div>
               </div>
             </div>
-            <div class="workflow-step step-active" id="wf2">
+            <div class="workflow-step step-active" id="wf2" onclick="selectAgentByType('generator')" style="cursor:pointer;" title="点击切换到资源生成师">
               <div class="step-dot" style="background:#10b981"><svg width="12" height="12" viewBox="0 0 24 24"
                   fill="none" stroke="#fff" stroke-width="3">
                   <circle cx="12" cy="12" r="4" />
@@ -3503,7 +3858,7 @@
                 <div class="step-desc">生成学习资源...</div>
               </div>
             </div>
-            <div class="workflow-step step-pending" id="wf3">
+            <div class="workflow-step step-pending" id="wf3" onclick="selectAgentByType('planner')" style="cursor:pointer;" title="点击切换到路径规划师">
               <div class="step-dot" style="background:#f59e0b"><svg width="12" height="12" viewBox="0 0 24 24"
                   fill="none" stroke="#fff" stroke-width="3">
                   <circle cx="12" cy="12" r="4" />
@@ -3544,7 +3899,7 @@
               <div class="msg-bubble">
                 你好！我是<strong>灵析</strong>，你的多智能体协同个性化学习助手。我可以帮你分析学习情况、生成个性化学习资源、规划学习路径。<br><br>
                 你可以直接告诉我你想学什么，比如：<br>
-                <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
+                <div id="sidebarQuickSuggests" style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
                   <span class="quick-suggest" onclick="sendQuickSuggest('我想学Python递归')">• "我想学Python递归"</span>
                   <span class="quick-suggest" onclick="sendQuickSuggest('帮我分析一下我的编程基础')">• "帮我分析一下我的编程基础"</span>
                   <span class="quick-suggest" onclick="sendQuickSuggest('推荐一些数据结构的学习路径')">• "推荐一些数据结构的学习路径"</span>
@@ -3563,16 +3918,16 @@
         <div class="chat-input-area" id="chatInputArea">
           <!-- 快捷功能工具栏 -->
           <div class="chat-quick-toolbar">
-            <button class="quick-tool-btn" onclick="sendQuickSuggest('帮我做一份当前文档的诊断')">
+            <button class="quick-tool-btn" onclick="openDocDiagnoseModal()">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
                 <line x1="16" y1="13" x2="8" y2="13" />
                 <line x1="16" y1="17" x2="8" y2="17" />
               </svg>
-              文档诊断
+              文档诊断 <span style="font-size:10px;color:#a78bfa;font-weight:400">v2.0</span>
             </button>
-            <button class="quick-tool-btn" onclick="sendQuickSuggest('帮我生成一张递归思维脑图')">
+            <button class="quick-tool-btn" onclick="openMindmapModal()">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="18" cy="18" r="3" />
                 <circle cx="6" cy="6" r="3" />
@@ -3582,14 +3937,14 @@
               </svg>
               一键脑图
             </button>
-            <button class="quick-tool-btn" onclick="sendQuickSuggest('我这有一段代码报错，帮我看看怎么纠错')">
+            <button class="quick-tool-btn" onclick="openCodeFixModal()">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="16 18 22 12 16 6" />
                 <polyline points="8 6 2 12 8 18" />
               </svg>
               代码纠错
             </button>
-            <button class="quick-tool-btn" onclick="sendQuickSuggest('帮我出一套关于递归的测试题')">
+            <button class="quick-tool-btn" onclick="openQuizGenModal()">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 11l3 3L22 4" />
                 <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
@@ -3648,7 +4003,7 @@
 
           <div class="search-results-section" id="searchResultsSection">
             <h3>热门推荐资源</h3>
-            <div class="search-results-grid">
+            <div class="search-results-grid" id="searchResultsGrid">
               <div class="resource-card" onclick="showResource('Python 递归完全指南', 'doc')">
                 <div class="rc-icon" style="background:#eef2ff;color:#6366f1"><svg width="18" height="18"
                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -4035,48 +4390,66 @@
           <div class="panel-section-header"><span>个人能力画像</span><span class="count">动态更新</span></div>
           <div class="dimension-chart">
             <div class="dim-item">
-              <div class="dim-label"><span>编程基础</span><span id="dimValBasic">未评估</span></div>
+              <div class="dim-label"><span>知识掌握</span><span id="dimValKnowledge">未评估</span></div>
               <div class="dim-bar">
-                <div class="dim-bar-fill" id="dimBarBasic"
+                <div class="dim-bar-fill" id="dimBarKnowledge"
                   style="width:0%;background:linear-gradient(90deg,#6366f1,#818cf8)"></div>
               </div>
             </div>
             <div class="dim-item">
-              <div class="dim-label"><span>算法思维</span><span id="dimValAlgo">未评估</span></div>
+              <div class="dim-label"><span>认知能力</span><span id="dimValCognition">未评估</span></div>
               <div class="dim-bar">
-                <div class="dim-bar-fill" id="dimBarAlgo"
+                <div class="dim-bar-fill" id="dimBarCognition"
                   style="width:0%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div>
               </div>
             </div>
             <div class="dim-item">
-              <div class="dim-label"><span>数据结构</span><span id="dimValData">未评估</span></div>
+              <div class="dim-label"><span>纠错能力</span><span id="dimValError">未评估</span></div>
               <div class="dim-bar">
-                <div class="dim-bar-fill" id="dimBarData"
+                <div class="dim-bar-fill" id="dimBarError"
                   style="width:0%;background:linear-gradient(90deg,#10b981,#34d399)"></div>
               </div>
             </div>
             <div class="dim-item">
-              <div class="dim-label"><span>问题解决</span><span id="dimValProblem">未评估</span></div>
+              <div class="dim-label"><span>兴趣活跃</span><span id="dimValInterest">未评估</span></div>
               <div class="dim-bar">
-                <div class="dim-bar-fill" id="dimBarProblem"
+                <div class="dim-bar-fill" id="dimBarInterest"
                   style="width:0%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div>
               </div>
             </div>
             <div class="dim-item">
-              <div class="dim-label"><span>自主学习</span><span id="dimValSelf">未评估</span></div>
+              <div class="dim-label"><span>目标完成</span><span id="dimValGoal">未评估</span></div>
               <div class="dim-bar">
-                <div class="dim-bar-fill" id="dimBarSelf"
+                <div class="dim-bar-fill" id="dimBarGoal"
                   style="width:0%;background:linear-gradient(90deg,#ec4899,#f472b6)"></div>
               </div>
             </div>
             <div class="dim-item">
-              <div class="dim-label"><span>项目实践</span><span id="dimValProject">未评估</span></div>
+              <div class="dim-label"><span>学习习惯</span><span id="dimValBehavior">未评估</span></div>
               <div class="dim-bar">
-                <div class="dim-bar-fill" id="dimBarProject"
+                <div class="dim-bar-fill" id="dimBarBehavior"
                   style="width:0%;background:linear-gradient(90deg,#8b5cf6,#a78bfa)"></div>
               </div>
             </div>
           </div>
+
+          <!-- 画像自然语言描述 -->
+          <div id="profileSummaryText" style="font-size:12px;color:#475569;line-height:1.6;margin:8px 0 12px;padding:8px 10px;background:#f8fafc;border-radius:8px;border-left:3px solid #8b5cf6;">
+            暂无画像数据，开始对话和答题即可生成你的个性化画像。
+          </div>
+
+          <!-- 薄弱知识点 -->
+          <div class="panel-section-header"><span>薄弱知识点</span></div>
+          <div id="profileWeakTopics" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px;">
+            <span style="color:#94a3b8;font-size:12px;">暂无数据</span>
+          </div>
+
+          <!-- 兴趣标签云 -->
+          <div class="panel-section-header"><span>兴趣标签</span></div>
+          <div id="profileInterestTags" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px;">
+            <span style="color:#94a3b8;font-size:12px;">探索中...</span>
+          </div>
+
           <div class="panel-section-header"><span>学习风格</span></div>
           <div id="learningStyleTags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px">
             <span style="padding:5px 12px;border-radius:20px;background:#eef2ff;color:#4f46e5;font-size:12px;font-weight:500">探索中...</span>
@@ -4327,6 +4700,15 @@
       }
     }
     let favoritesList = [];
+    let chatMessageIndex = 0;  // 全局消息索引，用于唯一标识每条AI消息
+    // 初始化 chatMessageIndex，避免和旧收藏的 chatIndex 冲突
+    function initChatMessageIndex() {
+      let maxIdx = 0;
+      favoritesList.forEach(f => {
+        if (f.chatIndex && f.chatIndex >= maxIdx) maxIdx = f.chatIndex + 1;
+      });
+      chatMessageIndex = maxIdx;
+    }
     let wrongQuestions = [];
     let notificationsList = [];
     let learningStats = {
@@ -4335,13 +4717,54 @@
       hours: 0.0,
       favorites: 0
     };
+    // ===== 六维学习特征全息画像 =====
+    // 知识(knowledge)、认知(cognition)、错误(error)、兴趣(interest)、目标(goal)、行为(behavior)
     let userProfileDimensions = {
-      basic: 0,
-      algo: 0,
-      data: 0,
-      problem: 0,
-      self: 0,
-      project: 0
+      // 1. 知识维度：当前知识掌握度 + 技能熟练度
+      knowledge: {
+        score: 0,           // 综合知识得分 0-100
+        topics: {},         // 各知识点掌握度 { '递归': 85, '链表': 60 }
+        weakTopics: [],     // 薄弱知识点
+        strongTopics: []    // 擅长知识点
+      },
+      // 2. 认知维度：学习风格、认知水平
+      cognition: {
+        score: 0,           // 认知能力得分 0-100
+        level: '入门',      // 入门/进阶/精通
+        style: '未知',      // 视觉型/听觉型/动手型/阅读型
+        adaptability: 0     // 知识迁移能力 0-100
+      },
+      // 3. 错误维度：错误模式分析
+      error: {
+        score: 0,           // 错误率反向得分(越低越弱) 0-100
+        pattern: [],        // 错误模式标签 ['概念混淆', '粗心大意']
+        recentErrors: [],   // 最近错误记录(最多20条)
+        fixRate: 0          // 纠错成功率 0-100
+      },
+      // 4. 兴趣维度：学习兴趣和偏好
+      interest: {
+        score: 0,           // 兴趣活跃度 0-100
+        tags: [],           // 当前兴趣标签 ['算法', '可视化']
+        seedTags: [],       // 注册时的兴趣种子
+        trend: []           // 兴趣趋势变化
+      },
+      // 5. 目标维度：学习目标
+      goal: {
+        score: 0,           // 目标完成度 0-100
+        shortTerm: [],      // 短期目标
+        longTerm: [],       // 长期目标
+        completed: 0        // 已完成目标数
+      },
+      // 6. 行为维度：学习习惯和模式
+      behavior: {
+        score: 0,           // 学习行为得分 0-100
+        dailyMinutes: 0,    // 日均学习时长(分钟)
+        consistency: 0,     // 学习连续性 0-100
+        peakTime: '未知',   // 活跃时段
+        interactionCount: 0 // 总交互次数
+      },
+      // 兼容旧字段(用于映射显示)
+      basic: 0, algo: 0, data: 0, problem: 0, self: 0, project: 0
     };
     let chatHistory = [];
     let activeChatHistoryIndex = null;
@@ -5542,6 +5965,19 @@ function submitProfileSetup(e) {
             intro: autoIntro,
             hobbies: hobbies
         };
+        // 兴趣种子写入画像
+        if (users[currentUserEmail].userProfileDimensions) {
+            if (!users[currentUserEmail].userProfileDimensions.interest) {
+                users[currentUserEmail].userProfileDimensions.interest = { score: 0, tags: [], seedTags: [], trend: [] };
+            }
+            users[currentUserEmail].userProfileDimensions.interest.seedTags = hobbies;
+            users[currentUserEmail].userProfileDimensions.interest.tags = hobbies.slice();
+            // 同步更新内存中的 userProfileDimensions
+            if (userProfileDimensions && userProfileDimensions.interest) {
+                userProfileDimensions.interest.seedTags = hobbies;
+                userProfileDimensions.interest.tags = hobbies.slice();
+            }
+        }
         localStorage.setItem('lingxi_users', JSON.stringify(users));
         console.log('✅ 配置已保存:', users[currentUserEmail].profile);
 
@@ -5744,8 +6180,27 @@ function handleLogin(e) {
 
     recentActivities = users[matchedUserKey].recentActivities || [];
     learningStats = users[matchedUserKey].learningStats || { days: 1, completedResources: 0, hours: 0.0, favorites: 0 };
-    userProfileDimensions = users[matchedUserKey].userProfileDimensions || { basic: 0, algo: 0, data: 0, problem: 0, self: 0, project: 0 };
+    // 旧数据兼容：如果没有 firstLoginDate，根据 days 反推
+    if (!learningStats.firstLoginDate && learningStats.days > 0) {
+      const d = new Date();
+      d.setDate(d.getDate() - learningStats.days + 1);
+      learningStats.firstLoginDate = d.toISOString().split('T')[0];
+    }
+    userProfileDimensions = migrateProfileDimensions(users[matchedUserKey].userProfileDimensions) || getDefaultProfileDimensions();
+    // 从 profile.hobbies 同步兴趣标签到画像
+    if (users[matchedUserKey].profile && users[matchedUserKey].profile.hobbies) {
+      const hobbies = users[matchedUserKey].profile.hobbies;
+      if (userProfileDimensions.interest) {
+        if (!userProfileDimensions.interest.seedTags || userProfileDimensions.interest.seedTags.length === 0) {
+          userProfileDimensions.interest.seedTags = hobbies;
+        }
+        if (!userProfileDimensions.interest.tags || userProfileDimensions.interest.tags.length === 0) {
+          userProfileDimensions.interest.tags = hobbies.slice();
+        }
+      }
+    }
     favoritesList = users[matchedUserKey].favoritesList || [];
+    initChatMessageIndex();
     wrongQuestions = users[matchedUserKey].wrongQuestions || [];
     notificationsList = users[matchedUserKey].notificationsList || getInitialNotifications();
 
@@ -5804,7 +6259,22 @@ function startSession() {
     if (updateIntervalId) clearInterval(updateIntervalId);
     sessionStartTime = Date.now();
     isSessionActive = document.visibilityState === 'visible';
-    // 每 10 秒更新一次学习时长（同时也会在页面可见性变化时触发）
+
+    // 计算学习天数：基于首次登录日期到今天的天数差，至少为1
+    if (!learningStats.firstLoginDate) {
+        learningStats.firstLoginDate = new Date().toISOString().split('T')[0];
+        learningStats.days = 1;
+    } else {
+        const first = new Date(learningStats.firstLoginDate);
+        const today = new Date();
+        const diffMs = today.getTime() - first.getTime();
+        const diffDays = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+        learningStats.days = diffDays;
+    }
+    renderLearningStats();
+    saveUserData();
+
+    // 每 10 秒更新一次学习时长
     updateIntervalId = setInterval(() => {
         updateLearningHours();
     }, 10000);
@@ -5896,12 +6366,13 @@ function handleRegister(e) {
       favorites: 0
     },
     userProfileDimensions: {
-      basic: 0,
-      algo: 0,
-      data: 0,
-      problem: 0,
-      self: 0,
-      project: 0
+      knowledge: { score: 0, topics: {}, weakTopics: [], strongTopics: [] },
+      cognition: { score: 0, level: '入门', style: '未知', adaptability: 0 },
+      error: { score: 0, pattern: [], recentErrors: [], fixRate: 0 },
+      interest: { score: 0, tags: [], seedTags: [], trend: [] },
+      goal: { score: 0, shortTerm: [], longTerm: [], completed: 0 },
+      behavior: { score: 0, dailyMinutes: 0, consistency: 0, peakTime: '未知', interactionCount: 0 },
+      basic: 0, algo: 0, data: 0, problem: 0, self: 0, project: 0
     },
     favoritesList: [],
     wrongQuestions: [],
@@ -5930,8 +6401,25 @@ function handleRegister(e) {
   chatHistory = users[email].chatHistory || [];
   recentActivities = users[email].recentActivities || [];
   learningStats = users[email].learningStats || { days: 1, completedResources: 0, hours: 0.0, favorites: 0 };
-  userProfileDimensions = users[email].userProfileDimensions || { basic: 0, algo: 0, data: 0, problem: 0, self: 0, project: 0 };
+  if (!learningStats.firstLoginDate && learningStats.days > 0) {
+    const d = new Date();
+    d.setDate(d.getDate() - learningStats.days + 1);
+    learningStats.firstLoginDate = d.toISOString().split('T')[0];
+  }
+  userProfileDimensions = migrateProfileDimensions(users[email].userProfileDimensions) || getDefaultProfileDimensions();
+  if (users[email].profile && users[email].profile.hobbies) {
+    const hobbies = users[email].profile.hobbies;
+    if (userProfileDimensions.interest) {
+      if (!userProfileDimensions.interest.seedTags || userProfileDimensions.interest.seedTags.length === 0) {
+        userProfileDimensions.interest.seedTags = hobbies;
+      }
+      if (!userProfileDimensions.interest.tags || userProfileDimensions.interest.tags.length === 0) {
+        userProfileDimensions.interest.tags = hobbies.slice();
+      }
+    }
+  }
   favoritesList = users[email].favoritesList || [];
+  initChatMessageIndex();
   wrongQuestions = users[email].wrongQuestions || [];
   notificationsList = users[email].notificationsList || getInitialNotifications();
 
@@ -6073,6 +6561,45 @@ function startTransition() {
 
                 // 加载后端课程数据
                 loadBackendCourses();
+
+                // 根据用户兴趣动态更新推荐内容
+                const interestData = getInterestBasedSuggestions();
+                const chatInput = document.getElementById('chatInput');
+                if (chatInput) chatInput.placeholder = '输入你的学习需求，例如：' + (interestData.placeholder || '我想学Python递归...');
+                const searchTagsContainer = document.querySelector('.search-tags');
+                if (searchTagsContainer && interestData.searchTags) {
+                  searchTagsContainer.innerHTML = interestData.searchTags.map(tag =>
+                    `<span class="search-tag" onclick="quickSearch('${tag}')">${tag}</span>`
+                  ).join('');
+                }
+                // 新用户自动根据兴趣添加课程
+                if (myCourses.length === 0) {
+                  autoAddCoursesByInterest();
+                }
+                // 更新侧边栏 quick-suggest
+                const sidebarSuggests = document.getElementById('sidebarQuickSuggests');
+                if (sidebarSuggests && interestData.suggests) {
+                  sidebarSuggests.innerHTML = interestData.suggests.map(s =>
+                    `<span class="quick-suggest" onclick="sendQuickSuggest('${s}')">• "${s}"</span>`
+                  ).join('');
+                }
+                // 更新搜索中心热门推荐资源
+                const searchGrid = document.getElementById('searchResultsGrid');
+                if (searchGrid && interestData.resources) {
+                  const iconSvgs = {
+                    doc: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+                    mind: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>',
+                    quiz: '<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>'
+                  };
+                  const typeLabels = { doc: '讲解文档', mind: '思维导图', quiz: '练习题' };
+                  searchGrid.innerHTML = interestData.resources.map(r => `
+                    <div class="resource-card" onclick="showResource('${r.title}', '${r.type}')">
+                      <div class="rc-icon" style="background:${r.bgColor};color:${r.iconColor}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${iconSvgs[r.type] || iconSvgs.doc}</svg></div>
+                      <div class="rc-title">${r.title}</div>
+                      <div class="rc-type">${typeLabels[r.type] || '资源'} · 推荐</div>
+                    </div>
+                  `).join('');
+                }
 
                 // ========== 新增：自适应初始化折叠（非PC端默认折叠两边栏） ==========
                 const sidebar = document.getElementById('sidebar');
@@ -6392,131 +6919,45 @@ function findChapterByFuzzyTitle(course, targetChTitle) {
 }
 
 function showResource(title, type) {
-  switchMainPage('resource');
-  const titleEl = document.getElementById('resourceViewerTitle');
-  const tagEl = document.getElementById('resourceViewerTag');
-  const bodyEl = document.getElementById('resourceViewerBody');
-  
-  titleEl.textContent = title;
-  
-  let contentHtml = '';
-  if (type === 'doc') {
-    tagEl.textContent = '讲解文档';
-    tagEl.style.background = 'rgba(99, 102, 241, 0.08)';
-    tagEl.style.color = '#6366f1';
-    // 动态查找实际的章节内容（使用模糊匹配）
-    let foundContent = '';
-    const sepIdx = title.indexOf(' — ');
-    if (sepIdx !== -1) {
-      const courseTitle = title.substring(0, sepIdx);
-      const chTitle = title.substring(sepIdx + 4);
-      const course = findCourseByFuzzyTitle(courseTitle);
-      if (course) {
-        const ch = findChapterByFuzzyTitle(course, chTitle);
-        if (ch && ch.content) {
-          foundContent = ch.content;
-        }
-      }
-    }
-    if (foundContent) {
-      contentHtml = `<div class="resource-doc-content" style="line-height:1.7;color:#334155;">${safeMarkdownParse(foundContent)}</div>`;
-    } else {
-      contentHtml = `<div style="text-align:center;padding:40px;color:#94a3b8;"><div style="font-size:14px;">该章节的讲解内容暂不可用</div></div>`;
-    }
-  } else if (type === 'mind') {
-    tagEl.textContent = '思维导图';
-    tagEl.style.background = 'rgba(16, 185, 129, 0.08)';
-    tagEl.style.color = '#10b981';
-    // 动态查找实际的思维导图内容（使用模糊匹配）
-    let foundMindmap = '';
-    const sepIdx = title.indexOf(' — ');
-    if (sepIdx !== -1) {
-      const courseTitle = title.substring(0, sepIdx);
-      const chTitleRaw = title.substring(sepIdx + 4);
-      const chTitle = chTitleRaw.replace(/思维导图$/, '');
-      const course = findCourseByFuzzyTitle(courseTitle);
-      if (course) {
-        const ch = findChapterByFuzzyTitle(course, chTitle);
-        if (ch && ch.mindmapHtml) {
-          foundMindmap = ch.mindmapHtml;
-        }
-      }
-    }
-    if (foundMindmap) {
-      contentHtml = `<div style="padding:20px 0;">${foundMindmap}</div>`;
-    } else {
-      contentHtml = `
-        <div style="text-align:center;padding:40px;color:#94a3b8;">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px;display:block;color:#cbd5e1;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-          <div style="font-size:14px;">该章节的思维导图暂不可用</div>
-        </div>
-      `;
-    }
-  } else if (type === 'quiz') {
-    tagEl.textContent = '练习题';
-    tagEl.style.background = 'rgba(245, 158, 11, 0.08)';
-    tagEl.style.color = '#f59e0b';
-    contentHtml = `
-      <div class="quiz-container" id="quizContainer">
-        <!-- Will be dynamically rendered by initQuiz -->
-      </div>
-    `;
-    setTimeout(() => {
-      initQuiz();
-    }, 50);
-  } else if (type === 'code') {
-    tagEl.textContent = '代码案例';
-    tagEl.style.background = 'rgba(236, 72, 153, 0.08)';
-    tagEl.style.color = '#ec4899';
-    contentHtml = `
-      <div class="code-runner-container">
-        <div class="code-editor-side">
-          <div class="code-editor-header">
-            <span class="code-editor-title">main.py</span>
-            <button class="code-editor-run" onclick="runSimulatedCode()">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              运行代码
-            </button>
-          </div>
-          <textarea class="code-editor-content" id="codeEditorContent" spellcheck="false">
-def hanoi(n, source, target, auxiliary):
-    if n == 1:
-        print(f"移动圆盘 1: 从 {source} -> {target}")
-        return
-    hanoi(n - 1, source, auxiliary, target)
-    print(f"移动圆盘 {n}: 从 {source} -> {target}")
-    hanoi(n - 1, auxiliary, target, source)
+  // 兼容旧式收藏（无 content）：切换到聊天页，插入一条提示消息
+  switchMainPage('chat');
+  const chat = document.getElementById('chatMessages');
+  if (!chat) return;
 
-# 运行 3 层汉诺塔
-print("--- 汉诺塔演练开始 ---")
-hanoi(3, 'A', 'C', 'B')
-print("--- 演练结束 ---")</textarea>
-        </div>
-        <div class="code-console-side">
-          <div class="code-console-header">控制台输出 (Console)</div>
-          <div class="code-console-body" id="codeConsoleBody">点击左侧“运行代码”查看输出...</div>
+  let typeText = '资源';
+  if (type === 'doc') typeText = '讲解文档';
+  else if (type === 'mind') typeText = '思维导图';
+
+  chatMessageIndex++;
+  const html = `<div class="msg assistant fade-up" data-chat-index="${chatMessageIndex}">
+    <div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div>
+    <div>
+      <div class="msg-sender">灵析助手</div>
+      <div class="msg-bubble-wrap" data-chat-index="${chatMessageIndex}" data-fav-type="${type}" data-fav-title="${escapeHtml(title)}">
+        <button class="fav-bubble-btn" onclick="toggleFavoriteBubble(${chatMessageIndex})" title="收藏此消息">
+          <span class="fav-star">&#9734;</span>
+        </button>
+        <div class="msg-bubble" style="color:#64748b;">
+          <div style="padding:20px 0;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px;display:block;color:#cbd5e1;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            <div style="font-size:14px;">该${typeText}「${escapeHtml(title)}」是旧版收藏，需要进入对应课程重新查看。</div>
+            <div style="font-size:12px;color:#cbd5e1;margin-top:8px;">提示：重新收藏后的内容可以在收藏列表中直接打开。</div>
+          </div>
         </div>
       </div>
-    `;
-  } else if (type === 'read') {
-    tagEl.textContent = '拓展阅读';
-    tagEl.style.background = 'rgba(139, 92, 246, 0.08)';
-    tagEl.style.color = '#8b5cf6';
-    contentHtml = `
-      <div class="resource-doc-content">
-        <h3>算法导论第3章：分治法的数学之美</h3>
-        <p>在算法分析中，分治法是一种具有深厚数学底蕴的策略。它的基本思想是将原问题分解为若干个规模较小但类似于原问题的子问题，递归地求解这些子问题，然后再合并这些子问题的解来建立原问题的解。</p>
-        <p>分治法在每层递归上都有三个步骤：</p>
-        <p>1. <strong>分解（Divide）</strong>：将原问题分解为若干个子问题。</p>
-        <p>2. <strong>解决（Conquer）</strong>：递归地求解各个子问题。若子问题规模足够小，则直接求解。</p>
-        <p>3. <strong>合并（Combine）</strong>：将子问题的解合并为原问题的解。</p>
-        <h3>分治法的复杂度计算——主定理 (Master Theorem)</h3>
-        <p>主定理为我们求解递归式提供了极为便利的公式化方法。它适用于形如 T(n) = aT(n/b) + f(n) 的递归方程。主定理将规模为 n 的问题划分为 a 个规模为 n/b 的子问题，其中 a >= 1 且 b > 1 是常数，f(n) 是渐近正函数。</p>
-      </div>
-    `;
+    </div>
+  </div>`;
+  chat.insertAdjacentHTML('beforeend', html);
+  chat.scrollTop = chat.scrollHeight;
+
+  // 渲染数学公式（MathJax）和后处理，确保和原章节格式一致
+  const newBubble = chat.querySelector(`.msg-bubble-wrap[data-chat-index="${chatMessageIndex}"] .msg-bubble`);
+  if (newBubble && typeof postProcessChapterContent === 'function') {
+    postProcessChapterContent(newBubble);
   }
-  
-  bodyEl.innerHTML = contentHtml;
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise();
+  }
 }
 
 const quizQuestions_duplicate = [{
@@ -7243,21 +7684,16 @@ function renderChaptersList() {
   
   let html = '';
   course.chapters.forEach((ch, idx) => {
-    const isLocked = idx > unlockedIdx;
+    const isLocked = false; // 所有章节解锁，不再上锁
     const isActive = idx === activeChapterIndex;
-    
+
     html += `
-      <div class="chapter-nav-item ${isLocked ? 'locked' : ''} ${isActive ? 'active' : ''}" 
-           onclick="${isLocked ? '' : `selectChapter(${idx})`}">
+      <div class="chapter-nav-item ${isActive ? 'active' : ''}"
+           onclick="selectChapter(${idx})">
         <div style="display: flex; flex-direction: column; min-width: 0; flex: 1;">
           <span style="font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ch.title}</span>
           <span style="font-size: 10.5px; color: #94a3b8; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ch.intro}</span>
         </div>
-        ${isLocked ? `
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="flex-shrink:0; margin-left: 6px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        ` : idx < unlockedIdx ? `
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" style="flex-shrink:0; margin-left: 6px;"><polyline points="20 6 9 17 4 12"/></svg>
-        ` : ''}
       </div>
     `;
   });
@@ -7711,7 +8147,9 @@ function submitChapterQuiz() {
   }
   
   // 动态更新能力画像
-  trackQuizResult(course.title, isCorrect);
+  const questionTopic = q && q.question ? q.question.substring(0, 20) : null;
+  const errorPattern = !isCorrect && q && q.analysis ? q.analysis.substring(0, 30) : null;
+  updateProfileFromQuiz(course.title, questionTopic, isCorrect, errorPattern);
 }
 
 function nextChapterQuizQuestion() {
@@ -7740,18 +8178,70 @@ function renderLearningStats() {
 }
 
 function renderUserProfileDimensions() {
-  const updateDim = (valId, barId, val) => {
-    const valEl = document.getElementById(valId);
-    const barEl = document.getElementById(barId);
-    if (valEl) valEl.textContent = val === 0 ? '未评估' : val + '%';
-    if (barEl) barEl.style.width = val + '%';
+  const p = userProfileDimensions;
+
+  // 6个新维度的进度条更新
+  const dimMap = [
+    { valId: 'dimValKnowledge', barId: 'dimBarKnowledge', score: p.knowledge.score || 0, label: '知识掌握' },
+    { valId: 'dimValCognition', barId: 'dimBarCognition', score: p.cognition.score || 0, label: '认知能力' },
+    { valId: 'dimValError', barId: 'dimBarError', score: p.error.score || 0, label: '纠错能力' },
+    { valId: 'dimValInterest', barId: 'dimBarInterest', score: p.interest.score || 0, label: '兴趣活跃' },
+    { valId: 'dimValGoal', barId: 'dimBarGoal', score: p.goal.score || 0, label: '目标完成' },
+    { valId: 'dimValBehavior', barId: 'dimBarBehavior', score: p.behavior.score || 0, label: '学习习惯' }
+  ];
+
+  dimMap.forEach(d => {
+    const valEl = document.getElementById(d.valId);
+    const barEl = document.getElementById(d.barId);
+    if (valEl) valEl.textContent = d.score === 0 ? '未评估' : Math.round(d.score) + '%';
+    if (barEl) barEl.style.width = Math.min(100, d.score) + '%';
+  });
+
+  // 自然语言描述（前两句）
+  const summary = getProfileSummary();
+  const summarySentences = summary.split('。').filter(s => s.trim());
+  const shortSummary = summarySentences.slice(0, 2).join('。') + (summarySentences.length > 2 ? '。' : '');
+  const summaryEl = document.getElementById('profileSummaryText');
+  if (summaryEl) summaryEl.textContent = shortSummary;
+
+  // 薄弱知识点列表
+  const weakListEl = document.getElementById('profileWeakTopics');
+  if (weakListEl) {
+    const weakTopics = (p.knowledge.weakTopics || []).slice(0, 5);
+    if (weakTopics.length === 0) {
+      weakListEl.innerHTML = '<span style="color:#94a3b8;font-size:12px;">暂无数据</span>';
+    } else {
+      weakListEl.innerHTML = weakTopics.map(t =>
+        `<span style="display:inline-block;padding:3px 10px;border-radius:12px;background:#fef2f2;color:#dc2626;font-size:11px;margin:2px;">${t}</span>`
+      ).join('');
+    }
+  }
+
+  // 兴趣标签云
+  const tagCloudEl = document.getElementById('profileInterestTags');
+  if (tagCloudEl) {
+    const tags = (p.interest.tags || []).slice(0, 8);
+    if (tags.length === 0) {
+      tagCloudEl.innerHTML = '<span style="color:#94a3b8;font-size:12px;">探索中...</span>';
+    } else {
+      tagCloudEl.innerHTML = tags.map(t =>
+        `<span style="display:inline-block;padding:3px 10px;border-radius:12px;background:#f5f3ff;color:#7c3aed;font-size:11px;margin:2px;">${t}</span>`
+      ).join('');
+    }
+  }
+
+  // 兼容旧字段同步显示
+  const compatDims = {
+    dimValBasic: 'basic', dimValAlgo: 'algo', dimValData: 'data',
+    dimValProblem: 'problem', dimValSelf: 'self', dimValProject: 'project'
   };
-  updateDim('dimValBasic', 'dimBarBasic', userProfileDimensions.basic);
-  updateDim('dimValAlgo', 'dimBarAlgo', userProfileDimensions.algo);
-  updateDim('dimValData', 'dimBarData', userProfileDimensions.data);
-  updateDim('dimValProblem', 'dimBarProblem', userProfileDimensions.problem);
-  updateDim('dimValSelf', 'dimBarSelf', userProfileDimensions.self);
-  updateDim('dimValProject', 'dimBarProject', userProfileDimensions.project);
+  for (const [valId, key] of Object.entries(compatDims)) {
+    const valEl = document.getElementById(valId);
+    const barEl = document.getElementById(valId.replace('Val', 'Bar'));
+    if (valEl && typeof p[key] === 'number') valEl.textContent = p[key] === 0 ? '未评估' : p[key] + '%';
+    if (barEl && typeof p[key] === 'number') barEl.style.width = p[key] + '%';
+  }
+
   updateLearningStyle();
 }
 
@@ -8003,6 +8493,37 @@ const courseDimensionMap = {
 
 // 增量更新某维度（带衰减：越接近100增长越慢）
 function bumpDimension(name, delta) {
+  // 兼容旧字段映射到新6维结构
+  const compatMap = {
+    basic: 'knowledge',
+    algo: 'knowledge',
+    data: 'knowledge',
+    problem: 'cognition',
+    self: 'interest',
+    project: 'goal'
+  };
+
+  if (compatMap.hasOwnProperty(name)) {
+    const newDim = compatMap[name];
+    const cur = userProfileDimensions[newDim] && typeof userProfileDimensions[newDim].score === 'number'
+      ? userProfileDimensions[newDim].score
+      : 0;
+    const decay = Math.max(0.2, 1 - cur / 120);
+    const newVal = Math.min(100, Math.round(cur + delta * decay));
+    if (userProfileDimensions[newDim]) {
+      userProfileDimensions[newDim].score = newVal;
+    }
+    // 旧字段也保留同步（兼容旧显示逻辑）
+    if (typeof userProfileDimensions[name] === 'number') {
+      userProfileDimensions[name] = newVal;
+    }
+    // algo特殊处理：同时增加算法topic
+    if (name === 'algo' && userProfileDimensions.knowledge && userProfileDimensions.knowledge.topics) {
+      userProfileDimensions.knowledge.topics['算法'] = (userProfileDimensions.knowledge.topics['算法'] || 0) + delta;
+    }
+    return;
+  }
+
   if (!userProfileDimensions.hasOwnProperty(name)) return;
   const cur = userProfileDimensions[name];
   // 衰减因子：值越高增长越难，避免轻易满值
@@ -8011,61 +8532,462 @@ function bumpDimension(name, delta) {
   userProfileDimensions[name] = newVal;
 }
 
-// 1. 答题结果追踪
-function trackQuizResult(courseTitle, isCorrect) {
-  const weights = courseDimensionMap[courseTitle];
-  if (!weights) return;
-  Object.keys(weights).forEach(dim => {
-    const delta = isCorrect ? weights[dim] * 2 : weights[dim] * 0.5;
-    bumpDimension(dim, delta);
-  });
-  renderUserProfileDimensions();
-  saveUserData();
-}
-
-// 2. 章节完成追踪
-function trackChapterComplete(courseTitle) {
-  const weights = courseDimensionMap[courseTitle];
-  if (!weights) return;
-  Object.keys(weights).forEach(dim => {
-    bumpDimension(dim, weights[dim] * 3);
-  });
-  // 自主学习维度额外加成
-  bumpDimension('self', 2);
-  renderUserProfileDimensions();
-  saveUserData();
-}
-
-// 3. 对话学习追踪
-function trackChatInteraction(topic) {
+// 1. 对话学习追踪（新6维画像）
+function updateProfileFromChat(topic) {
   const t = (topic || '').toLowerCase();
-  if (t.includes('递归') || t.includes('函数') || t.includes('编程') || t.includes('python')) {
-    bumpDimension('basic', 2); bumpDimension('problem', 1);
-  } else if (t.includes('算法') || t.includes('复杂度') || t.includes('排序')) {
-    bumpDimension('algo', 2); bumpDimension('problem', 1);
-  } else if (t.includes('数据结构') || t.includes('链表') || t.includes('树') || t.includes('图')) {
-    bumpDimension('data', 2); bumpDimension('algo', 1);
-  } else if (t.includes('数学') || t.includes('极限') || t.includes('积分') || t.includes('导数')) {
-    bumpDimension('problem', 2); bumpDimension('self', 1);
-  } else if (t.includes('英语') || t.includes('词汇') || t.includes('阅读')) {
-    bumpDimension('self', 2);
-  } else if (t.includes('网络') || t.includes('协议') || t.includes('tcp')) {
-    bumpDimension('basic', 1); bumpDimension('self', 1);
-  } else {
-    bumpDimension('self', 1);
+  const p = userProfileDimensions;
+
+  // knowledge: 分析topic中的知识点关键词，提升对应topic的掌握度(+1)
+  const topicKeywords = [
+    { keys: ['递归', '函数', '编程', 'python', '语法'], topic: '编程基础' },
+    { keys: ['算法', '复杂度', '排序', '贪心', '动态规划'], topic: '算法' },
+    { keys: ['数据结构', '链表', '树', '图', '栈', '队列'], topic: '数据结构' },
+    { keys: ['数学', '极限', '积分', '导数', '线性代数'], topic: '数学' },
+    { keys: ['网络', '协议', 'tcp', 'ip', 'http'], topic: '计算机网络' },
+    { keys: ['英语', '词汇', '阅读', '听力', '写作'], topic: '英语' }
+  ];
+  let matchedTopic = null;
+  for (const tk of topicKeywords) {
+    if (tk.keys.some(k => t.includes(k))) {
+      matchedTopic = tk.topic;
+      p.knowledge.topics[tk.topic] = (p.knowledge.topics[tk.topic] || 0) + 1;
+      break;
+    }
   }
+  if (!matchedTopic && t.length > 0) {
+    p.knowledge.topics['通用'] = (p.knowledge.topics['通用'] || 0) + 1;
+  }
+
+  // cognition: 每次对话+0.5，超过50次后标记为'进阶'
+  p.cognition.score = Math.min(100, p.cognition.score + 0.5);
+  p.behavior.interactionCount = (p.behavior.interactionCount || 0) + 1;
+  if (p.behavior.interactionCount > 50 && p.cognition.level === '入门') {
+    p.cognition.level = '进阶';
+  }
+
+  // behavior: interactionCount+1
+  p.behavior.score = Math.min(100, p.behavior.score + 0.2);
+
+  // interest: 如果topic包含新的关键词不在tags中，添加到tags，记录trend
+  const allKeywords = topicKeywords.flatMap(tk => tk.keys);
+  const newTags = allKeywords.filter(k => t.includes(k) && !p.interest.tags.includes(k));
+  if (newTags.length > 0) {
+    p.interest.tags.push(...newTags);
+    p.interest.trend.push({ tag: newTags[0], time: Date.now() });
+  }
+  p.interest.score = Math.min(100, p.interest.score + 0.5);
+
+  // 更新强弱知识点
+  updateKnowledgeTopics();
+
   renderUserProfileDimensions();
   saveUserData();
 }
 
-// 4. 学习时长追踪（由会话计时器调用）
-function trackStudyTime(minutes) {
-  if (minutes < 1) return;
-  // 每10分钟学习时长给自主学习维度加1分
-  const delta = Math.max(1, Math.floor(minutes / 10));
-  bumpDimension('self', delta);
+// 辅助：更新强弱知识点列表
+function updateKnowledgeTopics() {
+  const topics = userProfileDimensions.knowledge.topics;
+  const entries = Object.entries(topics).filter(([k]) => k !== '通用');
+  entries.sort((a, b) => a[1] - b[1]);
+  userProfileDimensions.knowledge.weakTopics = entries.slice(0, 5).map(e => e[0]);
+  userProfileDimensions.knowledge.strongTopics = entries.slice(-5).reverse().map(e => e[0]);
+}
+
+// 2. 答题结果追踪（新6维画像）
+function updateProfileFromQuiz(courseTitle, questionTopic, isCorrect, errorPattern) {
+  const p = userProfileDimensions;
+
+  // knowledge: 正确+2，错误+0.5
+  const topic = questionTopic || courseTitle || '通用';
+  p.knowledge.topics[topic] = (p.knowledge.topics[topic] || 0) + (isCorrect ? 2 : 0.5);
+  p.knowledge.score = Math.min(100, p.knowledge.score + (isCorrect ? 1 : 0.3));
+
+  // error: 错误时记录recentErrors(最多20条)，分析errorPattern加入pattern
+  if (!isCorrect) {
+    const errRecord = {
+      topic: topic,
+      pattern: errorPattern || '未知错误',
+      time: Date.now()
+    };
+    p.error.recentErrors.unshift(errRecord);
+    if (p.error.recentErrors.length > 20) p.error.recentErrors.pop();
+    if (errorPattern && !p.error.pattern.includes(errorPattern)) {
+      p.error.pattern.push(errorPattern);
+    }
+    p.error.score = Math.max(0, p.error.score - 1);
+  } else {
+    p.error.fixRate = Math.min(100, (p.error.fixRate || 0) + 2);
+    p.error.score = Math.min(100, p.error.score + 0.5);
+  }
+
+  // cognition: 正确+1，错误+0.3
+  p.cognition.score = Math.min(100, p.cognition.score + (isCorrect ? 1 : 0.3));
+
+  // behavior: interactionCount+1
+  p.behavior.interactionCount = (p.behavior.interactionCount || 0) + 1;
+  p.behavior.score = Math.min(100, p.behavior.score + 0.3);
+
+  // goal: 如果连续正确3次，添加短期目标"掌握{courseTitle}"
+  if (isCorrect) {
+    p.goal._recentCorrect = (p.goal._recentCorrect || 0) + 1;
+    if (p.goal._recentCorrect >= 3) {
+      const goalText = `掌握${courseTitle}`;
+      if (!p.goal.shortTerm.some(g => g.text === goalText)) {
+        p.goal.shortTerm.push({ text: goalText, completed: false, created: Date.now() });
+      }
+      p.goal._recentCorrect = 0;
+    }
+  } else {
+    p.goal._recentCorrect = 0;
+  }
+
+  updateKnowledgeTopics();
   renderUserProfileDimensions();
   saveUserData();
+}
+
+// 3. 章节完成追踪（新6维画像）
+function updateProfileFromComplete(courseTitle) {
+  const p = userProfileDimensions;
+
+  // knowledge: 对应topic+5
+  p.knowledge.topics[courseTitle] = (p.knowledge.topics[courseTitle] || 0) + 5;
+  p.knowledge.score = Math.min(100, p.knowledge.score + 3);
+
+  // goal: 标记短期目标为完成
+  const goalText = `掌握${courseTitle}`;
+  const goal = p.goal.shortTerm.find(g => g.text === goalText);
+  if (goal && !goal.completed) {
+    goal.completed = true;
+    goal.completedAt = Date.now();
+    p.goal.completed = (p.goal.completed || 0) + 1;
+    p.goal.score = Math.min(100, p.goal.score + 10);
+  }
+
+  // cognition: +2
+  p.cognition.score = Math.min(100, p.cognition.score + 2);
+
+  // behavior: +1
+  p.behavior.score = Math.min(100, p.behavior.score + 1);
+  p.behavior.interactionCount = (p.behavior.interactionCount || 0) + 1;
+
+  updateKnowledgeTopics();
+  renderUserProfileDimensions();
+  saveUserData();
+}
+
+// 4. 学习时长追踪（新6维画像）
+function updateProfileFromStudy(minutes) {
+  if (minutes < 1) return;
+  const p = userProfileDimensions;
+
+  // behavior: 更新dailyMinutes(滑动平均)，consistency+0.5(上限100)
+  const prevDaily = p.behavior.dailyMinutes || 0;
+  // 滑动平均：新值占10%权重
+  p.behavior.dailyMinutes = Math.round((prevDaily * 0.9 + minutes * 0.1) * 10) / 10;
+  p.behavior.consistency = Math.min(100, (p.behavior.consistency || 0) + 0.5);
+  p.behavior.score = Math.min(100, p.behavior.score + 0.5);
+
+  // 记录peakTime(根据当前小时)
+  const hour = new Date().getHours();
+  const timeSlot = `${hour}:00-${hour + 1}:00`;
+  if (!p.behavior._peakTimeMap) p.behavior._peakTimeMap = {};
+  p.behavior._peakTimeMap[timeSlot] = (p.behavior._peakTimeMap[timeSlot] || 0) + minutes;
+  // 找出峰值时段
+  let maxTime = 0;
+  let peakSlot = '未知';
+  for (const [slot, totalMin] of Object.entries(p.behavior._peakTimeMap)) {
+    if (totalMin > maxTime) {
+      maxTime = totalMin;
+      peakSlot = slot;
+    }
+  }
+  p.behavior.peakTime = peakSlot;
+
+  renderUserProfileDimensions();
+  saveUserData();
+}
+
+// 5. 获取画像自然语言摘要
+function getProfileSummary() {
+  const p = userProfileDimensions;
+  const weakTopics = p.knowledge.weakTopics || [];
+  const weakText = weakTopics.slice(0, 3).join('、') || '暂无数据';
+  const interestTags = p.interest.tags || [];
+  const interestText = interestTags.slice(0, 5).join('、') || '探索中';
+  const style = p.cognition.style || '未知';
+
+  // 趋势分析：最近3个兴趣变化
+  const trends = p.interest.trend || [];
+  let trendText = '综合学习';
+  if (trends.length > 0) {
+    const recentTrends = trends.slice(-3);
+    const trendTags = [...new Set(recentTrends.map(t => t.tag))];
+    trendText = trendTags.join('、') || '综合学习';
+  }
+
+  const dailyMinutes = p.behavior.dailyMinutes || 0;
+
+  return `你最薄弱的知识点是：${weakText}。你最感兴趣的方向是：${interestText}。你的学习风格偏向：${style}。你最近在${trendText}方面进步明显。你的日均学习时长约${dailyMinutes}分钟。`;
+}
+
+// 6. 获取雷达图数据数组
+function getProfileRadarData() {
+  const p = userProfileDimensions;
+  return [
+    Math.round(p.knowledge.score || 0),
+    Math.round(p.cognition.score || 0),
+    Math.round(p.error.score || 0),
+    Math.round(p.interest.score || 0),
+    Math.round(p.goal.score || 0),
+    Math.round(p.behavior.score || 0)
+  ];
+}
+
+// 生成SVG雷达图HTML字符串
+function getProfileRadarSvg(data) {
+  const labels = ['知识', '认知', '纠错', '兴趣', '目标', '行为'];
+  const colors = ['#8b5cf6', '#a78bfa', '#c4b5fd'];
+  const cx = 100, cy = 100, r = 70;
+  const angleOffset = -Math.PI / 2;
+
+  // 计算6个顶点坐标
+  const points = data.map((val, i) => {
+    const angle = angleOffset + (Math.PI * 2 * i) / 6;
+    const radius = (val / 100) * r;
+    return [cx + radius * Math.cos(angle), cy + radius * Math.sin(angle)];
+  });
+
+  // 6边形网格
+  let gridHtml = '';
+  for (let level = 1; level <= 5; level++) {
+    const lr = (r * level) / 5;
+    const lp = Array.from({ length: 6 }, (_, i) => {
+      const a = angleOffset + (Math.PI * 2 * i) / 6;
+      return `${cx + lr * Math.cos(a)},${cy + lr * Math.sin(a)}`;
+    }).join(' ');
+    gridHtml += `<polygon points="${lp}" fill="none" stroke="#e9d5ff" stroke-width="1"/>`;
+  }
+
+  // 轴线
+  let axisHtml = '';
+  for (let i = 0; i < 6; i++) {
+    const a = angleOffset + (Math.PI * 2 * i) / 6;
+    const x = cx + r * Math.cos(a);
+    const y = cy + r * Math.sin(a);
+    axisHtml += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#e9d5ff" stroke-width="1"/>`;
+  }
+
+  // 数据区域
+  const dataPoints = points.map(p => p.join(',')).join(' ');
+  const dataPoly = `<polygon points="${dataPoints}" fill="rgba(139,92,246,0.25)" stroke="#8b5cf6" stroke-width="2"/>`;
+
+  // 数据点
+  let dotsHtml = '';
+  points.forEach((p, i) => {
+    dotsHtml += `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#8b5cf6"/>`;
+  });
+
+  // 标签
+  let labelHtml = '';
+  labels.forEach((lbl, i) => {
+    const a = angleOffset + (Math.PI * 2 * i) / 6;
+    const lx = cx + (r + 18) * Math.cos(a);
+    const ly = cy + (r + 18) * Math.sin(a);
+    labelHtml += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="#6b21a8">${lbl}</text>`;
+  });
+
+  return `<svg width="200" height="200" viewBox="0 0 200 200" style="margin:8px auto;display:block;">${gridHtml}${axisHtml}${dataPoly}${dotsHtml}${labelHtml}</svg>`;
+}
+
+// 兼容旧调用：保留旧函数名作为别名
+function trackChatInteraction(topic) { updateProfileFromChat(topic); }
+function trackQuizResult(courseTitle, isCorrect) { updateProfileFromQuiz(courseTitle, null, isCorrect, null); }
+function trackChapterComplete(courseTitle) { updateProfileFromComplete(courseTitle); }
+function trackStudyTime(minutes) { updateProfileFromStudy(minutes); }
+
+// 兼容旧数据结构：将旧6字段结构升级到新6维结构
+function migrateProfileDimensions(old) {
+  if (!old) return null;
+  // 如果已经有新结构，直接返回
+  if (old.knowledge && typeof old.knowledge === 'object' && 'score' in old.knowledge) {
+    return old;
+  }
+  // 创建新结构并迁移旧数据
+  const migrated = {
+    knowledge: {
+      score: Math.round(((old.basic || 0) + (old.algo || 0) + (old.data || 0)) / 3),
+      topics: {},
+      weakTopics: [],
+      strongTopics: []
+    },
+    cognition: {
+      score: old.problem || 0,
+      level: '入门',
+      style: '未知',
+      adaptability: 0
+    },
+    error: {
+      score: 0,
+      pattern: [],
+      recentErrors: [],
+      fixRate: 0
+    },
+    interest: {
+      score: old.self || 0,
+      tags: [],
+      seedTags: [],
+      trend: []
+    },
+    goal: {
+      score: old.project || 0,
+      shortTerm: [],
+      longTerm: [],
+      completed: 0
+    },
+    behavior: {
+      score: Math.round(((old.self || 0) + (old.project || 0)) / 2),
+      dailyMinutes: 0,
+      consistency: 0,
+      peakTime: '未知',
+      interactionCount: 0
+    },
+    // 保留旧字段兼容
+    basic: old.basic || 0,
+    algo: old.algo || 0,
+    data: old.data || 0,
+    problem: old.problem || 0,
+    self: old.self || 0,
+    project: old.project || 0
+  };
+  return migrated;
+}
+
+function getDefaultProfileDimensions() {
+  return {
+    knowledge: { score: 0, topics: {}, weakTopics: [], strongTopics: [] },
+    cognition: { score: 0, level: '入门', style: '未知', adaptability: 0 },
+    error: { score: 0, pattern: [], recentErrors: [], fixRate: 0 },
+    interest: { score: 0, tags: [], seedTags: [], trend: [] },
+    goal: { score: 0, shortTerm: [], longTerm: [], completed: 0 },
+    behavior: { score: 0, dailyMinutes: 0, consistency: 0, peakTime: '未知', interactionCount: 0 },
+    basic: 0, algo: 0, data: 0, problem: 0, self: 0, project: 0
+  };
+}
+
+// 根据用户兴趣获取推荐内容
+function getUserInterests() {
+  let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+  if (currentUserEmail && users[currentUserEmail] && users[currentUserEmail].profile) {
+    return users[currentUserEmail].profile.hobbies || [];
+  }
+  return [];
+}
+
+function getInterestBasedSuggestions() {
+  const interests = getUserInterests();
+  const map = {
+    '编程': {
+      suggests: ['我想学Python递归', '帮我分析一下我的编程基础', '推荐一些数据结构的学习路径'],
+      placeholder: '我想学Python递归...',
+      searchTags: ['Python递归', '数据结构', '算法复杂度', '尾递归优化'],
+      resources: [
+        { title: 'Python 递归完全指南', type: 'doc', iconColor: '#6366f1', bgColor: '#eef2ff' },
+        { title: '递归与分治思维导图', type: 'mind', iconColor: '#10b981', bgColor: '#ecfdf5' }
+      ],
+      courses: ['Python递归从入门到精通', '数据结构基础', '算法复杂度分析入门']
+    },
+    '数学': {
+      suggests: ['我想学微积分', '帮我分析一下我的数学基础', '推荐一些线性代数的学习路径'],
+      placeholder: '我想学微积分...',
+      searchTags: ['微积分', '线性代数', '概率论', '极限'],
+      resources: [
+        { title: '微积分一完全指南', type: 'doc', iconColor: '#6366f1', bgColor: '#eef2ff' },
+        { title: '线性代数思维导图', type: 'mind', iconColor: '#10b981', bgColor: '#ecfdf5' }
+      ],
+      courses: ['高等数学基础']
+    },
+    '英语': {
+      suggests: ['我想学英语阅读', '帮我分析一下我的英语词汇量', '推荐一些英语写作技巧'],
+      placeholder: '我想学英语阅读...',
+      searchTags: ['英语阅读', '词汇量', '写作技巧', '语法'],
+      resources: [
+        { title: '大学英语进阶指南', type: 'doc', iconColor: '#6366f1', bgColor: '#eef2ff' },
+        { title: '英语词汇记忆法', type: 'mind', iconColor: '#10b981', bgColor: '#ecfdf5' }
+      ],
+      courses: ['大学英语进阶']
+    },
+    '物理': {
+      suggests: ['我想学大学物理', '帮我分析一下我的物理基础', '推荐一些力学相关的知识'],
+      placeholder: '我想学大学物理...',
+      searchTags: ['力学', '电磁学', '热力学', '量子物理'],
+      resources: [
+        { title: '大学物理基础指南', type: 'doc', iconColor: '#6366f1', bgColor: '#eef2ff' },
+        { title: '力学思维导图', type: 'mind', iconColor: '#10b981', bgColor: '#ecfdf5' }
+      ],
+      courses: ['高等数学基础']
+    },
+    '设计': {
+      suggests: ['我想学UI设计', '帮我分析一下我的设计审美', '推荐一些前端开发的学习路径'],
+      placeholder: '我想学UI设计...',
+      searchTags: ['UI设计', '前端开发', '色彩搭配', '用户体验'],
+      resources: [
+        { title: 'UI设计完全指南', type: 'doc', iconColor: '#6366f1', bgColor: '#eef2ff' },
+        { title: '前端开发思维导图', type: 'mind', iconColor: '#10b981', bgColor: '#ecfdf5' }
+      ],
+      courses: ['计算机网络基础']
+    },
+    '文学': {
+      suggests: ['我想学文学鉴赏', '帮我推荐一些经典文学作品', '如何提高写作能力'],
+      placeholder: '我想学文学鉴赏...',
+      searchTags: ['文学鉴赏', '经典作品', '写作技巧', '诗词'],
+      resources: [
+        { title: '文学鉴赏入门', type: 'doc', iconColor: '#6366f1', bgColor: '#eef2ff' },
+        { title: '经典文学作品导读', type: 'mind', iconColor: '#10b981', bgColor: '#ecfdf5' }
+      ],
+      courses: []
+    },
+    '音乐': {
+      suggests: ['我想学乐理基础', '帮我推荐一些音乐欣赏课程', '如何学习乐器演奏'],
+      placeholder: '我想学乐理基础...',
+      searchTags: ['乐理', '音乐欣赏', '乐器', '作曲'],
+      resources: [
+        { title: '乐理基础指南', type: 'doc', iconColor: '#6366f1', bgColor: '#eef2ff' },
+        { title: '音乐欣赏思维导图', type: 'mind', iconColor: '#10b981', bgColor: '#ecfdf5' }
+      ],
+      courses: []
+    },
+    '运动': {
+      suggests: ['我想学运动科学', '帮我制定一个健身计划', '推荐一些营养学相关的知识'],
+      placeholder: '我想学运动科学...',
+      searchTags: ['运动科学', '健身', '营养学', '康复训练'],
+      resources: [
+        { title: '运动科学入门', type: 'doc', iconColor: '#6366f1', bgColor: '#eef2ff' },
+        { title: '健身计划思维导图', type: 'mind', iconColor: '#10b981', bgColor: '#ecfdf5' }
+      ],
+      courses: []
+    }
+  };
+  // 默认用编程
+  const defaultData = map['编程'];
+  if (interests.length === 0) return defaultData;
+  // 找到第一个匹配的兴趣
+  for (let interest of interests) {
+    if (map[interest]) return map[interest];
+  }
+  return defaultData;
+}
+
+// 根据兴趣自动添加课程
+function autoAddCoursesByInterest() {
+  const data = getInterestBasedSuggestions();
+  if (!data.courses || data.courses.length === 0) return;
+  data.courses.forEach(courseTitle => {
+    const exists = myCourses.some(c => c.title === courseTitle);
+    if (!exists) {
+      addCourse(courseTitle);
+    }
+  });
 }
 
 function renderChatHistory() {
@@ -8206,12 +9128,10 @@ function advanceCourseChapter() {
     } else {
       course.progress = 100;
       course.status = '已完成';
-      learningStats.days += 1;
     }
     
-    // Increment completed resource and hours
+    // 完成资源计数+1，时长由 updateLearningHours 精确累计
     learningStats.completedResources++;
-    learningStats.hours += Math.random() * 0.8 + 0.4;
     
     // Trigger notification every 3 days
     if (learningStats.days % 3 === 0) {
@@ -8230,7 +9150,7 @@ function advanceCourseChapter() {
     renderLearningStats();
     
     // 动态更新能力画像 — 章节完成
-    trackChapterComplete(course.title);
+    updateProfileFromComplete(course.title);
     
     renderMyCourses();
     saveUserData();
@@ -8283,8 +9203,8 @@ function sendStudyAssistantMessage() {
   input.value = '';
   container.scrollTop = container.scrollHeight;
   
-  // Increment study hour slightly for interaction
-  learningStats.hours += 0.1;
+  // 每次交互累计少量时长（约1分钟），精确时长由 updateLearningHours 计算
+  learningStats.hours += 1 / 60;
   renderLearningStats();
   saveUserData();
   
@@ -8486,6 +9406,14 @@ function selectAgent(el, agent) {
     el.classList.add('active');
     currentAgent = agent;
     switchMainPage('chat');
+}
+
+function selectAgentByType(agent) {
+    const map = { 'analyst': 1, 'generator': 2, 'planner': 3 };
+    const cards = document.querySelectorAll('.agent-card');
+    if (cards[map[agent]]) {
+        selectAgent(cards[map[agent]], agent);
+    }
 }
 
 // 切换侧边栏折叠状态（支持左右按钮，并保存状态）
@@ -8845,8 +9773,10 @@ function favoriteCurrentChapter() {
     favTitle = `${course.title} — ${ch.title}思维导图`;
     favType = 'mind';
   }
+  // 用 uid 去重，防止重复收藏
+  const favUid = 'chapter_' + activeCourseIndex + '_' + activeChapterIndex + '_' + (activeStudyTab === 'lecture' ? 'doc' : 'mind');
   
-  const existingIndex = favoritesList.findIndex(f => f.title === favTitle && f.type === favType);
+  const existingIndex = favoritesList.findIndex(f => f.uid === favUid);
   if (existingIndex !== -1) {
     showConfirmModal(
       '取消收藏',
@@ -8862,9 +9792,18 @@ function favoriteCurrentChapter() {
       '⭐'
     );
   } else {
+    // 保存时带上 content，以便收藏列表可以直接恢复显示
+    let favContent = '';
+    if (activeStudyTab === 'lecture' && ch.content) {
+      favContent = ch.content;
+    } else if (activeStudyTab === 'mindmap' && ch.mindmapHtml) {
+      favContent = ch.mindmapHtml;
+    }
     favoritesList.push({
+      uid: favUid,
       title: favTitle,
-      type: favType
+      type: favType,
+      content: favContent
     });
     learningStats.favorites = favoritesList.length;
     renderFavorites();
@@ -8893,7 +9832,9 @@ function updateFavoriteBtnState() {
     favType = 'mind';
   }
   
-  const isFav = favoritesList.some(f => f.title === favTitle && f.type === favType);
+  const favUid = 'chapter_' + activeCourseIndex + '_' + activeChapterIndex + '_' + (activeStudyTab === 'lecture' ? 'doc' : 'mind');
+  
+  const isFav = favoritesList.some(f => f.uid === favUid);
   const svg = favBtn.querySelector('svg');
   const span = favBtn.querySelector('span');
   if (svg && span) {
@@ -8927,25 +9868,51 @@ function renderFavorites() {
   } else {
     favoritesList.forEach((fav, index) => {
       let iconHtml = '';
+      let iconBg = '#eef2ff';
+      let iconColor = '#6366f1';
+      let typeText = '';
       if (fav.type === 'doc') {
         iconHtml = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+        iconBg = '#eef2ff'; iconColor = '#6366f1'; typeText = '讲解文档';
       } else if (fav.type === 'mind') {
         iconHtml = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`;
+        iconBg = '#ecfdf5'; iconColor = '#10b981'; typeText = '思维导图';
       } else if (fav.type === 'quiz') {
         iconHtml = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>`;
+        iconBg = '#fef3c7'; iconColor = '#f59e0b'; typeText = '练习题';
+      } else if (fav.type === 'chat') {
+        iconHtml = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
+        iconBg = '#f0f9ff'; iconColor = '#3b82f6'; typeText = 'AI对话';
+      } else if (fav.type === 'video') {
+        iconHtml = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>`;
+        iconBg = '#fef2f2'; iconColor = '#ef4444'; typeText = '视频资源';
+      } else if (fav.type === 'path') {
+        iconHtml = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`;
+        iconBg = '#ede9fe'; iconColor = '#8b5cf6'; typeText = '学习路径';
+      } else {
+        iconHtml = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+        iconBg = '#f1f5f9'; iconColor = '#64748b'; typeText = '其他';
+      }
+
+      // 根据是否有 content 来决定点击行为
+      let clickAction = '';
+      if (fav.content) {
+        // 有保存的完整内容：恢复到聊天区
+        clickAction = `restoreFavoriteToChat(${index})`;
+      } else {
+        // 旧式收藏（无content）：使用原有的 showResource
+        clickAction = `showResource('${fav.title.replace(/'/g, "\\'")}', '${fav.type}')`;
       }
       
-      let typeText = fav.type === 'doc' ? '讲解文档' : fav.type === 'mind' ? '思维导图' : '练习题';
-      
       html += `
-        <div class="fav-item" onclick="showResource('${fav.title}', '${fav.type}')" style="position: relative; padding-right: 32px; cursor:pointer;">
-          <button onclick="removeFavorite(${index}); event.stopPropagation();" style="position: absolute; right: 10px; top: 12px; background: transparent; color: #cbd5e1; font-size: 16px; border:none; outline:none; cursor:pointer;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#cbd5e1'">×</button>
-          <div class="fav-icon" style="background:${fav.type === 'doc' ? '#eef2ff' : fav.type === 'mind' ? '#ecfdf5' : '#fef3c7'};color:${fav.type === 'doc' ? '#6366f1' : fav.type === 'mind' ? '#10b981' : '#f59e0b'}">
+        <div class="fav-item" onclick="${clickAction}" style="position: relative; padding-right: 32px; cursor:pointer;">
+          <button onclick="removeFavorite(${index}); event.stopPropagation();" style="position: absolute; right: 10px; top: 12px; background: transparent; color: #cbd5e1; font-size: 16px; border:none; outline:none; cursor:pointer;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#cbd5e1'">&times;</button>
+          <div class="fav-icon" style="background:${iconBg};color:${iconColor}">
             ${iconHtml}
           </div>
           <div class="fav-info">
             <div class="fav-title">${fav.title}</div>
-            <div class="fav-meta">${typeText} · 收藏于刚刚</div>
+            <div class="fav-meta">${typeText}${fav.content ? ' · 点击恢复' : ''}</div>
           </div>
         </div>
       `;
@@ -8965,9 +9932,217 @@ function removeFavorite(index) {
       renderFavorites();
       renderLearningStats();
       saveUserData();
+      // 同步更新题库收藏按钮状态
+      updateFavoriteBtnState();
+      // 同步更新聊天区收藏按钮状态
+      document.querySelectorAll('.fav-bubble-btn.favorited').forEach(btn => {
+        const wrap = btn.closest('.msg-bubble-wrap');
+        if (!wrap) return;
+        const chatIdx = wrap.getAttribute('data-chat-index');
+        const stillFav = favoritesList.some(f => f.chatIndex == chatIdx);
+        if (!stillFav) {
+          btn.classList.remove('favorited');
+          const star = btn.querySelector('.fav-star');
+          if (star) star.innerHTML = '&#9734;';
+          btn.title = '收藏此消息';
+        }
+      });
     },
     '⭐'
   );
+}
+
+/**
+ * 将收藏的内容恢复到聊天区域
+ * @param {number} index - 收藏列表索引
+ */
+function restoreFavoriteToChat(index) {
+  const fav = favoritesList[index];
+  if (!fav || !fav.content) return;
+
+  // 切换到聊天页面
+  switchMainPage('chat');
+
+  const chat = document.getElementById('chatMessages');
+  if (!chat) return;
+
+  // 渲染内容
+  let bubbleContent = '';
+  if (fav.uid && fav.uid.startsWith('chapter_') && fav.content) {
+    // 课程章节收藏：content 是原始 markdown，需要解析
+    bubbleContent = safeMarkdownParse(fav.content);
+  } else {
+    // 聊天收藏：content 是已渲染的 HTML，直接放
+    bubbleContent = fav.content;
+  }
+
+  // 简洁渲染，不加收藏按钮（避免重复收藏）
+  const html = `<div class="msg assistant fade-up">
+    <div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div>
+    <div>
+      <div class="msg-sender">灵析助手 (收藏恢复)</div>
+      <div class="msg-bubble">${bubbleContent}</div>
+    </div>
+  </div>`;
+  chat.insertAdjacentHTML('beforeend', html);
+  chat.scrollTop = chat.scrollHeight;
+
+  // 数学公式渲染（延迟执行确保 DOM 已更新）
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    setTimeout(function() {
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise([chat.lastElementChild]);
+      }
+    }, 100);
+  }
+}
+
+// ===== 统一收藏功能：包装AI消息气泡，添加收藏按钮 =====
+
+// 收藏按钮的CSS样式
+const favBubbleStyle = document.createElement('style');
+favBubbleStyle.textContent = `
+  .msg-bubble-wrap {
+    position: relative;
+  }
+  .fav-bubble-btn {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.85);
+    border: 1px solid rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 11px;
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.15s;
+    z-index: 10;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    padding: 0;
+    line-height: 1;
+  }
+  .msg-bubble-wrap:hover .fav-bubble-btn {
+    opacity: 1;
+  }
+  .fav-bubble-btn:hover {
+    transform: scale(1.15);
+  }
+  .fav-bubble-btn.favorited {
+    opacity: 1;
+    background: rgba(255,255,255,0.95);
+    border-color: rgba(251,191,36,0.3);
+  }
+  .fav-bubble-btn .fav-star {
+    color: #cbd5e1;
+    transition: color 0.2s;
+  }
+  .fav-bubble-btn.favorited .fav-star {
+    color: #f59e0b;
+  }
+`;
+document.head.appendChild(favBubbleStyle);
+
+/**
+ * 包装AI助手消息气泡，添加收藏按钮
+ * @param {string} bubbleInnerHtml - msg-bubble 的内部HTML内容
+ * @param {string} chatIndex - 唯一消息索引
+ * @param {string} favType - 收藏类型：'doc'|'mind'|'quiz'|'chat'|'video'|'path'
+ * @param {string} favTitle - 收藏标题（可选）
+ * @returns {string} 包装后的完整消息div HTML
+ */
+function wrapAssistantBubble(bubbleInnerHtml, chatIndex, favType, favTitle) {
+  if (!favType) favType = 'chat';
+  if (!favTitle) favTitle = 'AI回复 #' + chatIndex;
+  // 检查是否已收藏
+  const isFav = favoritesList.some(f => f.chatIndex === chatIndex);
+  return `<div class="msg-bubble-wrap" data-chat-index="${chatIndex}" data-fav-type="${favType}" data-fav-title="${escapeHtml(favTitle)}">
+    <button class="fav-bubble-btn ${isFav ? 'favorited' : ''}" onclick="toggleFavoriteBubble(${chatIndex})" title="${isFav ? '取消收藏' : '收藏此消息'}">
+      <span class="fav-star">${isFav ? '&#9733;' : '&#9734;'}</span>
+    </button>
+    ${bubbleInnerHtml}
+  </div>`;
+}
+
+/**
+ * 切换气泡消息的收藏状态
+ * @param {number} chatIndex - 消息索引
+ */
+function toggleFavoriteBubble(chatIndex) {
+  const favUid = 'chat_' + chatIndex;
+  const existingIdx = favoritesList.findIndex(f => f.uid === favUid || f.chatIndex === chatIndex);
+  if (existingIdx !== -1) {
+    // 取消收藏
+    favoritesList.splice(existingIdx, 1);
+  } else {
+    // 添加收藏
+    const wrapEl = document.querySelector(`.msg-bubble-wrap[data-chat-index="${chatIndex}"]`);
+    if (!wrapEl) return;
+    const bubbleEl = wrapEl.querySelector('.msg-bubble');
+    // 收集内容：优先取 .msg-bubble，如果没有则取整个 wrap 的内容（去掉收藏按钮）
+    let content = '';
+    if (bubbleEl) {
+      content = bubbleEl.innerHTML;
+    } else {
+      const clone = wrapEl.cloneNode(true);
+      const btn = clone.querySelector('.fav-bubble-btn');
+      if (btn) btn.remove();
+      content = clone.innerHTML;
+    }
+    const senderEl = wrapEl.parentElement ? wrapEl.parentElement.querySelector('.msg-sender') : null;
+    const senderName = senderEl ? senderEl.textContent : '灵析助手';
+    const favType = wrapEl.getAttribute('data-fav-type') || 'chat';
+    const favTitle = wrapEl.getAttribute('data-fav-title') || (senderName + '的回复');
+    // 生成标题
+    let previewTitle = favTitle;
+    if (favType === 'mind' && content) {
+      const tmpDiv = document.createElement('div');
+      tmpDiv.innerHTML = content;
+      const rootEl = tmpDiv.querySelector('.mm-root');
+      if (rootEl) {
+        previewTitle = '脑图: ' + rootEl.textContent.trim();
+      } else {
+        previewTitle = '思维导图 #' + chatIndex;
+      }
+    } else if (content) {
+      const tmpDiv = document.createElement('div');
+      tmpDiv.innerHTML = content;
+      const plainText = tmpDiv.textContent || tmpDiv.innerText || '';
+      previewTitle = plainText.substring(0, 40).trim();
+      if (plainText.length > 40) previewTitle += '...';
+    }
+    favoritesList.push({
+      uid: favUid,
+      title: previewTitle,
+      type: favType,
+      content: content,
+      chatIndex: chatIndex
+    });
+  }
+  // 更新按钮状态
+  const wrapEl = document.querySelector(`.msg-bubble-wrap[data-chat-index="${chatIndex}"]`);
+  if (wrapEl) {
+    const btn = wrapEl.querySelector('.fav-bubble-btn');
+    const star = wrapEl.querySelector('.fav-star');
+    const isFav = favoritesList.some(f => f.uid === favUid || f.chatIndex === chatIndex);
+    if (btn) {
+      btn.classList.toggle('favorited', isFav);
+      btn.title = isFav ? '取消收藏' : '收藏此消息';
+    }
+    if (star) {
+      star.innerHTML = isFav ? '&#9733;' : '&#9734;';
+    }
+  }
+  learningStats.favorites = favoritesList.length;
+  renderFavorites();
+  renderLearningStats();
+  saveUserData();
+  // 同步更新题库收藏按钮状态
+  updateFavoriteBtnState();
 }
 
 function recordWrongQuestion(courseTitle, chapterTitle, q) {
@@ -9090,6 +10265,938 @@ function submitWrongAnswer(wqId) {
     successBox.style.display = 'none';
   }
 }
+// 渲染用户消息（含附件卡片）
+function renderUserMessageWithAttachments(text) {
+  const pendingFiles = window._pendingDocFiles || [];
+  let html = '';
+
+  // 如果有附件文件，先渲染文件卡片
+  if (pendingFiles.length > 0) {
+    html += '<div class="chat-attachment-list">';
+    pendingFiles.forEach(f => {
+      // 根据文件类型选图标
+      let iconSvg = '';
+      if (['PDF'].includes(f.ext)) {
+        iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+      } else if (['DOCX','DOC','DOC'].includes(f.ext)) {
+        iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
+      } else if (['XLSX','XLS','CSV'].includes(f.ext)) {
+        iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>';
+      } else if (['PPTX','PPT'].includes(f.ext)) {
+        iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>';
+      } else if (['MD','TXT'].includes(f.ext)) {
+        iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+      } else {
+        iconSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+      }
+
+      // 文件类型对应的颜色
+      const colors = {
+        'PDF': '#fef2f2; border-color:#fecaca',
+        'DOC': '#eff6ff; border-color:#bfdbfe',
+        'DOCX': '#eff6ff; border-color:#bfdbfe',
+        'XLSX': '#f0fdf4; border-color:#bbf7d0',
+        'XLS': '#f0fdf4; border-color:#bbf7d0',
+        'CSV': '#f0fdf4; border-color:#bbf7d0',
+        'PPTX': '#fff7ed; border-color:#fed7aa',
+        'PPT': '#fff7ed; border-color:#fed7aa',
+        'MD': '#faf5ff; border-color:#e9d5ff',
+        'TXT': '#faf5ff; border-color:#e9d5ff'
+      };
+      const bgColor = colors[f.ext] || '#f8fafc; border-color:#e2e8f0';
+
+      html += `<div class="chat-attachment-card" style="background:${bgColor}">
+        <div class="chat-attachment-icon">${iconSvg}</div>
+        <div class="chat-attachment-info">
+          <div class="chat-attachment-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</div>
+          <div class="chat-attachment-meta">${f.ext} &middot; ${formatFileSize(f.size)}</div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // 再显示用户的文字消息
+  html += escapeHtml(text);
+
+  // 清空暂存的附件
+  window._pendingDocFiles = [];
+
+  return html;
+}
+
+// ===== 文档诊断弹窗相关 =====
+let docDiagnoseFiles = []; // 存储已选文件列表
+
+function openDocDiagnoseModal() {
+  docDiagnoseFiles = [];
+  renderDocFileList();
+  document.getElementById('docDiagnoseInput').value = '';
+  document.getElementById('docDiagnoseOverlay').classList.add('active');
+  document.getElementById('docDiagnoseSendBtn').disabled = false;
+  // 聚焦到输入框
+  setTimeout(() => document.getElementById('docDiagnoseInput').focus(), 300);
+}
+
+function closeDocDiagnoseModal() {
+  document.getElementById('docDiagnoseOverlay').classList.remove('active');
+  docDiagnoseFiles = [];
+  document.getElementById('docFileInput').value = '';
+}
+
+function closeDocDiagnoseOnOverlay(e) {
+  if (e.target === e.currentTarget) {
+    closeDocDiagnoseModal();
+  }
+}
+
+// 格式化文件大小
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// 获取文件扩展名
+function getFileExt(name) {
+  return (name.split('.').pop() || '').toUpperCase();
+}
+
+// 处理文件选择
+function handleDocFileSelect(event) {
+  const files = Array.from(event.target.files || []);
+  addDocFiles(files);
+  event.target.value = ''; // 重置 input 以允许重复选择相同文件
+}
+
+// 处理拖拽
+function handleDocDrop(event) {
+  event.preventDefault();
+  document.getElementById('docUploadZone').classList.remove('drag-over');
+  const files = Array.from(event.dataTransfer.files || []);
+  // 过滤只保留支持的文档类型
+  const allowed = ['.txt', '.docx', '.doc', '.md', '.csv', '.xlsx', '.xls', '.pptx', '.ppt'];
+  const filtered = files.filter(f => {
+    const ext = '.' + f.name.split('.').pop().toLowerCase();
+    return allowed.includes(ext);
+  });
+  if (filtered.length < files.length) {
+    const unsupported = files.length - filtered.length;
+    alert('有 ' + unsupported + ' 个文件格式不支持，已自动忽略');
+  }
+  addDocFiles(filtered);
+}
+
+// 添加文件到列表
+function addDocFiles(files) {
+  const existingNames = new Set(docDiagnoseFiles.map(f => f.name));
+  files.forEach(f => {
+    if (!existingNames.has(f.name)) {
+      docDiagnoseFiles.push(f);
+    }
+  });
+  renderDocFileList();
+}
+
+// 移除文件
+function removeDocFile(index) {
+  docDiagnoseFiles.splice(index, 1);
+  renderDocFileList();
+}
+
+// 渲染文件列表
+function renderDocFileList() {
+  const container = document.getElementById('docFileList');
+  if (docDiagnoseFiles.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = docDiagnoseFiles.map((f, i) => {
+    const ext = getFileExt(f.name);
+    return `<div class="doc-file-item">
+      <div class="doc-file-item-icon">${ext}</div>
+      <div class="doc-file-item-info">
+        <div class="doc-file-item-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</div>
+        <div class="doc-file-item-size">${formatFileSize(f.size)}</div>
+      </div>
+      <button class="doc-file-item-remove" onclick="removeDocFile(${i})" title="移除">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+// 发送文档诊断请求
+async function sendDocDiagnose() {
+  console.log('[文档诊断] sendDocDiagnose 被调用');
+  const requirement = document.getElementById('docDiagnoseInput').value.trim();
+  const sendBtn = document.getElementById('docDiagnoseSendBtn');
+  console.log('[文档诊断] requirement:', requirement, 'files:', docDiagnoseFiles.length);
+
+  // 至少需要有文件或需求
+  if (docDiagnoseFiles.length === 0 && !requirement) {
+    if (typeof showToast === 'function') { showToast('请上传文档或输入诊断需求'); }
+    else { alert('请上传文档或输入诊断需求'); }
+    return;
+  }
+
+  sendBtn.disabled = true;
+  const originalBtnHtml = sendBtn.innerHTML;
+  sendBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> 处理中...';
+
+  try {
+    // 先保存文件信息（closeDocDiagnoseModal 会清空 docDiagnoseFiles）
+    const savedFiles = docDiagnoseFiles.map(f => ({
+      name: f.name,
+      size: f.size,
+      ext: getFileExt(f.name)
+    }));
+    window._pendingDocFiles = savedFiles;
+
+    // 如果有文件，先上传提取文本
+    let docContentSummary = '';
+    if (docDiagnoseFiles.length > 0) {
+      const formData = new FormData();
+      docDiagnoseFiles.forEach(f => formData.append('documents', f));
+
+      try {
+        const uploadResp = await fetch('/api/upload_documents', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (uploadResp.ok) {
+          const uploadData = await uploadResp.json();
+          if (uploadData.all_extract_failed) {
+            alert('文档内容提取失败，请尝试上传 TXT/MD 格式');
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = originalBtnHtml;
+            return;
+          }
+          docContentSummary = uploadData.content_summary || '';
+        }
+      } catch (uploadErr) {
+        console.error('[文档诊断] 上传异常:', uploadErr);
+        alert('文档上传失败: ' + uploadErr.message);
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = originalBtnHtml;
+        return;
+      }
+    }
+
+    // 关闭弹窗
+    closeDocDiagnoseModal();
+
+    // 切换到聊天页面
+    switchMainPage('chat');
+
+    // 构建显示消息
+    const displayMessage = requirement || '请对文档进行全面诊断分析';
+
+    // ========== 自己渲染消息和调用AI，不走 sendMessage ==========
+    const chat = document.getElementById('chatMessages');
+
+    // 渲染用户头像
+    let avatarStyleHtml = '';
+    let avatarText = (typeof userName !== 'undefined') ? userName.charAt(0).toUpperCase() : 'U';
+    if (typeof uploadedAvatarDataUrl !== 'undefined' && uploadedAvatarDataUrl && uploadedAvatarDataUrl.startsWith('data:image')) {
+      avatarStyleHtml = `background-image:url(${uploadedAvatarDataUrl}); background-size:cover; background-position:center;`;
+      avatarText = '';
+    } else {
+      avatarStyleHtml = `background:linear-gradient(135deg,#818cf8,#a78bfa);`;
+    }
+
+    // 渲染用户消息（含附件卡片）
+    let userBubbleHtml = renderUserMessageWithAttachments(displayMessage);
+    chat.insertAdjacentHTML('beforeend', `<div class="msg user"><div class="msg-avatar" style="${avatarStyleHtml}">${avatarText}</div><div><div class="msg-sender">${escapeHtml(typeof userName !== 'undefined' ? userName : '用户')}</div><div class="msg-bubble">${userBubbleHtml}</div></div></div>`);
+    chat.scrollTop = chat.scrollHeight;
+
+    // 渲染"思考中"
+    chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" id="thinking"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div></div>`);
+    chat.scrollTop = chat.scrollHeight;
+
+    // 直接调用 /api/chat，带 doc_context
+    const chatResp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: displayMessage,
+        user_id: (typeof currentUserEmail !== 'undefined') ? currentUserEmail : 'default',
+        doc_context: docContentSummary
+      })
+    });
+
+    if (chatResp.ok) {
+      const chatData = await chatResp.json();
+      const advice = chatData.advice || '（未获取到回复）';
+
+      // 移除"思考中"
+      const thinkingEl = document.getElementById('thinking');
+      if (thinkingEl) thinkingEl.remove();
+
+      // 渲染AI回复
+      const formattedAdvice = safeMarkdownParse(advice);
+      chatMessageIndex++;
+      chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div>${wrapAssistantBubble(formattedAdvice, chatMessageIndex, 'doc', '文档诊断回复')}</div></div>`);
+      chat.scrollTop = chat.scrollHeight;
+      if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise();
+      // 创建历史记录
+      if (typeof window.addChatHistoryItem === 'function') {
+        if (activeChatHistoryIndex === null) {
+          window.addChatHistoryItem('文档诊断: ' + displayMessage);
+        } else {
+          saveUserData();
+        }
+      }
+    } else {
+      const thinkingEl = document.getElementById('thinking');
+      if (thinkingEl) thinkingEl.remove();
+      chatMessageIndex++;
+      chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div>${wrapAssistantBubble('<span style="color:#ef4444;">请求失败，请重试</span>', chatMessageIndex, 'chat', '请求失败提示')}</div></div>`);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+  } catch (err) {
+    console.error('[文档诊断] 整体异常:', err);
+    alert('文档诊断出错: ' + err.message);
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.innerHTML = originalBtnHtml;
+  }
+}
+
+// 添加旋转动画（用于加载状态）
+const docDiagnoseSpinStyle = document.createElement('style');
+docDiagnoseSpinStyle.textContent = `.spin { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
+document.head.appendChild(docDiagnoseSpinStyle);
+
+// ===== 一键脑图弹窗相关 =====
+function openMindmapModal() {
+  document.getElementById('mindmapOverlay').classList.add('active');
+  setTimeout(() => document.getElementById('mindmapTopicInput').focus(), 100);
+}
+
+function closeMindmapModal() {
+  document.getElementById('mindmapOverlay').classList.remove('active');
+  document.getElementById('mindmapTopicInput').value = '';
+}
+
+function closeMindmapOnOverlay(event) {
+  if (event.target === document.getElementById('mindmapOverlay')) {
+    closeMindmapModal();
+  }
+}
+
+// 将 Markdown 标题/列表文本转换为漂亮的脑图 HTML
+function markdownToMindmapHtml(mdText) {
+  const lines = mdText.split('\n').map(l => l.trimEnd()).filter(l => l.trim());
+  let rootTitle = '思维导图';
+  const branches = []; // 每个 branch = { title: string, leaves: string[] }
+
+  for (const line of lines) {
+    if (line.startsWith('# ') && !line.startsWith('## ')) {
+      rootTitle = line.replace(/^# /, '').replace(/[#*_`]/g, '').trim();
+    } else if (line.startsWith('## ')) {
+      branches.push({
+        title: line.replace(/^## /, '').replace(/[#*_`]/g, '').trim(),
+        leaves: []
+      });
+    } else if (line.startsWith('### ')) {
+      // 三级标题作为叶子项
+      if (branches.length > 0) {
+        branches[branches.length - 1].leaves.push(line.replace(/^### /, '').replace(/[#*_`]/g, '').trim());
+      }
+    } else if (line.startsWith('- ') || line.startsWith('* ')) {
+      // 列表项作为叶子
+      if (branches.length > 0) {
+        branches[branches.length - 1].leaves.push(line.replace(/^[-*] /, '').replace(/[#*_`]/g, '').trim());
+      }
+    }
+  }
+
+  // 如果没有解析到分支，整段文本当叶子
+  if (branches.length === 0) {
+    branches.push({ title: '内容概要', leaves: lines.slice(1, 8) });
+  }
+
+  // 构建脑图 HTML
+  let html = '<div class="mindmap-chart">';
+  html += `<div class="mm-root">${escapeHtml(rootTitle)}</div>`;
+  html += '<div class="mm-branches">';
+
+  // 给每个分支分配颜色
+  const colors = [
+    ['#6366f1', '#eef2ff'], ['#ec4899', '#fdf2f8'], ['#f59e0b', '#fffbeb'],
+    ['#10b981', '#ecfdf5'], ['#3b82f6', '#eff6ff'], ['#8b5cf6', '#f5f3ff'],
+    ['#ef4444', '#fef2f2'], ['#14b8a6', '#f0fdfa']
+  ];
+
+  branches.forEach((branch, i) => {
+    const [accent, bg] = colors[i % colors.length];
+    html += '<div class="mm-branch">';
+    html += `<div class="mm-parent-node" style="background:${accent};color:#fff">${escapeHtml(branch.title)}</div>`;
+    html += '<div class="mm-leaves">';
+    branch.leaves.forEach(leaf => {
+      html += `<div class="mm-leaf-item"><div class="mm-leaf-node" style="background:${bg};border-left:3px solid ${accent}">${escapeHtml(leaf)}</div></div>`;
+    });
+    html += '</div></div>';
+  });
+
+  html += '</div></div>';
+  return html;
+}
+
+// 发送脑图生成请求
+async function sendMindmapGenerate() {
+  const topic = document.getElementById('mindmapTopicInput').value.trim();
+  if (!topic) {
+    alert('请输入脑图主题');
+    return;
+  }
+
+  const sendBtn = document.getElementById('mindmapSendBtn');
+  sendBtn.disabled = true;
+  const originalBtnHtml = sendBtn.innerHTML;
+  sendBtn.innerHTML = '生成中...';
+
+  try {
+    closeMindmapModal();
+    switchMainPage('chat');
+
+    const chat = document.getElementById('chatMessages');
+
+    // 渲染用户头像
+    let avatarStyleHtml = '';
+    let avatarText = (typeof userName !== 'undefined') ? userName.charAt(0).toUpperCase() : 'U';
+    if (typeof uploadedAvatarDataUrl !== 'undefined' && uploadedAvatarDataUrl && uploadedAvatarDataUrl.startsWith('data:image')) {
+      avatarStyleHtml = `background-image:url(${uploadedAvatarDataUrl}); background-size:cover; background-position:center;`;
+      avatarText = '';
+    } else {
+      avatarStyleHtml = `background:linear-gradient(135deg,#818cf8,#a78bfa);`;
+    }
+
+    // 渲染用户消息
+    chat.insertAdjacentHTML('beforeend', `<div class="msg user"><div class="msg-avatar" style="${avatarStyleHtml}">${avatarText}</div><div><div class="msg-sender">${escapeHtml(typeof userName !== 'undefined' ? userName : '用户')}</div><div class="msg-bubble">${escapeHtml(topic)}</div></div></div>`);
+    chat.scrollTop = chat.scrollHeight;
+
+    // 渲染"思考中"
+    chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" id="thinking"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div></div>`);
+    chat.scrollTop = chat.scrollHeight;
+
+    // 调用 /api/chat，带脑图生成标记
+    const chatResp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: '请帮我生成关于【' + topic + '】的思维脑图',
+        user_id: (typeof currentUserEmail !== 'undefined') ? currentUserEmail : 'default',
+        doc_context: '',
+        is_mindmap: true
+      })
+    });
+
+    if (chatResp.ok) {
+      const chatData = await chatResp.json();
+      const advice = chatData.advice || '（未获取到回复）';
+
+      const thinkingEl = document.getElementById('thinking');
+      if (thinkingEl) thinkingEl.remove();
+
+      // 将AI返回的Markdown文本渲染为图形化脑图
+      const mindmapHtml = markdownToMindmapHtml(advice);
+      chatMessageIndex++;
+      chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div>${wrapAssistantBubble(mindmapHtml, chatMessageIndex, 'mind', '思维导图')}</div></div>`);
+      chat.scrollTop = chat.scrollHeight;
+      // 创建历史记录
+      if (typeof window.addChatHistoryItem === 'function') {
+        if (activeChatHistoryIndex === null) {
+          window.addChatHistoryItem('脑图: ' + topic);
+        } else {
+          saveUserData();
+        }
+      }
+    } else {
+      const thinkingEl = document.getElementById('thinking');
+      if (thinkingEl) thinkingEl.remove();
+      chatMessageIndex++;
+      chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div>${wrapAssistantBubble('<span style="color:#ef4444;">请求失败，请重试</span>', chatMessageIndex, 'chat', '脑图生成失败提示')}</div></div>`);
+      chat.scrollTop = chat.scrollHeight;
+    }
+  } catch (err) {
+    alert('脑图生成出错: ' + err.message);
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.innerHTML = originalBtnHtml;
+  }
+}
+
+// ===== 代码纠错弹窗相关 =====
+let codeFixFiles = [];
+
+function openCodeFixModal() {
+  codeFixFiles = [];
+  document.getElementById('codeFixFileList').innerHTML = '';
+  document.getElementById('codeFixOverlay').classList.add('active');
+}
+
+function closeCodeFixModal() {
+  document.getElementById('codeFixOverlay').classList.remove('active');
+  document.getElementById('codeFixFileInput').value = '';
+  document.getElementById('codeFixInput').value = '';
+  codeFixFiles = [];
+  document.getElementById('codeFixFileList').innerHTML = '';
+}
+
+function closeCodeFixOnOverlay(event) {
+  if (event.target === document.getElementById('codeFixOverlay')) closeCodeFixModal();
+}
+
+function handleCodeFixFileSelect(event) {
+  const files = Array.from(event.target.files || []);
+  addCodeFixFiles(files);
+  event.target.value = '';
+}
+
+function handleCodeFixDrop(event) {
+  event.preventDefault();
+  document.getElementById('codeFixUploadZone').classList.remove('drag-over');
+  const files = Array.from(event.dataTransfer.files || []);
+  const allowed = ['.py','.js','.java','.c','.cpp','.h','.hpp','.cs','.go','.rs','.rb','.php','.html','.htm','.css','.json','.xml','.yaml','.yml','.sql','.sh','.bat','.txt','.md'];
+  const filtered = files.filter(f => {
+    const ext = '.' + f.name.split('.').pop().toLowerCase();
+    return allowed.includes(ext);
+  });
+  if (filtered.length < files.length) {
+    alert('有 ' + (files.length - filtered.length) + ' 个文件格式不支持，已忽略');
+  }
+  addCodeFixFiles(filtered);
+}
+
+function addCodeFixFiles(files) {
+  const existingNames = new Set(codeFixFiles.map(f => f.name));
+  for (const f of files) {
+    if (!existingNames.has(f.name)) {
+      codeFixFiles.push(f);
+      existingNames.add(f.name);
+    }
+  }
+  renderCodeFixFileList();
+}
+
+function removeCodeFixFile(index) {
+  codeFixFiles.splice(index, 1);
+  renderCodeFixFileList();
+}
+
+function renderCodeFixFileList() {
+  const container = document.getElementById('codeFixFileList');
+  container.innerHTML = codeFixFiles.map((f, i) => {
+    const ext = f.name.split('.').pop().toLowerCase();
+    const iconColors = { py: '#3572A5', js: '#f1e05a', java: '#b07219', c: '#555', cpp: '#f34b7d', html: '#e34c26', css: '#563d7c', json: '#292929', go: '#00ADD8', rs: '#dea584', php: '#4F5D95' };
+    const color = iconColors[ext] || '#6366f1';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f8fafc;border-radius:8px;font-size:13px">
+      <div style="width:32px;height:32px;border-radius:6px;background:${color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">.${ext}</div>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(f.name)}</span>
+      <button onclick="removeCodeFixFile(${i})" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:16px">&times;</button>
+    </div>`;
+  }).join('');
+}
+
+// 读取文件文本内容
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(file);
+  });
+}
+
+// 发送代码纠错请求
+async function sendCodeFix() {
+  if (codeFixFiles.length === 0) {
+    alert('请上传至少一份代码文件');
+    return;
+  }
+
+  const requirement = document.getElementById('codeFixInput').value.trim();
+  const sendBtn = document.getElementById('codeFixSendBtn');
+  sendBtn.disabled = true;
+  const originalBtnHtml = sendBtn.innerHTML;
+  sendBtn.innerHTML = '处理中...';
+
+  try {
+    // 读取所有文件内容
+    let allCode = '';
+    const fileNames = [];
+    for (const f of codeFixFiles) {
+      try {
+        const text = await readFileAsText(f);
+        fileNames.push(f.name);
+        allCode += `\n--- ${f.name} ---\n${text}\n`;
+      } catch (e) {
+        console.error('读取文件失败:', f.name, e);
+      }
+    }
+
+    if (!allCode.trim()) {
+      alert('所有文件读取失败，请确认文件格式正确');
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = originalBtnHtml;
+      return;
+    }
+
+    // 保存附件信息
+    window._pendingDocFiles = codeFixFiles.map(f => ({ name: f.name, size: f.size, ext: getFileExt(f.name) }));
+
+    closeCodeFixModal();
+    switchMainPage('chat');
+
+    const chat = document.getElementById('chatMessages');
+
+    // 渲染用户头像
+    let avatarStyleHtml = '';
+    let avatarText = (typeof userName !== 'undefined') ? userName.charAt(0).toUpperCase() : 'U';
+    if (typeof uploadedAvatarDataUrl !== 'undefined' && uploadedAvatarDataUrl && uploadedAvatarDataUrl.startsWith('data:image')) {
+      avatarStyleHtml = `background-image:url(${uploadedAvatarDataUrl}); background-size:cover; background-position:center;`;
+      avatarText = '';
+    } else {
+      avatarStyleHtml = `background:linear-gradient(135deg,#818cf8,#a78bfa);`;
+    }
+
+    const displayMsg = requirement || '帮我检查并纠错以下代码';
+    chat.insertAdjacentHTML('beforeend', `<div class="msg user"><div class="msg-avatar" style="${avatarStyleHtml}">${avatarText}</div><div><div class="msg-sender">${escapeHtml(typeof userName !== 'undefined' ? userName : '用户')}</div><div class="msg-bubble">${renderUserMessageWithAttachments(displayMsg)}</div></div></div>`);
+    chat.scrollTop = chat.scrollHeight;
+
+    chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" id="thinking"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div></div>`);
+    chat.scrollTop = chat.scrollHeight;
+
+    // 调用 /api/chat，把代码内容放在 doc_context 里，用专门的代码纠错 prompt
+    const codeContext = `【以下是用户上传的代码文件】\n${allCode}\n【代码文件结束】`;
+    const chatResp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: (requirement || '帮我检查并纠错以下代码') + '（共 ' + fileNames.length + ' 个文件：' + fileNames.join(', ') + '）',
+        user_id: (typeof currentUserEmail !== 'undefined') ? currentUserEmail : 'default',
+        doc_context: codeContext,
+        is_code_fix: true
+      })
+    });
+
+    if (chatResp.ok) {
+      const chatData = await chatResp.json();
+      const advice = chatData.advice || '（未获取到回复）';
+      const thinkingEl = document.getElementById('thinking');
+      if (thinkingEl) thinkingEl.remove();
+      const formattedAdvice = safeMarkdownParse(advice);
+      chatMessageIndex++;
+      chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div>${wrapAssistantBubble(formattedAdvice, chatMessageIndex, 'chat', '代码纠错回复')}</div></div>`);
+      chat.scrollTop = chat.scrollHeight;
+      if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise();
+      // 创建历史记录
+      if (typeof window.addChatHistoryItem === 'function') {
+        if (activeChatHistoryIndex === null) {
+          window.addChatHistoryItem('代码纠错: ' + fileNames.join(', '));
+        } else {
+          saveUserData();
+        }
+      }
+    } else {
+      const thinkingEl = document.getElementById('thinking');
+      if (thinkingEl) thinkingEl.remove();
+      chatMessageIndex++;
+      chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div>${wrapAssistantBubble('<span style="color:#ef4444;">请求失败，请重试</span>', chatMessageIndex, 'chat', '代码纠错失败提示')}</div></div>`);
+      chat.scrollTop = chat.scrollHeight;
+    }
+  } catch (err) {
+    alert('代码纠错出错: ' + err.message);
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.innerHTML = originalBtnHtml;
+  }
+}
+
+// ===== 出题测试弹窗相关 =====
+
+function openQuizGenModal() {
+  document.getElementById('quizGenTopic').value = '';
+  document.getElementById('quizGenOverlay').classList.add('active');
+}
+
+function closeQuizGenModal() {
+  document.getElementById('quizGenOverlay').classList.remove('active');
+  document.getElementById('quizGenTopic').value = '';
+}
+
+function closeQuizGenOnOverlay(event) {
+  if (event.target === document.getElementById('quizGenOverlay')) closeQuizGenModal();
+}
+
+// 存储当前出题的题目数据，供交互使用
+let currentQuizQuestions = [];
+
+async function sendQuizGenerate() {
+  const topic = document.getElementById('quizGenTopic').value.trim();
+  if (!topic) {
+    alert('请输入出题主题');
+    return;
+  }
+
+  const countEl = document.querySelector('input[name="quizCount"]:checked');
+  const diffEl = document.querySelector('input[name="quizDiff"]:checked');
+  const count = countEl ? countEl.value : '5';
+  const difficulty = diffEl ? diffEl.value : '中级';
+
+  const sendBtn = document.getElementById('quizGenSendBtn');
+  sendBtn.disabled = true;
+  const originalBtnHtml = sendBtn.innerHTML;
+  sendBtn.innerHTML = '出题中...';
+
+  try {
+    closeQuizGenModal();
+    switchMainPage('chat');
+
+    const chat = document.getElementById('chatMessages');
+
+    // 渲染用户头像
+    let avatarStyleHtml = '';
+    let avatarText = (typeof userName !== 'undefined') ? userName.charAt(0).toUpperCase() : 'U';
+    if (typeof uploadedAvatarDataUrl !== 'undefined' && uploadedAvatarDataUrl && uploadedAvatarDataUrl.startsWith('data:image')) {
+      avatarStyleHtml = `background-image:url(${uploadedAvatarDataUrl}); background-size:cover; background-position:center;`;
+      avatarText = '';
+    } else {
+      avatarStyleHtml = `background:linear-gradient(135deg,#818cf8,#a78bfa);`;
+    }
+
+    window._quizTopic = topic;
+    const displayMsg = `帮我出一套关于「${topic}」的测试题（${count}题，${difficulty}难度）`;
+    chat.insertAdjacentHTML('beforeend', `<div class="msg user"><div class="msg-avatar" style="${avatarStyleHtml}">${avatarText}</div><div><div class="msg-sender">${escapeHtml(typeof userName !== 'undefined' ? userName : '用户')}</div><div class="msg-bubble">${escapeHtml(displayMsg)}</div></div></div>`);
+    chat.scrollTop = chat.scrollHeight;
+
+    // 渲染"思考中"
+    chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" id="thinking"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div></div>`);
+    chat.scrollTop = chat.scrollHeight;
+
+    // 调用 /api/chat，带 is_quiz_gen=true
+    const chatResp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: displayMsg,
+        user_id: (typeof currentUserEmail !== 'undefined') ? currentUserEmail : 'default',
+        is_quiz_gen: true,
+        quiz_topic: topic,
+        quiz_count: count,
+        quiz_difficulty: difficulty
+      })
+    });
+
+    if (chatResp.ok) {
+      const chatData = await chatResp.json();
+      const advice = chatData.advice || '（未获取到回复）';
+      const thinkingEl = document.getElementById('thinking');
+      if (thinkingEl) thinkingEl.remove();
+
+      // 尝试解析 JSON 题目
+      let questions = null;
+      try {
+        // 处理可能的 markdown 代码块包裹
+        let cleaned = advice.trim();
+        if (cleaned.startsWith('```json')) {
+          cleaned = cleaned.slice(7);
+        } else if (cleaned.startsWith('```')) {
+          cleaned = cleaned.slice(3);
+        }
+        if (cleaned.endsWith('```')) {
+          cleaned = cleaned.slice(0, -3);
+        }
+        cleaned = cleaned.trim();
+        questions = JSON.parse(cleaned);
+        if (!Array.isArray(questions)) {
+          questions = null;
+        }
+      } catch (parseErr) {
+        console.error('解析题目JSON失败:', parseErr);
+        questions = null;
+      }
+
+      if (questions && questions.length > 0) {
+        currentQuizQuestions = questions;
+        const quizHtml = renderQuizPractice(questions);
+        chat.insertAdjacentHTML('beforeend', `<div class="msg assistant"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble"><div style="margin-bottom:8px;font-weight:600;color:#7c3aed">已为你生成 ${questions.length} 道关于「${escapeHtml(topic)}」的${difficulty}测试题，请作答：</div>${quizHtml}${renderAllQuizSubmitBtn(questions.length)}</div></div></div>`);
+      } else {
+        // 解析失败，按普通消息渲染
+        const formattedAdvice = typeof safeMarkdownParse !== 'undefined' ? safeMarkdownParse(advice) : escapeHtml(advice);
+        chat.insertAdjacentHTML('beforeend', `<div class="msg assistant"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble">${formattedAdvice}</div></div></div>`);
+      }
+      chat.scrollTop = chat.scrollHeight;
+      // 创建历史记录
+      if (typeof window.addChatHistoryItem === 'function') {
+        if (activeChatHistoryIndex === null) {
+          window.addChatHistoryItem('出题测试: ' + topic);
+        } else {
+          saveUserData();
+        }
+      }
+    } else {
+      const thinkingEl = document.getElementById('thinking');
+      if (thinkingEl) thinkingEl.remove();
+      chat.insertAdjacentHTML('beforeend', `<div class="msg assistant"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble" style="color:#ef4444;">请求失败，请重试</div></div></div>`);
+      chat.scrollTop = chat.scrollHeight;
+    }
+  } catch (err) {
+    const thinkingEl = document.getElementById('thinking');
+    if (thinkingEl) thinkingEl.remove();
+    alert('出题出错: ' + err.message);
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.innerHTML = originalBtnHtml;
+  }
+}
+
+// 渲染做题界面
+function renderQuizPractice(questions) {
+  let html = '';
+  questions.forEach((q, idx) => {
+    html += `<div class="quiz-item" data-index="${idx}" style="margin-bottom:16px;padding:14px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0">`;
+    html += `<div style="font-size:14px;font-weight:600;color:#334155;margin-bottom:10px">${idx + 1}. ${escapeHtml(q.question)}</div>`;
+    html += `<div class="quiz-options" data-qindex="${idx}">`;
+    q.options.forEach((opt, oi) => {
+      html += `<div class="quiz-option" data-index="${idx}" data-option="${oi}" onclick="selectQuizOption(${idx}, ${oi})" style="padding:8px 12px;font-size:13px;margin-bottom:6px;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;transition:all 0.2s;color:#475569">`;
+      html += `<span style="font-weight:600;margin-right:6px">${opt.key}.</span>${escapeHtml(opt.text)}`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+    html += `<div class="quiz-actions" data-qindex="${idx}" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">`;
+    html += `<button onclick="submitQuizAnswer(${idx})" class="quiz-submit-btn" data-qindex="${idx}" style="padding:6px 16px;border-radius:8px;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:12px;cursor:pointer">提交本题答案</button>`;
+    html += `<button onclick="toggleQuizAnalysis(${idx})" class="quiz-analysis-btn" data-qindex="${idx}" style="padding:6px 16px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:12px;cursor:pointer">查看解析</button>`;
+    html += `</div>`;
+    html += `<div class="quiz-analysis" data-qindex="${idx}" style="display:none;margin-top:10px;padding:10px;background:#fefce8;border-radius:8px;border:1px solid #fde68a;font-size:12.5px;color:#92400e;line-height:1.6">${escapeHtml(q.analysis)}</div>`;
+    html += `<div class="quiz-result" data-qindex="${idx}" style="margin-top:8px"></div>`;
+    if (idx < questions.length - 1) {
+      html += `<hr style="border:none;border-top:1px solid #e2e8f0;margin:14px 0 0 0">`;
+    }
+    html += `</div>`;
+  });
+  return html;
+}
+
+// 选择选项
+function selectQuizOption(qIndex, optIndex) {
+  // 如果已提交该题，不允许再选
+  const resultEl = document.querySelector(`.quiz-result[data-qindex="${qIndex}"]`);
+  if (resultEl && resultEl.innerHTML.trim()) return;
+
+  // 高亮选中项，取消其他高亮
+  const optionsEl = document.querySelectorAll(`.quiz-option[data-index="${qIndex}"]`);
+  optionsEl.forEach((el, i) => {
+    if (i === optIndex) {
+      el.style.borderColor = '#7c3aed';
+      el.style.background = '#f5f3ff';
+      el.style.color = '#5b21b6';
+    } else {
+      el.style.borderColor = '#e2e8f0';
+      el.style.background = '#fff';
+      el.style.color = '#475569';
+    }
+  });
+}
+
+// 提交单题答案
+function submitQuizAnswer(index) {
+  const resultEl = document.querySelector(`.quiz-result[data-qindex="${index}"]`);
+  if (!resultEl || resultEl.innerHTML.trim()) return; // 已提交过
+
+  // 找到选中的选项
+  const optionsEl = document.querySelectorAll(`.quiz-option[data-index="${index}"]`);
+  let selectedIdx = -1;
+  optionsEl.forEach((el, i) => {
+    if (el.style.borderColor === 'rgb(124, 58, 237)' || el.style.borderColor === '#7c3aed') {
+      selectedIdx = i;
+    }
+  });
+
+  if (selectedIdx === -1) {
+    alert('请先选择一个选项');
+    return;
+  }
+
+  const q = currentQuizQuestions[index];
+  if (!q) return;
+
+  const selectedOpt = q.options[selectedIdx];
+  const isCorrect = selectedOpt.correct;
+
+  // 标记所有选项颜色
+  optionsEl.forEach((el, i) => {
+    el.style.cursor = 'default';
+    if (q.options[i].correct) {
+      el.style.borderColor = '#22c55e';
+      el.style.background = '#f0fdf4';
+      el.style.color = '#166534';
+    } else if (i === selectedIdx && !isCorrect) {
+      el.style.borderColor = '#ef4444';
+      el.style.background = '#fef2f2';
+      el.style.color = '#991b1b';
+    } else {
+      el.style.borderColor = '#e2e8f0';
+      el.style.background = '#f8fafc';
+      el.style.color = '#94a3b8';
+    }
+  });
+
+  // 显示结果
+  if (isCorrect) {
+    resultEl.innerHTML = `<div style="padding:8px 12px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;font-size:13px;color:#166534;font-weight:500">回答正确!</div>`;
+  } else {
+    resultEl.innerHTML = `<div style="padding:8px 12px;background:#fef2f2;border-radius:8px;border:1px solid #fecaca;font-size:13px;color:#991b1b;font-weight:500">回答错误! 正确答案是 ${q.options.find(o => o.correct).key}</div>`;
+    // 做错的题加入错题集
+    if (typeof recordWrongQuestion === 'function') {
+      recordWrongQuestion('自定义出题', window._quizTopic || '未指定主题', q);
+    }
+  }
+
+  // 禁用提交按钮
+  const submitBtn = document.querySelector(`.quiz-submit-btn[data-qindex="${index}"]`);
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.5';
+    submitBtn.style.cursor = 'default';
+  }
+}
+
+// 切换解析显示
+function toggleQuizAnalysis(index) {
+  const analysisEl = document.querySelector(`.quiz-analysis[data-qindex="${index}"]`);
+  if (!analysisEl) return;
+  analysisEl.style.display = analysisEl.style.display === 'none' ? 'block' : 'none';
+}
+
+// 提交全部答案
+function submitAllQuizAnswers() {
+  if (!currentQuizQuestions || currentQuizQuestions.length === 0) return;
+  for (let i = 0; i < currentQuizQuestions.length; i++) {
+    submitQuizAnswer(i);
+  }
+  // 禁用"提交全部"按钮
+  const btn = document.getElementById('submitAllQuizBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.style.cursor = 'default';
+  }
+}
+
+// 渲染"提交全部答案"按钮
+function renderAllQuizSubmitBtn(totalCount) {
+  return `<div style="margin-top:16px;text-align:center">
+    <button id="submitAllQuizBtn" onclick="submitAllQuizAnswers()" style="padding:10px 28px;border-radius:10px;border:none;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(99,102,241,0.3)">提交全部答案</button>
+  </div>`;
+}
+
 function sendQuickSuggest(text) {
   switchMainPage('chat');
   const inp = document.getElementById('chatInput');
@@ -9103,17 +11210,18 @@ function newChat() {
   activeChatHistoryIndex = null;
   renderChatHistory(); // 刷新高亮状态为不选中
   switchMainPage('chat');
+  const data = getInterestBasedSuggestions();
+  const suggests = data.suggests || ['我想学Python递归', '帮我分析一下我的编程基础', '推荐一些数据结构的学习路径'];
+  const suggestHtml = suggests.map(s => `<span class="quick-suggest" onclick="sendQuickSuggest('${s}')">• "${s}"</span>`).join('');
   document.getElementById('chatMessages').innerHTML = `<div class="msg assistant fade-up">
     <div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div>
     <div>
       <div class="msg-sender">灵析助手</div>
       <div class="msg-bubble">
         新的对话已开始！请告诉我你想学什么，我会协同多个智能体为你服务。<br><br>
-        你可以直接点击以下常见需求开始学习：<br>
+        根据你的兴趣，你可以直接点击以下需求开始学习：<br>
         <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
-          <span class="quick-suggest" onclick="sendQuickSuggest('我想学Python递归')">• "我想学Python递归"</span>
-          <span class="quick-suggest" onclick="sendQuickSuggest('帮我分析一下我的编程基础')">• "帮我分析一下我的编程基础"</span>
-          <span class="quick-suggest" onclick="sendQuickSuggest('推荐一些数据结构的学习路径')">• "推荐一些数据结构的学习路径"</span>
+          ${suggestHtml}
         </div>
       </div>
     </div>
@@ -9350,13 +11458,46 @@ async function sendMessage() {
         avatarStyleHtml = `background:linear-gradient(135deg,#818cf8,#a78bfa);`;
     }
 
-    chat.insertAdjacentHTML('beforeend', `<div class="msg user"><div class="msg-avatar" style="${avatarStyleHtml}">${avatarText}</div><div><div class="msg-sender">${escapeHtml(userName)}</div><div class="msg-bubble">${escapeHtml(text)}</div></div></div>`);
+    chat.insertAdjacentHTML('beforeend', `<div class="msg user"><div class="msg-avatar" style="${avatarStyleHtml}">${avatarText}</div><div><div class="msg-sender">${escapeHtml(userName)}</div><div class="msg-bubble">${renderUserMessageWithAttachments(text)}</div></div></div>`);
     inp.value = '';
     inp.style.height = 'auto';
     chat.scrollTop = chat.scrollHeight;
 
+    // 画像查询入口
+    const profileQueryPatterns = [
+      /最近.*最弱/, /哪个知识点最弱/, /薄弱/, /弱点/,
+      /学习风格/, /风格.*变/, /怎么学习/,
+      /画像/, /画像.*怎样/, /我.*怎样/, /我.*如何/,
+      /兴趣/, /喜欢.*什么/, /偏好/,
+      /目标/, /完成.*多少/, /进度/,
+      /行为/, /习惯/, /时长/
+    ];
+    const isProfileQuery = profileQueryPatterns.some(p => p.test(text));
+    if (isProfileQuery) {
+      const summary = getProfileSummary();
+      const radarData = getProfileRadarData();
+      const radarSvg = getProfileRadarSvg(radarData);
+      chatMessageIndex++;
+      const bubbleContent = `<div style="line-height:1.7;color:#1e293b;font-size:13.5px;margin-bottom:10px;">${summary}</div><div style="background:#faf5ff;border-radius:12px;padding:10px;border:1px solid #f3e8ff;">${radarSvg}</div>`;
+      chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">析</div><div><div class="msg-sender">学习分析师</div>${wrapAssistantBubble(bubbleContent, chatMessageIndex, 'chat', '画像分析')}</div></div>`);
+      chat.scrollTop = chat.scrollHeight;
+      updateProfileFromChat(text);
+      try {
+        if (activeChatHistoryIndex === null) {
+          window.addChatHistoryItem(text);
+        } else {
+          saveUserData();
+        }
+      } catch (saveErr) {
+        console.warn('保存对话历史失败:', saveErr);
+      }
+      isProcessing = false;
+      updateSendBtnState();
+      return;
+    }
+
     // 能力画像：对话学习追踪
-    trackChatInteraction(text);
+    updateProfileFromChat(text);
 
     chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" id="thinking"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div></div>`);
     chat.scrollTop = chat.scrollHeight;
@@ -9369,11 +11510,15 @@ async function sendMessage() {
         let keywords = [];
         let hideResources = false;
 
+        // 取出暂存的文档内容（如果有），发送后清空
+        const docContext = window._pendingDocContext || '';
+        window._pendingDocContext = '';
+
         try {
             const chatResp = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text, user_id: currentUserEmail }),
+                body: JSON.stringify({ message: text, user_id: currentUserEmail, doc_context: docContext }),
                 signal: signal
             });
             if (chatResp.ok) {
@@ -9407,9 +11552,15 @@ async function sendMessage() {
 
         if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
 
-        const searcher = new SearcherAgent();
-        const resources = await searcher.search(intent.topic);
-        console.log('搜索资源数量:', resources.length);
+        // 【文档诊断模式】有文档内容时跳过B站搜索，不推荐视频
+        let resources = [];
+        if (!docContext) {
+            const searcher = new SearcherAgent();
+            resources = await searcher.search(intent.topic);
+            console.log('搜索资源数量:', resources.length);
+        } else {
+            console.log('文档诊断模式：跳过B站搜索');
+        }
         updateWF(2);
 
         if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
@@ -9440,26 +11591,26 @@ async function sendMessage() {
             agentBg = 'linear-gradient(135deg,#f59e0b,#fbbf24)';
         }
 
-        let replyHtml = `<div class="msg assistant"><div class="msg-avatar" style="background:${agentBg}">${agentAvatar}</div><div><div class="msg-sender">${agentName}</div><div class="msg-bubble">`;
+        let bubbleContent = '';
 
         // 1. 先进行解答（显示大模型建议）
         if (advice) {
             let parsedAdvice = safeMarkdownParse(advice);
-            replyHtml += `<div class="ai-advice markdown-body" style="margin-bottom:14px; line-height:1.6; color:#1e293b; font-size:13.5px;">${parsedAdvice}</div>`;
+            bubbleContent += `<div class="ai-advice markdown-body" style="margin-bottom:14px; line-height:1.6; color:#1e293b; font-size:13.5px;">${parsedAdvice}</div>`;
         }
 
         // 2. 给出当前智能体所负责的模块
         if (currentAgent === 'all') {
             if (!hideResources) {
                 // 全体协同：学习路径 + 资源推荐
-                replyHtml += `<strong>📋 为您规划的学习路径：</strong><div class="learning-path">`;
+                bubbleContent += `<strong>📋 为您规划的学习路径：</strong><div class="learning-path">`;
                 plan.forEach(step => {
-                    replyHtml += `<div class="lp-step" style="border-color:#6366f1"><div class="lp-num" style="background:#eef2ff;color:#6366f1">${step.order}</div><div class="lp-text"><strong>${step.type}</strong> — ${step.items.join('；')}</div></div>`;
+                    bubbleContent += `<div class="lp-step" style="border-color:#6366f1"><div class="lp-num" style="background:#eef2ff;color:#6366f1">${step.order}</div><div class="lp-text"><strong>${step.type}</strong> — ${step.items.join('；')}</div></div>`;
                 });
-                replyHtml += `</div>`;
+                bubbleContent += `</div>`;
 
                 if (resources.length > 0) {
-                    replyHtml += `<br><strong>🔍 为您找到的相关资源：</strong><div class="resource-grid">`;
+                    bubbleContent += `<br><strong>🔍 为您找到的相关资源：</strong><div class="resource-grid">`;
                     resources.slice(0, 4).forEach(r => {
                         let icon = '📄';
                         let dataAttrs = '';
@@ -9486,16 +11637,16 @@ async function sendMessage() {
                             icon = '📄';
                             dataAttrs = `data-type="other" data-url="${r.url}"`;
                         }
-                        replyHtml += `<div class="resource-card" ${dataAttrs} style="cursor:pointer;"><div class="rc-icon" style="background:#f1f5f9;color:#6366f1">${icon}</div><div class="rc-title">${escapeHtml(r.title)}</div><div class="rc-type">${r.type}</div></div>`;
+                        bubbleContent += `<div class="resource-card" ${dataAttrs} style="cursor:pointer;"><div class="rc-icon" style="background:#f1f5f9;color:#6366f1">${icon}</div><div class="rc-title">${escapeHtml(r.title)}</div><div class="rc-type">${r.type}</div></div>`;
                     });
-                    replyHtml += `</div>`;
+                    bubbleContent += `</div>`;
                 } else {
-                    replyHtml += `<br>😅 暂时没找到相关资源，试试换个关键词吧。`;
+                    bubbleContent += `<br>😅 暂时没找到相关资源，试试换个关键词吧。`;
                 }
             }
         } else if (currentAgent === 'analyst') {
             // 学习分析师：展示分析诊断模块
-            replyHtml += `<strong>📊 学习分析师诊断报告：</strong><div class="analyst-report" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; margin-top:8px; font-size:12.5px; color:#0369a1;">
+            bubbleContent += `<strong>📊 学习分析师诊断报告：</strong><div class="analyst-report" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; margin-top:8px; font-size:12.5px; color:#0369a1;">
                 <div style="margin-bottom:6px;"><strong>🎯 分析主题：</strong>${escapeHtml(intent.topic)}</div>
                 <div style="margin-bottom:6px;"><strong>📈 推荐难度等级：</strong>${escapeHtml(intent.difficulty)}</div>
                 <div><strong>🏷️ 薄弱知识点/关键词：</strong>${intent.keywords.map(k => `<span style="background:#e0f2fe; padding:2px 6px; border-radius:4px; margin-right:4px;">${escapeHtml(k)}</span>`).join('')}</div>
@@ -9503,7 +11654,7 @@ async function sendMessage() {
         } else if (currentAgent === 'generator') {
             // 资源生成师：推荐资源
             if (resources.length > 0) {
-                replyHtml += `<strong>🔍 资源生成师推荐资源：</strong><div class="resource-grid">`;
+                bubbleContent += `<strong>🔍 资源生成师推荐资源：</strong><div class="resource-grid">`;
                 resources.slice(0, 4).forEach(r => {
                     let icon = '📄';
                     let dataAttrs = '';
@@ -9530,22 +11681,30 @@ async function sendMessage() {
                         icon = '📄';
                         dataAttrs = `data-type="other" data-url="${r.url}"`;
                     }
-                    replyHtml += `<div class="resource-card" ${dataAttrs} style="cursor:pointer;"><div class="rc-icon" style="background:#f0fdf4;color:#10b981">${icon}</div><div class="rc-title">${escapeHtml(r.title)}</div><div class="rc-type">${r.type}</div></div>`;
+                    bubbleContent += `<div class="resource-card" ${dataAttrs} style="cursor:pointer;"><div class="rc-icon" style="background:#f0fdf4;color:#10b981">${icon}</div><div class="rc-title">${escapeHtml(r.title)}</div><div class="rc-type">${r.type}</div></div>`;
                 });
-                replyHtml += `</div>`;
+                bubbleContent += `</div>`;
             } else {
-                replyHtml += `<strong>🔍 资源生成师推荐资源：</strong><br>😅 暂时没能匹配到合适的学习资料，您可以尝试修改提问主题。`;
+                bubbleContent += `<strong>🔍 资源生成师推荐资源：</strong><br>😅 暂时没能匹配到合适的学习资料，您可以尝试修改提问主题。`;
             }
         } else if (currentAgent === 'planner') {
             // 路径规划师：学习路径规划
-            replyHtml += `<strong>📋 路径规划师定制学习路径：</strong><div class="learning-path">`;
+            bubbleContent += `<strong>📋 路径规划师定制学习路径：</strong><div class="learning-path">`;
             plan.forEach(step => {
-                replyHtml += `<div class="lp-step" style="border-color:#f59e0b"><div class="lp-num" style="background:#fef3c7;color:#d97706">${step.order}</div><div class="lp-text"><strong>${step.type}</strong> — ${step.items.join('；')}</div></div>`;
+                bubbleContent += `<div class="lp-step" style="border-color:#f59e0b"><div class="lp-num" style="background:#fef3c7;color:#d97706">${step.order}</div><div class="lp-text"><strong>${step.type}</strong> — ${step.items.join('；')}</div></div>`;
             });
-            replyHtml += `</div>`;
+            bubbleContent += `</div>`;
         }
 
-        replyHtml += `</div></div></div>`;
+        // 确定收藏类型
+        let favTypeForMsg = 'chat';
+        let favTitleForMsg = agentName + '的回复';
+        if (currentAgent === 'analyst') favTypeForMsg = 'path';
+        else if (currentAgent === 'generator') favTypeForMsg = 'path';
+        else if (currentAgent === 'planner') favTypeForMsg = 'path';
+
+        chatMessageIndex++;
+        let replyHtml = `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:${agentBg}">${agentAvatar}</div><div><div class="msg-sender">${agentName}</div>${wrapAssistantBubble(bubbleContent, chatMessageIndex, favTypeForMsg, favTitleForMsg)}</div></div>`;
         chat.insertAdjacentHTML('beforeend', replyHtml);
         chat.scrollTop = chat.scrollHeight;
 
@@ -9566,13 +11725,15 @@ async function sendMessage() {
             const thinking = document.getElementById('thinking');
             if (thinking) thinking.remove();
 
-            chat.insertAdjacentHTML('beforeend', `<div class="msg assistant"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">❌</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble" style="background:#fef2f2; color:#b91c1c; border:1.5px solid #fee2e2;">已终止回答生成。</div></div></div>`);
+            chatMessageIndex++;
+            chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">❌</div><div><div class="msg-sender">灵析助手</div>${wrapAssistantBubble('<span style="background:#fef2f2; color:#b91c1c; border:1.5px solid #fee2e2; display:block; padding:8px 12px; border-radius:12px;">已终止回答生成。</span>', chatMessageIndex, 'chat', '已终止提示')}</div></div>`);
             chat.scrollTop = chat.scrollHeight;
         } else {
             console.error('处理失败:', e, e.stack);
             const thinking = document.getElementById('thinking');
             if (thinking) thinking.remove();
-            chat.insertAdjacentHTML('beforeend', `<div class="msg assistant"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">!</div><div><div class="msg-sender">系统提示</div><div class="msg-bubble">处理请求时发生错误，请稍后再试。</div></div></div>`);
+            chatMessageIndex++;
+            chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">!</div><div><div class="msg-sender">系统提示</div>${wrapAssistantBubble('处理请求时发生错误，请稍后再试。', chatMessageIndex, 'chat', '错误提示')}</div></div>`);
         }
     } finally {
         isProcessing = false;
@@ -9635,7 +11796,7 @@ function simulateWorkflow(text) {
       updateWF(2); 
       
       // Update dimensions dynamically based on topic
-      trackChatInteraction(text);
+      updateProfileFromChat(text);
     }, 2000);
     
     // Step 3: Resource Generator Typing...
@@ -9750,7 +11911,7 @@ function updateLearningHours() {
     saveUserData();
     // 能力画像：学习时长追踪
     const diffMinutes = diffMs / (1000 * 60);
-    trackStudyTime(diffMinutes);
+    updateProfileFromStudy(diffMinutes);
     sessionStartTime = now; // 重置起始时间
 }
 
@@ -9814,8 +11975,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 recentActivities = users[currentUserEmail].recentActivities || [];
                 learningStats = users[currentUserEmail].learningStats || { days: 1, completedResources: 0, hours: 0.0, favorites: 0 };
-                userProfileDimensions = users[currentUserEmail].userProfileDimensions || { basic: 0, algo: 0, data: 0, problem: 0, self: 0, project: 0 };
+                if (!learningStats.firstLoginDate && learningStats.days > 0) {
+                  const d = new Date();
+                  d.setDate(d.getDate() - learningStats.days + 1);
+                  learningStats.firstLoginDate = d.toISOString().split('T')[0];
+                }
+                userProfileDimensions = migrateProfileDimensions(users[currentUserEmail].userProfileDimensions) || getDefaultProfileDimensions();
+                if (users[currentUserEmail].profile && users[currentUserEmail].profile.hobbies) {
+                  const hobbies = users[currentUserEmail].profile.hobbies;
+                  if (userProfileDimensions.interest) {
+                    if (!userProfileDimensions.interest.seedTags || userProfileDimensions.interest.seedTags.length === 0) {
+                      userProfileDimensions.interest.seedTags = hobbies;
+                    }
+                    if (!userProfileDimensions.interest.tags || userProfileDimensions.interest.tags.length === 0) {
+                      userProfileDimensions.interest.tags = hobbies.slice();
+                    }
+                  }
+                }
                 favoritesList = users[currentUserEmail].favoritesList || [];
+                initChatMessageIndex();
                 wrongQuestions = users[currentUserEmail].wrongQuestions || [];
                 notificationsList = users[currentUserEmail].notificationsList || getInitialNotifications();
 
@@ -10459,7 +12637,7 @@ async function sendGlobalFloatingChatMessage() {
     container.scrollTop = container.scrollHeight;
 
     // 能力画像：全局对话学习追踪
-    trackChatInteraction(text);
+    updateProfileFromChat(text);
 
     // 渲染打字状态
     const typingId = 'typing_' + Date.now();
@@ -10652,6 +12830,187 @@ async function sendGlobalFloatingChatMessage() {
     });
 })();
   </script>
+
+  <!-- ===== 文档诊断弹窗 ===== -->
+  <div class="doc-diagnose-overlay" id="docDiagnoseOverlay" onclick="closeDocDiagnoseOnOverlay(event)">
+    <div class="doc-diagnose-modal" onclick="event.stopPropagation()">
+      <div class="doc-diagnose-header">
+        <div class="doc-diagnose-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          文档诊断 <span style="font-size:10px;color:#a78bfa;font-weight:400">v2.0</span>
+        </div>
+        <button class="doc-diagnose-close" onclick="closeDocDiagnoseModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="doc-diagnose-body">
+        <!-- 上传区域 -->
+        <div class="doc-upload-zone" id="docUploadZone" onclick="document.getElementById('docFileInput').click()"
+             ondragover="event.preventDefault(); this.classList.add('drag-over')"
+             ondragleave="this.classList.remove('drag-over')"
+             ondrop="handleDocDrop(event)">
+          <div class="doc-upload-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+          </div>
+          <div class="doc-upload-text">点击或拖拽上传文档</div>
+          <div class="doc-upload-hint">支持 TXT、DOCX、MD、CSV 等格式</div>
+        </div>
+        <input type="file" id="docFileInput" accept=".txt,.docx,.doc,.md,.csv,.xlsx,.xls,.pptx,.ppt" multiple style="display:none" onchange="handleDocFileSelect(event)">
+
+        <!-- 已上传文件列表 -->
+        <div class="doc-file-list" id="docFileList"></div>
+
+        <!-- 需求输入区 -->
+        <div class="doc-requirement-area">
+          <textarea id="docDiagnoseInput" rows="3" placeholder="输入你的诊断需求，例如：帮我分析这份文档的结构，总结核心要点，指出可能的错误..."></textarea>
+        </div>
+      </div>
+
+      <div class="doc-diagnose-footer">
+        <button class="doc-diagnose-cancel-btn" onclick="closeDocDiagnoseModal()">取消</button>
+        <button class="doc-diagnose-send-btn" id="docDiagnoseSendBtn" onclick="sendDocDiagnose()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+          开始诊断
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 一键脑图弹窗 -->
+  <div class="mindmap-overlay" id="mindmapOverlay" onclick="closeMindmapOnOverlay(event)">
+    <div class="mindmap-modal">
+      <div class="doc-diagnose-header">
+        <div class="doc-diagnose-title">一键脑图 <span style="font-size:10px;color:#a78bfa;font-weight:400">v2.0</span></div>
+        <button class="doc-diagnose-close" onclick="closeMindmapModal()">&times;</button>
+      </div>
+      <div class="doc-diagnose-body">
+        <div style="margin-bottom:16px">
+          <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:8px">输入脑图主题</label>
+          <textarea id="mindmapTopicInput" rows="3" placeholder="例如：Python递归、数据结构、计算机网络体系结构、高等数学微积分..." style="width:100%;padding:12px;border-radius:10px;border:1px solid #e2e8f0;font-size:14px;resize:vertical;outline:none;font-family:inherit;transition:border-color 0.2s" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button onclick="closeMindmapModal()" style="padding:8px 20px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:13px;cursor:pointer">取消</button>
+          <button id="mindmapSendBtn" onclick="sendMindmapGenerate()" style="padding:8px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            生成脑图
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 代码纠错弹窗 -->
+  <div class="mindmap-overlay" id="codeFixOverlay" onclick="closeCodeFixOnOverlay(event)">
+    <div class="mindmap-modal">
+      <div class="doc-diagnose-header">
+        <div class="doc-diagnose-title">代码纠错 <span style="font-size:10px;color:#a78bfa;font-weight:400">v2.0</span></div>
+        <button class="doc-diagnose-close" onclick="closeCodeFixModal()">&times;</button>
+      </div>
+      <div class="doc-diagnose-body">
+        <!-- 上传代码文件区域 -->
+        <div style="margin-bottom:16px">
+          <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:8px">上传代码文件</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <div class="doc-upload-zone" id="codeFixUploadZone" onclick="document.getElementById('codeFixFileInput').click()"
+                 ondragover="event.preventDefault(); this.classList.add('drag-over')"
+                 ondragleave="this.classList.remove('drag-over')"
+                 ondrop="handleCodeFixDrop(event)"
+                 style="flex:1;min-width:200px;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:2px dashed #e2e8f0;border-radius:12px;cursor:pointer;transition:border-color 0.2s;padding:16px">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              <div style="font-size:12px;color:#94a3b8">点击或拖拽上传代码文件</div>
+              <div style="font-size:11px;color:#cbd5e1">支持 .py .js .java .c .cpp .html .css 等格式</div>
+            </div>
+          </div>
+          <input type="file" id="codeFixFileInput" accept=".py,.js,.java,.c,.cpp,.h,.hpp,.cs,.go,.rs,.rb,.php,.html,.htm,.css,.json,.xml,.yaml,.yml,.sql,.sh,.bat,.txt,.md" multiple style="display:none" onchange="handleCodeFixFileSelect(event)">
+          <div id="codeFixFileList" style="margin-top:8px;display:flex;flex-direction:column;gap:6px"></div>
+        </div>
+        <!-- 需求描述 -->
+        <div style="margin-bottom:16px">
+          <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:8px">描述问题（可选）</label>
+          <textarea id="codeFixInput" rows="2" placeholder="例如：运行报错 IndexError、逻辑有误、性能需要优化..." style="width:100%;padding:12px;border-radius:10px;border:1px solid #e2e8f0;font-size:14px;resize:vertical;outline:none;font-family:inherit;transition:border-color 0.2s" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button onclick="closeCodeFixModal()" style="padding:8px 20px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:13px;cursor:pointer">取消</button>
+          <button id="codeFixSendBtn" onclick="sendCodeFix()" style="padding:8px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            开始纠错
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 出题测试弹窗 -->
+  <div class="mindmap-overlay" id="quizGenOverlay" onclick="closeQuizGenOnOverlay(event)">
+    <div class="mindmap-modal">
+      <div class="doc-diagnose-header">
+        <div class="doc-diagnose-title">出题测试 <span style="font-size:10px;color:#a78bfa;font-weight:400">AI智能出题</span></div>
+        <button class="doc-diagnose-close" onclick="closeQuizGenModal()">&times;</button>
+      </div>
+      <div class="doc-diagnose-body">
+        <!-- 主题输入 -->
+        <div style="margin-bottom:16px">
+          <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:8px">出题主题</label>
+          <textarea id="quizGenTopic" rows="3" placeholder="例如：递归、二叉树遍历、动态规划、面向对象编程..." style="width:100%;padding:12px;border-radius:10px;border:1px solid #e2e8f0;font-size:14px;resize:vertical;outline:none;font-family:inherit;transition:border-color 0.2s" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+        </div>
+        <!-- 题目数量选择 -->
+        <div style="margin-bottom:16px">
+          <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:8px">题目数量</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="quizGenCountGroup">
+            <label style="display:flex;align-items:center;gap:4px;padding:6px 14px;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;font-size:13px;color:#475569;transition:all 0.2s">
+              <input type="radio" name="quizCount" value="5" checked style="accent-color:#7c3aed"> 5题
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;padding:6px 14px;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;font-size:13px;color:#475569;transition:all 0.2s">
+              <input type="radio" name="quizCount" value="10" style="accent-color:#7c3aed"> 10题
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;padding:6px 14px;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;font-size:13px;color:#475569;transition:all 0.2s">
+              <input type="radio" name="quizCount" value="15" style="accent-color:#7c3aed"> 15题
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;padding:6px 14px;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;font-size:13px;color:#475569;transition:all 0.2s">
+              <input type="radio" name="quizCount" value="20" style="accent-color:#7c3aed"> 20题
+            </label>
+          </div>
+        </div>
+        <!-- 难度选择 -->
+        <div style="margin-bottom:16px">
+          <label style="font-size:13px;font-weight:600;color:#334155;display:block;margin-bottom:8px">难度等级</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="quizGenDiffGroup">
+            <label style="display:flex;align-items:center;gap:4px;padding:6px 14px;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;font-size:13px;color:#475569;transition:all 0.2s">
+              <input type="radio" name="quizDiff" value="初级" style="accent-color:#7c3aed"> 初级
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;padding:6px 14px;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;font-size:13px;color:#475569;transition:all 0.2s">
+              <input type="radio" name="quizDiff" value="中级" checked style="accent-color:#7c3aed"> 中级
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;padding:6px 14px;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;font-size:13px;color:#475569;transition:all 0.2s">
+              <input type="radio" name="quizDiff" value="高级" style="accent-color:#7c3aed"> 高级
+            </label>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button onclick="closeQuizGenModal()" style="padding:8px 20px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:13px;cursor:pointer">取消</button>
+          <button id="quizGenSendBtn" onclick="sendQuizGenerate()" style="padding:8px 20px;border-radius:10px;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            开始出题
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 
 </html>
