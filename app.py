@@ -663,7 +663,7 @@ def chat():
     clean_question = extract_user_question(user_input)
 
     history = data.get('history', [])
-    
+    system_prompt = "你是一个温和友好、智慧的学习助手。"
 
     # 优先处理图片识别
     if image_path:
