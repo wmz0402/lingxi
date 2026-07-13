@@ -8030,6 +8030,21 @@ function renderChapterContent() {
   
   const course = myCourses[activeCourseIndex];
   const ch = course.chapters[activeChapterIndex];
+
+  // 动态补充/升级思维导图内容
+  if (ch.content && (!ch.mindmapHtml || ch.mindmapHtml.includes('理论概念') || ch.mindmapHtml.includes('核心知识'))) {
+    const rootTitle = ch.title ? ch.title.replace(/^第\d+章[：:]\s*/, '') : '思维导图';
+    let md = ch.content;
+    if (md.includes('<h3>') || md.includes('<h2>') || md.includes('<p>')) {
+      md = md.replace(/<h2[^>]*>(.*?)<\/h2>/gi, '\n## $1\n')
+             .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '\n### $1\n')
+             .replace(/<li[^>]*>(.*?)<\/li>/gi, '\n- $1\n')
+             .replace(/<[^>]+>/g, ''); // 移除其余 HTML 标签避免干扰
+    }
+    let generated = markdownToMindmapHtml(md);
+    generated = generated.replace(/<div class="mm-root">[^<]*<\/div>/, `<div class="mm-root">${escapeHtml(rootTitle)}</div>`);
+    ch.mindmapHtml = generated;
+  }
   
   if (activeStudyTab === 'mindmap') {
     container.innerHTML = ch.mindmapHtml || `<div style="text-align: center; color: #94a3b8; font-size: 13px; padding-top: 40px;">暂无脑图</div>`;
