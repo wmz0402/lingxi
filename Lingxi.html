@@ -10091,7 +10091,7 @@ function wrapAssistantBubble(bubbleInnerHtml, chatIndex, favType, favTitle) {
     <button class="fav-bubble-btn ${isFav ? 'favorited' : ''}" onclick="toggleFavoriteBubble(${chatIndex})" title="${isFav ? '取消收藏' : '收藏此消息'}">
       <span class="fav-star">${isFav ? '&#9733;' : '&#9734;'}</span>
     </button>
-    ${bubbleInnerHtml}
+    <div class="msg-bubble">${bubbleInnerHtml}</div>
   </div>`;
 }
 
