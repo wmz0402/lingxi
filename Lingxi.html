@@ -6579,10 +6579,6 @@ function startTransition() {
                     `<span class="search-tag" onclick="quickSearch('${tag}')">${tag}</span>`
                   ).join('');
                 }
-                // 新用户自动根据兴趣添加课程
-                if (myCourses.length === 0) {
-                  autoAddCoursesByInterest();
-                }
                 // 更新侧边栏 quick-suggest
                 const sidebarSuggests = document.getElementById('sidebarQuickSuggests');
                 if (sidebarSuggests && interestData.suggests) {
@@ -13368,6 +13364,8 @@ async function sendGlobalFloatingChatMessage() {
       const listContainer = document.getElementById('courseRecommendList');
       if (!listContainer) return;
       
+      window._recommendedCoursesList = recommendedCourses;
+      
       if (recommendedCourses.length === 0) {
         listContainer.innerHTML = `<div style="text-align:center;color:#94a3b8;font-size:13px;padding:20px 0;">暂无可匹配的课程资源</div>`;
       } else {
@@ -13379,7 +13377,7 @@ async function sendGlobalFloatingChatMessage() {
                 <span style="font-size:14px; font-weight:600; color:#1e293b;">${escapeHtml(c.title)}</span>
                 <span style="font-size:11.5px; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px; width:fit-content; margin-top:2px;">分类: ${escapeHtml(c.category)}</span>
               </div>
-              <input type="checkbox" class="course-rec-checkbox" value="${escapeHtml(JSON.stringify(c))}" checked style="width:18px; height:18px; accent-color:#6366f1; cursor:pointer;">
+              <input type="checkbox" class="course-rec-checkbox" value="${idx}" checked style="width:18px; height:18px; accent-color:#6366f1; cursor:pointer;">
             </label>
           `;
         });
@@ -13407,7 +13405,7 @@ async function sendGlobalFloatingChatMessage() {
 
     function confirmCourseRecommendations() {
       const checkboxes = document.querySelectorAll('.course-rec-checkbox:checked');
-      const selectedCourses = Array.from(checkboxes).map(cb => JSON.parse(cb.value));
+      const selectedCourses = Array.from(checkboxes).map(cb => window._recommendedCoursesList[parseInt(cb.value)]);
       
       myCourses = [];
       selectedCourses.forEach(c => {
