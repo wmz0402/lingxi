@@ -1106,10 +1106,15 @@ def run_code_via_jdoodle(language, code):
     }
     
     try:
+        import urllib.error
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
         req = urllib.request.Request(
             url, 
             data=json.dumps(payload).encode('utf-8'),
-            headers={'Content-Type': 'application/json'},
+            headers=headers,
             method='POST'
         )
         with urllib.request.urlopen(req, timeout=10) as resp:
@@ -1125,6 +1130,18 @@ def run_code_via_jdoodle(language, code):
             "success": status_code == 200 and "error" not in output.lower(),
             "output": output or "运行成功（无输出结果）。"
         }
+    except urllib.error.HTTPError as e:
+        try:
+            err_body = e.read().decode('utf-8')
+            return {
+                "success": False,
+                "output": f"本地无编译环境，远程代码沙箱拒绝访问 (HTTP {e.code})：{err_body}"
+            }
+        except:
+            return {
+                "success": False,
+                "output": f"本地无编译环境，远程代码沙箱拒绝访问 (HTTP {e.code}): {e.reason}"
+            }
     except Exception as e:
         return {
             "success": False,
