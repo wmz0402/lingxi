@@ -8268,11 +8268,6 @@ function submitChapterQuiz() {
     item.classList.remove('correct', 'wrong');
   });
   
-  const course = myCourses[activeCourseIndex];
-  const ch = course.chapters[activeChapterIndex];
-  const quizArray = ch.quizzes || (ch.quiz ? [ch.quiz] : []);
-  const q = quizArray[activeChapterQuizIndex];
-  
   if (isCorrect) {
     activeChapterQuizSelectedEl.classList.add('correct');
     successBox.style.display = 'block';
