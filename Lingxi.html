@@ -10793,23 +10793,30 @@ function markdownToMindmapHtml(mdText) {
     const mList = line.match(/^[-*+]\s+(.*)/);
 
     if (m1 && !m2) {
-      rootTitle = cleanMarker(m1[1]);
+      const cleaned = cleanMarker(m1[1]);
+      if (cleaned) rootTitle = cleaned;
     } else if (m2) {
-      branches.push({
-        title: cleanMarker(m2[1]),
-        leaves: []
-      });
+      const cleaned = cleanMarker(m2[1]);
+      if (cleaned) {
+        branches.push({
+          title: cleaned,
+          leaves: []
+        });
+      }
     } else if (m3) {
-      if (branches.length > 0) {
-        branches[branches.length - 1].leaves.push(cleanMarker(m3[1]));
+      const cleaned = cleanMarker(m3[1]);
+      if (cleaned && branches.length > 0) {
+        branches[branches.length - 1].leaves.push(cleaned);
       }
     } else if (mList) {
-      if (branches.length > 0) {
-        branches[branches.length - 1].leaves.push(cleanMarker(mList[1]));
+      const cleaned = cleanMarker(mList[1]);
+      if (cleaned && branches.length > 0) {
+        branches[branches.length - 1].leaves.push(cleaned);
       }
     } else if (line.length > 0) {
-      if (branches.length > 0) {
-        branches[branches.length - 1].leaves.push(cleanMarker(line));
+      const cleaned = cleanMarker(line);
+      if (cleaned && branches.length > 0) {
+        branches[branches.length - 1].leaves.push(cleaned);
       }
     }
   }
@@ -10837,7 +10844,9 @@ function markdownToMindmapHtml(mdText) {
     html += `<div class="mm-parent-node" style="background:${accent};color:#fff">${escapeHtml(branch.title)}</div>`;
     html += '<div class="mm-leaves">';
     branch.leaves.forEach(leaf => {
-      html += `<div class="mm-leaf-item"><div class="mm-leaf-node" style="background:${bg};border-left:3px solid ${accent}">${escapeHtml(leaf)}</div></div>`;
+      if (leaf && leaf.trim()) {
+        html += `<div class="mm-leaf-item"><div class="mm-leaf-node" style="background:${bg};border-left:3px solid ${accent}">${escapeHtml(leaf)}</div></div>`;
+      }
     });
     html += '</div></div>';
   });
