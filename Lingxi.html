@@ -6110,7 +6110,12 @@ function saveUserData() {
     try {
         let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
         if (users[currentUserEmail]) {
-            users[currentUserEmail].myCourses = myCourses;
+            // 深拷贝并移除庞大的静态 chapters 模板数据，防止 localStorage 容量超限
+            const serializedCourses = myCourses.map(c => {
+                const { chapters, ...rest } = c;
+                return rest;
+            });
+            users[currentUserEmail].myCourses = serializedCourses;
             users[currentUserEmail].chatHistory = chatHistory;
             users[currentUserEmail].recentActivities = recentActivities;
             users[currentUserEmail].learningStats = learningStats;
@@ -7696,9 +7701,11 @@ function enterCourseStudy(courseIndex) {
   // If the course doesn't have chapters initialized, bind default ones
   if (!myCourses[courseIndex].chapters) {
     const courseTitle = myCourses[courseIndex].title;
-    const baseTitle = Object.keys(courseTemplates).find(k => courseTitle.includes(k)) || 'Python递归从入门到精通';
+    const baseTitle = Object.keys(courseTemplates).find(k => k.includes(courseTitle) || courseTitle.includes(k)) || 'Python递归从入门到精通';
     myCourses[courseIndex].chapters = JSON.parse(JSON.stringify(courseTemplates[baseTitle]));
-    myCourses[courseIndex].unlockedChapterIndex = 0;
+    if (myCourses[courseIndex].unlockedChapterIndex === undefined) {
+      myCourses[courseIndex].unlockedChapterIndex = 0;
+    }
   }
   
   activeChapterIndex = myCourses[courseIndex].unlockedChapterIndex;
