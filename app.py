@@ -1066,8 +1066,23 @@ def search_questions():
     conn.close()
     return jsonify({"questions": [dict(row) for row in rows]})
 
-def run_code_via_piston(language, code):
-    """当本地环境无编译器时（如 Vercel 云端部署），降级调用公共 Piston API 在线执行代码"""
+JDOODLE_CLIENT_ID = os.getenv("JDOODLE_CLIENT_ID", "")
+JDOODLE_CLIENT_SECRET = os.getenv("JDOODLE_CLIENT_SECRET", "")
+
+def run_code_via_jdoodle(language, code):
+    """当本地无编译环境时（如 Vercel），通过配置的 JDoodle 密钥进行远程编译执行"""
+    if not JDOODLE_CLIENT_ID or not JDOODLE_CLIENT_SECRET:
+        return {
+            "success": False,
+            "output": (
+                "提示：由于当前项目部署在云端 Serverless 环境，容器中未安装 C/C++/Java 等语言的物理编译器。\n"
+                "若要开启云端代码运行功能，请在您的 Vercel 项目控制面板（Settings -> Environment Variables）中配置以下环境变量以调用免费的代码运行服务：\n"
+                "  - JDOODLE_CLIENT_ID\n"
+                "  - JDOODLE_CLIENT_SECRET\n"
+                "（密钥可前往 JDoodle 官网免费注册申请，每日提供免费额度；若在本地运行该项目，只需本地安装 GCC/G++ 等编译器即可自动本地编译运行，不受此限）。"
+            )
+        }
+        
     import urllib.request
     import json
     
@@ -1076,22 +1091,20 @@ def run_code_via_piston(language, code):
         'cpp': 'cpp',
         'c++': 'cpp',
         'java': 'java',
-        'python': 'python',
-        'py': 'python',
-        'javascript': 'javascript',
-        'js': 'javascript'
+        'python': 'python3',
+        'py': 'python3',
+        'javascript': 'nodejs',
+        'js': 'nodejs'
     }
     target_lang = lang_map.get(language, language)
     
-    url = "https://emkc.org/api/v2/piston/execute"
+    url = "https://api.jdoodle.com/v1/execute"
     payload = {
+        "clientId": JDOODLE_CLIENT_ID,
+        "clientSecret": JDOODLE_CLIENT_SECRET,
+        "script": code,
         "language": target_lang,
-        "version": "*",
-        "files": [
-            {
-                "content": code
-            }
-        ]
+        "versionIndex": "5" if target_lang == 'cpp' else "0"
     }
     
     try:
@@ -1101,23 +1114,23 @@ def run_code_via_piston(language, code):
             headers={'Content-Type': 'application/json'},
             method='POST'
         )
-        with urllib.request.urlopen(req, timeout=8) as resp:
+        with urllib.request.urlopen(req, timeout=10) as resp:
             res_data = json.loads(resp.read().decode('utf-8'))
             
-        run_res = res_data.get('run', {})
-        stdout = run_res.get('stdout', '')
-        stderr = run_res.get('stderr', '')
-        output = run_res.get('output', stdout + stderr)
-        code_exit = run_res.get('code', 0)
+        output = res_data.get('output', '')
+        status_code = res_data.get('statusCode', 200)
         
+        if "Limit Exceeded" in output:
+            return {"success": False, "output": "您的 JDoodle API 每日免费执行额度已超限。"}
+            
         return {
-            "success": code_exit == 0,
+            "success": status_code == 200 and "error" not in output.lower(),
             "output": output or "运行成功（无输出结果）。"
         }
     except Exception as e:
         return {
             "success": False,
-            "output": f"本地无编译环境，尝试远程代码沙箱执行失败：{str(e)}"
+            "output": f"本地无编译环境，尝试连接远程代码沙箱执行失败：{str(e)}"
         }
 
 
@@ -1178,9 +1191,8 @@ def run_code():
             if compile_process.returncode != 0:
                 return jsonify({"success": False, "output": f"编译错误：\n{compile_process.stderr or compile_process.stdout}"})
         except FileNotFoundError:
-            # 捕获找不到编译器的异常，自动降级调用公共 Piston 接口远程运行
             print(f"本地未找到 {compiler} 编译器，自动降级为远程代码沙箱执行...")
-            remote_res = run_code_via_piston(language, code)
+            remote_res = run_code_via_jdoodle(language, code)
             return jsonify(remote_res)
             
         try:
@@ -1215,9 +1227,8 @@ def run_code():
             if compile_process.returncode != 0:
                 return jsonify({"success": False, "output": f"编译错误：\n{compile_process.stderr or compile_process.stdout}"})
         except FileNotFoundError:
-            # 捕获找不到编译器的异常，自动降级调用公共 Piston 接口远程运行
             print("本地未找到 javac 编译器，自动降级为远程代码沙箱执行...")
-            remote_res = run_code_via_piston(language, code)
+            remote_res = run_code_via_jdoodle(language, code)
             return jsonify(remote_res)
             
         try:
@@ -1234,8 +1245,7 @@ def run_code():
             return jsonify({"success": False, "output": f"执行错误：\n{str(e)}"})
         
     else:
-        # 其他多语言（如 JavaScript 等）未在本地定义，但可以通过 Piston 尝试远程执行
-        remote_res = run_code_via_piston(language, code)
+        remote_res = run_code_via_jdoodle(language, code)
         return jsonify(remote_res)
 
 # ============================
