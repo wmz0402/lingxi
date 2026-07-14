@@ -8140,7 +8140,7 @@ function renderChapterContent() {
           <div style="font-size: 12px; font-weight: 600; color: #7c3aed;">课后测试习题</div>
           <span style="font-size: 12px; font-weight: 600; color: #8b5cf6;">当前进度: ${activeChapterQuizIndex + 1} / ${quizArray.length}</span>
         </div>
-        <div class="quiz-question" style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 16px;">${q.question}</div>
+        <div class="quiz-question markdown-body" style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 16px; line-height: 1.6;">${safeMarkdownParse(q.question)}</div>
         <div id="chapterQuizOptionsList" style="display: flex; flex-direction: column; gap: 8px;">
           ${optionsHtml}
         </div>
@@ -10722,30 +10722,43 @@ function markdownToMindmapHtml(mdText) {
   let rootTitle = '思维导图';
   const branches = []; // 每个 branch = { title: string, leaves: string[] }
 
-  for (const line of lines) {
-    if (line.startsWith('# ') && !line.startsWith('## ')) {
-      rootTitle = line.replace(/^# /, '').replace(/[#*_`]/g, '').trim();
-    } else if (line.startsWith('## ')) {
+  const cleanMarker = (str) => {
+    return str.replace(/^[#\s\-*+]+/g, '').replace(/[#*_`]/g, '').trim();
+  };
+
+  for (let line of lines) {
+    line = line.trim();
+    const m1 = line.match(/^#\s+(.*)/);
+    const m2 = line.match(/^##\s+(.*)/);
+    const m3 = line.match(/^###+\s+(.*)/);
+    const mList = line.match(/^[-*+]\s+(.*)/);
+
+    if (m1 && !m2) {
+      rootTitle = cleanMarker(m1[1]);
+    } else if (m2) {
       branches.push({
-        title: line.replace(/^## /, '').replace(/[#*_`]/g, '').trim(),
+        title: cleanMarker(m2[1]),
         leaves: []
       });
-    } else if (line.startsWith('### ')) {
-      // 三级标题作为叶子项
+    } else if (m3) {
       if (branches.length > 0) {
-        branches[branches.length - 1].leaves.push(line.replace(/^### /, '').replace(/[#*_`]/g, '').trim());
+        branches[branches.length - 1].leaves.push(cleanMarker(m3[1]));
       }
-    } else if (line.startsWith('- ') || line.startsWith('* ')) {
-      // 列表项作为叶子
+    } else if (mList) {
       if (branches.length > 0) {
-        branches[branches.length - 1].leaves.push(line.replace(/^[-*] /, '').replace(/[#*_`]/g, '').trim());
+        branches[branches.length - 1].leaves.push(cleanMarker(mList[1]));
+      }
+    } else if (line.length > 0) {
+      if (branches.length > 0) {
+        branches[branches.length - 1].leaves.push(cleanMarker(line));
       }
     }
   }
 
-  // 如果没有解析到分支，整段文本当叶子
+  // 如果没有解析到分支，整段文本当叶子并进行彻底清洗
   if (branches.length === 0) {
-    branches.push({ title: '内容概要', leaves: lines.slice(1, 8) });
+    const cleanedLeaves = lines.slice(1, 8).map(l => cleanMarker(l)).filter(l => l);
+    branches.push({ title: '内容概要', leaves: cleanedLeaves });
   }
 
   // 构建脑图 HTML
@@ -10753,7 +10766,6 @@ function markdownToMindmapHtml(mdText) {
   html += `<div class="mm-root">${escapeHtml(rootTitle)}</div>`;
   html += '<div class="mm-branches">';
 
-  // 给每个分支分配颜色
   const colors = [
     ['#6366f1', '#eef2ff'], ['#ec4899', '#fdf2f8'], ['#f59e0b', '#fffbeb'],
     ['#10b981', '#ecfdf5'], ['#3b82f6', '#eff6ff'], ['#8b5cf6', '#f5f3ff'],
