@@ -685,7 +685,12 @@ def chat():
         else:
             safe_path = os.path.join(BASE_DIR, 'static', 'uploads', filename)
         if os.path.exists(safe_path):
-            image_extract_prompt = "请仔细识别并提取这张图片中的所有关键文字、数学公式、图表数据、手写内容或代码。如果是题目，请完整复述题目内容，不需要进行解答，只需客观、准确且完整地还原图片中的所有信息。"
+            image_extract_prompt = (
+                "请仔细识别并客观描述或提取这张图片中的关键信息：\n"
+                "1. 如果图片中包含文字、数学公式、图表数据、手写内容或代码，请完整且准确地提取出图片中所有的文本内容。\n"
+                "2. 如果图片是人物、风景、物品或非文字的日常图像，请非常详细、客观地描述画面中的视觉内容（例如：画面中有几个人，他们的穿着、神态动作、背景环境、画面中的核心物体以及构图排版等）。\n"
+                "注意：您的职责是客观还原图片内容以供对话系统使用，不需要对用户提问进行解答，也不要包含任何多余的引申评论。"
+            )
             image_description = call_xunfei_image(safe_path, image_extract_prompt)
             print(f"[DEBUG] 图像提取结果前100字: {image_description[:100]}...")
             if "图片识别调用失败" not in image_description and image_description.strip():
