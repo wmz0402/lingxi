@@ -10767,7 +10767,17 @@ function closeMindmapOnOverlay(event) {
 
 // 将 Markdown 标题/列表文本转换为漂亮的脑图 HTML
 function markdownToMindmapHtml(mdText) {
-  const lines = mdText.split('\n').map(l => l.trimEnd()).filter(l => l.trim());
+  let lines = mdText.split('\n')
+    .map(l => l.trim())
+    .filter(l => {
+      // 仅保留标题行（# 开头）和列表行（-, *, + 开头），直接滤除普通长文本段落、表格源码、代码块等杂音
+      return l.startsWith('#') || l.startsWith('-') || l.startsWith('*') || l.startsWith('+');
+    });
+  
+  if (lines.length === 0) {
+    // 兜底降级：若未过滤出大纲行，则回退为传统非空行全文本解析
+    lines = mdText.split('\n').map(l => l.trim()).filter(l => l);
+  }
   let rootTitle = '思维导图';
   const branches = []; // 每个 branch = { title: string, leaves: string[] }
 
