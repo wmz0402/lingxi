@@ -504,15 +504,23 @@ def upload_file():
         return jsonify({"error": "不支持的图片格式，仅支持 JPG, JPEG, PNG, GIF, WEBP"}), 400
         
     import uuid
-    upload_dir = os.path.join(BASE_DIR, 'static', 'uploads')
-    os.makedirs(upload_dir, exist_ok=True)
+    import tempfile
+    upload_dir = tempfile.gettempdir()
     
     new_filename = f"{uuid.uuid4().hex}{ext}"
     save_path = os.path.join(upload_dir, new_filename)
     file.save(save_path)
     
-    relative_url = f"/static/uploads/{new_filename}"
+    relative_url = f"/api/tmp_images/{new_filename}"
     return jsonify({"success": True, "image_path": relative_url})
+
+
+@app.route('/api/tmp_images/<filename>', methods=['GET'])
+def get_tmp_image(filename):
+    from flask import send_from_directory
+    import tempfile
+    upload_dir = tempfile.gettempdir()
+    return send_from_directory(upload_dir, filename)
 
 
 # 文档上传与文本提取接口（供文档诊断弹窗使用）
@@ -529,8 +537,8 @@ def upload_documents():
         return jsonify({"error": "未选择任何文件"}), 400
 
     allowed_extensions = {'.txt', '.pdf', '.docx', '.doc', '.md', '.csv'}
-    upload_dir = os.path.join(BASE_DIR, 'static', 'uploads')
-    os.makedirs(upload_dir, exist_ok=True)
+    import tempfile
+    upload_dir = tempfile.gettempdir()
 
     all_text_parts = []
     file_summaries = []
@@ -671,7 +679,11 @@ def chat():
     image_extracted_context = ""
     if image_path:
         filename = os.path.basename(image_path)
-        safe_path = os.path.join(BASE_DIR, 'static', 'uploads', filename)
+        import tempfile
+        if "/api/tmp_images/" in image_path:
+            safe_path = os.path.join(tempfile.gettempdir(), filename)
+        else:
+            safe_path = os.path.join(BASE_DIR, 'static', 'uploads', filename)
         if os.path.exists(safe_path):
             image_extract_prompt = "请仔细识别并提取这张图片中的所有关键文字、数学公式、图表数据、手写内容或代码。如果是题目，请完整复述题目内容，不需要进行解答，只需客观、准确且完整地还原图片中的所有信息。"
             image_description = call_xunfei_image(safe_path, image_extract_prompt)
