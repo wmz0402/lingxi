@@ -6223,6 +6223,20 @@ function handleLogin(e) {
       learningStats.firstLoginDate = d.toISOString().split('T')[0];
     }
     userProfileDimensions = migrateProfileDimensions(users[matchedUserKey].userProfileDimensions) || getDefaultProfileDimensions();
+    // 自愈清洗旧数据中因题目截取产生的极长、错乱薄弱知识点标签
+    if (userProfileDimensions && userProfileDimensions.knowledge && userProfileDimensions.knowledge.topics) {
+      const topicsObj = userProfileDimensions.knowledge.topics;
+      let dirtyFound = false;
+      for (const key in topicsObj) {
+        if (key.length > 15 && (key.includes('：') || key.includes(':') || key.includes('下') || key.includes('的') || key.includes('中') || key.includes('，') || key.includes(',') || key.includes('是') || key.includes('在'))) {
+          delete topicsObj[key];
+          dirtyFound = true;
+        }
+      }
+      if (dirtyFound) {
+        updateKnowledgeTopics();
+      }
+    }
     // 从 profile.hobbies 同步兴趣标签到画像
     if (users[matchedUserKey].profile && users[matchedUserKey].profile.hobbies) {
       const hobbies = users[matchedUserKey].profile.hobbies;
@@ -8261,7 +8275,7 @@ function submitChapterQuiz() {
     successBox.style.display = 'block';
     failBox.style.display = 'none';
     
-    const questionTopic = q && q.question ? q.question.substring(0, 20) : null;
+    const questionTopic = ch.title ? ch.title.replace(/^第?\s*\d+\s*[章章节节]\s*[：:\s]*/, '').trim() : '通用';
     updateProfileFromQuiz(course.title, questionTopic, true, null);
     return;
   }
@@ -8292,7 +8306,7 @@ function submitChapterQuiz() {
   }
   
   // 动态更新能力画像
-  const questionTopic = q && q.question ? q.question.substring(0, 20) : null;
+  const questionTopic = ch.title ? ch.title.replace(/^第?\s*\d+\s*[章章节节]\s*[：:\s]*/, '').trim() : '通用';
   const errorPattern = !isCorrect && q && q.analysis ? q.analysis.substring(0, 30) : null;
   updateProfileFromQuiz(course.title, questionTopic, isCorrect, errorPattern);
 }
@@ -12562,6 +12576,20 @@ document.addEventListener('DOMContentLoaded', function() {
                   learningStats.firstLoginDate = d.toISOString().split('T')[0];
                 }
                 userProfileDimensions = migrateProfileDimensions(users[currentUserEmail].userProfileDimensions) || getDefaultProfileDimensions();
+                // 自愈清洗旧数据中因题目截取产生的极长、错乱薄弱知识点标签
+                if (userProfileDimensions && userProfileDimensions.knowledge && userProfileDimensions.knowledge.topics) {
+                  const topicsObj = userProfileDimensions.knowledge.topics;
+                  let dirtyFound = false;
+                  for (const key in topicsObj) {
+                    if (key.length > 15 && (key.includes('：') || key.includes(':') || key.includes('下') || key.includes('的') || key.includes('中') || key.includes('，') || key.includes(',') || key.includes('是') || key.includes('在'))) {
+                      delete topicsObj[key];
+                      dirtyFound = true;
+                    }
+                  }
+                  if (dirtyFound) {
+                    updateKnowledgeTopics();
+                  }
+                }
                 if (users[currentUserEmail].profile && users[currentUserEmail].profile.hobbies) {
                   const hobbies = users[currentUserEmail].profile.hobbies;
                   if (userProfileDimensions.interest) {
