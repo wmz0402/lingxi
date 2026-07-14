@@ -6190,6 +6190,16 @@ function handleLogin(e) {
 
     // Restore all data structures
     myCourses = users[matchedUserKey].myCourses || [];
+    
+    // 一键重置清空保存在本地 localStorage 的章节思维脑图缓存，强迫前端在展示时使用最新升级的过滤算法进行实时渲染
+    myCourses.forEach(c => {
+      if (c.chapters) {
+        c.chapters.forEach(ch => {
+          ch.mindmapHtml = "";
+        });
+      }
+    });
+
     chatHistory = users[matchedUserKey].chatHistory || [];
     // 兼容升级旧数据结构
     chatHistory = chatHistory.map(item => {
@@ -12520,6 +12530,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (users[currentUserEmail]) {
                 userName = users[currentUserEmail].name;
                 myCourses = users[currentUserEmail].myCourses || [];
+                // 刷新/自动登录时，清空本地思维脑图缓存以重新用最新过滤算法进行渲染
+                myCourses.forEach(c => {
+                  if (c.chapters) {
+                    c.chapters.forEach(ch => {
+                      ch.mindmapHtml = "";
+                    });
+                  }
+                });
 
 
 
