@@ -10785,8 +10785,24 @@ function markdownToMindmapHtml(mdText) {
     return str.replace(/^[#\s\-*+]+/g, '').replace(/[#*_`]/g, '').trim();
   };
 
+  let skipMode = false;
   for (let line of lines) {
     line = line.trim();
+    
+    // 自动屏蔽不属于知识主干的“参考资料”、“外部链接”等杂音板块及底下的所有链接子项
+    if (line.startsWith('#')) {
+      if (line.includes('参考资料') || line.includes('参考链接') || line.includes('推荐阅读') || line.includes('参考文献') || line.includes('拓展阅读') || line.includes('外部链接')) {
+        skipMode = true;
+        continue;
+      } else {
+        skipMode = false;
+      }
+    }
+    
+    if (skipMode) {
+      continue;
+    }
+
     const m1 = line.match(/^#\s+(.*)/);
     const m2 = line.match(/^##\s+(.*)/);
     const m3 = line.match(/^###+\s+(.*)/);
