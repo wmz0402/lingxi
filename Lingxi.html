@@ -1654,6 +1654,344 @@
       text-align: center;
     }
 
+    /* ========== AI解题群样式 ========== */
+    .group-chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .group-chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.08);
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .group-chat-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .group-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1, #0ea5e9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+
+    .group-chat-title h3 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      color: #1e1b4b;
+    }
+
+    .group-members {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .member-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-left: 6px;
+    }
+
+    .member-dot:first-child {
+      margin-left: 0;
+    }
+
+    .group-new-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      border: 1.5px solid #e2e8f0;
+      background: #fff;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .group-new-btn:hover {
+      border-color: #a78bfa;
+      color: #7c3aed;
+      background: #faf5ff;
+    }
+
+    .group-chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .group-welcome {
+      text-align: center;
+      padding: 40px 20px;
+      color: #64748b;
+    }
+
+    .group-welcome-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .group-welcome h4 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e1b4b;
+    }
+
+    .group-welcome p {
+      margin: 0 0 24px 0;
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    .group-welcome-tips {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .tip-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: #fff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      font-size: 13px;
+      color: #334155;
+    }
+
+    .tip-card:hover {
+      border-color: #a78bfa;
+      background: #faf5ff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
+    }
+
+    .tip-icon {
+      font-size: 20px;
+    }
+
+    /* 群聊消息样式 */
+    .group-msg {
+      display: flex;
+      gap: 12px;
+      animation: fadeUp 0.3s ease;
+    }
+
+    .group-msg.user {
+      justify-content: flex-end;
+    }
+
+    .group-msg.user .group-msg-content {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: #fff;
+      border-radius: 16px 4px 16px 16px;
+    }
+
+    .group-msg.user .group-msg-sender {
+      text-align: right;
+    }
+
+    .group-msg-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .group-msg.user .group-msg-avatar {
+      order: 2;
+    }
+
+    .group-msg-body {
+      max-width: 70%;
+    }
+
+    .group-msg.user .group-msg-body {
+      order: 1;
+    }
+
+    .group-msg-sender {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    .group-msg-content {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px 16px 16px 16px;
+      padding: 12px 16px;
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: #1e293b;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .group-msg-content .markdown-body {
+      font-size: 13.5px;
+      line-height: 1.65;
+    }
+
+    .group-msg-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .group-msg-time {
+      font-size: 11px;
+      color: #cbd5e1;
+    }
+
+    .group-msg-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .group-msg-status.thinking {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    .group-msg-status.done {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .group-msg-status.error {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .group-typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 4px 0;
+    }
+
+    .group-typing-indicator span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #94a3b8;
+      animation: groupTyping 1.4s infinite;
+    }
+
+    .group-typing-indicator span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .group-typing-indicator span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes groupTyping {
+      0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+      }
+      30% {
+        transform: translateY(-6px);
+        opacity: 1;
+      }
+    }
+
+    .group-chat-input-area {
+      padding: 16px 32px 20px;
+      border-top: 1px solid rgba(139, 92, 246, 0.05);
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .group-chat-input-box {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      background: #fff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 10px 14px;
+      transition: border-color 0.2s;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .group-chat-input-box:focus-within {
+      border-color: #a78bfa;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    .group-chat-input-box textarea {
+      flex: 1;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1e293b;
+      line-height: 1.5;
+      max-height: 120px;
+      min-height: 22px;
+      background: transparent;
+    }
+
+    .group-chat-input-box textarea::placeholder {
+      color: #cbd5e1;
+    }
+
     /* Right panel */
     .right-panel {
       width: 320px;
@@ -3472,6 +3810,93 @@
   </div>
 </div>
 
+<!-- ===== AI翻译弹窗 ===== -->
+<div id="translateModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.45); backdrop-filter:blur(8px); z-index:1000; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:rgba(255,255,255,0.97); border-radius:20px; max-width:680px; width:100%; max-height:85vh; overflow-y:auto; padding:28px 32px; box-shadow:0 20px 60px rgba(0,0,0,0.15); position:relative;">
+    <button onclick="closeTranslateModal()" style="position:absolute; top:14px; right:18px; background:none; border:none; font-size:26px; color:#94a3b8; cursor:pointer; line-height:1;">&times;</button>
+
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+      <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,#6366f1,#8b5cf6); display:flex; align-items:center; justify-content:center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+          <path d="M5 8l6 6" /><path d="M4 14l6-6 2-3" /><path d="M2 5h12" /><path d="M7 2h1" />
+          <path d="M22 22l-5-10-5 10" /><path d="M14 18h6" />
+        </svg>
+      </div>
+      <div>
+        <h3 style="margin:0; font-size:18px; font-weight:700; color:#1e1b4b;">AI翻译</h3>
+        <p style="margin:2px 0 0; font-size:12px; color:#94a3b8;">Hy-MT2 翻译 · 支持中英日韩法德西俄</p>
+      </div>
+    </div>
+
+    <!-- 语言选择行 -->
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+      <select id="translateSourceLang" style="flex:1; padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:14px; color:#1e293b; background:#fff; outline:none; cursor:pointer;">
+        <option value="auto">自动检测</option>
+        <option value="zh">中文</option>
+        <option value="en">英文</option>
+        <option value="ja">日文</option>
+        <option value="ko">韩文</option>
+        <option value="fr">法文</option>
+        <option value="de">德文</option>
+        <option value="es">西班牙文</option>
+        <option value="ru">俄文</option>
+      </select>
+      <button onclick="swapTranslateLangs()" title="交换语言" style="width:36px; height:36px; border-radius:50%; border:1.5px solid #e2e8f0; background:#faf5ff; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s;" onmouseover="this.style.borderColor='#a78bfa';this.style.background='#ede9fe'" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#faf5ff'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2">
+          <path d="M7 16V4m0 0L3 8m4-4l4 4" />
+          <path d="M17 8v12m0 0l4-4m-4 4l-4-4" />
+        </svg>
+      </button>
+      <select id="translateTargetLang" style="flex:1; padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:14px; color:#1e293b; background:#fff; outline:none; cursor:pointer;">
+        <option value="en">英文</option>
+        <option value="zh">中文</option>
+        <option value="ja">日文</option>
+        <option value="ko">韩文</option>
+        <option value="fr">法文</option>
+        <option value="de">德文</option>
+        <option value="es">西班牙文</option>
+        <option value="ru">俄文</option>
+      </select>
+    </div>
+
+    <!-- 输入区 -->
+    <textarea id="translateInput" rows="5" placeholder="输入或粘贴需要翻译的文本..." style="width:100%; padding:14px 16px; border:1.5px solid #e2e8f0; border-radius:12px; font-size:14px; line-height:1.65; color:#1e293b; resize:vertical; min-height:100px; max-height:300px; outline:none; font-family:inherit; box-sizing:border-box; transition:border-color 0.2s;" onfocus="this.style.borderColor='#a78bfa'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+
+    <!-- 翻译按钮 -->
+    <div style="display:flex; justify-content:flex-end; margin:14px 0;">
+      <button id="translateBtn" onclick="doTranslate()" style="padding:10px 28px; border-radius:10px; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:14px; font-weight:600; border:none; cursor:pointer; display:flex; align-items:center; gap:8px; transition:opacity 0.2s;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 8l6 6" /><path d="M4 14l6-6 2-3" /><path d="M2 5h12" />
+          <path d="M22 22l-5-10-5 10" /><path d="M14 18h6" />
+        </svg>
+        翻译
+      </button>
+    </div>
+
+    <!-- 结果区 -->
+    <div id="translateResult" style="display:none;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+        <span style="font-size:13px; font-weight:600; color:#6d28d9;">翻译结果</span>
+        <button onclick="copyTranslateResult()" style="padding:4px 12px; border-radius:6px; border:1px solid #e2e8f0; background:#fff; font-size:12px; color:#64748b; cursor:pointer; display:flex; align-items:center; gap:4px; transition:all 0.2s;" onmouseover="this.style.borderColor='#a78bfa';this.style.color='#7c3aed'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          复制
+        </button>
+      </div>
+      <div id="translateResultText" style="padding:14px 16px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; font-size:14px; line-height:1.65; color:#1e293b; min-height:60px; white-space:pre-wrap; word-break:break-word;"></div>
+    </div>
+
+    <!-- 加载中 -->
+    <div id="translateLoading" style="display:none; text-align:center; padding:24px;">
+      <div style="display:inline-flex; gap:6px;">
+        <span style="width:8px; height:8px; border-radius:50%; background:#8b5cf6; animation:groupTyping 1.4s infinite;"></span>
+        <span style="width:8px; height:8px; border-radius:50%; background:#8b5cf6; animation:groupTyping 1.4s infinite 0.2s;"></span>
+        <span style="width:8px; height:8px; border-radius:50%; background:#8b5cf6; animation:groupTyping 1.4s infinite 0.4s;"></span>
+      </div>
+      <p style="margin:10px 0 0; font-size:13px; color:#94a3b8;">AI正在翻译中...</p>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 通用确认弹窗 ===== -->
 <div id="confirmModal"
   style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.45); backdrop-filter:blur(6px); z-index:1100; align-items:center; justify-content:center; padding:20px;">
@@ -3782,6 +4207,24 @@
           </svg>
           新建对话
         </button>
+        <!-- AI解题群入口 -->
+        <div class="sidebar-section" style="margin-bottom:4px;">
+          <div class="agent-card" onclick="switchMainPage('groupChat')" style="border:1.5px solid rgba(139,92,246,0.2); background:linear-gradient(135deg,rgba(139,92,246,0.06),rgba(99,102,241,0.06));">
+            <div class="agent-icon" style="background:linear-gradient(135deg,#8b5cf6,#6366f1,#0ea5e9)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            <div class="agent-info">
+              <div class="agent-name">AI解题群</div>
+              <div class="agent-desc">讯飞 · Hy-MT2 · Qwen3</div>
+            </div>
+            <div class="agent-status online"></div>
+          </div>
+        </div>
         <div class="sidebar-section">
           <div class="sidebar-section-title">智能体团队</div>
           <div class="agent-card active" onclick="selectAgent(this,'all')">
@@ -3951,6 +4394,17 @@
               </svg>
               出题测试
             </button>
+            <button class="quick-tool-btn" onclick="openTranslateModal()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 8l6 6" />
+                <path d="M4 14l6-6 2-3" />
+                <path d="M2 5h12" />
+                <path d="M7 2h1" />
+                <path d="M22 22l-5-10-5 10" />
+                <path d="M14 18h6" />
+              </svg>
+              AI翻译
+            </button>
           </div>
 
           <div class="chat-image-preview" id="chatImagePreview"></div>
@@ -3968,6 +4422,63 @@
               </svg></button>
           </div>
           <div class="chat-input-hint">按 Enter 发送 · Shift+Enter 换行 · 多智能体协同驱动</div>
+        </div>
+      </div>
+
+      <!-- AI解题群页面 -->
+      <div class="group-chat-area main-content-page hidden" id="groupChatArea">
+        <div class="group-chat-header">
+          <div class="group-chat-title">
+            <button class="back-to-chat-btn" onclick="switchMainPage('chat')" style="margin-right:12px;flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              返回对话
+            </button>
+            <div class="group-avatar">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            <div>
+              <h3>AI解题群</h3>
+              <div class="group-members">
+                <span class="member-dot" style="background:#8b5cf6"></span>讯飞星火
+                <span class="member-dot" style="background:#4f46e5"></span>Hy-MT2
+                <span class="member-dot" style="background:#0ea5e9"></span>Qwen3
+              </div>
+            </div>
+          </div>
+          <button class="group-new-btn" onclick="newGroupChat()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            新群聊
+          </button>
+        </div>
+        <div class="group-chat-messages" id="groupChatMessages">
+          <div class="group-welcome">
+            <div class="group-welcome-icon">👥</div>
+            <h4>欢迎来到 AI解题群</h4>
+            <p>三位AI导师已就位，随时为你解答问题</p>
+          </div>
+        </div>
+        <div class="group-chat-input-area">
+          <div class="group-chat-input-box">
+            <textarea id="groupChatInput" rows="1" placeholder="输入问题，三位AI同时为你解答..." onkeydown="handleGroupChatKey(event)"
+              oninput="autoResize(this)"></textarea>
+            <button class="send-btn" id="groupChatSendBtn" onclick="sendGroupMessage()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            </button>
+          </div>
+          <div class="chat-input-hint">按 Enter 发送 · Shift+Enter 换行 · 三大模型同时解答</div>
         </div>
       </div>
 
@@ -6890,6 +7401,12 @@ function switchMainPage(pageId) {
   // Show target page
   if (pageId === 'chat') {
     document.getElementById('chatArea').classList.remove('hidden');
+  } else if (pageId === 'groupChat') {
+    document.getElementById('groupChatArea').classList.remove('hidden');
+    setTimeout(() => {
+      const input = document.getElementById('groupChatInput');
+      if (input) input.focus();
+    }, 100);
   } else if (pageId === 'search') {
     document.getElementById('searchArea').classList.remove('hidden');
     setTimeout(() => {
@@ -11717,6 +12234,282 @@ function handleSendBtnClick() {
   } else {
     sendMessage();
   }
+}
+
+// ==================== AI解题群功能 ====================
+let isGroupChatProcessing = false;
+let groupChatHistory = [];
+
+function handleGroupChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (!isGroupChatProcessing) {
+      sendGroupMessage();
+    }
+  }
+}
+
+function quickGroupQuestion(question) {
+  document.getElementById('groupChatInput').value = question;
+  sendGroupMessage();
+}
+
+function newGroupChat() {
+  groupChatHistory = [];
+  const messages = document.getElementById('groupChatMessages');
+  if (messages) {
+    messages.innerHTML = `
+      <div class="group-welcome">
+        <div class="group-welcome-icon">👥</div>
+        <h4>欢迎来到 AI解题群</h4>
+        <p>三位AI导师已就位，随时为你解答问题</p>
+      </div>
+    `;
+  }
+}
+
+function getGroupChatHistory() {
+  return groupChatHistory.slice(-10);
+}
+
+async function sendGroupMessage() {
+  const inp = document.getElementById('groupChatInput');
+  const text = inp.value.trim();
+  if (!text || isGroupChatProcessing) return;
+
+  isGroupChatProcessing = true;
+  updateGroupSendBtnState();
+
+  const chat = document.getElementById('groupChatMessages');
+  
+  // 移除欢迎页
+  const welcome = chat.querySelector('.group-welcome');
+  if (welcome) welcome.remove();
+
+  // 渲染用户头像
+  let avatarStyleHtml = '';
+  let avatarText = userName.charAt(0).toUpperCase();
+  if (uploadedAvatarDataUrl && uploadedAvatarDataUrl.startsWith('data:image')) {
+    avatarStyleHtml = `background-image:url(${uploadedAvatarDataUrl}); background-size:cover; background-position:center;`;
+    avatarText = '';
+  } else {
+    avatarStyleHtml = `background:linear-gradient(135deg,#818cf8,#a78bfa);`;
+  }
+
+  // 添加用户消息
+  chat.insertAdjacentHTML('beforeend', `
+    <div class="group-msg user">
+      <div class="group-msg-avatar" style="${avatarStyleHtml}">${avatarText}</div>
+      <div class="group-msg-body">
+        <div class="group-msg-sender">${escapeHtml(userName)}</div>
+        <div class="group-msg-content">${escapeHtml(text)}</div>
+      </div>
+    </div>
+  `);
+  
+  inp.value = '';
+  inp.style.height = 'auto';
+  chat.scrollTop = chat.scrollHeight;
+
+  // 添加到历史记录（请求之后再push，避免重复）
+  // groupChatHistory.push 在请求成功后处理
+
+  // 用轮次计数器保证每轮AI回复的DOM ID唯一
+  const roundId = Date.now();
+
+  // 三个AI的配置
+  const aiConfigs = [
+    { key: 'xunfei', name: '讯飞星火', avatar: '讯', color: 'linear-gradient(135deg,#8b5cf6,#6366f1)' },
+    { key: 'deepseek', name: 'Hy-MT2', avatar: 'H', color: 'linear-gradient(135deg,#4f46e5,#6366f1)' },
+    { key: 'qianwen', name: 'Qwen3', avatar: 'Q', color: 'linear-gradient(135deg,#0ea5e9,#06b6d4)' }
+  ];
+
+  // 添加三个AI的"思考中"消息（ID带roundId，确保唯一）
+  aiConfigs.forEach(ai => {
+    chat.insertAdjacentHTML('beforeend', `
+      <div class="group-msg assistant group-msg-${ai.key}" id="group-msg-${ai.key}-${roundId}">
+        <div class="group-msg-avatar" style="background:${ai.color}">${ai.avatar}</div>
+        <div class="group-msg-body">
+          <div class="group-msg-sender">${ai.name}</div>
+          <div class="group-msg-content">
+            <div class="group-typing-indicator">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="group-msg-meta">
+            <span class="group-msg-status thinking">思考中...</span>
+          </div>
+        </div>
+      </div>
+    `);
+  });
+  
+  chat.scrollTop = chat.scrollHeight;
+
+  try {
+    const history = getGroupChatHistory();
+    const response = await fetch('/api/group_chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: text,
+        user_id: currentUserEmail,
+        history: history
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('请求失败');
+    }
+
+    const data = await response.json();
+    const results = data.results;
+
+    // 更新每个AI的回复
+    // 先记录讯飞回复，再push用户消息，保证历史顺序正确：[..., user, assistant, user, assistant]
+    let xunfeiReply = null;
+    aiConfigs.forEach(ai => {
+      const result = results[ai.key];
+      const msgEl = document.getElementById(`group-msg-${ai.key}-${roundId}`);
+      if (msgEl && result) {
+        const contentEl = msgEl.querySelector('.group-msg-content');
+        const statusEl = msgEl.querySelector('.group-msg-status');
+        const metaEl = msgEl.querySelector('.group-msg-meta');
+        
+        // 渲染Markdown内容
+        const parsedContent = safeMarkdownParse(result.content);
+        contentEl.innerHTML = `<div class="markdown-body">${parsedContent}</div>`;
+        
+        // 更新状态
+        statusEl.className = `group-msg-status ${result.status}`;
+        if (result.status === 'done') {
+          statusEl.textContent = `✓ 完成 (${result.elapsed}s)`;
+        } else if (result.status === 'error') {
+          statusEl.textContent = '✗ 失败';
+        }
+
+        if (ai.key === 'xunfei' && result.status === 'done') {
+          xunfeiReply = result.content;
+        }
+      }
+    });
+
+    // 按正确顺序写入历史：先用户，再讯飞回复
+    groupChatHistory.push({ role: 'user', content: text });
+    if (xunfeiReply) {
+      groupChatHistory.push({
+        role: 'assistant',
+        content: xunfeiReply,
+        model: 'xunfei'
+      });
+    }
+
+    // 重新渲染数学公式
+    if (window.MathJax) {
+      MathJax.typesetPromise([chat]).catch(() => {});
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+
+  } catch (err) {
+    console.error('群聊请求失败:', err);
+    aiConfigs.forEach(ai => {
+      const msgEl = document.getElementById(`group-msg-${ai.key}-${roundId}`);
+      if (msgEl) {
+        const contentEl = msgEl.querySelector('.group-msg-content');
+        const statusEl = msgEl.querySelector('.group-msg-status');
+        contentEl.innerHTML = `<div style="color:#dc2626;">请求失败：${escapeHtml(err.message)}</div>`;
+        statusEl.className = 'group-msg-status error';
+        statusEl.textContent = '✗ 失败';
+      }
+    });
+  }
+
+  isGroupChatProcessing = false;
+  updateGroupSendBtnState();
+}
+
+function updateGroupSendBtnState() {
+  const btn = document.getElementById('groupChatSendBtn');
+  if (!btn) return;
+  if (isGroupChatProcessing) {
+    btn.style.opacity = '0.5';
+    btn.style.cursor = 'not-allowed';
+  } else {
+    btn.style.opacity = '';
+    btn.style.cursor = '';
+  }
+}
+
+// ==================== AI翻译功能 ====================
+let isTranslating = false;
+
+function openTranslateModal() {
+  const modal = document.getElementById('translateModal');
+  modal.style.display = 'flex';
+}
+
+function closeTranslateModal() {
+  const modal = document.getElementById('translateModal');
+  modal.style.display = 'none';
+}
+
+function swapTranslateLangs() {
+  const src = document.getElementById('translateSourceLang');
+  const tgt = document.getElementById('translateTargetLang');
+  if (src.value === 'auto') return;
+  const tmp = src.value;
+  src.value = tgt.value;
+  tgt.value = tmp;
+}
+
+function copyTranslateResult() {
+  const text = document.getElementById('translateResultText').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target.closest('button');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> 已复制';
+    btn.style.color = '#16a34a';
+    btn.style.borderColor = '#bbf7d0';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.color = ''; btn.style.borderColor = ''; }, 1500);
+  });
+}
+
+async function doTranslate() {
+  const text = document.getElementById('translateInput').value.trim();
+  if (!text || isTranslating) return;
+  isTranslating = true;
+
+  const btn = document.getElementById('translateBtn');
+  const result = document.getElementById('translateResult');
+  const loading = document.getElementById('translateLoading');
+  const resultText = document.getElementById('translateResultText');
+
+  btn.style.opacity = '0.5';
+  btn.style.cursor = 'not-allowed';
+  result.style.display = 'none';
+  loading.style.display = 'block';
+
+  const targetLang = document.getElementById('translateTargetLang').value;
+
+  try {
+    const resp = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, target_lang: targetLang })
+    });
+    const data = await resp.json();
+    resultText.textContent = data.result || '翻译结果为空';
+    result.style.display = 'block';
+  } catch (err) {
+    resultText.textContent = '翻译请求失败：' + err.message;
+    result.style.display = 'block';
+  }
+
+  loading.style.display = 'none';
+  btn.style.opacity = '';
+  btn.style.cursor = '';
+  isTranslating = false;
 }
 
 function updateSendBtnState() {

@@ -28,6 +28,20 @@ SPARK_APP_ID = os.getenv("SPARK_APP_ID", "d3c1b0f3")
 SPARK_API_SECRET = os.getenv("SPARK_API_SECRET", "Y2Q1YWMzNWE2M2I0YTM3OWMxZDk2YWQ0")
 SPARK_API_KEY = os.getenv("SPARK_API_KEY", "cc4d24e4a9dcc2b82dc0665409de43f6")
 
+# DeepSeek API 配置
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "sk-deepseek-api-key-placeholder")
+DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions"
+
+# 讯飞 MaaS Qwen3-1.7B 模型配置（群聊解题用，OpenAI 兼容 HTTP 接口）
+QWEN_API_KEY = os.getenv("QWEN_API_KEY", "BUNaTHzexwnuCHDXPGVq:XglgTOCfFdeBWXMbIrVh")
+QWEN_API_URL = "https://maas-api.cn-huabei-1.xf-yun.com/v2/chat/completions"
+QWEN_MODEL = "xop3qwen1b7"
+
+# 讯飞翻译服务（MaaS 平台 Hy-MT2-7B 翻译模型，OpenAI 兼容 HTTP 接口）
+TRANSLATE_API_KEY = os.getenv("TRANSLATE_API_KEY", "BUNaTHzexwnuCHDXPGVq:XglgTOCfFdeBWXMbIrVh")
+TRANSLATE_API_URL = "https://maas-api.cn-huabei-1.xf-yun.com/v2/chat/completions"
+TRANSLATE_MODEL = "xophunyuan7bmt"
+
 # ============================
 # 2. Flask 应用初始化
 # ============================
@@ -215,6 +229,151 @@ def call_xunfei_image(image_path: str, prompt: str) -> str:
     except Exception as e:
         print(f"星火图片理解接口调用失败: {e}")
         return f"图片识别调用失败，错误信息: {e}"
+
+
+# ============================
+# 3.2 讯飞 Hy-MT2 翻译模型调用函数（群聊解题用）
+# ============================
+def call_deepseek(prompt: str, system_prompt: str = "你是一个专业、严谨的学习助手。") -> str:
+    """调用讯飞 MaaS Hy-MT2 模型，返回回复内容"""
+    import urllib.request
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {TRANSLATE_API_KEY}"
+    }
+    data = {
+        "model": TRANSLATE_MODEL,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.7,
+        "max_tokens": 2048
+    }
+    req = urllib.request.Request(
+        TRANSLATE_API_URL,
+        data=json.dumps(data).encode("utf-8"),
+        headers=headers,
+        method="POST"
+    )
+    with urllib.request.urlopen(req, timeout=60) as response:
+        result = json.loads(response.read().decode("utf-8"))
+        return result["choices"][0]["message"]["content"].strip()
+
+
+def call_deepseek_with_history(messages_list: list) -> str:
+    """调用讯飞 MaaS Hy-MT2 模型，支持历史会话上下文"""
+    import urllib.request
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {TRANSLATE_API_KEY}"
+    }
+    
+    data = {
+        "model": TRANSLATE_MODEL,
+        "messages": messages_list,
+        "temperature": 0.7,
+        "max_tokens": 2048
+    }
+    
+    req = urllib.request.Request(
+        TRANSLATE_API_URL,
+        data=json.dumps(data).encode("utf-8"),
+        headers=headers,
+        method="POST"
+    )
+    
+    with urllib.request.urlopen(req, timeout=60) as response:
+        result = json.loads(response.read().decode("utf-8"))
+        return result["choices"][0]["message"]["content"].strip()
+
+
+# ============================
+# 3.3 讯飞 MaaS Qwen3-1.7B 模型调用函数
+# ============================
+def call_qianwen(prompt: str, system_prompt: str = "你是一个专业、严谨的学习助手。") -> str:
+    """调用讯飞 MaaS Qwen3-1.7B 模型，返回回复内容"""
+    import urllib.request
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {QWEN_API_KEY}"
+    }
+    data = {
+        "model": QWEN_MODEL,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.7,
+        "max_tokens": 2048
+    }
+    req = urllib.request.Request(
+        QWEN_API_URL,
+        data=json.dumps(data).encode("utf-8"),
+        headers=headers,
+        method="POST"
+    )
+    with urllib.request.urlopen(req, timeout=60) as response:
+        result = json.loads(response.read().decode("utf-8"))
+        return result["choices"][0]["message"]["content"].strip()
+
+
+def call_qianwen_with_history(messages_list: list) -> str:
+    """调用讯飞 MaaS Qwen3-1.7B 模型，支持历史会话上下文"""
+    import urllib.request
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {QWEN_API_KEY}"
+    }
+    data = {
+        "model": QWEN_MODEL,
+        "messages": messages_list,
+        "temperature": 0.7,
+        "max_tokens": 2048
+    }
+    req = urllib.request.Request(
+        QWEN_API_URL,
+        data=json.dumps(data).encode("utf-8"),
+        headers=headers,
+        method="POST"
+    )
+    with urllib.request.urlopen(req, timeout=60) as response:
+        result = json.loads(response.read().decode("utf-8"))
+        return result["choices"][0]["message"]["content"].strip()
+
+
+# ============================
+# 3.4 讯飞翻译服务（MaaS 平台 Hy-MT2-7B，OpenAI 兼容 HTTP 接口）
+# ============================
+def call_translate(text: str, source_lang: str = "auto", target_lang: str = "en") -> str:
+    """调用讯飞 MaaS 翻译模型 Hy-MT2-7B"""
+    lang_map = {
+        "auto": "auto", "zh": "zh", "en": "en", "ja": "ja", "ko": "ko",
+        "fr": "fr", "de": "de", "es": "es", "ru": "ru",
+    }
+    tgt = lang_map.get(target_lang, target_lang)
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {TRANSLATE_API_KEY}"
+    }
+    data = {
+        "model": TRANSLATE_MODEL,
+        "messages": [
+            {"role": "user", "content": f"请将以下内容翻译为{'英文' if tgt == 'en' else tgt}，只输出翻译结果，不要加任何解释或说明：\n\n{text}"}
+        ],
+        "temperature": 0.1,
+        "max_tokens": 4096
+    }
+    req = urllib.request.Request(
+        TRANSLATE_API_URL,
+        data=json.dumps(data).encode("utf-8"),
+        headers=headers,
+        method="POST"
+    )
+    with urllib.request.urlopen(req, timeout=60) as response:
+        result = json.loads(response.read().decode("utf-8"))
+        return result["choices"][0]["message"]["content"].strip()
 
 
 def generate_fallback_response(prompt: str) -> str:
@@ -906,7 +1065,143 @@ def chat():
     })
 
 
-# 7.6 独立视频搜索接口（供前端搜索框使用）
+# 7.5.1 AI解题群接口 - 三个AI同时回复
+@app.route('/api/group_chat', methods=['POST'])
+def group_chat():
+    """AI解题群：科大讯飞 + Hy-MT2 + Qwen3 三个AI同时回复"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "请求体必须为 JSON"}), 400
+
+    user_id = data.get('user_id', 'default')
+    user_input = data.get('message', '').strip()
+    history = data.get('history', [])
+    
+    if not user_input:
+        return jsonify({"error": "消息不能为空"}), 400
+
+    print(f"[DEBUG] /api/group_chat 收到: message='{user_input[:50]}', history_len={len(history)}")
+
+    # 构建通用的解题系统提示
+    system_prompt = """你是一个专业、严谨且耐心的计算机与数学学习导师。请针对用户提出的具体题目、计算或技术问题，给出非常详细、步骤清晰、逻辑严密的讲解与答复。
+在回答时，请遵循以下规则：
+1. 语气一定要专业、严谨、专注且清晰。
+2. 详细给出解题步骤、推导过程或代码说明，引导用户彻底理解。
+3. 所有数学公式都必须使用 LaTeX 格式，且在 Markdown 里严格使用数学包裹符号：行间公式必须使用双美元符号 $$ 包裹，行内公式必须使用单美元符号 $ 包裹。
+4. 如果是编程问题，给出完整的代码实现并逐行解释关键逻辑。"""
+
+    # === 构建 OpenAI 兼容格式的 messages（给 DeepSeek 和通义千问用） ===
+    openai_messages = [{"role": "system", "content": system_prompt}]
+    
+    recent_history = history[-5:] if len(history) > 5 else history
+    for msg in recent_history:
+        if msg.get("role") in ["user", "assistant"]:
+            content = msg.get("content", "")
+            if content and len(content) > 5:
+                if msg.get("role") == "assistant" and msg.get("model"):
+                    if msg.get("model") == "xunfei":
+                        openai_messages.append({"role": "assistant", "content": content})
+                else:
+                    openai_messages.append({
+                        "role": msg.get("role", "user"),
+                        "content": content
+                    })
+    
+    openai_messages.append({"role": "user", "content": user_input})
+    
+    # === 构建讯飞用的单轮 prompt（把历史拼进去，避免多线程 WebSocket 问题） ===
+    xunfei_prompt = system_prompt + "\n\n"
+    for msg in recent_history:
+        if msg.get("role") == "user" and msg.get("content") and len(msg.get("content", "")) > 5:
+            xunfei_prompt += f"用户：{msg['content']}\n"
+        elif msg.get("role") == "assistant" and msg.get("model") == "xunfei" and msg.get("content") and len(msg.get("content", "")) > 5:
+            xunfei_prompt += f"助手：{msg['content']}\n"
+    xunfei_prompt += f"用户：{user_input}\n助手："
+
+    # 为 DeepSeek 和通义千问各准备独立的消息列表
+    deepseek_messages = [m.copy() for m in openai_messages]
+    qianwen_messages = [m.copy() for m in openai_messages]
+
+    # 使用线程池并发调用三个AI
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    import time
+
+    results = {
+        "xunfei": {"name": "讯飞星火", "content": "", "model": "xunfei", "color": "#8b5cf6", "status": "thinking"},
+        "deepseek": {"name": "Hy-MT2", "content": "", "model": "deepseek", "color": "#4f46e5", "status": "thinking"},
+        "qianwen": {"name": "Qwen3", "content": "", "model": "qianwen", "color": "#0ea5e9", "status": "thinking"},
+    }
+
+    def call_xunfei_worker():
+        start = time.time()
+        try:
+            # 用你代码里原有的 call_xunfei() 单轮调用，稳定可靠
+            content = call_xunfei(xunfei_prompt)
+            elapsed = round(time.time() - start, 2)
+            return ("xunfei", content, elapsed, True)
+        except Exception as e:
+            elapsed = round(time.time() - start, 2)
+            return ("xunfei", f"调用失败：{str(e)}", elapsed, False)
+
+    def call_deepseek_worker():
+        start = time.time()
+        try:
+            content = call_deepseek_with_history(deepseek_messages)
+            elapsed = round(time.time() - start, 2)
+            return ("deepseek", content, elapsed, True)
+        except Exception as e:
+            elapsed = round(time.time() - start, 2)
+            print(f"Hy-MT2调用失败: {e}")
+            return ("deepseek", f"调用失败：{str(e)}", elapsed, False)
+
+    def call_qianwen_worker():
+        start = time.time()
+        try:
+            content = call_qianwen_with_history(qianwen_messages)
+            elapsed = round(time.time() - start, 2)
+            return ("qianwen", content, elapsed, True)
+        except Exception as e:
+            elapsed = round(time.time() - start, 2)
+            print(f"Qwen3调用失败: {e}")
+            return ("qianwen", f"调用失败：{str(e)}", elapsed, False)
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = [
+            executor.submit(call_xunfei_worker),
+            executor.submit(call_deepseek_worker),
+            executor.submit(call_qianwen_worker)
+        ]
+        
+        for future in as_completed(futures):
+            model_key, content, elapsed, success = future.result()
+            results[model_key]["content"] = content
+            results[model_key]["elapsed"] = elapsed
+            results[model_key]["status"] = "done" if success else "error"
+            print(f"[DEBUG] {model_key} 完成，用时 {elapsed}s，状态: {results[model_key]['status']}")
+
+    return jsonify({
+        "results": results,
+        "user_input": user_input
+    })
+
+
+# 7.6 翻译接口
+@app.route('/api/translate', methods=['POST'])
+def translate():
+    """调用讯飞 MaaS 翻译服务"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "请求体必须为 JSON"}), 400
+    text = data.get('text', '').strip()
+    target_lang = data.get('target_lang', 'en')
+    if not text:
+        return jsonify({"error": "翻译内容不能为空"}), 400
+    print(f"[DEBUG] /api/translate 收到: text='{text[:50]}...', target_lang={target_lang}")
+    result = call_translate(text, source_lang="auto", target_lang=target_lang)
+    return jsonify({"result": result})
+
+
+# 7.7 独立视频搜索接口（供前端搜索框使用）
 @app.route('/api/search_videos', methods=['GET'])
 def search_videos():
     keyword = request.args.get('keyword', '').strip()
