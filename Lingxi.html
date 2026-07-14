@@ -10839,14 +10839,18 @@ function markdownToMindmapHtml(mdText) {
   ];
 
   branches.forEach((branch, i) => {
+    // 过滤出分支下真正有效的非空叶子节点
+    const validLeaves = branch.leaves.filter(leaf => leaf && leaf.trim());
+    if (validLeaves.length === 0) {
+      return; // 过滤掉没有任何子节点内容的分支，隐藏空壳
+    }
+
     const [accent, bg] = colors[i % colors.length];
     html += '<div class="mm-branch">';
     html += `<div class="mm-parent-node" style="background:${accent};color:#fff">${escapeHtml(branch.title)}</div>`;
     html += '<div class="mm-leaves">';
-    branch.leaves.forEach(leaf => {
-      if (leaf && leaf.trim()) {
-        html += `<div class="mm-leaf-item"><div class="mm-leaf-node" style="background:${bg};border-left:3px solid ${accent}">${escapeHtml(leaf)}</div></div>`;
-      }
+    validLeaves.forEach(leaf => {
+      html += `<div class="mm-leaf-item"><div class="mm-leaf-node" style="background:${bg};border-left:3px solid ${accent}">${escapeHtml(leaf)}</div></div>`;
     });
     html += '</div></div>';
   });
