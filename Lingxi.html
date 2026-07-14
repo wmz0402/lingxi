@@ -6278,10 +6278,6 @@ function handleLogin(e) {
 
     // 已有配置，正常进入主应用
     startTransition();
-    // 成功进入应用后，立刻渲染选中激活的最新历史对话，防止被自动保存机制以空的欢迎语覆盖
-    if (typeof activeChatHistoryIndex === 'number' && activeChatHistoryIndex >= 0 && activeChatHistoryIndex < chatHistory.length) {
-        loadChatHistoryItem(activeChatHistoryIndex);
-    }
     return true;
 }
 
@@ -6672,8 +6668,12 @@ function startTransition() {
                     }
                 }
 
-                // 自动开启新建对话
-                newChat();
+                // 如果存在最新选中的激活历史对话，在页面淡入完毕后自动恢复它，否则自动开启新建对话
+                if (typeof activeChatHistoryIndex === 'number' && activeChatHistoryIndex >= 0 && activeChatHistoryIndex < chatHistory.length) {
+                    loadChatHistoryItem(activeChatHistoryIndex);
+                } else {
+                    newChat();
+                }
 
             }, 1200);
         }, 300);
