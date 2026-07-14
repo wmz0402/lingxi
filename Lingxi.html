@@ -10381,7 +10381,7 @@ function renderWrongs() {
     wq.options.forEach(opt => {
       optionsHtml += `
         <div class="quiz-option" style="padding:8px 12px; font-size:12px; margin-bottom:5px; border-radius:8px; border:1px solid #cbd5e1; cursor:pointer;" onclick="selectWrongOption(this, '${opt.key}', '${wq.id}')" ${opt.correct ? 'data-correct="true"' : ''}>
-          <span>${opt.key}.</span> ${opt.text}
+          <span>${opt.key}.</span> ${escapeHtml(opt.text)}
         </div>
       `;
     });
@@ -10389,7 +10389,7 @@ function renderWrongs() {
     html += `
       <div class="wrong-card" id="wq_${wq.id}" style="background:#fff; border: 1.5px solid rgba(139,92,246,0.06); padding:14px; border-radius:12px; margin-bottom:10px;">
         <div style="font-size:10.5px; color:#8b5cf6; font-weight:600; margin-bottom:4px;">${wq.courseTitle} — ${wq.chapterTitle}</div>
-        <div style="font-size:12.5px; font-weight:600; color:#1e293b; margin-bottom:8px; line-height:1.4;">${wq.question}</div>
+        <div class="markdown-body" style="font-size:12.5px; font-weight:600; color:#1e293b; margin-bottom:8px; line-height:1.4;">${safeMarkdownParse(wq.question)}</div>
         <div class="wrong-options-list" style="display:flex; flex-direction:column;">
           ${optionsHtml}
         </div>
@@ -10405,13 +10405,18 @@ function renderWrongs() {
         <div class="quiz-feedback fail" id="wq_fail_${wq.id}" style="display:none; margin-top:10px; padding:10px; font-size:11px; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca;">
           <strong>回答错误。</strong> 再试一次吧！
         </div>
-        <div class="wrong-analysis-box" id="wq_analysis_${wq.id}" style="display:none; margin-top:10px; background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px; font-size:11.5px; color:#475569; line-height:1.5;">
-          ${wq.analysis}
+        <div class="wrong-analysis-box markdown-body" id="wq_analysis_${wq.id}" style="display:none; margin-top:10px; background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px; font-size:11.5px; color:#475569; line-height:1.5;">
+          ${safeMarkdownParse(wq.analysis)}
         </div>
       </div>
     `;
   });
   container.innerHTML = html;
+  
+  // 渲染完成后重新驱动 MathJax 对公式进行排版编译
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    window.MathJax.typesetPromise();
+  }
 }
 
 let selectedWrongOptions = {};
