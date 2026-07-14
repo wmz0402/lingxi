@@ -1067,8 +1067,8 @@ def search_questions():
     return jsonify({"questions": [dict(row) for row in rows]})
 
 # JDoodle Credentials (Vercel Redeploy Triggered)
-JDOODLE_CLIENT_ID = os.getenv("JDOODLE_CLIENT_ID", "")
-JDOODLE_CLIENT_SECRET = os.getenv("JDOODLE_CLIENT_SECRET", "")
+JDOODLE_CLIENT_ID = os.getenv("JDOODLE_CLIENT_ID", "f72e2812a62727efccd0a8b027f43493")
+JDOODLE_CLIENT_SECRET = os.getenv("JDOODLE_CLIENT_SECRET", "ea347b5ac72de27c36ae48adf1d6e387bcec2ce5dbee1a4be85c18925a6e26fc")
 
 def run_code_via_jdoodle(language, code):
     """当本地无编译环境时（如 Vercel），通过配置的 JDoodle 密钥进行远程编译执行"""
