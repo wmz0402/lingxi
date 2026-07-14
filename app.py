@@ -1072,17 +1072,14 @@ JDOODLE_CLIENT_SECRET = os.getenv("JDOODLE_CLIENT_SECRET", "ea347b5ac72de27c36ae
 
 def run_code_via_jdoodle(language, code):
     """当本地无编译环境时（如 Vercel），通过配置的 JDoodle 密钥进行远程编译执行"""
-    if not JDOODLE_CLIENT_ID or not JDOODLE_CLIENT_SECRET:
-        return {
-            "success": False,
-            "output": (
-                "提示：由于当前项目部署在云端 Serverless 环境，容器中未安装 C/C++/Java 等语言的物理编译器。\n"
-                "若要开启云端代码运行功能，请在您的 Vercel 项目控制面板（Settings -> Environment Variables）中配置以下环境变量以调用免费的代码运行服务：\n"
-                "  - JDOODLE_CLIENT_ID\n"
-                "  - JDOODLE_CLIENT_SECRET\n"
-                "（密钥可前往 JDoodle 官网免费注册申请，每日提供免费额度；若在本地运行该项目，只需本地安装 GCC/G++ 等编译器即可自动本地编译运行，不受此限）。"
-            )
-        }
+    # 强制防空提纯与长度过滤（防止 Vercel 网页上添加了空的环境变量导致覆盖失效）
+    client_id = JDOODLE_CLIENT_ID.strip() if (JDOODLE_CLIENT_ID and isinstance(JDOODLE_CLIENT_ID, str)) else ""
+    client_secret = JDOODLE_CLIENT_SECRET.strip() if (JDOODLE_CLIENT_SECRET and isinstance(JDOODLE_CLIENT_SECRET, str)) else ""
+    
+    if not client_id or len(client_id) < 10:
+        client_id = "f72e2812a62727efccd0a8b027f43493"
+    if not client_secret or len(client_secret) < 10:
+        client_secret = "ea347b5ac72de27c36ae48adf1d6e387bcec2ce5dbee1a4be85c18925a6e26fc"
         
     import urllib.request
     import json
@@ -1101,8 +1098,8 @@ def run_code_via_jdoodle(language, code):
     
     url = "https://api.jdoodle.com/v1/execute"
     payload = {
-        "clientId": JDOODLE_CLIENT_ID,
-        "clientSecret": JDOODLE_CLIENT_SECRET,
+        "clientId": client_id,
+        "clientSecret": client_secret,
         "script": code,
         "language": target_lang,
         "versionIndex": "5" if target_lang == 'cpp' else "0"
