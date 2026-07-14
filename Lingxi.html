@@ -8895,7 +8895,9 @@ function getProfileSummary() {
     trendText = trendTags.join('、') || '综合学习';
   }
 
-  const dailyMinutes = p.behavior.dailyMinutes || 0;
+  const totalMinutes = (learningStats.hours || 0) * 60;
+  const days = learningStats.days || 1;
+  const dailyMinutes = Math.round(totalMinutes / days);
 
   return `你最薄弱的知识点是：${weakText}。你最感兴趣的方向是：${interestText}。你的学习风格偏向：${style}。你最近在${trendText}方面进步明显。你的日均学习时长约${dailyMinutes}分钟。`;
 }
