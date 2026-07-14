@@ -6223,12 +6223,12 @@ function handleLogin(e) {
       learningStats.firstLoginDate = d.toISOString().split('T')[0];
     }
     userProfileDimensions = migrateProfileDimensions(users[matchedUserKey].userProfileDimensions) || getDefaultProfileDimensions();
-    // 自愈清洗旧数据中因题目截取产生的极长、错乱薄弱知识点标签
+    // 自愈清洗旧数据中因题目截取产生的极长、错乱薄弱知识点标签（凡是大于12字符的主题均判定为非法题干并一刀切清洗）
     if (userProfileDimensions && userProfileDimensions.knowledge && userProfileDimensions.knowledge.topics) {
       const topicsObj = userProfileDimensions.knowledge.topics;
       let dirtyFound = false;
       for (const key in topicsObj) {
-        if (key.length > 15 && (key.includes('：') || key.includes(':') || key.includes('下') || key.includes('的') || key.includes('中') || key.includes('，') || key.includes(',') || key.includes('是') || key.includes('在'))) {
+        if (key.length > 12) {
           delete topicsObj[key];
           dirtyFound = true;
         }
@@ -12576,12 +12576,12 @@ document.addEventListener('DOMContentLoaded', function() {
                   learningStats.firstLoginDate = d.toISOString().split('T')[0];
                 }
                 userProfileDimensions = migrateProfileDimensions(users[currentUserEmail].userProfileDimensions) || getDefaultProfileDimensions();
-                // 自愈清洗旧数据中因题目截取产生的极长、错乱薄弱知识点标签
+                // 自愈清洗旧数据中因题目截取产生的极长、错乱薄弱知识点标签（凡是大于12字符的主题均判定为非法题干并一刀切清洗）
                 if (userProfileDimensions && userProfileDimensions.knowledge && userProfileDimensions.knowledge.topics) {
                   const topicsObj = userProfileDimensions.knowledge.topics;
                   let dirtyFound = false;
                   for (const key in topicsObj) {
-                    if (key.length > 15 && (key.includes('：') || key.includes(':') || key.includes('下') || key.includes('的') || key.includes('中') || key.includes('，') || key.includes(',') || key.includes('是') || key.includes('在'))) {
+                    if (key.length > 12) {
                       delete topicsObj[key];
                       dirtyFound = true;
                     }
