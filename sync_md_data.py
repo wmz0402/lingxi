@@ -172,7 +172,7 @@ def parse_quizzes(text):
         question_text = re.sub(r'^\*\*\d+[\.\s、\*]*\s*', '', question_text).strip()
         question_text = re.sub(r'^####\s*Q\d+[\.\s、]*', '', question_text).strip()
         question_text = re.sub(r'^###\s+第?\s*\d+\s*题[\s：:]*', '', question_text).strip()
-        question_text = re.sub(r'^###\s+题目\s*\d+[\s\(\（]*[^)\）]*[)\）]*', '', question_text).strip()
+        question_text = re.sub(r'^###\s+题目\s*\d+[\s\(\（]*[^)\）\n]*[)\）]*', '', question_text).strip()
         
         # Filter out introduction headers
         if any(h in question_text for h in ['## 一、', '## 二、', '## 三、', '## 四、', '## 五、', '单选题', '单项选择题', '多选题', '多项选择题', '填空题', '计算题', '习题集']):
