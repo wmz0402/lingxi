@@ -6278,6 +6278,10 @@ function handleLogin(e) {
 
     // 已有配置，正常进入主应用
     startTransition();
+    // 成功进入应用后，立刻渲染选中激活的最新历史对话，防止被自动保存机制以空的欢迎语覆盖
+    if (typeof activeChatHistoryIndex === 'number' && activeChatHistoryIndex >= 0 && activeChatHistoryIndex < chatHistory.length) {
+        loadChatHistoryItem(activeChatHistoryIndex);
+    }
     return true;
 }
 
@@ -9165,6 +9169,14 @@ window.loadChatHistoryItem = function(index) {
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
   }
+  
+  // 切换历史对话时，一键隐蔽并关闭所有功能模态弹窗，还原清晰的历史对话画面
+  const overlays = ['mindmapOverlay', 'codeFixOverlay', 'quizGenOverlay', 'docDiagnoseOverlay'];
+  overlays.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
   renderChatHistory();
   switchMainPage('chat');
 }
