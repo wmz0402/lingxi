@@ -2,6 +2,8 @@
 
 灵析（Lingxi）是一款基于科大讯飞星火大模型（Spark API）与多模态视觉理解技术构建的高颜值、全功能、智能个性化学习辅助平台。系统旨在通过 AI 导师的高效协同，为用户提供集路径规划、文档诊断、一键脑图、代码纠错、自主测试、多模态提问与能力画像于一体的全新沉浸式学习体验。
 
+线上免部署演示版访问地址：https://lingxi-jhyc.vercel.app/
+
 ---
 
 ## 核心功能特性
@@ -144,7 +146,11 @@ lingxi/
 直接按照“快速启动指南”中的步骤配置 Python 依赖，使用 python app.py 并在本地浏览器中访问即可。
 
 ### 线上部署 (如 Vercel 部署)
-本系统提供了 vercel.json 配置文件，方便您一键部署至 Vercel 服务中。
+本系统支持与 Vercel 云平台深度结合，通过配置根目录下的 vercel.json，可以实现将 Python Flask 后端无缝转换为 Vercel Serverless Functions 运行，前端静态资源自动 CDN 加速分发，免去了管理云服务器的繁琐。
+
+当前已与 Vercel 结合并开通访问的线上稳定演示地址为：https://lingxi-jhyc.vercel.app/
+
+部署您自己的服务步骤如下：
 1. 将本项目推送至您的 GitHub 私有或公开仓库。
 2. 登录 Vercel 控制台，点击 Add New Project。
 3. 选择您推送的仓库并导入，系统会自动识别 vercel.json 并配置好后端云函数路由。
