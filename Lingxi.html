@@ -12397,13 +12397,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 userName = users[currentUserEmail].name;
                 myCourses = users[currentUserEmail].myCourses || [];
 
-                // 自动清理由于系统旧Bug强行订阅的、且进度为0%的非默认课程
-                const defaultTitles = ['Python递归从入门到精通', '数据结构基础', '算法复杂度分析入门'];
-                myCourses = myCourses.filter(c => {
-                    return defaultTitles.includes(c.title) || c.progress > 0;
-                });
-                users[currentUserEmail].myCourses = myCourses;
-                localStorage.setItem('lingxi_users', JSON.stringify(users));
+
 
                 chatHistory = users[currentUserEmail].chatHistory || [];
                 // 兼容升级旧数据结构
