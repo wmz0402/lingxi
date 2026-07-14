@@ -1066,6 +1066,61 @@ def search_questions():
     conn.close()
     return jsonify({"questions": [dict(row) for row in rows]})
 
+def run_code_via_piston(language, code):
+    """当本地环境无编译器时（如 Vercel 云端部署），降级调用公共 Piston API 在线执行代码"""
+    import urllib.request
+    import json
+    
+    lang_map = {
+        'c': 'c',
+        'cpp': 'cpp',
+        'c++': 'cpp',
+        'java': 'java',
+        'python': 'python',
+        'py': 'python',
+        'javascript': 'javascript',
+        'js': 'javascript'
+    }
+    target_lang = lang_map.get(language, language)
+    
+    url = "https://emkc.org/api/v2/piston/execute"
+    payload = {
+        "language": target_lang,
+        "version": "*",
+        "files": [
+            {
+                "content": code
+            }
+        ]
+    }
+    
+    try:
+        req = urllib.request.Request(
+            url, 
+            data=json.dumps(payload).encode('utf-8'),
+            headers={'Content-Type': 'application/json'},
+            method='POST'
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            res_data = json.loads(resp.read().decode('utf-8'))
+            
+        run_res = res_data.get('run', {})
+        stdout = run_res.get('stdout', '')
+        stderr = run_res.get('stderr', '')
+        output = run_res.get('output', stdout + stderr)
+        code_exit = run_res.get('code', 0)
+        
+        return {
+            "success": code_exit == 0,
+            "output": output or "运行成功（无输出结果）。"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "output": f"本地无编译环境，尝试远程代码沙箱执行失败：{str(e)}"
+        }
+
+
 @app.route('/api/run_code', methods=['POST'])
 def run_code():
     data = request.json or {}
@@ -1123,7 +1178,10 @@ def run_code():
             if compile_process.returncode != 0:
                 return jsonify({"success": False, "output": f"编译错误：\n{compile_process.stderr or compile_process.stdout}"})
         except FileNotFoundError:
-            return jsonify({"success": False, "output": f"未在服务器上找到 {compiler} 编译器。请先安装 GCC/G++。"})
+            # 捕获找不到编译器的异常，自动降级调用公共 Piston 接口远程运行
+            print(f"本地未找到 {compiler} 编译器，自动降级为远程代码沙箱执行...")
+            remote_res = run_code_via_piston(language, code)
+            return jsonify(remote_res)
             
         try:
             run_process = subprocess.run(
@@ -1157,7 +1215,10 @@ def run_code():
             if compile_process.returncode != 0:
                 return jsonify({"success": False, "output": f"编译错误：\n{compile_process.stderr or compile_process.stdout}"})
         except FileNotFoundError:
-            return jsonify({"success": False, "output": "未在服务器上找到 javac 编译器。请先安装 JDK。"})
+            # 捕获找不到编译器的异常，自动降级调用公共 Piston 接口远程运行
+            print("本地未找到 javac 编译器，自动降级为远程代码沙箱执行...")
+            remote_res = run_code_via_piston(language, code)
+            return jsonify(remote_res)
             
         try:
             run_process = subprocess.run(
@@ -1173,7 +1234,9 @@ def run_code():
             return jsonify({"success": False, "output": f"执行错误：\n{str(e)}"})
         
     else:
-        return jsonify({"success": False, "output": f"暂不支持 {language} 代码的运行环境。"})
+        # 其他多语言（如 JavaScript 等）未在本地定义，但可以通过 Piston 尝试远程执行
+        remote_res = run_code_via_piston(language, code)
+        return jsonify(remote_res)
 
 # ============================
 # 8. 启动服务
