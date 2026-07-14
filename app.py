@@ -45,38 +45,16 @@ def call_xunfei(prompt: str) -> str:
     if not SPARKAI_AVAILABLE:
         return generate_fallback_response(prompt)
     try:
-        import threading
-
-        result_container = {"response": ""}
-        error_container = {"error": None}
-
-        def _call():
-            try:
-                spark = ChatSparkLLM(
-                    spark_api_url="wss://spark-api.xf-yun.com/v4.0/chat",
-                    spark_app_id=SPARK_APP_ID,
-                    spark_api_key=SPARK_API_KEY,
-                    spark_api_secret=SPARK_API_SECRET,
-                    spark_llm_domain="4.0Ultra",
-                )
-                messages = [ChatMessage(role="user", content=prompt)]
-                response = spark.generate([messages])
-                result_container["response"] = response.generations[0][0].text.strip()
-            except Exception as e:
-                error_container["error"] = e
-
-        thread = threading.Thread(target=_call)
-        thread.start()
-        thread.join(timeout=15)  # 最多等15秒
-
-        if thread.is_alive():
-            print("讯飞调用超时（15秒），使用回退响应")
-            return generate_fallback_response(prompt)
-
-        if error_container["error"]:
-            raise error_container["error"]
-
-        return result_container["response"]
+        spark = ChatSparkLLM(
+            spark_api_url="wss://spark-api.xf-yun.com/v4.0/chat",
+            spark_app_id=SPARK_APP_ID,
+            spark_api_key=SPARK_API_KEY,
+            spark_api_secret=SPARK_API_SECRET,
+            spark_llm_domain="4.0Ultra",
+        )
+        messages = [ChatMessage(role="user", content=prompt)]
+        response = spark.generate([messages])
+        return response.generations[0][0].text.strip()
     except Exception as e:
         print(f"讯飞调用失败: {e}")
         return generate_fallback_response(prompt)
@@ -88,44 +66,21 @@ def call_xunfei_with_history(messages_list: list) -> str:
         last_msg = messages_list[-1].get("content", "") if messages_list else ""
         return generate_fallback_response(last_msg)
     try:
-        import threading
-
-        result_container = {"response": ""}
-        error_container = {"error": None}
-
-        def _call():
-            try:
-                spark = ChatSparkLLM(
-                    spark_api_url="wss://spark-api.xf-yun.com/v4.0/chat",
-                    spark_app_id=SPARK_APP_ID,
-                    spark_api_key=SPARK_API_KEY,
-                    spark_api_secret=SPARK_API_SECRET,
-                    spark_llm_domain="4.0Ultra",
-                )
-                spark_messages = []
-                for msg in messages_list:
-                    role = msg.get("role", "user")
-                    content = msg.get("content", "")
-                    spark_messages.append(ChatMessage(role=role, content=content))
-                
-                response = spark.generate([spark_messages])
-                result_container["response"] = response.generations[0][0].text.strip()
-            except Exception as e:
-                error_container["error"] = e
-
-        thread = threading.Thread(target=_call)
-        thread.start()
-        thread.join(timeout=15)  # 最多等15秒
-
-        if thread.is_alive():
-            print("讯飞多轮会话调用超时（15秒），使用回退响应")
-            last_msg = messages_list[-1].get("content", "") if messages_list else ""
-            return generate_fallback_response(last_msg)
-
-        if error_container["error"]:
-            raise error_container["error"]
-
-        return result_container["response"]
+        spark = ChatSparkLLM(
+            spark_api_url="wss://spark-api.xf-yun.com/v4.0/chat",
+            spark_app_id=SPARK_APP_ID,
+            spark_api_key=SPARK_API_KEY,
+            spark_api_secret=SPARK_API_SECRET,
+            spark_llm_domain="4.0Ultra",
+        )
+        spark_messages = []
+        for msg in messages_list:
+            role = msg.get("role", "user")
+            content = msg.get("content", "")
+            spark_messages.append(ChatMessage(role=role, content=content))
+        
+        response = spark.generate([spark_messages])
+        return response.generations[0][0].text.strip()
     except Exception as e:
         print(f"讯飞多轮会话调用失败: {e}")
         last_msg = messages_list[-1].get("content", "") if messages_list else ""
