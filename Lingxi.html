@@ -8129,14 +8129,26 @@ function renderChapterContent() {
       return;
     }
     const isLast = activeChapterQuizIndex === quizArray.length - 1;
+    
+    // 智能识别填空题/简答题类型
+    const isFillBlank = q.options.length === 1 && (q.options[0].text.includes('我已完成本题解答') || q.options[0].text.includes('查看参考答案'));
+    
     let optionsHtml = '';
-    q.options.forEach(opt => {
-      optionsHtml += `
-        <div class="quiz-option" onclick="selectChapterQuizOption(this, '${opt.key}')" ${opt.correct ? 'data-correct="true"' : ''}>
-          <span>${opt.key}.</span> ${opt.text}
+    if (isFillBlank) {
+      optionsHtml = `
+        <div class="quiz-fill-blank-wrap" style="margin-top: 6px; margin-bottom: 12px;">
+          <input type="text" id="quizBlankInput" placeholder="在此输入您的答案或解答思路..." style="width:100%; padding:14px 16px; border-radius:12px; border:1.5px solid #e2e8f0; outline:none; font-size:14.5px; box-shadow:0 2px 8px rgba(0,0,0,0.01); font-family:inherit; transition: all 0.2s;" onfocus="this.style.borderColor='#8b5cf6'; this.style.boxShadow='0 0 0 3px rgba(139,92,246,0.1)';" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
         </div>
       `;
-    });
+    } else {
+      q.options.forEach(opt => {
+        optionsHtml += `
+          <div class="quiz-option" onclick="selectChapterQuizOption(this, '${opt.key}')" ${opt.correct ? 'data-correct="true"' : ''}>
+            <span>${opt.key}.</span> ${opt.text}
+          </div>
+        `;
+      });
+    }
     
     container.innerHTML = `
       <div class="quiz-container" style="max-width: 680px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 16px; border: 1px solid rgba(139,92,246,0.06); box-shadow: 0 4px 20px rgba(0,0,0,0.01);">
@@ -8214,6 +8226,36 @@ function cancelChapterQuiz() {
 }
 
 function submitChapterQuiz() {
+  const course = myCourses[activeCourseIndex];
+  const ch = course.chapters[activeChapterIndex];
+  const quizArray = ch.quizzes || (ch.quiz ? [ch.quiz] : []);
+  const q = quizArray[activeChapterQuizIndex];
+
+  const isFillBlank = q && q.options && q.options.length === 1 && (q.options[0].text.includes('我已完成本题解答') || q.options[0].text.includes('查看参考答案'));
+
+  if (isFillBlank) {
+    const blankInput = document.getElementById('quizBlankInput');
+    const userVal = blankInput ? blankInput.value.trim() : '';
+    
+    const successBox = document.getElementById('chapterQuizFeedbackSuccess');
+    const failBox = document.getElementById('chapterQuizFeedbackFail');
+    
+    let userResponseHtml = '';
+    if (userVal) {
+      userResponseHtml = `<div style="margin-top: 12px; padding: 12px; background: rgba(99,102,241,0.05); border-radius: 10px; font-size:13px; color: #4f46e5; border-left: 3px solid #8b5cf6;">✍️ 您的解答：${escapeHtml(userVal)}</div>`;
+    }
+    
+    // 渲染解析和答案
+    successBox.querySelector('.markdown-body').innerHTML = safeMarkdownParse(q.analysis) + userResponseHtml;
+    
+    successBox.style.display = 'block';
+    failBox.style.display = 'none';
+    
+    const questionTopic = q && q.question ? q.question.substring(0, 20) : null;
+    updateProfileFromQuiz(course.title, questionTopic, true, null);
+    return;
+  }
+
   if (!activeChapterQuizSelectedEl) {
     alert('请选择一个选项！');
     return;
