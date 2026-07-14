@@ -24,9 +24,9 @@ except ImportError:
 # ============================
 # 1. 配置区（请替换为你的真实凭证）
 # ============================
-SPARK_APP_ID = os.getenv("SPARK_APP_ID", "ed4a1bef")
-SPARK_API_SECRET = os.getenv("SPARK_API_SECRET", "XglgTOCfFdeBWXMbIrVh")
-SPARK_API_KEY = os.getenv("SPARK_API_KEY", "BUNaTHzexwnuCHDXPGVq")
+SPARK_APP_ID = os.getenv("SPARK_APP_ID", "d3c1b0f3")
+SPARK_API_SECRET = os.getenv("SPARK_API_SECRET", "Y2Q1YWMzNWE2M2I0YTM3OWMxZDk2YWQ0")
+SPARK_API_KEY = os.getenv("SPARK_API_KEY", "cc4d24e4a9dcc2b82dc0665409de43f6")
 
 # ============================
 # 2. Flask 应用初始化
