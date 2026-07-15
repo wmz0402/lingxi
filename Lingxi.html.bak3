@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Fustat:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script>
     window.MathJax = {
       tex: {
@@ -243,341 +242,300 @@
       to { transform: translateX(-50%); }
     }
 
-    /* ===================== LIQUID GLASS AUTH PAGE (COMPACT) ===================== */
     #authPage {
       display: flex;
-      flex-direction: column;
       width: 100vw;
-      min-height: 100vh;
-      background: #ffffff;
+      height: 100vh;
+      background: var(--bg);
       position: fixed;
       top: 0;
       left: 0;
-      overflow-y: auto;
-      overflow-x: hidden;
-      color: #111827;
+      overflow: hidden;
+      color: var(--text);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      letter-spacing: -0.03em;
     }
 
-    /* Background glow - layered gradient in top-left */
-    .auth-glow-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+    #authPage::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url('https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260626_041422_4a459e05-abce-4150-9fb7-4ededc423cd1.png&w=1280&q=85');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.18;
       pointer-events: none;
       z-index: 0;
-      overflow: hidden;
     }
 
-    .auth-glow-orb {
+    .auth-blur-bottom {
       position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 178px;
+      background: linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.4) 40%, #ffffff 100%);
       pointer-events: none;
+      z-index: 1;
     }
 
-    .auth-glow-orb--1 {
-      width: 800px;
-      height: 400px;
-      top: -200px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #A78BFA;
-      opacity: 0.3;
+    .auth-lines {
+      position: absolute;
+      pointer-events: none;
+      z-index: 1;
     }
 
-    .auth-glow-orb--2 {
-      width: 600px;
-      height: 300px;
-      top: -150px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #7C3AED;
-      opacity: 0.2;
+    .auth-lines--left {
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 6px;
+      padding-left: 12px;
     }
 
-    /* Liquid Glass Navbar */
-    .auth-navbar-glass {
+    .auth-lines--right {
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 6px;
+      padding-right: 12px;
+    }
+
+    .auth-lines--top {
+      display: none;
+      top: 72px;
+      left: 0;
+      right: 0;
+      height: 80px;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 0 24px;
+    }
+
+    .auth-line {
+      border: 2.5px solid #FCFAF8;
+      animation: line-pulse 5s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    .auth-line--v-left {
+      height: 48px;
+      border-left: none;
+      border-radius: 0 80% 80% 0;
+    }
+
+    .auth-line--v-right {
+      height: 48px;
+      border-right: none;
+      border-radius: 80% 0 0 80%;
+    }
+
+    .auth-line--h {
+      width: 48px;
+      border-bottom: none;
+      border-radius: 80% 80% 0 0;
+    }
+
+    .auth-navbar {
       position: fixed;
-      top: 24px;
-      right: 24px;
+      top: 0;
+      left: 0;
+      right: 0;
       z-index: 100;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 10px 20px;
-      backdrop-filter: blur(50px);
-      -webkit-backdrop-filter: blur(50px);
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 16px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      box-shadow: inset 0px 4px 4px 0px rgba(255, 255, 255, 0.25), 0 4px 24px rgba(0, 0, 0, 0.08);
-      width: fit-content;
-      gap: 24px;
+      padding: 19px 36px;
+      pointer-events: none;
     }
 
-    .auth-navbar-glass .nav-signup-btn {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 6px 14px;
-      border-radius: 10px;
-      background: rgba(124, 58, 237, 0.8);
-      backdrop-filter: blur(2px);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 600;
-      border: 1px solid rgba(124, 58, 237, 0.3);
-      box-shadow: inset 0px 2px 4px 0px rgba(255, 255, 255, 0.35);
-      transition: transform 0.2s, box-shadow 0.2s;
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    .auth-navbar-glass .nav-signup-btn:hover {
-      transform: scale(1.02);
-    }
-
-    .auth-navbar-glass .nav-signup-btn svg {
-      width: 12px;
-      height: 12px;
-    }
-
-    /* Main auth content area */
-    .auth-main-content {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      z-index: 10;
-      max-width: 1400px;
+    .auth-navbar-inner {
       width: 100%;
-      margin: 0 auto;
-      padding: 40px 40px 24px;
-      gap: 40px;
-      min-height: calc(100vh - 60px);
-    }
-
-    /* Left: Hero + Form */
-    .auth-hero-left {
-      flex: 1;
+      max-width: 1200px;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
-      max-width: 500px;
-      position: relative;
-      z-index: 2;
-      padding-left: 80px;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .auth-hero-title {
-      font-family: 'Fustat', sans-serif;
-      font-size: clamp(28px, 3.5vw, 52px);
-      font-weight: 700;
-      line-height: 1.05;
-      letter-spacing: -1.5px;
-      color: #111827;
-      margin-bottom: 10px;
+    .auth-logo {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 30px;
+      font-weight: 600;
+      font-style: italic;
+      letter-spacing: -0.08em;
+      color: var(--text);
+      pointer-events: auto;
     }
 
-    .auth-hero-subtitle {
+    .auth-logo sup {
+      font-family: 'Inter', sans-serif;
       font-size: 14px;
-      font-weight: 400;
-      color: #6B7280;
-      line-height: 1.5;
-      letter-spacing: -0.3px;
-      margin-bottom: 14px;
-      max-width: 400px;
-    }
-
-    .auth-hero-cta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 24px;
-    }
-
-    .auth-hero-cta .primary-cta {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 22px;
-      border-radius: 12px;
-      background: rgba(124, 58, 237, 0.8);
-      backdrop-filter: blur(2px);
-      color: #fff;
-      font-size: 13px;
       font-weight: 600;
-      border: none;
-      box-shadow: inset 0px 3px 4px 0px rgba(255, 255, 255, 0.35), 0 3px 16px rgba(124, 58, 237, 0.2);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-      cursor: pointer;
-      font-family: inherit;
+      font-style: normal;
+      letter-spacing: -0.02em;
+      vertical-align: super;
+      margin-left: 1px;
     }
 
-    .auth-hero-cta .primary-cta:hover {
-      transform: scale(1.02);
-      box-shadow: inset 0px 3px 4px 0px rgba(255, 255, 255, 0.35), 0 6px 24px rgba(124, 58, 237, 0.3);
-    }
-
-    .auth-hero-cta .primary-cta .cta-arrow {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.25);
+    .auth-left {
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 100px 36px 60px;
+      position: relative;
+      z-index: 3;
     }
 
-    .auth-hero-cta .primary-cta .cta-arrow svg {
-      width: 10px;
-      height: 10px;
-    }
-
-    /* Auth Card (Form) */
     .auth-card {
-      width: 100%;
-      max-width: 360px;
-      max-height: none;
-      overflow: visible;
-      background: rgba(255, 255, 255, 0.72);
+      width: 400px;
+      max-width: 100%;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
-      border-radius: 18px;
-      padding: 18px 18px 14px;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.06);
+      border-radius: 24px;
+      padding: 36px 32px 28px;
+      border: 1px solid var(--border-soft);
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06);
       position: relative;
       z-index: 2;
     }
 
     .auth-card h2 {
-      font-family: 'Fustat', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: -0.05em;
-      color: #111827;
-      margin-bottom: 4px;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.06em;
+      color: var(--text);
+      margin-bottom: 6px;
       line-height: 1.1;
     }
 
+    .auth-card h2 .serif {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-style: italic;
+      letter-spacing: -0.08em;
+    }
+
     .auth-card .auth-subtitle {
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 400;
-      color: #6B7280;
-      margin-bottom: 16px;
-      line-height: 1.4;
-      letter-spacing: -0.02em;
+      color: var(--muted);
+      margin-bottom: 28px;
+      line-height: 1.45;
+      letter-spacing: -0.03em;
     }
 
     .auth-mode-tabs {
       display: flex;
-      gap: 4px;
-      margin-bottom: 16px;
-      padding: 3px;
-      background: rgba(243, 244, 246, 0.8);
+      gap: 6px;
+      margin-bottom: 28px;
+      padding: 4px;
+      background: rgb(251, 251, 251);
       border-radius: 999px;
-      border: 1px solid rgba(0, 0, 0, 0.06);
+      border: 1px solid var(--border-soft);
     }
 
     .auth-mode-tabs button {
       flex: 1;
-      padding: 7px 0;
+      padding: 10px 0;
       border-radius: 999px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 500;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
       background: transparent;
-      color: #6B7280;
-      border: none;
+      color: var(--muted);
       transition: all 0.25s ease;
-      cursor: pointer;
-      font-family: inherit;
     }
 
     .auth-mode-tabs button.active {
-      background: #111827;
-      color: #fff;
-      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
+      background: var(--button-bg);
+      color: var(--button-text);
     }
 
     .auth-field {
-      margin-bottom: 12px;
+      margin-bottom: 18px;
       position: relative;
     }
 
     .auth-field label {
       display: block;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 500;
-      color: #6B7280;
-      margin-bottom: 4px;
+      color: var(--muted);
+      margin-bottom: 8px;
       letter-spacing: -0.02em;
     }
 
     .auth-field .input-line {
       display: flex;
       align-items: center;
-      gap: 6px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
-      padding: 8px 12px;
-      background: rgba(255, 255, 255, 0.9);
+      gap: 8px;
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: #fff;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .auth-field .input-line:focus-within {
-      border-color: rgba(124, 58, 237, 0.5);
-      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08);
+      border-color: rgba(0, 0, 0, 0.2);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
     }
 
     .auth-field .input-line.error-line {
       border-color: #ef4444;
     }
 
+    .auth-field .input-line svg {
+      flex-shrink: 0;
+      color: var(--muted);
+    }
+
     .auth-field .input-line input,
     .auth-field .input-line select {
       flex: 1;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 400;
       letter-spacing: -0.02em;
-      color: #111827;
+      color: var(--text);
       background: transparent;
       min-width: 0;
-      border: none;
-      outline: none;
-      font-family: inherit;
     }
 
     .auth-field .input-line input::placeholder {
-      color: #9CA3AF;
+      color: #b0b0b0;
     }
 
     .auth-field .input-line .toggle-pwd {
       background: none;
-      padding: 2px;
-      color: #6B7280;
+      padding: 4px;
+      color: var(--muted);
       display: flex;
       align-items: center;
-      border: none;
-      cursor: pointer;
-      font-family: inherit;
     }
 
     .auth-field .input-line .toggle-pwd:hover {
-      color: #111827;
+      color: var(--text);
     }
 
     .auth-field .field-error {
-      font-size: 10px;
+      font-size: 11px;
       color: #ef4444;
-      margin-top: 4px;
+      margin-top: 6px;
       display: none;
       letter-spacing: -0.01em;
     }
@@ -589,54 +547,51 @@
     .auth-field select,
     .auth-select {
       width: 100%;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
-      padding: 8px 12px;
-      background: rgba(255, 255, 255, 0.9);
-      font-size: 13px;
-      color: #111827;
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: #fff;
+      font-size: 14px;
+      color: var(--text);
       letter-spacing: -0.02em;
       outline: none;
       transition: border-color 0.2s;
-      font-family: inherit;
     }
 
     .auth-field select:focus,
     .auth-select:focus {
-      border-color: rgba(124, 58, 237, 0.5);
+      border-color: rgba(0, 0, 0, 0.2);
     }
 
     .auth-question-box {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
-      color: #111827;
-      background: rgba(243, 244, 246, 0.8);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-radius: 10px;
-      padding: 8px 12px;
+      color: var(--text);
+      background: rgb(251, 251, 251);
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      padding: 12px 14px;
       line-height: 1.5;
       letter-spacing: -0.03em;
     }
 
     .auth-code-btn {
       flex-shrink: 0;
-      padding: 6px 12px;
+      padding: 10px 14px;
       border-radius: 999px;
       border: none;
-      background: #111827;
-      color: #fff;
-      font-size: 11px;
+      background: var(--button-bg);
+      color: var(--button-text);
+      font-size: 12px;
       font-weight: 500;
       letter-spacing: -0.02em;
       white-space: nowrap;
       transition: transform 0.15s, box-shadow 0.15s;
-      cursor: pointer;
-      font-family: inherit;
     }
 
     .auth-code-btn:hover:not(:disabled) {
       transform: translateY(-1px);
-      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     }
 
     .auth-code-btn:disabled {
@@ -645,8 +600,8 @@
     }
 
     .auth-code-btn.is-countdown {
-      background: rgba(243, 244, 246, 0.8);
-      color: #6B7280;
+      background: rgb(251, 251, 251);
+      color: var(--muted);
       opacity: 1;
     }
 
@@ -654,46 +609,43 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 14px;
+      margin-bottom: 22px;
     }
 
     .auth-remember {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 12px;
+      gap: 8px;
+      font-size: 13px;
       font-weight: 400;
-      color: #6B7280;
+      color: var(--muted);
       cursor: pointer;
       user-select: none;
       letter-spacing: -0.02em;
     }
 
     .auth-remember input[type="checkbox"] {
-      width: 14px;
-      height: 14px;
-      accent-color: #111827;
+      width: 16px;
+      height: 16px;
+      accent-color: var(--button-bg);
       cursor: pointer;
     }
 
     .auth-btn {
       width: 100%;
-      height: 38px;
-      border-radius: 10px;
-      font-size: 13px;
+      height: 48px;
+      border-radius: 999px;
+      font-size: 15px;
       font-weight: 600;
       letter-spacing: -0.03em;
-      color: #fff;
-      background: #111827;
-      border: none;
+      color: var(--button-text);
+      background: var(--button-bg);
       transition: transform 0.15s, box-shadow 0.15s;
-      cursor: pointer;
-      font-family: inherit;
     }
 
     .auth-btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 3px 16px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
     }
 
     .auth-btn:active {
@@ -701,23 +653,22 @@
     }
 
     .auth-btn.register-btn {
-      background: #111827;
+      background: var(--button-bg);
     }
 
     .auth-links {
       text-align: center;
-      margin-top: 12px;
-      font-size: 12px;
+      margin-top: 18px;
+      font-size: 13px;
       font-weight: 400;
-      color: #6B7280;
+      color: var(--muted);
       letter-spacing: -0.02em;
     }
 
     .auth-links a {
-      color: #111827;
+      color: var(--text);
       font-weight: 600;
       letter-spacing: -0.03em;
-      cursor: pointer;
     }
 
     .auth-links a:hover {
@@ -725,25 +676,24 @@
     }
 
     .auth-forgot {
-      font-size: 11px;
+      font-size: 12px;
     }
 
     .auth-forgot a {
-      color: #6B7280;
+      color: var(--muted);
       font-weight: 500;
-      cursor: pointer;
     }
 
     .auth-forgot a:hover {
-      color: #111827;
+      color: var(--text);
     }
 
     .auth-divider {
       display: flex;
       align-items: center;
-      margin: 14px 0;
-      font-size: 11px;
-      color: #9CA3AF;
+      margin: 24px 0;
+      font-size: 12px;
+      color: var(--muted);
       letter-spacing: -0.02em;
     }
 
@@ -752,498 +702,216 @@
       content: '';
       flex: 1;
       height: 1px;
-      background: rgba(0, 0, 0, 0.08);
+      background: var(--border-soft);
     }
 
     .auth-divider span {
-      padding: 0 12px;
+      padding: 0 14px;
       white-space: nowrap;
     }
 
-    /* Right: Glassy Orb */
-    .auth-hero-right {
+    .social-btns {
+      display: flex;
+      gap: 12px;
+    }
+
+    .social-btns button {
       flex: 1;
+      height: 44px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--border-soft);
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
-      z-index: 1;
-      min-height: 0;
-    }
-
-    .auth-orb-container {
-      position: relative;
-      width: 100%;
-      max-width: 460px;
-      margin-left: 40px;
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .auth-orb-video {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      mix-blend-mode: screen;
-      transform: scale(1.25);
-      filter: saturate(200%) brightness(1.15) contrast(1.1);
-      pointer-events: none;
-    }
-
-
-    /* Auth overlay - dims background when card is shown */
-    .login-page-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.35);
-      z-index: 9998;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    .login-page-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    /* Card sits above overlay, centered on screen */
-    #authCardWrapper {
-      position: fixed !important;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 9999 !important;
-      margin: 0 !important;
-    }
-
-    /* Brand Name */
-    .auth-brand-name {
-      font-family: 'Fustat', sans-serif;
-      font-size: clamp(36px, 5vw, 64px);
-      font-weight: 700;
-      letter-spacing: -2px;
-      color: #111827;
-      margin-bottom: 8px;
-      line-height: 1;
-    }
-
-    .auth-brand-name span {
-      background: linear-gradient(135deg, #7C3AED, #A78BFA);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    /* ===================== PRODUCT INTRO SECTION ===================== */
-    .auth-product-intro {
-      position: relative;
-      z-index: 10;
-      padding: 80px 40px 60px;
-      max-width: 1000px;
-      margin: 0 auto;
-      margin-top: -30px;
-    }
-
-    .auth-product-intro::before {
-      content: '';
-      position: absolute;
-      top: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 3px;
-      border-radius: 2px;
-      background: linear-gradient(90deg, #A78BFA, #7C3AED);
-      opacity: 0.4;
-    }
-
-    .intro-section-header {
-      text-align: center;
-      margin-bottom: 60px;
-      opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-
-    .intro-section-header.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .intro-section-header h2 {
-      font-family: 'Fustat', sans-serif;
-      font-size: clamp(28px, 3.5vw, 48px);
-      font-weight: 700;
-      letter-spacing: -1.5px;
-      color: #111827;
-      margin-bottom: 12px;
-      line-height: 1.1;
-    }
-
-    .intro-section-header p {
-      font-size: 16px;
-      color: #6B7280;
-      letter-spacing: -0.3px;
-      max-width: 500px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-
-    /* Feature cards grid */
-    .intro-features-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      margin-bottom: 80px;
-    }
-
-    .intro-feature-card {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      border-radius: 20px;
-      padding: 32px 24px;
-      opacity: 0;
-      transform: translateY(50px);
-      transition: opacity 0.7s ease, transform 0.7s ease, box-shadow 0.3s ease;
-      transition-delay: calc(var(--i, 0) * 0.12s);
-    }
-
-    .intro-feature-card.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .intro-feature-card:hover {
-      box-shadow: 0 12px 40px rgba(124, 58, 237, 0.12);
-    }
-
-    .intro-feature-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(167, 139, 250, 0.12));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 18px;
-      font-size: 22px;
-    }
-
-    .intro-feature-card h3 {
-      font-family: 'Fustat', sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      color: #111827;
-      margin-bottom: 8px;
-    }
-
-    .intro-feature-card p {
+      gap: 8px;
       font-size: 13px;
-      color: #6B7280;
-      line-height: 1.6;
-      letter-spacing: -0.01em;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      transition: all 0.2s;
     }
 
-    /* Showcase slides */
-    .intro-showcase {
-      display: flex;
-      flex-direction: column;
-      gap: 100px;
-      padding-bottom: 40px;
+    .social-btns button:hover {
+      border-color: rgba(0, 0, 0, 0.15);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
     }
 
-    .intro-slide {
-      display: flex;
-      align-items: center;
-      gap: 60px;
-      opacity: 0;
-      transition: opacity 0.9s ease, transform 0.9s ease;
-    }
-
-    .intro-slide.from-left {
-      transform: translateX(-60px);
-    }
-
-    .intro-slide.from-right {
-      transform: translateX(60px);
-      flex-direction: row-reverse;
-    }
-
-    .intro-slide.visible {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .intro-slide-visual {
+    .auth-right {
       flex: 1;
-      min-height: 260px;
-      border-radius: 20px;
-      background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(167, 139, 250, 0.06));
-      border: 1px solid rgba(124, 58, 237, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 64px;
       position: relative;
       overflow: hidden;
-    }
-
-    .intro-slide-visual::after {
-      content: '';
-      position: absolute;
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      background: rgba(124, 58, 237, 0.06);
-      filter: blur(40px);
-    }
-
-    .intro-slide-text {
-      flex: 1;
-    }
-
-    .intro-slide-text .slide-tag {
-      display: inline-block;
-      padding: 4px 14px;
-      border-radius: 999px;
-      background: rgba(124, 58, 237, 0.08);
-      color: #7C3AED;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      margin-bottom: 14px;
-    }
-
-    .intro-slide-text h3 {
-      font-family: 'Fustat', sans-serif;
-      font-size: clamp(22px, 2.5vw, 32px);
-      font-weight: 700;
-      letter-spacing: -1px;
-      color: #111827;
-      margin-bottom: 12px;
-      line-height: 1.15;
-    }
-
-    .intro-slide-text p {
-      font-size: 14px;
-      color: #6B7280;
-      line-height: 1.7;
-      letter-spacing: -0.02em;
-    }
-
-    /* Bottom CTA */
-    .intro-bottom-cta {
-      text-align: center;
-      padding: 60px 0 40px;
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.8s ease, transform 0.8s ease;
-    }
-
-    .intro-bottom-cta.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .intro-bottom-cta h3 {
-      font-family: 'Fustat', sans-serif;
-      font-size: clamp(22px, 2.5vw, 36px);
-      font-weight: 700;
-      letter-spacing: -1px;
-      color: #111827;
-      margin-bottom: 12px;
-    }
-
-    .intro-bottom-cta p {
-      font-size: 15px;
-      color: #6B7280;
-      margin-bottom: 24px;
-    }
-
-    .intro-bottom-cta button {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 36px;
-      border-radius: 14px;
-      background: rgba(124, 58, 237, 0.8);
-      backdrop-filter: blur(2px);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 600;
-      border: none;
-      box-shadow: inset 0px 3px 4px 0px rgba(255, 255, 255, 0.35), 0 6px 24px rgba(124, 58, 237, 0.25);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    .intro-bottom-cta button:hover {
-      transform: scale(1.03);
-      box-shadow: inset 0px 3px 4px 0px rgba(255, 255, 255, 0.35), 0 8px 32px rgba(124, 58, 237, 0.35);
-    }
-
-    /* Navbar links */
+      z-index: 2;
       display: flex;
       align-items: center;
-      gap: 20px;
+      justify-content: center;
+      padding: 100px 36px 60px;
     }
 
-    .auth-navbar-glass .nav-links a {
-      font-size: 13px;
-      font-weight: 500;
-      color: #374151;
-      letter-spacing: -0.01em;
-      transition: color 0.2s;
-      cursor: pointer;
-      text-decoration: none;
-    }
-
-    .auth-navbar-glass .nav-links a:hover {
-      color: #7C3AED;
-    }
-
-    /* Scroll hint */
-    .auth-scroll-hint {
-      position: relative;
-      z-index: 10;
+    .auth-right-inner {
+      max-width: 480px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      padding: 20px 0 10px;
-      opacity: 1;
-      transition: opacity 0.4s ease;
-      pointer-events: none;
+      align-items: flex-start;
+      position: relative;
+      z-index: 2;
     }
 
-    .auth-scroll-hint.hidden {
-      opacity: 0;
+    .auth-ticker {
+      max-width: 340px;
+      height: 36px;
+      overflow: hidden;
+      margin-bottom: 28px;
+      mask-image: linear-gradient(90deg, transparent 0%, black 12%, black 88%, transparent 100%);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 12%, black 88%, transparent 100%);
     }
 
-    .scroll-hint-text {
-      font-size: 11px;
+    .auth-ticker-track {
+      display: flex;
+      width: max-content;
+      animation: marquee-left 30s linear infinite;
+    }
+
+    .auth-ticker-row {
+      display: flex;
+      gap: 8px;
+      padding-right: 8px;
+    }
+
+    .auth-ticker-item {
+      font-size: 13px;
       font-weight: 500;
-      color: #9CA3AF;
-      letter-spacing: 0.05em;
+      color: var(--muted);
+      letter-spacing: -0.03em;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgb(251, 251, 251);
+      white-space: nowrap;
+      border: 1px solid var(--border-soft);
     }
 
-    .scroll-hint-arrow {
-      color: #9CA3AF;
-      animation: scrollBounce 2s ease-in-out infinite;
+    .auth-right-inner h1 {
+      font-size: clamp(36px, 4vw, 52px);
+      font-weight: 600;
+      letter-spacing: -0.07em;
+      line-height: 1.05;
+      color: var(--text);
+      margin-bottom: 16px;
     }
 
-    @keyframes scrollBounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(6px); }
+    .auth-right-inner h1 .serif {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-style: italic;
+      letter-spacing: -0.08em;
     }
 
-    /* Responsive */
+    .auth-right-inner p {
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--muted);
+      line-height: 1.45;
+      letter-spacing: -0.03em;
+      max-width: 380px;
+      margin-bottom: 32px;
+    }
+
+    .auth-right-btn {
+      height: 48px;
+      padding: 0 28px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--button-text);
+      background: var(--button-bg);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .auth-right-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    #authPage.register-mode::before {
+      opacity: 0.22;
+    }
+
     @media (max-width: 1199px) {
-      .auth-main-content {
-        padding: 40px 32px 24px;
-        gap: 30px;
+      .auth-left {
+        padding: 90px 32px 48px;
       }
-      .auth-hero-title {
-        font-size: clamp(26px, 3.5vw, 42px);
+
+      .auth-right {
+        padding: 90px 32px 48px;
+      }
+
+      .auth-navbar {
+        padding: 19px 32px;
+      }
+
+      .auth-card h2 {
+        font-size: 24px;
       }
     }
 
     @media (max-width: 1023px) {
-      .auth-hero-right {
+      .auth-right {
         display: none;
       }
-      .auth-hero-left {
-        align-items: center;
-        text-align: center;
+
+      .auth-left {
+        flex: 1;
       }
-      .auth-hero-subtitle {
-        max-width: 100%;
-      }
-      .auth-card {
-        max-width: 400px;
-      }
-      .intro-features-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-      }
-      .intro-slide {
-        flex-direction: column !important;
-        gap: 30px;
-      }
-      .intro-slide.from-right {
-        flex-direction: column !important;
-      }
-      .intro-slide-visual {
-        min-height: 180px;
-        width: 100%;
-      }
-      .auth-product-intro {
-        padding: 60px 24px 40px;
+
+      #authPage {
+        justify-content: center;
       }
     }
 
     @media (max-width: 809px) {
-      .auth-navbar-glass {
-        top: 12px;
-        right: 12px;
-        padding: 8px 14px;
-        gap: 16px;
+      #authPage::before {
+        transform: rotate(90deg) scale(1.4);
+        transform-origin: center center;
       }
-      .auth-navbar-glass .nav-links {
+
+      .auth-lines--left,
+      .auth-lines--right {
         display: none;
       }
-      .auth-main-content {
-        padding: 60px 16px 24px;
+
+      .auth-lines--top {
+        display: flex;
       }
-      .auth-hero-title {
+
+      .auth-left {
+        padding: 88px 24px 48px;
+      }
+
+      .auth-navbar {
+        padding: 20px;
+      }
+
+      .auth-logo {
         font-size: 26px;
-        letter-spacing: -1px;
       }
-      .auth-hero-subtitle {
-        font-size: 13px;
-      }
+
       .auth-card {
-        padding: 18px 16px 14px;
-        border-radius: 16px;
+        padding: 28px 22px 24px;
+        border-radius: 20px;
       }
-      .intro-features-grid {
-        grid-template-columns: 1fr;
-      }
-      .auth-brand-name {
-        font-size: 32px;
-      }
-      .intro-product-intro {
-        padding: 40px 16px 30px;
-      }
-      .intro-showcase {
-        gap: 60px;
+
+      .auth-card h2 {
+        font-size: 22px;
       }
     }
 
     @media (max-width: 520px) {
       .auth-card {
         width: 100%;
-        max-width: 100%;
-      }
-      .auth-hero-cta {
-        flex-direction: column;
-        width: 100%;
-      }
-      .auth-hero-cta .primary-cta {
-        width: 100%;
-        justify-content: center;
       }
     }
+
+    /* ===================== LOADING PAGE ===================== */
     #loadingPage {
       display: flex;
       flex-direction: column;
@@ -4932,313 +4600,244 @@
 </div>
 
   <!-- ==================== PAGE 1: AUTH (SPLIT LAYOUT) ==================== -->
-  <!-- ==================== PAGE 1: AUTH (LIQUID GLASS HERO) ==================== -->
   <div id="authPage" class="page">
-    <!-- Background glow -->
-    <div class="auth-glow-container">
-      <div class="auth-glow-orb auth-glow-orb--1"></div>
-      <div class="auth-glow-orb auth-glow-orb--2"></div>
-    </div>
+    <div class="auth-lines auth-lines--left" id="authLinesLeft"></div>
+    <div class="auth-lines auth-lines--right" id="authLinesRight"></div>
+    <div class="auth-lines auth-lines--top" id="authLinesTop"></div>
+    <div class="auth-blur-bottom"></div>
 
-    <!-- Overlay for dimming background -->
-    <div class="login-page-overlay" id="authOverlay" onclick="hideAuthCard()"></div>
-
-    <!-- Liquid Glass Navbar -->
-    <nav class="auth-navbar-glass" id="authNavbar">
-      <div class="nav-links" id="authNavLinks">
-        <a href="#" onclick="showProductIntro(); return false;">产品介绍</a>
-        <a href="#" onclick="showContactInfo(); return false;">联系我们</a>
+    <nav class="auth-navbar">
+      <div class="auth-navbar-inner">
+        <div class="auth-logo">灵析<sup>®</sup></div>
       </div>
-      <button class="nav-signup-btn" id="authNavRegBtn" onclick="showAuthCard('register')" style="display:none;">
-        注册
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-          <polyline points="12 5 19 12 12 19"></polyline>
-        </svg>
-      </button>
     </nav>
 
-    <!-- Main Content -->
-    <div class="auth-main-content">
-      <!-- LEFT: Hero Content + Form Card -->
-      <div class="auth-hero-left">
-        <!-- Brand Name -->
-        <div class="auth-brand-name">灵析</div>
+    <!-- LEFT: Form Card -->
+    <div class="auth-left">
+      <div class="auth-card fade-up">
 
-        <!-- Hero Content -->
-        <h1 class="auth-hero-title">更聪明地学习，<br>更快地达成目标</h1>
+        <!-- Hidden iframe to capture form submission for browser password saving without reloading -->
+        <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
 
-        <p class="auth-hero-subtitle">轻松管理您的学习项目，与智能体团队协作，通过我们直观的多智能体协同学习工具实现您的目标。</p>
-
-        <div class="auth-hero-cta">
-          <button class="primary-cta" id="heroStartBtn" onclick="showAuthCard('login')">
-            立即开始
-            <span class="cta-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </span>
-          </button>
-        </div>
-      </div>
-
-      <!-- RIGHT: Glassy Orb -->
-      <div class="auth-hero-right">
-        <div class="auth-orb-container">
-          <video class="auth-orb-video" autoPlay loop muted playsInline>
-            <source src="https://future.co/images/homepage/glassy-orb/orb-purple.webm" type="video/webm">
-          </video>
-        </div>
-      </div>
-    </div>
-
-    <!-- Scroll hint -->
-    <div class="auth-scroll-hint" id="authScrollHint">
-      <div class="scroll-hint-text">向下探索</div>
-      <div class="scroll-hint-arrow">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </div>
-    </div>
-
-    <!-- ==================== PRODUCT INTRO (scroll to reveal) ==================== -->
-    <div class="auth-product-intro">
-      <!-- Section Header -->
-      <div class="intro-section-header" data-reveal>
-        <h2>为什么选择灵析</h2>
-        <p>多智能体协同，让学习不再是孤独的旅程</p>
-      </div>
-
-      <!-- 6 Feature Cards -->
-      <div class="intro-features-grid">
-        <div class="intro-feature-card" data-reveal style="--i:0">
-          <div class="intro-feature-icon">🧠</div>
-          <h3>多智能体协同</h3>
-          <p>多个AI智能体从不同角度为你解析问题，提供全方位、多维度的知识解答与学习指导。</p>
-        </div>
-        <div class="intro-feature-card" data-reveal style="--i:1">
-          <div class="intro-feature-icon">🗺️</div>
-          <h3>智能学习路径</h3>
-          <p>基于你的知识水平和学习目标，自动规划最优学习路线，因材施教，循序渐进。</p>
-        </div>
-        <div class="intro-feature-card" data-reveal style="--i:2">
-          <div class="intro-feature-icon">📊</div>
-          <h3>能力画像追踪</h3>
-          <p>实时分析学习数据，构建个人能力图谱，精准定位薄弱环节，让提升有据可依。</p>
-        </div>
-        <div class="intro-feature-card" data-reveal style="--i:3">
-          <div class="intro-feature-icon">📖</div>
-          <h3>文档沉浸学习</h3>
-          <p>上传课程文档，AI智能解析内容并生成知识点结构，边读边问，高效吸收。</p>
-        </div>
-        <div class="intro-feature-card" data-reveal style="--i:4">
-          <div class="intro-feature-icon">📝</div>
-          <h3>智能测验系统</h3>
-          <p>自动生成针对性练习题，错题智能归集与解析，用测验巩固每一个知识点。</p>
-        </div>
-        <div class="intro-feature-card" data-reveal style="--i:5">
-          <div class="intro-feature-icon">🎯</div>
-          <h3>个性化推荐</h3>
-          <p>根据学习行为和兴趣偏好，精准推荐B站视频等优质学习资源，拓展知识边界。</p>
-        </div>
-      </div>
-
-      <!-- Showcase Slides -->
-      <div class="intro-showcase">
-        <div class="intro-slide from-left" data-reveal>
-          <div class="intro-slide-visual">💬</div>
-          <div class="intro-slide-text">
-            <span class="slide-tag">核心交互</span>
-            <h3>像和导师对话一样学习</h3>
-            <p>不用死记硬背，直接向灵析提问。无论是概念理解、代码调试还是算法推导，多智能体会协同给出专业、详尽的解答，像一对一私教一样耐心。</p>
-          </div>
+        <div class="auth-mode-tabs" id="authModeTabs">
+          <button type="button" id="tabLoginBtn" class="active" onclick="switchTab('login')">登录</button>
+          <button type="button" id="tabRegisterBtn" onclick="switchTab('register')">注册</button>
         </div>
 
-        <div class="intro-slide from-right" data-reveal>
-          <div class="intro-slide-visual">📈</div>
-          <div class="intro-slide-text">
-            <span class="slide-tag">数据驱动</span>
-            <h3>看见自己的成长轨迹</h3>
-            <p>学习天数、累计时长、知识掌握度、薄弱领域分析——所有数据可视化呈现。每一次学习都在积累，每一步进步都看得见。</p>
-          </div>
-        </div>
+        <!-- ===== LOGIN FORM ===== -->
+        <form id="loginForm" target="hidden_iframe" action="" method="POST" onsubmit="return handleLogin(event)">
+          <h2>欢迎<span class="serif">回来</span></h2>
+          <p class="auth-subtitle">请使用您的账号登录灵析</p>
 
-        <div class="intro-slide from-left" data-reveal>
-          <div class="intro-slide-visual">📚</div>
-          <div class="intro-slide-text">
-            <span class="slide-tag">课程体系</span>
-            <h3>结构化课程管理</h3>
-            <p>按学科组织课程与章节，支持文档上传与智能解析。每个知识点都能被追踪、被测试、被掌握。学习不再是碎片化的浏览，而是系统化的成长。</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Bottom CTA -->
-      <div class="intro-bottom-cta" data-reveal>
-        <h3>开始你的学习之旅</h3>
-        <p>加入灵析，让AI成为你最强的学习伙伴</p>
-        <button onclick="showAuthCard('login')">
-          立即开始
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Auth Card (detached from layout, centered via fixed) -->
-    <div class="auth-card" id="authCardWrapper" style="display:none;">
-      <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
-
-      <!-- ===== LOGIN FORM ===== -->
-      <form id="loginForm" target="hidden_iframe" action="" method="POST" onsubmit="return handleLogin(event)">
-        <h2>欢迎回来</h2>
-        <p class="auth-subtitle">请使用您的账号登录灵析</p>
-
-        <div class="auth-field" id="loginEmailField">
-          <label>用户名</label>
-          <div class="input-line">
-            <input type="text" id="loginEmail" name="username" autocomplete="username" placeholder="请输入用户名" required>
-          </div>
-          <div class="field-error">请输入用户名</div>
-        </div>
-
-        <div class="auth-field" id="loginPwdField">
-          <label>密码</label>
-          <div class="input-line">
-            <input type="password" id="loginPwd" name="password" autocomplete="current-password" placeholder="请输入密码" required>
-          </div>
-          <div class="field-error">密码不能为空</div>
-        </div>
-
-        <div class="auth-remember-row">
-          <label class="auth-remember">
-            <input type="checkbox" id="rememberMe"> 记住我
-          </label>
-          <div class="auth-forgot"><a href="#" onclick="showForgot(); return false;">忘记密码？</a></div>
-        </div>
-
-        <button type="submit" class="auth-btn">登录</button>
-
-        <div class="auth-links">
-          还没有账号？<a href="#" onclick="switchTab('register'); return false;">立即注册</a>
-        </div>
-        <div class="auth-links" style="margin-top:8px;">
-          <a href="#" onclick="showAdminLogin(); return false;">管理员入口</a>
-        </div>
-      </form>
-
-      <!-- ===== REGISTER FORM ===== -->
-      <form id="registerForm" style="display:none" target="hidden_iframe" action="" method="POST" onsubmit="return handleRegister(event)">
-        <h2>创建账号</h2>
-        <p class="auth-subtitle">注册并提供您的个人信息</p>
-
-        <div class="auth-field" id="regNameField">
-          <label>用户名</label>
-          <div class="input-line">
-            <input type="text" id="regName" name="username" autocomplete="username" placeholder="请输入用户名" required>
-          </div>
-          <div class="field-error">用户名不能为空</div>
-        </div>
-
-        <div class="auth-field" id="regEmailField">
-          <label>邮箱</label>
-          <div class="input-line">
-            <input type="email" id="regEmail" name="email" placeholder="请输入邮箱地址" required>
-            <button type="button" id="regSendCodeBtn" class="auth-code-btn" onclick="sendRegVerifyCode()">发送验证码</button>
-          </div>
-          <div class="field-error">请输入有效的邮箱地址</div>
-        </div>
-
-        <div class="auth-field" id="regCodeField">
-          <label>邮箱验证码</label>
-          <div class="input-line">
-            <input type="text" id="regVerifyCode" name="verify_code" placeholder="请输入6位验证码" maxlength="6" required style="letter-spacing:4px; font-weight:600;">
-          </div>
-          <div class="field-error">请输入验证码</div>
-        </div>
-
-        <div class="auth-field" id="regPwdField">
-          <label>密码</label>
-          <div class="input-line">
-            <input type="password" id="regPwd" name="password" autocomplete="new-password" placeholder="请设置密码（至少6位）" required minlength="6">
-          </div>
-          <div class="field-error">密码至少6位</div>
-        </div>
-
-        <div class="auth-field" id="regPwd2Field">
-          <label>确认密码</label>
-          <div class="input-line">
-            <input type="password" id="regPwd2" name="password_confirm" placeholder="请再次输入密码" required>
-          </div>
-          <div class="field-error">两次密码不一致</div>
-        </div>
-
-        <button type="submit" class="auth-btn register-btn">注册</button>
-
-        <div class="auth-links">
-          已有账号？<a href="#" onclick="switchTab('login'); return false;">立即登录</a>
-        </div>
-      </form>
-
-      <!-- ===== FORGOT PASSWORD FORM ===== -->
-      <form id="forgotForm" style="display:none" onsubmit="return handleForgotSubmit(event)">
-        <h2>找回密码</h2>
-        <p class="auth-subtitle">请输入您的用户名和注册邮箱以进行核对</p>
-
-        <div id="forgotStep1">
-          <div class="auth-field" id="forgotNameField">
+          <div class="auth-field" id="loginEmailField">
             <label>用户名</label>
             <div class="input-line">
-              <input type="text" id="forgotName" placeholder="请输入用户名" required>
+              <input type="text" id="loginEmail" name="username" autocomplete="username" placeholder="请输入用户名" required>
             </div>
+            <div class="field-error">请输入用户名</div>
           </div>
-          <div class="auth-field" id="forgotEmailField">
+
+          <div class="auth-field" id="loginPwdField">
+            <label>密码</label>
+            <div class="input-line">
+              <input type="password" id="loginPwd" name="password" autocomplete="current-password" placeholder="请输入密码"
+                required>
+            </div>
+            <div class="field-error">密码不能为空</div>
+          </div>
+
+          <div class="auth-remember-row">
+            <label class="auth-remember">
+              <input type="checkbox" id="rememberMe"> 记住我？
+            </label>
+            <div class="auth-forgot"><a href="#" onclick="showForgot(); return false;">忘记密码？</a></div>
+          </div>
+
+          <button type="submit" class="auth-btn">登录</button>
+
+          <div class="auth-links">
+            还没有账号？<a href="#" onclick="switchTab('register'); return false;">立即注册</a>
+          </div>
+          <div class="auth-links" style="margin-top:8px;">
+            <a href="#" onclick="showAdminLogin(); return false;">管理员入口</a>
+          </div>
+        </form>
+
+        <!-- ===== REGISTER FORM ===== -->
+        <form id="registerForm" style="display:none" target="hidden_iframe" action="" method="POST"
+          onsubmit="return handleRegister(event)">
+          <h2>创建<span class="serif">账号</span></h2>
+          <p class="auth-subtitle">注册并提供您的个人信息</p>
+
+          <div class="auth-field" id="regNameField">
+            <label>用户名</label>
+            <div class="input-line">
+              <input type="text" id="regName" name="username" autocomplete="username" placeholder="请输入用户名" required>
+            </div>
+            <div class="field-error">用户名不能为空</div>
+          </div>
+
+          <div class="auth-field" id="regEmailField">
             <label>邮箱</label>
             <div class="input-line">
-              <input type="email" id="forgotEmail" placeholder="请输入注册邮箱" required>
+              <input type="email" id="regEmail" name="email" placeholder="请输入邮箱地址" required>
+              <button type="button" id="regSendCodeBtn" class="auth-code-btn" onclick="sendRegVerifyCode()">发送验证码</button>
             </div>
+            <div class="field-error">请输入有效的邮箱地址</div>
           </div>
-          <button type="button" class="auth-btn" onclick="verifyForgotUser()" style="margin-top: 10px;">验证身份</button>
-        </div>
 
-        <div id="forgotStep2" style="display:none">
-          <div class="auth-field">
-            <label>您的安全问题是：</label>
-            <div id="forgotQuestionText" class="auth-question-box">安全问题加载中...</div>
-          </div>
-          <div class="auth-field" id="forgotAnswerField">
-            <label>您的回答</label>
+          <div class="auth-field" id="regCodeField">
+            <label>邮箱验证码</label>
             <div class="input-line">
-              <input type="text" id="forgotAnswer" placeholder="请输入安全问题答案" required>
+              <input type="text" id="regVerifyCode" name="verify_code" placeholder="请输入6位验证码" maxlength="6" required style="letter-spacing:4px; font-weight:600;">
             </div>
+            <div class="field-error">请输入验证码</div>
           </div>
-          <button type="button" class="auth-btn" onclick="verifyForgotAnswer()" style="margin-top: 10px;">验证答案</button>
-        </div>
 
-        <div id="forgotStep3" style="display:none">
-          <div class="auth-field" id="forgotNewPwdField">
-            <label>设置新密码</label>
+          <div class="auth-field" id="regPwdField">
+            <label>密码</label>
             <div class="input-line">
-              <input type="password" id="forgotNewPwd" placeholder="请设置新密码（至少6位）" required minlength="6">
+              <input type="password" id="regPwd" name="password" autocomplete="new-password" placeholder="请设置密码（至少6位）"
+                required minlength="6">
             </div>
+            <div class="field-error">密码至少6位</div>
           </div>
-          <div class="auth-field" id="forgotNewPwd2Field">
-            <label>确认新密码</label>
-            <div class="input-line">
-              <input type="password" id="forgotNewPwd2" placeholder="请再次输入新密码" required>
-            </div>
-          </div>
-          <button type="submit" class="auth-btn" style="margin-top: 10px;">重置密码</button>
-        </div>
 
-        <div class="auth-links">
-          想起密码了？<a href="#" onclick="switchTab('login'); return false;">立即登录</a>
+          <div class="auth-field" id="regPwd2Field">
+            <label>确认密码</label>
+            <div class="input-line">
+              <input type="password" id="regPwd2" name="password_confirm" placeholder="请再次输入密码" required>
+            </div>
+            <div class="field-error">两次密码不一致</div>
+          </div>
+
+          <div class="auth-field" id="regQuestionField">
+            <label>安全问题（用于找回密码）</label>
+            <select id="regQuestion" class="auth-select">
+              <option value="您母亲的姓名是？">您母亲的姓名是？</option>
+              <option value="您父亲的姓名是？">您父亲的姓名是？</option>
+              <option value="您第一只宠物的名字是？">您第一只宠物的名字是？</option>
+              <option value="您最喜欢的科目的名字是？">您最喜欢的科目的名字是？</option>
+              <option value="您出生地的名字是？">您出生地的名字是？</option>
+            </select>
+          </div>
+
+          <div class="auth-field" id="regAnswerField">
+            <label>安全问题答案</label>
+            <div class="input-line">
+              <input type="text" id="regAnswer" placeholder="请输入答案" required>
+            </div>
+            <div class="field-error">答案不能为空</div>
+          </div>
+
+          <button type="submit" class="auth-btn register-btn">注册</button>
+
+          <div class="auth-links">
+            已有账号？<a href="#" onclick="switchTab('login'); return false;">立即登录</a>
+          </div>
+        </form>
+
+        <!-- ===== FORGOT PASSWORD FORM ===== -->
+        <form id="forgotForm" style="display:none" onsubmit="return handleForgotSubmit(event)">
+          <h2>找回<span class="serif">密码</span></h2>
+          <p class="auth-subtitle">请输入您的用户名和注册邮箱以进行核对</p>
+
+          <!-- 第一步：输入用户名与邮箱 -->
+          <div id="forgotStep1">
+            <div class="auth-field" id="forgotNameField">
+              <label>用户名</label>
+              <div class="input-line">
+                <input type="text" id="forgotName" placeholder="请输入用户名" required>
+              </div>
+            </div>
+            <div class="auth-field" id="forgotEmailField">
+              <label>邮箱</label>
+              <div class="input-line">
+                <input type="email" id="forgotEmail" placeholder="请输入注册邮箱" required>
+              </div>
+            </div>
+            <button type="button" class="auth-btn" onclick="verifyForgotUser()" style="margin-top: 10px;">验证身份</button>
+          </div>
+
+          <!-- 第二步：展示安全问题并回答 -->
+          <div id="forgotStep2" style="display:none">
+            <div class="auth-field">
+              <label>您的安全问题是：</label>
+              <div id="forgotQuestionText" class="auth-question-box">安全问题加载中...</div>
+            </div>
+            <div class="auth-field" id="forgotAnswerField">
+              <label>您的回答</label>
+              <div class="input-line">
+                <input type="text" id="forgotAnswer" placeholder="请输入安全问题答案" required>
+              </div>
+            </div>
+            <button type="button" class="auth-btn" onclick="verifyForgotAnswer()"
+              style="margin-top: 10px;">验证答案</button>
+          </div>
+
+          <!-- 第三步：重置新密码 -->
+          <div id="forgotStep3" style="display:none">
+            <div class="auth-field" id="forgotNewPwdField">
+              <label>设置新密码</label>
+              <div class="input-line">
+                <input type="password" id="forgotNewPwd" placeholder="请设置新密码（至少6位）" required minlength="6">
+              </div>
+            </div>
+            <div class="auth-field" id="forgotNewPwd2Field">
+              <label>确认新密码</label>
+              <div class="input-line">
+                <input type="password" id="forgotNewPwd2" placeholder="请再次输入新密码" required>
+              </div>
+            </div>
+            <button type="submit" class="auth-btn" style="margin-top: 10px;">重置密码</button>
+          </div>
+
+          <div class="auth-links">
+            想起密码了？<a href="#" onclick="switchTab('login'); return false;">立即登录</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- RIGHT: Brand panel -->
+    <div class="auth-right">
+      <div class="auth-right-inner" id="rightPanel">
+        <div class="auth-ticker">
+          <div class="auth-ticker-track">
+            <div class="auth-ticker-row">
+              <span class="auth-ticker-item">智能问答</span>
+              <span class="auth-ticker-item">个性学习</span>
+              <span class="auth-ticker-item">知识图谱</span>
+              <span class="auth-ticker-item">多智能体</span>
+              <span class="auth-ticker-item">进度追踪</span>
+            </div>
+            <div class="auth-ticker-row">
+              <span class="auth-ticker-item">智能问答</span>
+              <span class="auth-ticker-item">个性学习</span>
+              <span class="auth-ticker-item">知识图谱</span>
+              <span class="auth-ticker-item">多智能体</span>
+              <span class="auth-ticker-item">进度追踪</span>
+            </div>
+            <div class="auth-ticker-row">
+              <span class="auth-ticker-item">智能问答</span>
+              <span class="auth-ticker-item">个性学习</span>
+              <span class="auth-ticker-item">知识图谱</span>
+              <span class="auth-ticker-item">多智能体</span>
+              <span class="auth-ticker-item">进度追踪</span>
+            </div>
+            <div class="auth-ticker-row">
+              <span class="auth-ticker-item">智能问答</span>
+              <span class="auth-ticker-item">个性学习</span>
+              <span class="auth-ticker-item">知识图谱</span>
+              <span class="auth-ticker-item">多智能体</span>
+              <span class="auth-ticker-item">进度追踪</span>
+            </div>
+          </div>
         </div>
-      </form>
+        <h1 id="rightTitle">你好，<span class="serif">朋友</span>！</h1>
+        <p id="rightDesc">注意并保护您的个人主页，开始您的旅程吧</p>
+        <button class="auth-right-btn" id="rightBtn" onclick="switchTab('register')">注册</button>
+      </div>
     </div>
   </div>
 
@@ -6399,7 +5998,7 @@
     </div>
   </div>
 
-  <div class="auth-overlay" id="mainOverlay"></div>
+  <div class="auth-overlay" id="authOverlay"></div>
 
   <!-- ==================== PAGE 3: 个人信息配置 ==================== -->
   <div id="profileSetupPage" class="page hidden">
@@ -7744,104 +7343,38 @@ function setAuthTabButtons(tab) {
   if (authModeTabs) authModeTabs.style.display = 'flex';
 }
 
-function showProductIntro() {
-  const intro = document.querySelector('.auth-product-intro');
-  if (intro) intro.scrollIntoView({ behavior: 'smooth' });
-}
-
-// Scroll reveal observer for product intro section
-(function() {
-  var authPage = document.getElementById('authPage');
-  if (!authPage) return;
-
-  // Fade out scroll hint on scroll
-  var scrollHint = document.getElementById('authScrollHint');
-  authPage.addEventListener('scroll', function() {
-    if (scrollHint && authPage.scrollTop > 30) {
-      scrollHint.classList.add('hidden');
-    }
-  });
-
-  var observer = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-      }
-    });
-  }, { threshold: 0.05, root: authPage });
-  document.querySelectorAll('[data-reveal]').forEach(function(el) {
-    observer.observe(el);
-  });
-})();
-
-function showContactInfo() {
-  alert('联系我们\n\n邮箱：lingxi@example.com\n\n感谢您对灵析的关注与支持！');
-}
-
-function showAuthCard(tab) {
-  const card = document.getElementById('authCardWrapper');
-  const overlay = document.getElementById('authOverlay');
-  const authPage = document.getElementById('authPage');
-  const navbar = document.getElementById('authNavbar');
-
-  // Show overlay dim, show card centered
-  authPage.classList.add('card-visible');
-  overlay.classList.add('active');
-  card.style.display = 'block';
-  const navLinks = document.getElementById('authNavLinks');
-  if (navLinks) navLinks.style.display = 'none';
-  const navRegBtn = document.getElementById('authNavRegBtn');
-  if (navRegBtn) navRegBtn.style.display = tab === 'register' ? 'flex' : 'none';
-
-  // Show the requested form
-  if (tab === 'login') {
-    document.getElementById('loginForm').style.display = 'block';
-    document.getElementById('registerForm').style.display = 'none';
-  } else {
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('registerForm').style.display = 'block';
-  }
-}
-
-function hideAuthCard() {
-  const card = document.getElementById('authCardWrapper');
-  const overlay = document.getElementById('authOverlay');
-  const authPage = document.getElementById('authPage');
-
-  authPage.classList.remove('card-visible');
-  overlay.classList.remove('active');
-  card.style.display = 'none';
-  document.getElementById('loginForm').style.display = 'none';
-  document.getElementById('registerForm').style.display = 'none';
-  const forgotForm = document.getElementById('forgotForm');
-  if (forgotForm) forgotForm.style.display = 'none';
-  const navLinks = document.getElementById('authNavLinks');
-  if (navLinks) navLinks.style.display = '';
-  const navRegBtn = document.getElementById('authNavRegBtn');
-  if (navRegBtn) navRegBtn.style.display = 'none';
-}
-
 function switchTab(tab) {
   currentTab = tab;
   const loginForm = document.getElementById('loginForm');
   const regForm = document.getElementById('registerForm');
   const forgotForm = document.getElementById('forgotForm');
+  const rightTitle = document.getElementById('rightTitle');
+  const rightDesc = document.getElementById('rightDesc');
+  const rightBtn = document.getElementById('rightBtn');
   const authPage = document.getElementById('authPage');
   const adminForm = document.getElementById('adminLoginForm');
 
   document.querySelectorAll('.auth-field.has-error').forEach(f => f.classList.remove('has-error'));
   if (adminForm) adminForm.style.display = 'none';
+  setAuthTabButtons(tab);
 
   if (tab === 'login') {
     loginForm.style.display = 'block';
     regForm.style.display = 'none';
     if (forgotForm) forgotForm.style.display = 'none';
-    if (authPage) authPage.classList.remove('register-mode');
+    rightTitle.innerHTML = '你好，<span class="serif">朋友</span>！';
+    rightDesc.textContent = '注意并保护您的个人主页，开始您的旅程吧';
+    rightBtn.textContent = '注册';
+    rightBtn.onclick = () => switchTab('register');
+    authPage.classList.remove('register-mode');
   } else {
-    loginForm.style.display = 'none';
-    regForm.style.display = 'block';
+    loginForm.style.display = 'none'; regForm.style.display = 'block';
     if (forgotForm) forgotForm.style.display = 'none';
-    if (authPage) authPage.classList.add('register-mode');
+    rightTitle.innerHTML = '欢迎<span class="serif">回来</span>！';
+    rightDesc.textContent = '已有账号？立即登录，继续您的个性化学习之旅';
+    rightBtn.textContent = '登录';
+    rightBtn.onclick = () => switchTab('login');
+    authPage.classList.add('register-mode');
   }
 }
 
@@ -7856,6 +7389,8 @@ function showForgot() {
     document.getElementById('registerForm').style.display = 'none';
     const adminForm = document.getElementById('adminLoginForm');
     if (adminForm) adminForm.style.display = 'none';
+    const authModeTabs = document.getElementById('authModeTabs');
+    if (authModeTabs) authModeTabs.style.display = 'none';
     
     const forgotForm = document.getElementById('forgotForm');
     if (forgotForm) {
@@ -8501,9 +8036,11 @@ function handleRegister(e) {
   const email = document.getElementById('regEmail').value.trim().toLowerCase();
   const pwd = document.getElementById('regPwd').value;
   const pwd2 = document.getElementById('regPwd2').value;
+  const question = document.getElementById('regQuestion').value;
+  const answer = document.getElementById('regAnswer').value.trim();
   const verifyCode = document.getElementById('regVerifyCode').value.trim();
 
-  const fields = ['regNameField','regEmailField','regCodeField','regPwdField','regPwd2Field'];
+  const fields = ['regNameField','regEmailField','regCodeField','regPwdField','regPwd2Field','regAnswerField'];
   fields.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('has-error');
@@ -8531,6 +8068,11 @@ function handleRegister(e) {
   }
   if (pwd !== pwd2) {
     const el = document.getElementById('regPwd2Field');
+    if (el) el.classList.add('has-error');
+    ok = false;
+  }
+  if (!answer) {
+    const el = document.getElementById('regAnswerField');
     if (el) el.classList.add('has-error');
     ok = false;
   }
@@ -8570,6 +8112,8 @@ function handleRegister(e) {
     users[email] = {
       name: name,
       pwd: pwd,
+      securityQuestion: question,
+      securityAnswer: answer,
       profile: null,
       myCourses: [],
       chatHistory: [],
@@ -8746,7 +8290,7 @@ function renderCourseBoard() {
 
 function startTransition() {
     try {
-        var ov = document.getElementById('mainOverlay');
+        var ov = document.getElementById('authOverlay');
         var authPage = document.getElementById('authPage');
         var loadingPage = document.getElementById('loadingPage');
         var mainPage = document.getElementById('mainPage');
@@ -17050,6 +16594,7 @@ function hideAdminLogin() {
   const f = document.getElementById('adminLoginForm');
   if (f) f.style.display = 'none';
   document.getElementById('loginForm').style.display = 'block';
+  setAuthTabButtons('login');
 }
 
 function enterAdminMode() {
