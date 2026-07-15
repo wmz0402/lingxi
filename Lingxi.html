@@ -1864,16 +1864,81 @@
       background: #fff;
       border: 1px solid #e2e8f0;
       border-radius: 4px 16px 16px 16px;
-      padding: 12px 16px;
+      padding: 14px 18px;
       font-size: 13.5px;
       line-height: 1.65;
       color: #1e293b;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
+      transition: all 0.3s ease;
+    }
+
+    /* 优化三种不同大模型的卡片微弱渐变描边和微光背景 */
+    .group-msg-xunfei .group-msg-content {
+      background: rgba(253, 251, 255, 0.85);
+      border: 1.5px solid rgba(139, 92, 246, 0.12);
+      box-shadow: 0 4px 16px rgba(139, 92, 246, 0.03);
+    }
+    .group-msg-deepseek .group-msg-content {
+      background: rgba(250, 251, 255, 0.85);
+      border: 1.5px solid rgba(79, 70, 229, 0.12);
+      box-shadow: 0 4px 16px rgba(79, 70, 229, 0.03);
+    }
+    .group-msg-qianwen .group-msg-content {
+      background: rgba(248, 253, 255, 0.85);
+      border: 1.5px solid rgba(14, 165, 233, 0.12);
+      box-shadow: 0 4px 16px rgba(14, 165, 233, 0.03);
     }
 
     .group-msg-content .markdown-body {
       font-size: 13.5px;
       line-height: 1.65;
+    }
+
+    /* AI解题群气泡内的 Markdown 结构微调，避免排版挤压 */
+    .group-msg-content .markdown-body p {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    .group-msg-content .markdown-body p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .group-msg-content .markdown-body h1,
+    .group-msg-content .markdown-body h2,
+    .group-msg-content .markdown-body h3,
+    .group-msg-content .markdown-body h4 {
+      color: #0f172a;
+      font-weight: 700;
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+    .group-msg-content .markdown-body h1 { font-size: 16px; }
+    .group-msg-content .markdown-body h2 { font-size: 15px; }
+    .group-msg-content .markdown-body h3 { font-size: 14.5px; }
+    .group-msg-content .markdown-body h4 { font-size: 13.5px; }
+    
+    .group-msg-content .markdown-body h1:first-child,
+    .group-msg-content .markdown-body h2:first-child,
+    .group-msg-content .markdown-body h3:first-child,
+    .group-msg-content .markdown-body h4:first-child {
+      margin-top: 0;
+    }
+
+    .group-msg-content .markdown-body ul,
+    .group-msg-content .markdown-body ol {
+      padding-left: 20px;
+      margin-top: 4px;
+      margin-bottom: 10px;
+    }
+    .group-msg-content .markdown-body li {
+      margin-bottom: 6px;
+    }
+    .group-msg-content .markdown-body li:last-child {
+      margin-bottom: 0;
+    }
+    .group-msg-content .markdown-body strong {
+      color: #1e1b4b;
+      font-weight: 600;
     }
 
     .group-msg-meta {
@@ -7680,7 +7745,7 @@ function renderQuestion(index) {
   q.options.forEach(opt => {
     optionsHtml += `
       <div class="quiz-option" onclick="selectQuizOption(this, '${opt.key}')" ${opt.correct ? 'data-correct="true"' : ''}>
-        <span>${opt.key}.</span> ${opt.text}
+        <span>${opt.key}.</span> ${escapeHtml(opt.text)}
       </div>
     `;
   });
@@ -8692,7 +8757,7 @@ function renderChapterContent() {
       q.options.forEach(opt => {
         optionsHtml += `
           <div class="quiz-option" onclick="selectChapterQuizOption(this, '${opt.key}')" ${opt.correct ? 'data-correct="true"' : ''}>
-            <span>${opt.key}.</span> ${opt.text}
+            <span>${opt.key}.</span> ${escapeHtml(opt.text)}
           </div>
         `;
       });
