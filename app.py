@@ -12,6 +12,13 @@ import datetime
 import urllib.request
 import urllib.parse
 import webbrowser
+import smtplib
+import random
+import threading
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.header import Header
+from email.utils import formataddr
 # 基于脚本所在目录的绝对路径，确保无论从哪个目录启动都能找到文件
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -43,6 +50,21 @@ QWEN_MODEL = "xop3qwen1b7"
 TRANSLATE_API_KEY = os.getenv("TRANSLATE_API_KEY", "BUNaTHzexwnuCHDXPGVq:XglgTOCfFdeBWXMbIrVh")
 TRANSLATE_API_URL = "https://maas-api.cn-huabei-1.xf-yun.com/v2/chat/completions"
 TRANSLATE_MODEL = "xophunyuan7bmt"
+
+# QQ邮箱 SMTP 配置（用于注册验证码）
+# 请将下方替换为你的真实 QQ 邮箱和授权码
+# 授权码获取方式：QQ邮箱 → 设置 → 账户 → POP3/SMTP服务 → 开启 → 获取授权码
+SMTP_HOST = 'smtp.qq.com'
+SMTP_PORT = 465  # SSL
+SMTP_USER = os.getenv("SMTP_USER", "2631296163@qq.com")      # ← 替换为你的QQ邮箱
+SMTP_PASS = os.getenv("SMTP_PASS", "ccqgylsrzvfgeaae")  # ← 替换为QQ邮箱授权码
+SMTP_SENDER_NAME = '灵析学习平台'
+VERIFY_CODE_EXPIRE = 300   # 验证码有效期（秒），5分钟
+VERIFY_CODE_COOLDOWN = 60  # 发送冷却时间（秒），防止频繁发送
+
+# 验证码内存存储: { email: { code, created_at, expires_at } }
+_verify_codes = {}
+_verify_codes_lock = threading.Lock()
 
 # ============================
 # 2. Flask 应用初始化
@@ -1693,6 +1715,81 @@ def _ensure_admin_account():
     conn.close()
 
 
+@app.route('/api/send-verify-code', methods=['POST'])
+def send_verify_code():
+    """发送邮箱注册验证码"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "无效请求"}), 400
+
+    email = data.get('email', '').strip().lower()
+    if not email:
+        return jsonify({"success": False, "error": "请输入邮箱地址"}), 400
+
+    # 基本邮箱格式校验
+    import re
+    if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+        return jsonify({"success": False, "error": "邮箱格式不正确"}), 400
+
+    now = datetime.datetime.now().timestamp()
+
+    with _verify_codes_lock:
+        # 冷却检查
+        existing = _verify_codes.get(email)
+        if existing and (now - existing['created_at']) < VERIFY_CODE_COOLDOWN:
+            remaining = int(VERIFY_CODE_COOLDOWN - (now - existing['created_at']))
+            return jsonify({"success": False, "error": f"发送过于频繁，请 {remaining} 秒后再试"}), 429
+
+        # 生成6位验证码
+        code = str(random.randint(100000, 999999))
+        _verify_codes[email] = {
+            'code': code,
+            'created_at': now,
+            'expires_at': now + VERIFY_CODE_EXPIRE
+        }
+
+    # 发送邮件
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = formataddr((str(Header(SMTP_SENDER_NAME, 'utf-8')), SMTP_USER))
+        msg['To'] = email
+        msg['Subject'] = '【灵析】注册验证码'
+
+        html_body = f'''
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
+          <div style="background: linear-gradient(135deg, #6366f1, #8b5cf6); padding: 28px 24px; text-align: center;">
+            <h1 style="color: #fff; margin: 0; font-size: 22px; font-weight: 700;">灵析学习平台</h1>
+            <p style="color: rgba(255,255,255,0.85); margin: 6px 0 0; font-size: 13px;">注册验证码</p>
+          </div>
+          <div style="padding: 32px 24px; text-align: center;">
+            <p style="color: #475569; font-size: 14px; margin: 0 0 20px;">您的注册验证码为：</p>
+            <div style="background: #f1f5f9; border-radius: 12px; padding: 20px; margin: 0 auto; max-width: 240px;">
+              <span style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #6366f1;">{code}</span>
+            </div>
+            <p style="color: #94a3b8; font-size: 12px; margin: 20px 0 0;">验证码有效期为 {VERIFY_CODE_EXPIRE // 60} 分钟，请勿泄露给他人。</p>
+            <p style="color: #94a3b8; font-size: 12px; margin: 8px 0 0;">如非本人操作，请忽略此邮件。</p>
+          </div>
+          <div style="background: #f8fafc; padding: 16px 24px; text-align: center; border-top: 1px solid #f1f5f9;">
+            <p style="color: #cbd5e1; font-size: 11px; margin: 0;">灵析 — 智能学习，从心出发</p>
+          </div>
+        </div>'''
+
+        msg.attach(MIMEText(html_body, 'html', 'utf-8'))
+
+        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
+            server.login(SMTP_USER, SMTP_PASS)
+            server.send_message(msg)
+
+        return jsonify({"success": True, "message": "验证码已发送，请查收邮箱"})
+
+    except smtplib.SMTPAuthenticationError:
+        return jsonify({"success": False, "error": "邮件服务配置错误，请联系管理员检查 SMTP 授权码"}), 500
+    except smtplib.SMTPException as e:
+        return jsonify({"success": False, "error": f"邮件发送失败: {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": f"发送失败: {str(e)}"}), 500
+
+
 @app.route('/api/register', methods=['POST'])
 def register_user():
     """用户注册时同步写入服务端数据库"""
@@ -1702,11 +1799,34 @@ def register_user():
         return jsonify({"success": False, "error": "无效请求"}), 400
 
     username = data.get('username', '').strip()
-    email = data.get('email', '').strip()
+    email = data.get('email', '').strip().lower()
     password = data.get('password', '')
+    verify_code = data.get('verify_code', '').strip()
 
     if not username or not email or not password:
         return jsonify({"success": False, "error": "用户名、邮箱、密码均为必填"}), 400
+
+    # 邮箱格式校验
+    import re
+    if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+        return jsonify({"success": False, "error": "邮箱格式不正确"}), 400
+
+    # 验证码校验
+    if not verify_code:
+        return jsonify({"success": False, "error": "请输入邮箱验证码"}), 400
+
+    now_ts = datetime.datetime.now().timestamp()
+    with _verify_codes_lock:
+        stored = _verify_codes.get(email)
+        if not stored:
+            return jsonify({"success": False, "error": "请先获取邮箱验证码"}), 400
+        if now_ts > stored['expires_at']:
+            del _verify_codes[email]
+            return jsonify({"success": False, "error": "验证码已过期，请重新获取"}), 400
+        if stored['code'] != verify_code:
+            return jsonify({"success": False, "error": "验证码不正确"}), 400
+        # 验证通过，删除已使用的验证码
+        del _verify_codes[email]
 
     pwd_hash = hashlib.sha256(password.encode()).hexdigest()
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')

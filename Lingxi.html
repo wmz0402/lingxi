@@ -4458,10 +4458,22 @@
 
           <div class="auth-field" id="regEmailField">
             <label>邮箱</label>
-            <div class="input-line">
-              <input type="email" id="regEmail" name="email" placeholder="请输入邮箱地址" required>
+            <div class="input-line" style="display:flex; gap:8px; align-items:center;">
+              <input type="email" id="regEmail" name="email" placeholder="请输入邮箱地址" required style="flex:1;">
+              <button type="button" id="regSendCodeBtn" onclick="sendRegVerifyCode()"
+                style="flex-shrink:0; padding:10px 16px; border-radius:8px; border:1.5px solid #6366f1; background:#fff; color:#6366f1; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; transition:all 0.2s;"
+                onmouseover="if(!this.disabled)this.style.background='#6366f1',this.style.color='#fff'"
+                onmouseout="if(!this.disabled)this.style.background='#fff',this.style.color='#6366f1'">发送验证码</button>
             </div>
             <div class="field-error">请输入有效的邮箱地址</div>
+          </div>
+
+          <div class="auth-field" id="regCodeField">
+            <label>邮箱验证码</label>
+            <div class="input-line">
+              <input type="text" id="regVerifyCode" name="verify_code" placeholder="请输入6位验证码" maxlength="6" required style="letter-spacing:4px; font-weight:600;">
+            </div>
+            <div class="field-error">请输入验证码</div>
           </div>
 
           <div class="auth-field" id="regPwdField">
@@ -7669,164 +7681,241 @@ function deleteAccount() {
     window.location.reload();
 }
 
+let _regCodeTimer = null;
+function sendRegVerifyCode() {
+  const emailInput = document.getElementById('regEmail');
+  const email = emailInput ? emailInput.value.trim() : '';
+  if (!email || !email.includes('@')) {
+    const el = document.getElementById('regEmailField');
+    if (el) el.classList.add('has-error');
+    emailInput && emailInput.focus();
+    return;
+  }
+  const btn = document.getElementById('regSendCodeBtn');
+  if (!btn || btn.disabled) return;
+
+  btn.disabled = true;
+  btn.textContent = '发送中...';
+  btn.style.opacity = '0.6';
+
+  fetch('/api/send-verify-code', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      // 开始60秒倒计时
+      let countdown = 60;
+      btn.textContent = `${countdown}s 后重发`;
+      btn.style.background = '#f1f5f9';
+      btn.style.color = '#94a3b8';
+      btn.style.borderColor = '#e2e8f0';
+      _regCodeTimer = setInterval(() => {
+        countdown--;
+        if (countdown <= 0) {
+          clearInterval(_regCodeTimer);
+          _regCodeTimer = null;
+          btn.disabled = false;
+          btn.textContent = '重新发送';
+          btn.style.opacity = '1';
+          btn.style.background = '#fff';
+          btn.style.color = '#6366f1';
+          btn.style.borderColor = '#6366f1';
+        } else {
+          btn.textContent = `${countdown}s 后重发`;
+        }
+      }, 1000);
+    } else {
+      btn.disabled = false;
+      btn.textContent = '发送验证码';
+      btn.style.opacity = '1';
+      alert(data.error || '发送失败，请稍后重试');
+    }
+  })
+  .catch(err => {
+    btn.disabled = false;
+    btn.textContent = '发送验证码';
+    btn.style.opacity = '1';
+    alert('网络错误：' + err.message);
+  });
+}
+
 function handleRegister(e) {
+  if (e) e.preventDefault();
   let ok = true;
   const name = document.getElementById('regName').value.trim();
-  const email = document.getElementById('regEmail').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
   const pwd = document.getElementById('regPwd').value;
   const pwd2 = document.getElementById('regPwd2').value;
   const question = document.getElementById('regQuestion').value;
   const answer = document.getElementById('regAnswer').value.trim();
-  
-  const fields = ['regNameField','regEmailField','regPwdField','regPwd2Field','regAnswerField'];
+  const verifyCode = document.getElementById('regVerifyCode').value.trim();
+
+  const fields = ['regNameField','regEmailField','regCodeField','regPwdField','regPwd2Field','regAnswerField'];
   fields.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('has-error');
   });
-  
-  if (!name) { 
+
+  if (!name) {
     const el = document.getElementById('regNameField');
-    if (el) el.classList.add('has-error'); 
-    ok = false; 
+    if (el) el.classList.add('has-error');
+    ok = false;
   }
-  if (!email || !email.includes('@')) { 
+  if (!email || !email.includes('@')) {
     const el = document.getElementById('regEmailField');
-    if (el) el.classList.add('has-error'); 
-    ok = false; 
+    if (el) el.classList.add('has-error');
+    ok = false;
   }
-  if (!pwd || pwd.length < 6) { 
+  if (!verifyCode || verifyCode.length !== 6) {
+    const el = document.getElementById('regCodeField');
+    if (el) el.classList.add('has-error');
+    ok = false;
+  }
+  if (!pwd || pwd.length < 6) {
     const el = document.getElementById('regPwdField');
-    if (el) el.classList.add('has-error'); 
-    ok = false; 
+    if (el) el.classList.add('has-error');
+    ok = false;
   }
-  if (pwd !== pwd2) { 
+  if (pwd !== pwd2) {
     const el = document.getElementById('regPwd2Field');
-    if (el) el.classList.add('has-error'); 
-    ok = false; 
+    if (el) el.classList.add('has-error');
+    ok = false;
   }
   if (!answer) {
     const el = document.getElementById('regAnswerField');
     if (el) el.classList.add('has-error');
     ok = false;
   }
-  if (!ok) {
-    if (e) e.preventDefault();
-    return false;
-  }
-  
-  // Register checks
+  if (!ok) return false;
+
+  // 本地查重
   let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
   if (users[email]) {
     alert('该邮箱已被注册！');
-    if (e) e.preventDefault();
     return false;
   }
-
-  // 查重用户名是否冲突
   let usernameExists = Object.values(users).some(u => u.name && u.name.toLowerCase() === name.toLowerCase());
   if (usernameExists) {
     alert('该用户名已被占用，请换个用户名！');
-    if (e) e.preventDefault();
     return false;
   }
 
-  // Store new user with defaults（增加了 profile 字段）
-  users[email] = {
-    name: name,
-    pwd: pwd,
-    securityQuestion: question,
-    securityAnswer: answer,
-    profile: null,   // 初始无配置信息，用于判断是否需要显示配置页面
-    myCourses: [],
-    chatHistory: [],
-    recentActivities: [],
-    learningStats: {
-      days: 1,
-      completedResources: 0,
-      hours: 0.0,
-      favorites: 0
-    },
-    userProfileDimensions: {
-      knowledge: { score: 0, topics: {}, weakTopics: [], strongTopics: [] },
-      cognition: { score: 0, level: '入门', style: '未知', adaptability: 0 },
-      error: { score: 0, pattern: [], recentErrors: [], fixRate: 0 },
-      interest: { score: 0, tags: [], seedTags: [], trend: [] },
-      goal: { score: 0, shortTerm: [], longTerm: [], completed: 0 },
-      behavior: { score: 0, dailyMinutes: 0, consistency: 0, peakTime: '未知', interactionCount: 0 },
-      basic: 0, algo: 0, data: 0, problem: 0, self: 0, project: 0
-    },
-    favoritesList: [],
-    wrongQuestions: [],
-    notificationsList: [
-      {
-        id: Date.now(),
-        sender: '灵',
-        title: '🎉 欢迎加入灵析',
-        desc: '开始你的个性化学习之旅吧！随时向我提问，我会为你推荐最合适的学习资源。',
-        time: '刚刚',
-        unread: true,
-        senderBg: 'linear-gradient(135deg,#6366f1,#8b5cf6)'
-      }
-    ]
-  };
-  localStorage.setItem('lingxi_users', JSON.stringify(users));
+  // 显示注册中状态
+  const submitBtn = document.querySelector('.register-btn');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '注册中...'; }
 
-  // 同步注册信息到服务端数据库（供管理员查看）
+  // 先发送注册请求到后端验证验证码
   fetch('/api/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username: name, email: email, password: pwd })
-  }).catch(err => console.warn('注册同步失败:', err));
+    body: JSON.stringify({ username: name, email: email, password: pwd, verify_code: verifyCode })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.success) {
+      alert(data.error || '注册失败，请重试');
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '注 册'; }
+      return;
+    }
 
-  // Logged in
-  currentUserEmail = email;
-  sessionStorage.setItem('lingxi_current_user', email);
-  localStorage.removeItem('lingxi_current_user');
-  userName = name;
+    // 后端验证通过，保存到 localStorage
+    users[email] = {
+      name: name,
+      pwd: pwd,
+      securityQuestion: question,
+      securityAnswer: answer,
+      profile: null,
+      myCourses: [],
+      chatHistory: [],
+      recentActivities: [],
+      learningStats: {
+        days: 1,
+        completedResources: 0,
+        hours: 0.0,
+        favorites: 0
+      },
+      userProfileDimensions: {
+        knowledge: { score: 0, topics: {}, weakTopics: [], strongTopics: [] },
+        cognition: { score: 0, level: '入门', style: '未知', adaptability: 0 },
+        error: { score: 0, pattern: [], recentErrors: [], fixRate: 0 },
+        interest: { score: 0, tags: [], seedTags: [], trend: [] },
+        goal: { score: 0, shortTerm: [], longTerm: [], completed: 0 },
+        behavior: { score: 0, dailyMinutes: 0, consistency: 0, peakTime: '未知', interactionCount: 0 },
+        basic: 0, algo: 0, data: 0, problem: 0, self: 0, project: 0
+      },
+      favoritesList: [],
+      wrongQuestions: [],
+      notificationsList: [
+        {
+          id: Date.now(),
+          sender: '灵',
+          title: '🎉 欢迎加入灵析',
+          desc: '开始你的个性化学习之旅吧！随时向我提问，我会为你推荐最合适的学习资源。',
+          time: '刚刚',
+          unread: true,
+          senderBg: 'linear-gradient(135deg,#6366f1,#8b5cf6)'
+        }
+      ]
+    };
+    localStorage.setItem('lingxi_users', JSON.stringify(users));
 
-  // Restore all data structures
-  myCourses = users[email].myCourses;
-  chatHistory = users[email].chatHistory || [];
-  recentActivities = users[email].recentActivities || [];
-  learningStats = users[email].learningStats || { days: 1, completedResources: 0, hours: 0.0, favorites: 0 };
-  if (learningStats.days > 0 && learningStats.hours > learningStats.days * 8) {
-    learningStats.hours = 0;
-  }
-  if (!learningStats.firstLoginDate && learningStats.days > 0) {
-    const d = new Date();
-    d.setDate(d.getDate() - learningStats.days + 1);
-    learningStats.firstLoginDate = d.toISOString().split('T')[0];
-  }
-  userProfileDimensions = migrateProfileDimensions(users[email].userProfileDimensions) || getDefaultProfileDimensions();
-  if (users[email].profile && users[email].profile.hobbies) {
-    const hobbies = users[email].profile.hobbies;
-    if (userProfileDimensions.interest) {
-      if (!userProfileDimensions.interest.seedTags || userProfileDimensions.interest.seedTags.length === 0) {
-        userProfileDimensions.interest.seedTags = hobbies;
-      }
-      if (!userProfileDimensions.interest.tags || userProfileDimensions.interest.tags.length === 0) {
-        userProfileDimensions.interest.tags = hobbies.slice();
+    // Logged in
+    currentUserEmail = email;
+    sessionStorage.setItem('lingxi_current_user', email);
+    localStorage.removeItem('lingxi_current_user');
+    userName = name;
+
+    // Restore all data structures
+    myCourses = users[email].myCourses;
+    chatHistory = users[email].chatHistory || [];
+    recentActivities = users[email].recentActivities || [];
+    learningStats = users[email].learningStats || { days: 1, completedResources: 0, hours: 0.0, favorites: 0 };
+    if (learningStats.days > 0 && learningStats.hours > learningStats.days * 8) {
+      learningStats.hours = 0;
+    }
+    if (!learningStats.firstLoginDate && learningStats.days > 0) {
+      const d = new Date();
+      d.setDate(d.getDate() - learningStats.days + 1);
+      learningStats.firstLoginDate = d.toISOString().split('T')[0];
+    }
+    userProfileDimensions = migrateProfileDimensions(users[email].userProfileDimensions) || getDefaultProfileDimensions();
+    if (users[email].profile && users[email].profile.hobbies) {
+      const hobbies = users[email].profile.hobbies;
+      if (userProfileDimensions.interest) {
+        if (!userProfileDimensions.interest.seedTags || userProfileDimensions.interest.seedTags.length === 0) {
+          userProfileDimensions.interest.seedTags = hobbies;
+        }
+        if (!userProfileDimensions.interest.tags || userProfileDimensions.interest.tags.length === 0) {
+          userProfileDimensions.interest.tags = hobbies.slice();
+        }
       }
     }
-  }
-  favoritesList = users[email].favoritesList || [];
-  initChatMessageIndex();
-  wrongQuestions = users[email].wrongQuestions || [];
-  notificationsList = users[email].notificationsList || getInitialNotifications();
+    favoritesList = users[email].favoritesList || [];
+    initChatMessageIndex();
+    wrongQuestions = users[email].wrongQuestions || [];
+    notificationsList = users[email].notificationsList || getInitialNotifications();
 
-  // Re-render UI
-  renderMyCourses();
-  renderLearningStats();
-  renderUserProfileDimensions();
-  renderChatHistory();
-  renderRecentActivities();
-  renderFavorites();
-  renderWrongs();
-  renderNotifications();
+    // Re-render UI
+    renderMyCourses();
+    renderLearningStats();
+    renderUserProfileDimensions();
+    renderChatHistory();
+    renderRecentActivities();
+    renderFavorites();
+    renderWrongs();
+    renderNotifications();
 
-  // 显示配置页面
-  showProfileSetup();
-  return true;
+    // 显示配置页面
+    showProfileSetup();
+  })
+  .catch(err => {
+    alert('网络错误：' + err.message);
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '注 册'; }
+  });
+  return false;
 }
 
 // ==================== 课程中心交互逻辑 (看板视图) ====================
