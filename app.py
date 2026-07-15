@@ -1346,16 +1346,17 @@ def run_code_via_jdoodle(language, code):
     }
     target_lang = lang_map.get(language, language)
     
-    # 针对 Java 远程编译，移除所有注释以避免 JDoodle 环境下因默认 ASCII 编码导致中文注释编译失败
+    # 针对 Java 远程编译，将所有非 ASCII 字符转换为 \uXXXX 的 Unicode 转义序列
+    # 这样可以确保源码为 100% 纯 ASCII 字符，彻底避免远程沙箱的 Java 编译器因字符集限制报错
     if target_lang == 'java':
-        import re
-        comment_pattern = r'(?:"[^"\\]*(?:\\.[^"\\]*)*"|\'[^\'\\]*(?:\\.[^\'\\]*)*\')|/\*[\s\S]*?\*/|//.*'
-        def replacer(match):
-            s = match.group(0)
-            if s.startswith('/'):
-                return ""
-            return s
-        code = re.sub(comment_pattern, replacer, code)
+        escaped_code = []
+        for char in code:
+            o = ord(char)
+            if o > 127:
+                escaped_code.append(f"\\u{o:04x}")
+            else:
+                escaped_code.append(char)
+        code = "".join(escaped_code)
     
     url = "https://api.jdoodle.com/v1/execute"
     payload = {
