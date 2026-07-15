@@ -4636,6 +4636,17 @@
             <circle cx="12" cy="12" r="2" />
           </svg>
         </button>
+        <!-- 榜单 -->
+        <button id="navLeaderboardBtn" title="学习榜单" onclick="switchMainPage('leaderboard')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+            <path d="M4 22h16" />
+            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22" />
+            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22" />
+            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+          </svg>
+        </button>
         <!-- ===== 新增：切换右侧面板按钮 ===== -->
         <button id="navRightPanelBtn" title="切换右侧面板" onclick="toggleRightPanel()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -5124,6 +5135,82 @@
         </div>
       </div>
 
+      <!-- Leaderboard -->
+      <div class="leaderboard-area main-content-page hidden" id="leaderboardArea"
+        style="overflow-y:auto; padding:32px 48px; width:100%; box-sizing:border-box; background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 100%);">
+        <div style="max-width:900px; margin:0 auto;">
+
+          <!-- Header -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px;">
+            <div>
+              <h2 style="font-size:28px; font-weight:800; color:#1e1b4b; margin:0; display:flex; align-items:center; gap:10px;">
+                <span style="font-size:32px;">🏆</span> 学习榜单
+              </h2>
+              <p style="color:#64748b; font-size:13.5px; margin-top:6px;">实时追踪全平台学习进度，看看谁是学习达人</p>
+            </div>
+            <button class="back-to-chat-btn" onclick="switchMainPage('chat')" style="flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6" /></svg>
+              返回对话
+            </button>
+          </div>
+
+          <!-- Stats summary -->
+          <div id="leaderboardStats" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px;">
+            <div style="background:#fff; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(99,102,241,0.08); text-align:center;">
+              <div style="font-size:28px; font-weight:800; color:#6366f1;" id="lbTotalUsers">0</div>
+              <div style="font-size:12px; color:#94a3b8; margin-top:4px;">参与学习</div>
+            </div>
+            <div style="background:#fff; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(99,102,241,0.08); text-align:center;">
+              <div style="font-size:28px; font-weight:800; color:#0ea5e9;" id="lbTotalQuestions">0</div>
+              <div style="font-size:12px; color:#94a3b8; margin-top:4px;">答对题数</div>
+            </div>
+            <div style="background:#fff; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(99,102,241,0.08); text-align:center;">
+              <div style="font-size:28px; font-weight:800; color:#10b981;" id="lbMyRank">-</div>
+              <div style="font-size:12px; color:#94a3b8; margin-top:4px;">我的排名</div>
+            </div>
+          </div>
+
+          <!-- Anonymous toggle -->
+          <div id="lbAnonymousToggle" style="display:none; background:#fff; border-radius:14px; padding:14px 20px; margin-bottom:20px; box-shadow:0 1px 4px rgba(0,0,0,0.04); align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-size:13px; font-weight:600; color:#334155;">匿名上榜</div>
+              <div style="font-size:11.5px; color:#94a3b8; margin-top:2px;">开启后其他用户将看不到你的真实姓名</div>
+            </div>
+            <label style="position:relative; display:inline-block; width:44px; height:24px; cursor:pointer;">
+              <input type="checkbox" id="lbAnonymousCheckbox" onchange="toggleLeaderboardAnonymous()" style="opacity:0; width:0; height:0;">
+              <span style="position:absolute; top:0; left:0; right:0; bottom:0; background:#cbd5e1; border-radius:24px; transition:0.3s;" id="lbToggleSlider">
+                <span style="position:absolute; content:''; height:18px; width:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:0.3s;" id="lbToggleKnob"></span>
+              </span>
+            </label>
+          </div>
+
+          <!-- Period filter tabs -->
+          <div style="display:flex; gap:8px; margin-bottom:20px;">
+            <button class="lb-period-btn active" data-period="all" onclick="switchLeaderboardPeriod('all')" style="padding:8px 18px; border-radius:20px; border:1.5px solid #e2e8f0; background:#6366f1; color:#fff; font-size:12.5px; font-weight:600; cursor:pointer; transition:all 0.2s;">全部</button>
+            <button class="lb-period-btn" data-period="month" onclick="switchLeaderboardPeriod('month')" style="padding:8px 18px; border-radius:20px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:12.5px; font-weight:600; cursor:pointer; transition:all 0.2s;">本月</button>
+            <button class="lb-period-btn" data-period="week" onclick="switchLeaderboardPeriod('week')" style="padding:8px 18px; border-radius:20px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:12.5px; font-weight:600; cursor:pointer; transition:all 0.2s;">本周</button>
+            <button class="lb-period-btn" data-period="day" onclick="switchLeaderboardPeriod('day')" style="padding:8px 18px; border-radius:20px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:12.5px; font-weight:600; cursor:pointer; transition:all 0.2s;">今日</button>
+          </div>
+
+          <!-- Top 3 podium -->
+          <div id="lbPodium" style="display:flex; align-items:flex-end; justify-content:center; gap:16px; margin-bottom:28px; min-height:180px;">
+            <!-- Dynamically filled -->
+          </div>
+
+          <!-- Full ranking list -->
+          <div style="background:#fff; border-radius:18px; box-shadow:0 2px 12px rgba(99,102,241,0.06); overflow:hidden;">
+            <div style="padding:16px 24px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:14px; font-weight:700; color:#1e1b4b;">完整排行</span>
+              <span style="font-size:11px; color:#94a3b8;" id="lbUpdateHint">实时更新</span>
+            </div>
+            <div id="lbRankingList" style="max-height:500px; overflow-y:auto;">
+              <div style="padding:40px; text-align:center; color:#94a3b8; font-size:13px;">加载中...</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       <!-- Profile Setting Center -->
       <div class="setting-area main-content-page hidden" id="profileSettingArea">
         <div class="setting-container">
@@ -5232,21 +5319,61 @@
             </button>
           </div>
           <!-- Stats Cards -->
-          <div id="adminStatsBar" style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px;"></div>
+          <div id="adminStatsBar" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px;"></div>
           <!-- Tab Navigation -->
           <div style="display:flex; gap:4px; margin-bottom:18px; background:rgba(139,92,246,0.04); border-radius:12px; padding:4px;">
-            <button id="adminTabUsers" onclick="switchAdminTab('users')" style="flex:1; padding:10px 0; border-radius:10px; border:none; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; background:#fff; color:#6366f1; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              用户管理
+            <button id="adminTabOverview" onclick="switchAdminTab('overview')" style="flex:1; padding:10px 0; border-radius:10px; border:none; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; background:transparent; color:#94a3b8;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:3px;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              总览
             </button>
-            <button id="adminTabInbox" onclick="switchAdminTab('inbox')" style="flex:1; padding:10px 0; border-radius:10px; border:none; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; background:transparent; color:#94a3b8; position:relative;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <button id="adminTabUsers" onclick="switchAdminTab('users')" style="flex:1; padding:10px 0; border-radius:10px; border:none; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; background:#fff; color:#6366f1; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:3px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              用户
+            </button>
+            <button id="adminTabInbox" onclick="switchAdminTab('inbox')" style="flex:1; padding:10px 0; border-radius:10px; border:none; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; background:transparent; color:#94a3b8; position:relative;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:3px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               收件箱
-              <span id="adminInboxBadge" style="display:none; position:absolute; top:6px; right:calc(50% - 52px); width:18px; height:18px; border-radius:50%; background:#ef4444; color:#fff; font-size:10px; line-height:18px; text-align:center; font-weight:700;"></span>
+              <span id="adminInboxBadge" style="display:none; position:absolute; top:6px; right:calc(50% - 48px); width:18px; height:18px; border-radius:50%; background:#ef4444; color:#fff; font-size:10px; line-height:18px; text-align:center; font-weight:700;"></span>
+            </button>
+            <button id="adminTabLogs" onclick="switchAdminTab('logs')" style="flex:1; padding:10px 0; border-radius:10px; border:none; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; background:transparent; color:#94a3b8;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:3px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              日志
             </button>
           </div>
+          <!-- Overview Tab -->
+          <div id="adminOverviewTab">
+            <div id="adminDashboardContent" style="padding:10px 0;">
+              <div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">加载仪表盘数据中...</div>
+            </div>
+          </div>
           <!-- Users Tab -->
-          <div id="adminUsersTab">
+          <div id="adminUsersTab" style="display:none;">
+            <!-- Search & Filter Bar -->
+            <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+              <div style="flex:1;min-width:150px;position:relative;">
+                <input id="adminSearchInput" type="text" placeholder="搜索用户名、邮箱、专业..." style="width:100%;padding:8px 12px 8px 32px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;outline:none;transition:border 0.2s;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'" oninput="debouncedAdminSearch()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+              <select id="adminSortSelect" onchange="loadAdminUsers()" style="padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;outline:none;background:#fff;color:#475569;cursor:pointer;">
+                <option value="newest">最新注册</option>
+                <option value="oldest">最早注册</option>
+                <option value="name">按用户名</option>
+              </select>
+              <select id="adminStatusSelect" onchange="loadAdminUsers()" style="padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;outline:none;background:#fff;color:#475569;cursor:pointer;">
+                <option value="all">全部状态</option>
+                <option value="active">正常</option>
+                <option value="disabled">已停用</option>
+              </select>
+            </div>
+            <!-- Batch Action Bar -->
+            <div id="adminBatchBar" style="display:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:10px;padding:10px 14px;margin-bottom:12px;display:none;align-items:center;justify-content:space-between;color:#fff;">
+              <span id="adminBatchCount" style="font-size:12px;font-weight:600;">已选 0 个用户</span>
+              <div style="display:flex;gap:6px;">
+                <button onclick="adminBatchToggle(1)" style="padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;font-size:11px;cursor:pointer;">批量启用</button>
+                <button onclick="adminBatchToggle(0)" style="padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;font-size:11px;cursor:pointer;">批量停用</button>
+                <button onclick="adminBatchDelete()" style="padding:5px 12px;border-radius:6px;border:1px solid #ef4444;background:rgba(239,68,68,0.3);color:#fff;font-size:11px;cursor:pointer;">批量删除</button>
+              </div>
+            </div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
               <span style="font-size:13px; color:#64748b;" id="adminUserCount">加载中...</span>
               <button onclick="showAddAccountForm()" style="padding:8px 18px; border-radius:10px; border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:12.5px; font-weight:600; cursor:pointer; transition:all 0.2s; box-shadow:0 2px 8px rgba(99,102,241,0.2);" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(99,102,241,0.3)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(99,102,241,0.2)'">
@@ -5282,6 +5409,17 @@
               </button>
             </div>
             <div id="adminInboxList" class="noti-list"></div>
+          </div>
+          <!-- Logs Tab -->
+          <div id="adminLogsTab" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <span style="font-size:13px; color:#64748b;" id="adminLogCount">加载中...</span>
+              <button onclick="loadAdminLogs()" style="padding:6px 14px; border-radius:8px; border:1.5px solid rgba(139,92,246,0.15); background:rgba(139,92,246,0.04); color:#7c3aed; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.1)'" onmouseout="this.style.background='rgba(139,92,246,0.04)'">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px; margin-right:3px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                刷新
+              </button>
+            </div>
+            <div id="adminLogList" class="noti-list"></div>
           </div>
         </div>
       </div>
@@ -8133,6 +8271,9 @@ function switchMainPage(pageId) {
   } else if (pageId === 'questionBank') {
     document.getElementById('questionBankArea').classList.remove('hidden');
     renderCourseBoard();
+  } else if (pageId === 'leaderboard') {
+    document.getElementById('leaderboardArea').classList.remove('hidden');
+    loadLeaderboard();
   } else if (pageId === 'adminPanel') {
     document.getElementById('adminPanelArea').classList.remove('hidden');
   }
@@ -8426,6 +8567,9 @@ function submitQuiz() {
     bumpDimension(dim, isCorrect ? 1.5 : 0.3);
   });
   renderUserProfileDimensions();
+  // 上报做题记录
+  const _sq = quizQuestions[currentQuestionIndex];
+  reportQuestionComplete('综合模拟测验', '随机测试题', _sq ? _sq.question : '', isCorrect);
   saveUserData();
 }
 
@@ -9468,6 +9612,8 @@ function submitChapterQuiz() {
     
     const questionTopic = ch.title ? ch.title.replace(/^第?\s*\d+\s*[章章节节]\s*[：:\s]*/, '').trim() : '通用';
     updateProfileFromQuiz(course.title, questionTopic, true, null);
+    // 上报做题记录（填空题视为正确）
+    reportQuestionComplete(course.title, ch.title, q.question || '', true);
     return;
   }
 
@@ -9500,6 +9646,8 @@ function submitChapterQuiz() {
   const questionTopic = ch.title ? ch.title.replace(/^第?\s*\d+\s*[章章节节]\s*[：:\s]*/, '').trim() : '通用';
   const errorPattern = !isCorrect && q && q.analysis ? q.analysis.substring(0, 30) : null;
   updateProfileFromQuiz(course.title, questionTopic, isCorrect, errorPattern);
+  // 上报做题记录
+  reportQuestionComplete(course.title, ch.title, q.question || '', isCorrect);
 }
 
 function nextChapterQuizQuestion() {
@@ -12775,6 +12923,8 @@ function submitQuizAnswer(index) {
     submitBtn.style.opacity = '0.5';
     submitBtn.style.cursor = 'default';
   }
+  // 上报做题记录
+  reportQuestionComplete('自定义出题', window._quizTopic || '未指定主题', q.question || '', isCorrect);
 }
 
 // 切换解析显示
@@ -14513,9 +14663,9 @@ document.addEventListener('DOMContentLoaded', function() {
             adminToken = savedAdminToken;
             try {
                 const adminInfo = JSON.parse(sessionStorage.getItem('lingxi_admin_info') || '{}');
-                userName = adminInfo.username || 'lingxi_admin_2026';
+                userName = adminInfo.username || 'king33';
             } catch(e) {
-                userName = 'lingxi_admin_2026';
+                userName = 'king33';
             }
             enterAdminMode();
             const navActions = document.querySelector('.nav-actions');
@@ -15310,6 +15460,185 @@ async function sendGlobalFloatingChatMessage() {
         if (resizeTopLeft) resizeTopLeft.addEventListener('mousedown', (e) => onResizeStart(e, 'tl'));
     });
 })();
+
+// ==================== 做题榜单 ====================
+let _lbCurrentPeriod = 'all';
+let _lbRefreshTimer = null;
+
+function loadLeaderboard() {
+  const email = currentUserEmail || '';
+  const period = _lbCurrentPeriod;
+  fetch(`/api/leaderboard?period=${encodeURIComponent(period)}&email=${encodeURIComponent(email)}`)
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) return;
+      // 更新统计卡片
+      const tu = document.getElementById('lbTotalUsers');
+      const tq = document.getElementById('lbTotalQuestions');
+      const mr = document.getElementById('lbMyRank');
+      if (tu) tu.textContent = data.total_users || 0;
+      // 总做题数显示当前用户自己答对的题目数
+      const myEntry = data.rankings.find(r => r.is_me);
+      if (tq) tq.textContent = myEntry ? myEntry.correct_count : 0;
+      if (mr) mr.textContent = data.my_rank ? ('#' + data.my_rank) : '-';
+
+      // 显示匿名开关（仅登录用户可见）
+      const toggle = document.getElementById('lbAnonymousToggle');
+      if (toggle && email) {
+        toggle.style.display = 'flex';
+        const me = data.rankings.find(r => r.is_me);
+        if (me) {
+          document.getElementById('lbAnonymousCheckbox').checked = me.is_anonymous;
+          _updateToggleUI(me.is_anonymous);
+        }
+      }
+
+      // 渲染领奖台
+      renderLbPodium(data.rankings.slice(0, 3));
+      // 渲染完整排行
+      renderLbRankingList(data.rankings);
+
+      // 自动刷新（每30秒）
+      if (_lbRefreshTimer) clearInterval(_lbRefreshTimer);
+      _lbRefreshTimer = setInterval(() => {
+        const lbPage = document.getElementById('leaderboardArea');
+        if (lbPage && !lbPage.classList.contains('hidden')) {
+          loadLeaderboard();
+        } else {
+          clearInterval(_lbRefreshTimer);
+          _lbRefreshTimer = null;
+        }
+      }, 30000);
+    })
+    .catch(err => console.error('榜单加载失败:', err));
+}
+
+function _updateToggleUI(isOn) {
+  const slider = document.getElementById('lbToggleSlider');
+  const knob = document.getElementById('lbToggleKnob');
+  if (slider) slider.style.background = isOn ? '#6366f1' : '#cbd5e1';
+  if (knob) knob.style.transform = isOn ? 'translateX(20px)' : 'translateX(0)';
+}
+
+function toggleLeaderboardAnonymous() {
+  if (!currentUserEmail) return;
+  fetch('/api/user/toggle-anonymous', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: currentUserEmail })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      _updateToggleUI(data.is_anonymous);
+      loadLeaderboard();
+    }
+  })
+  .catch(err => console.error('匿名切换失败:', err));
+}
+
+function switchLeaderboardPeriod(period) {
+  _lbCurrentPeriod = period;
+  document.querySelectorAll('.lb-period-btn').forEach(btn => {
+    const isActive = btn.getAttribute('data-period') === period;
+    btn.style.background = isActive ? '#6366f1' : '#fff';
+    btn.style.color = isActive ? '#fff' : '#64748b';
+    btn.style.borderColor = isActive ? '#6366f1' : '#e2e8f0';
+  });
+  loadLeaderboard();
+}
+
+function renderLbPodium(top3) {
+  const podium = document.getElementById('lbPodium');
+  if (!podium) return;
+  if (!top3 || top3.length === 0) {
+    podium.innerHTML = '<div style="padding:40px; color:#94a3b8; font-size:13px; text-align:center; width:100;">暂无排行数据，快去做几道题吧</div>';
+    return;
+  }
+
+  const medals = ['🥇', '🥈', '🥉'];
+  const colors = ['#f59e0b', '#94a3b8', '#cd7f32'];
+  const bgColors = ['linear-gradient(135deg,#fef3c7,#fde68a)', 'linear-gradient(135deg,#f1f5f9,#e2e8f0)', 'linear-gradient(135deg,#fed7aa,#fdba74)'];
+  const heights = [160, 130, 110];
+  const order = top3.length >= 3 ? [1, 0, 2] : top3.length === 2 ? [1, 0] : [0];
+
+  podium.innerHTML = order.map(i => {
+    const u = top3[i];
+    if (!u) return '';
+    const isMe = u.is_me;
+    return `
+    <div style="display:flex; flex-direction:column; align-items:center; width:160px;
+      ${isMe ? 'filter:drop-shadow(0 0 8px rgba(99,102,241,0.3));' : ''}">
+      <div style="font-size:36px; margin-bottom:6px;">${medals[i]}</div>
+      <div style="font-size:14px; font-weight:700; color:#1e1b4b; margin-bottom:2px; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+        ${u.is_me ? u.username : (u.is_anonymous ? '***' : u.username)}
+      </div>
+      ${u.is_me ? '<div style="font-size:10px; color:#6366f1; font-weight:600; margin-bottom:4px;">（我）</div>' : '<div style="height:16px;"></div>'}
+      <div style="width:100%; background:${bgColors[i]}; border-radius:14px 14px 0 0; padding:16px 10px; text-align:center; height:${heights[i]}px; display:flex; flex-direction:column; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <div style="font-size:26px; font-weight:800; color:${colors[i]};">${u.total_completed}</div>
+        <div style="font-size:11px; color:#64748b; margin-top:2px;">题</div>
+        <div style="font-size:11px; color:#64748b; margin-top:4px;">正确率 ${u.accuracy}%</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderLbRankingList(rankings) {
+  const list = document.getElementById('lbRankingList');
+  if (!list) return;
+  if (!rankings || rankings.length === 0) {
+    list.innerHTML = '<div style="padding:40px; text-align:center; color:#94a3b8; font-size:13px;">暂无排行数据</div>';
+    return;
+  }
+
+  list.innerHTML = rankings.map(u => {
+    const isMe = u.is_me;
+    const rankColor = u.rank <= 3 ? ['#f59e0b','#94a3b8','#cd7f32'][u.rank - 1] : '#64748b';
+    const rankBg = u.rank <= 3 ? ['#fef3c7','#f1f5f9','#fed7aa'][u.rank - 1] : '#f8fafc';
+    const initials = (u.is_me ? u.username : (u.is_anonymous ? '匿' : u.username))[0].toUpperCase();
+    const avatarColors = ['#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
+    const avatarBg = avatarColors[(u.user_id || 0) % avatarColors.length];
+    return `
+    <div style="display:flex; align-items:center; padding:12px 24px; border-bottom:1px solid #f8fafc; transition:background 0.15s; ${isMe ? 'background:linear-gradient(90deg,#eef2ff,#f8fafc); border-left:3px solid #6366f1;' : ''}"
+      onmouseover="if(!${isMe})this.style.background='#f8fafc'" onmouseout="if(!${isMe})this.style.background=''">
+      <div style="width:32px; height:32px; border-radius:10px; background:${u.rank <= 3 ? rankBg : '#f1f5f9'}; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:${rankColor}; margin-right:14px; flex-shrink:0;">
+        ${u.rank}
+      </div>
+      <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,${avatarBg},${avatarBg}cc); display:flex; align-items:center; justify-content:center; color:#fff; font-size:14px; font-weight:700; margin-right:14px; flex-shrink:0;">
+        ${initials}
+      </div>
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:13.5px; font-weight:600; color:#1e1b4b; display:flex; align-items:center; gap:6px;">
+          ${u.is_me ? u.username : (u.is_anonymous ? '***' : u.username)}
+          ${isMe ? '<span style="font-size:10px; background:#6366f1; color:#fff; padding:1px 7px; border-radius:8px; font-weight:600;">我</span>' : ''}
+          ${u.is_anonymous && !u.is_me ? '<span style="font-size:10px; color:#94a3b8;">匿名</span>' : ''}
+        </div>
+        <div style="font-size:11.5px; color:#94a3b8; margin-top:2px;">最近活跃：${u.last_active || '-'}</div>
+      </div>
+      <div style="text-align:right; flex-shrink:0; margin-left:12px;">
+        <div style="font-size:18px; font-weight:800; color:#6366f1;">${u.total_completed}</div>
+        <div style="font-size:11px; color:#94a3b8;">正确率 ${u.accuracy}%</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// 上报做题记录到服务端
+function reportQuestionComplete(courseTitle, chapterTitle, questionText, isCorrect) {
+  if (!currentUserEmail) return;
+  fetch('/api/question/complete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: currentUserEmail,
+      question: questionText,
+      course: courseTitle || '',
+      chapter: chapterTitle || '',
+      correct: !!isCorrect
+    })
+  }).catch(() => {});
+}
+
   </script>
 
   <!-- ===== 文档诊断弹窗 ===== -->
@@ -15740,99 +16069,297 @@ function handleAdminLogin(e) {
 
 function switchAdminTab(tab) {
   adminCurrentTab = tab;
-  const tabUsers = document.getElementById('adminTabUsers');
-  const tabInbox = document.getElementById('adminTabInbox');
-  const usersTab = document.getElementById('adminUsersTab');
-  const inboxTab = document.getElementById('adminInboxTab');
-  if (tab === 'users') {
-    tabUsers.style.background = '#fff'; tabUsers.style.color = '#6366f1'; tabUsers.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)';
-    tabInbox.style.background = 'transparent'; tabInbox.style.color = '#94a3b8'; tabInbox.style.boxShadow = 'none';
-    usersTab.style.display = ''; inboxTab.style.display = 'none';
-  } else {
-    tabInbox.style.background = '#fff'; tabInbox.style.color = '#6366f1'; tabInbox.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)';
-    tabUsers.style.background = 'transparent'; tabUsers.style.color = '#94a3b8'; tabUsers.style.boxShadow = 'none';
-    usersTab.style.display = 'none'; inboxTab.style.display = '';
-    loadAdminInbox();
-  }
+  const tabs = {overview:'adminTabOverview',users:'adminTabUsers',inbox:'adminTabInbox',logs:'adminTabLogs'};
+  const panels = {overview:'adminOverviewTab',users:'adminUsersTab',inbox:'adminInboxTab',logs:'adminLogsTab'};
+  // Reset all tab buttons
+  Object.values(tabs).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.style.background='transparent'; el.style.color='#94a3b8'; el.style.boxShadow='none'; }
+  });
+  // Hide all panels
+  Object.values(panels).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  // Activate selected tab
+  const activeBtn = document.getElementById(tabs[tab]);
+  if (activeBtn) { activeBtn.style.background='#fff'; activeBtn.style.color='#6366f1'; activeBtn.style.boxShadow='0 1px 3px rgba(0,0,0,0.06)'; }
+  const activePanel = document.getElementById(panels[tab]);
+  if (activePanel) activePanel.style.display = '';
+  // Load data for specific tabs
+  if (tab === 'overview') loadAdminDashboard();
+  else if (tab === 'users') loadAdminUsers();
+  else if (tab === 'inbox') loadAdminInbox();
+  else if (tab === 'logs') loadAdminLogs();
 }
 
 function loadAdminPanel() {
   switchMainPage('adminPanel');
-  switchAdminTab(adminCurrentTab);
+  switchAdminTab('overview');
   loadAdminStats();
-  loadAdminUsers();
 }
 
 function loadAdminStats() {
-  fetch('/api/admin/stats').then(r => r.json()).then(data => {
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/stats', { headers: { 'X-Admin-Token': token } }).then(r => r.json()).then(data => {
     if (!data.success) return;
     const s = data.stats;
     document.getElementById('adminStatsBar').innerHTML = `
-      <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:14px;padding:18px 20px;color:#fff;">
-        <div style="font-size:12px;opacity:0.85;">注册用户</div>
-        <div style="font-size:26px;font-weight:700;margin-top:2px;">${s.total_users}</div>
+      <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:14px;padding:14px 16px;color:#fff;">
+        <div style="font-size:11px;opacity:0.85;">总用户</div>
+        <div style="font-size:22px;font-weight:700;margin-top:2px;">${s.total_users}</div>
       </div>
-      <div style="background:linear-gradient(135deg,#0ea5e9,#06b6d4);border-radius:14px;padding:18px 20px;color:#fff;">
-        <div style="font-size:12px;opacity:0.85;">消息总数</div>
-        <div style="font-size:26px;font-weight:700;margin-top:2px;">${s.total_messages}</div>
+      <div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:14px;padding:14px 16px;color:#fff;">
+        <div style="font-size:11px;opacity:0.85;">活跃 / 停用</div>
+        <div style="font-size:22px;font-weight:700;margin-top:2px;">${s.active_users} <span style="font-size:13px;opacity:0.7">/ ${s.disabled_users}</span></div>
       </div>
-      <div style="background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:14px;padding:18px 20px;color:#fff;position:relative;">
-        <div style="font-size:12px;opacity:0.85;">未读消息</div>
-        <div style="font-size:26px;font-weight:700;margin-top:2px;">${s.unread_messages}</div>
+      <div style="background:linear-gradient(135deg,#0ea5e9,#06b6d4);border-radius:14px;padding:14px 16px;color:#fff;">
+        <div style="font-size:11px;opacity:0.85;">今日新增</div>
+        <div style="font-size:22px;font-weight:700;margin-top:2px;">${s.today_new_users}</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:14px;padding:14px 16px;color:#fff;">
+        <div style="font-size:11px;opacity:0.85;">消息总数</div>
+        <div style="font-size:22px;font-weight:700;margin-top:2px;">${s.total_messages}</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:14px;padding:14px 16px;color:#fff;position:relative;">
+        <div style="font-size:11px;opacity:0.85;">未读消息</div>
+        <div style="font-size:22px;font-weight:700;margin-top:2px;">${s.unread_messages}</div>
       </div>`;
-    // Update inbox badge
     const badge = document.getElementById('adminInboxBadge');
-    if (s.unread_messages > 0) {
-      badge.style.display = ''; badge.textContent = s.unread_messages > 99 ? '99+' : s.unread_messages;
-    } else {
-      badge.style.display = 'none';
-    }
+    if (s.unread_messages > 0) { badge.style.display = ''; badge.textContent = s.unread_messages > 99 ? '99+' : s.unread_messages; }
+    else { badge.style.display = 'none'; }
   });
 }
+
+let _adminSearchTimer = null;
+function debouncedAdminSearch() {
+  if (_adminSearchTimer) clearTimeout(_adminSearchTimer);
+  _adminSearchTimer = setTimeout(() => loadAdminUsers(), 300);
+}
+
+let adminSelectedUsers = new Set();
 
 function loadAdminUsers() {
   const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
   if (!token) return;
-  fetch('/api/admin/users', { headers: { 'X-Admin-Token': token } })
+  const keyword = (document.getElementById('adminSearchInput') || {}).value || '';
+  const sort = (document.getElementById('adminSortSelect') || {}).value || 'newest';
+  const status = (document.getElementById('adminStatusSelect') || {}).value || 'all';
+  const params = new URLSearchParams({ keyword, sort, status });
+  fetch('/api/admin/users?' + params, { headers: { 'X-Admin-Token': token } })
     .then(r => r.json()).then(data => {
       if (data.success) {
         renderAdminUserCards(data.users);
-        document.getElementById('adminUserCount').textContent = `共 ${data.total} 位注册用户`;
+        document.getElementById('adminUserCount').textContent = `共 ${data.total} 位用户`;
+        adminSelectedUsers.clear();
+        updateBatchBar();
       }
     });
+}
+
+function updateBatchBar() {
+  const bar = document.getElementById('adminBatchBar');
+  const count = adminSelectedUsers.size;
+  if (count > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('adminBatchCount').textContent = `已选 ${count} 个用户`;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function toggleUserSelect(userId) {
+  if (adminSelectedUsers.has(userId)) adminSelectedUsers.delete(userId);
+  else adminSelectedUsers.add(userId);
+  updateBatchBar();
 }
 
 function renderAdminUserCards(users) {
   const list = document.getElementById('adminUserList');
   if (!users || users.length === 0) {
-    list.innerHTML = '<div style="padding:40px; text-align:center; color:#94a3b8; font-size:13px;">暂无注册用户，点击上方「添加账户」创建第一个用户</div>';
+    list.innerHTML = '<div style="padding:40px; text-align:center; color:#94a3b8; font-size:13px;">暂无匹配用户</div>';
     return;
   }
   const colors = ['#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
   list.innerHTML = users.map((u, i) => {
     const initial = (u.username || '?')[0].toUpperCase();
     const color = colors[i % colors.length];
+    const isActive = u.is_active !== 0;
+    const statusBadge = isActive
+      ? '<span style="display:inline-block;padding:1px 6px;border-radius:4px;background:#dcfce7;color:#16a34a;font-size:10px;font-weight:600;margin-left:6px;">正常</span>'
+      : '<span style="display:inline-block;padding:1px 6px;border-radius:4px;background:#fef2f2;color:#ef4444;font-size:10px;font-weight:600;margin-left:6px;">已停用</span>';
+    const toggleBtn = isActive
+      ? `<button onclick="adminToggleUser(${u.id},0)" style="padding:3px 10px;border-radius:6px;border:1px solid #fbbf24;background:#fff;color:#f59e0b;font-size:11px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#f59e0b';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#f59e0b'">停用</button>`
+      : `<button onclick="adminToggleUser(${u.id},1)" style="padding:3px 10px;border-radius:6px;border:1px solid #86efac;background:#fff;color:#16a34a;font-size:11px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#16a34a';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#16a34a'">启用</button>`;
+    const checked = adminSelectedUsers.has(u.id) ? 'checked' : '';
     return `
-    <div class="noti-item" style="align-items:flex-start;">
+    <div class="noti-item" style="align-items:flex-start;opacity:${isActive?1:0.55};">
+      <div style="display:flex;align-items:center;gap:8px;margin-right:8px;">
+        <input type="checkbox" ${checked} onchange="toggleUserSelect(${u.id})" style="width:16px;height:16px;cursor:pointer;accent-color:#6366f1;">
+      </div>
       <div class="noti-item-icon" style="background:linear-gradient(135deg,${color},${color}cc); font-size:16px; font-weight:700;">${initial}</div>
       <div class="noti-item-content" style="flex:1; min-width:0;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <div class="noti-item-title" style="margin:0;">${u.username || '-'}</div>
-          <div style="display:flex; gap:6px; flex-shrink:0;">
-            <button onclick="showAdminUserDetail(${u.id})" style="padding:3px 10px; border-radius:6px; border:1px solid #e2e8f0; background:#fff; color:#6366f1; font-size:11px; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.background='#6366f1';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#6366f1'">详情</button>
-            <button onclick="adminChangePassword(${u.id},'${(u.username||'').replace(/'/g,"\\'")}')" style="padding:3px 10px; border-radius:6px; border:1px solid #e2e8f0; background:#fff; color:#f59e0b; font-size:11px; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.background='#f59e0b';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#f59e0b'">改密码</button>
-            <button onclick="adminDeleteUser(${u.id},'${(u.username||'').replace(/'/g,"\\'")}')" style="padding:3px 10px; border-radius:6px; border:1px solid #fecaca; background:#fff; color:#ef4444; font-size:11px; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.background='#ef4444';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#ef4444'">注销</button>
+          <div class="noti-item-title" style="margin:0;">${u.username || '-'}${statusBadge}</div>
+          <div style="display:flex; gap:5px; flex-shrink:0; flex-wrap:wrap;">
+            <button onclick="showAdminUserDetail(${u.id})" style="padding:3px 8px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#6366f1;font-size:10px;cursor:pointer;">详情</button>
+            ${toggleBtn}
+            <button onclick="adminChangePassword(${u.id},'${(u.username||'').replace(/'/g,"\\'")}')" style="padding:3px 8px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#f59e0b;font-size:10px;cursor:pointer;">改密</button>
+            <button onclick="adminDeleteUser(${u.id},'${(u.username||'').replace(/'/g,"\\'")}')" style="padding:3px 8px;border-radius:6px;border:1px solid #fecaca;background:#fff;color:#ef4444;font-size:10px;cursor:pointer;">删除</button>
           </div>
         </div>
         <div class="noti-item-desc" style="line-height:1.6;">
-          <span style="color:#64748b;">邮箱：</span>${u.email || '-'}<br>
-          <span style="color:#64748b;">年级：</span>${u.grade || '-'}&nbsp;&nbsp;<span style="color:#64748b;">专业：</span>${u.major || '-'}<br>
-          <span style="color:#64748b;">QQ：</span>${u.qq || '-'}&nbsp;&nbsp;<span style="color:#64748b;">生日：</span>${u.birthday || '-'}&nbsp;&nbsp;<span style="color:#64748b;">性别：</span>${u.gender || '-'}
+          <span style="color:#64748b;">邮箱：</span>${u.email || '-'}
+          &nbsp;&nbsp;<span style="color:#64748b;">年级：</span>${u.grade || '-'}&nbsp;&nbsp;<span style="color:#64748b;">专业：</span>${u.major || '-'}
         </div>
         <div class="noti-item-time" style="margin-top:4px;">注册于 ${u.created_at || '-'}</div>
       </div>
     </div>`;
   }).join('');
+}
+
+function adminToggleUser(userId, is_active) {
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/user/' + userId + '/toggle', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+    body: JSON.stringify({ is_active: is_active })
+  }).then(r => r.json()).then(data => {
+    if (data.success) {
+      loadAdminUsers(); loadAdminStats();
+    } else {
+      alert('操作失败：' + (data.error || '未知错误'));
+    }
+  });
+}
+
+function adminBatchToggle(is_active) {
+  if (adminSelectedUsers.size === 0) { alert('请先选择用户'); return; }
+  const action = is_active ? '启用' : '停用';
+  if (!confirm(`确定要批量${action}选中的 ${adminSelectedUsers.size} 个用户吗？`)) return;
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/batch/toggle', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+    body: JSON.stringify({ user_ids: Array.from(adminSelectedUsers), is_active: is_active })
+  }).then(r => r.json()).then(data => {
+    if (data.success) {
+      alert(data.message);
+      loadAdminUsers(); loadAdminStats();
+    } else {
+      alert('批量操作失败：' + (data.error || '未知错误'));
+    }
+  });
+}
+
+function adminBatchDelete() {
+  if (adminSelectedUsers.size === 0) { alert('请先选择用户'); return; }
+  if (!confirm(`确定要永久删除选中的 ${adminSelectedUsers.size} 个用户吗？此操作不可恢复！`)) return;
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/batch/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+    body: JSON.stringify({ user_ids: Array.from(adminSelectedUsers) })
+  }).then(r => r.json()).then(data => {
+    if (data.success) {
+      alert(data.message);
+      loadAdminUsers(); loadAdminStats();
+    } else {
+      alert('批量删除失败：' + (data.error || '未知错误'));
+    }
+  });
+}
+
+function loadAdminDashboard() {
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  const el = document.getElementById('adminDashboardContent');
+  el.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">加载仪表盘数据中...</div>';
+  fetch('/api/admin/dashboard', { headers: { 'X-Admin-Token': token } }).then(r => r.json()).then(data => {
+    if (!data.success) { el.innerHTML = '<div style="padding:40px;text-align:center;color:#ef4444;">加载失败</div>'; return; }
+    const d = data.dashboard;
+    // User growth chart
+    const growthBars = (d.user_growth || []).map(g => {
+      const maxCount = Math.max(...d.user_growth.map(x => x.count), 1);
+      const pct = (g.count / maxCount * 100).toFixed(0);
+      return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+        <span style="font-size:10px;color:#94a3b8;width:60px;text-align:right;flex-shrink:0;">${g.day.slice(5)}</span>
+        <div style="flex:1;height:14px;background:#f1f5f9;border-radius:3px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:3px;transition:width 0.5s;"></div>
+        </div>
+        <span style="font-size:10px;color:#475569;width:20px;">${g.count}</span>
+      </div>`;
+    }).join('');
+    // Active users ranking
+    const activeRank = (d.active_users || []).filter(u => u.msg_count > 0).map((u, i) => {
+      const medals = ['🥇','🥈','🥉'];
+      const medal = medals[i] || `${i+1}.`;
+      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9;">
+        <span style="font-size:14px;width:24px;text-align:center;">${medal}</span>
+        <span style="font-size:12px;color:#1e293b;flex:1;">${u.username}</span>
+        <span style="font-size:11px;color:#6366f1;font-weight:600;">${u.msg_count} 条消息</span>
+      </div>`;
+    }).join('') || '<div style="padding:10px;text-align:center;color:#94a3b8;font-size:12px;">暂无活跃用户</div>';
+    // Message trend
+    const msgBars = (d.message_trend || []).map(m => {
+      const maxMsg = Math.max(...d.message_trend.map(x => x.count), 1);
+      const pct = (m.count / maxMsg * 100).toFixed(0);
+      return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+        <span style="font-size:10px;color:#94a3b8;width:60px;text-align:right;flex-shrink:0;">${m.day.slice(5)}</span>
+        <div style="flex:1;height:14px;background:#f1f5f9;border-radius:3px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#0ea5e9,#06b6d4);border-radius:3px;"></div>
+        </div>
+        <span style="font-size:10px;color:#475569;width:20px;">${m.count}</span>
+      </div>`;
+    }).join('');
+
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div style="background:#f8fafc;border-radius:12px;padding:16px;">
+          <div style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:12px;">用户增长趋势（近30天）</div>
+          ${growthBars || '<div style="padding:10px;text-align:center;color:#94a3b8;font-size:12px;">暂无数据</div>'}
+        </div>
+        <div style="background:#f8fafc;border-radius:12px;padding:16px;">
+          <div style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:12px;">活跃用户排行</div>
+          ${activeRank}
+        </div>
+        <div style="background:#f8fafc;border-radius:12px;padding:16px;">
+          <div style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:12px;">消息趋势（近7天）</div>
+          ${msgBars || '<div style="padding:10px;text-align:center;color:#94a3b8;font-size:12px;">暂无数据</div>'}
+        </div>
+        <div style="background:#f8fafc;border-radius:12px;padding:16px;text-align:center;">
+          <div style="font-size:13px;font-weight:600;color:#1e293b;margin-bottom:12px;">回复率</div>
+          <div style="font-size:40px;font-weight:700;color:#6366f1;">${d.reply_rate}%</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:4px;">管理员对用户消息的回复比例</div>
+        </div>
+      </div>`;
+  });
+}
+
+function loadAdminLogs() {
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/logs', { headers: { 'X-Admin-Token': token } }).then(r => r.json()).then(data => {
+    if (!data.success) return;
+    document.getElementById('adminLogCount').textContent = `共 ${data.total} 条操作记录`;
+    const list = document.getElementById('adminLogList');
+    if (!data.logs || data.logs.length === 0) {
+      list.innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;font-size:13px;">暂无操作记录</div>';
+      return;
+    }
+    const actionColors = {'注销用户':'#ef4444','修改密码':'#f59e0b','停用用户':'#ef4444','启用用户':'#16a34a','批量停用':'#ef4444','批量启用':'#16a34a','批量删除':'#ef4444'};
+    list.innerHTML = data.logs.map(log => {
+      const color = actionColors[log.action] || '#6366f1';
+      return `<div class="noti-item" style="padding:10px 14px;">
+        <div class="noti-item-content" style="flex:1;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="display:inline-block;padding:2px 8px;border-radius:4px;background:${color}15;color:${color};font-size:11px;font-weight:600;">${log.action}</span>
+            <span style="font-size:10px;color:#94a3b8;">${log.created_at}</span>
+          </div>
+          <div style="font-size:12px;color:#475569;margin-top:4px;">目标：<strong>${log.target_user || '-'}</strong></div>
+          ${log.detail ? `<div style="font-size:11px;color:#94a3b8;margin-top:2px;">${log.detail}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  });
 }
 
 function showAdminUserDetail(userId) {

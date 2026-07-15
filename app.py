@@ -1560,6 +1560,8 @@ def _ensure_user_table():
         email TEXT UNIQUE,
         password_hash TEXT NOT NULL,
         is_admin INTEGER DEFAULT 0,
+        is_active INTEGER DEFAULT 1,
+        is_anonymous INTEGER DEFAULT 0,
         grade TEXT DEFAULT '',
         major TEXT DEFAULT '',
         qq TEXT DEFAULT '',
@@ -1568,6 +1570,68 @@ def _ensure_user_table():
         intro TEXT DEFAULT '',
         gender TEXT DEFAULT '',
         created_at TEXT NOT NULL
+    );
+    ''')
+    # 迁移：为已有表添加 is_active 字段
+    try:
+        c.execute('SELECT is_active FROM user LIMIT 1')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE user ADD COLUMN is_active INTEGER DEFAULT 1')
+    # 迁移：为已有表添加 is_anonymous 字段（榜单匿名）
+    try:
+        c.execute('SELECT is_anonymous FROM user LIMIT 1')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE user ADD COLUMN is_anonymous INTEGER DEFAULT 0')
+    conn.commit()
+    conn.close()
+
+
+def _ensure_admin_log_table():
+    """确保管理员操作日志表存在"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS admin_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        admin_name TEXT NOT NULL,
+        action TEXT NOT NULL,
+        target_user TEXT DEFAULT '',
+        detail TEXT DEFAULT '',
+        created_at TEXT NOT NULL
+    );
+    ''')
+    conn.commit()
+    conn.close()
+
+
+def _log_admin_action(admin_name, action, target_user='', detail=''):
+    """记录管理员操作日志"""
+    _ensure_admin_log_table()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    c.execute(
+        'INSERT INTO admin_log (admin_name, action, target_user, detail, created_at) VALUES (?, ?, ?, ?, ?)',
+        (admin_name, action, target_user, detail, now)
+    )
+    conn.commit()
+    conn.close()
+
+
+def _ensure_question_completion_table():
+    """确保题目完成记录表存在"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS question_completion (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        question_text TEXT DEFAULT '',
+        course_title TEXT DEFAULT '',
+        chapter_title TEXT DEFAULT '',
+        is_correct INTEGER DEFAULT 1,
+        completed_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES user(id)
     );
     ''')
     conn.commit()
@@ -1595,17 +1659,19 @@ def _ensure_message_table():
 
 
 def _ensure_admin_account():
-    """确保唯一管理员账号存在"""
+    """确保唯一管理员账号存在，并强制更新为最新凭据"""
     _ensure_user_table()
     _ensure_message_table()
+    admin_username = 'king33'
+    admin_email = 'admin@lingxi.com'
+    admin_password = 'dnl946'
+    pwd_hash = hashlib.sha256(admin_password.encode()).hexdigest()
+
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('SELECT id FROM user WHERE is_admin = 1')
-    if c.fetchone() is None:
-        admin_username = 'lingxi_admin_2026'
-        admin_email = 'admin@lingxi.com'
-        admin_password = 'LingXi@Admin#2026'
-        pwd_hash = hashlib.sha256(admin_password.encode()).hexdigest()
+    row = c.fetchone()
+    if row is None:
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         try:
             c.execute(
@@ -1613,9 +1679,17 @@ def _ensure_admin_account():
                 (admin_username, admin_email, pwd_hash, '系统管理员', '灵析平台', '灵析唯一超级管理员', now)
             )
             conn.commit()
-            print("[管理员] 已自动创建管理员账号: lingxi_admin_2026")
+            print(f"[管理员] 已自动创建管理员账号: {admin_username}")
         except sqlite3.IntegrityError:
             pass
+    else:
+        # 强制更新管理员用户名和密码
+        c.execute(
+            'UPDATE user SET username = ?, email = ?, password_hash = ? WHERE is_admin = 1',
+            (admin_username, admin_email, pwd_hash)
+        )
+        conn.commit()
+        print(f"[管理员] 已更新管理员账号: {admin_username}")
     conn.close()
 
 
@@ -1676,7 +1750,7 @@ def user_login():
     try:
         # 支持邮箱或用户名登录，排除管理员账号
         c.execute(
-            'SELECT id, username, email, grade, major, qq, birthday, signature, intro, gender '
+            'SELECT id, username, email, is_active, grade, major, qq, birthday, signature, intro, gender '
             'FROM user WHERE (email = ? OR username = ?) AND is_admin = 0 AND password_hash = ?',
             (login_id, login_id, pwd_hash)
         )
@@ -1693,6 +1767,9 @@ def user_login():
                 return jsonify({"success": False, "error": "密码错误", "code": "WRONG_PWD"}), 403
 
         user = dict(row)
+        # 检查账号是否被停用
+        if user.get('is_active') == 0:
+            return jsonify({"success": False, "error": "账号已被管理员停用，请联系管理员", "code": "DISABLED"}), 403
         return jsonify({"success": True, "user": user})
     finally:
         conn.close()
@@ -1750,18 +1827,45 @@ def admin_login():
 
 @app.route('/api/admin/users', methods=['GET'])
 def admin_get_users():
-    """管理员查看所有用户基本信息"""
+    """管理员查看所有用户基本信息（支持搜索、排序、状态筛选）"""
     _ensure_user_table()
     token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
     if not token:
         return jsonify({"success": False, "error": "未授权访问"}), 401
 
+    keyword = request.args.get('keyword', '').strip()
+    sort = request.args.get('sort', 'newest').strip()
+    status = request.args.get('status', 'all').strip()
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    c.execute(
-        'SELECT id, username, email, grade, major, qq, birthday, signature, intro, gender, created_at FROM user WHERE is_admin = 0 ORDER BY created_at DESC'
-    )
+
+    # 基础查询
+    query = 'SELECT id, username, email, grade, major, qq, birthday, signature, intro, gender, is_active, created_at FROM user WHERE is_admin = 0'
+    params = []
+
+    # 状态筛选
+    if status == 'active':
+        query += ' AND is_active = 1'
+    elif status == 'disabled':
+        query += ' AND is_active = 0'
+
+    # 关键词搜索
+    if keyword:
+        query += ' AND (username LIKE ? OR email LIKE ? OR major LIKE ? OR grade LIKE ?)'
+        like = f'%{keyword}%'
+        params.extend([like, like, like, like])
+
+    # 排序
+    if sort == 'oldest':
+        query += ' ORDER BY created_at ASC'
+    elif sort == 'name':
+        query += ' ORDER BY username ASC'
+    else:
+        query += ' ORDER BY created_at DESC'
+
+    c.execute(query, params)
     users = [dict(row) for row in c.fetchall()]
     conn.close()
 
@@ -1814,18 +1918,22 @@ def admin_delete_user(user_id):
     c = conn.cursor()
     try:
         # 不允许删除管理员
-        c.execute('SELECT is_admin FROM user WHERE id = ?', (user_id,))
+        c.execute('SELECT is_admin, username FROM user WHERE id = ?', (user_id,))
         row = c.fetchone()
         if not row:
             return jsonify({"success": False, "error": "用户不存在"}), 404
         if row[0] == 1:
             return jsonify({"success": False, "error": "不能注销管理员账号"}), 403
+        target_username = row[1]
 
         # 删除该用户的所有消息
         c.execute('DELETE FROM message WHERE sender_id = ?', (user_id,))
+        # 删除该用户的做题记录
+        c.execute('DELETE FROM question_completion WHERE user_id = ?', (user_id,))
         # 删除用户
         c.execute('DELETE FROM user WHERE id = ?', (user_id,))
         conn.commit()
+        _log_admin_action('admin', '注销用户', target_username, '永久删除用户及其消息和做题记录')
         return jsonify({"success": True, "message": "用户已注销"})
     except Exception as e:
         conn.rollback()
@@ -1852,12 +1960,14 @@ def admin_change_password(user_id):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     try:
-        c.execute('SELECT id, is_admin FROM user WHERE id = ?', (user_id,))
+        c.execute('SELECT id, is_admin, username FROM user WHERE id = ?', (user_id,))
         row = c.fetchone()
         if not row:
             return jsonify({"success": False, "error": "用户不存在"}), 404
+        target_username = row[2]
         c.execute('UPDATE user SET password_hash = ? WHERE id = ?', (pwd_hash, user_id))
         conn.commit()
+        _log_admin_action('admin', '修改密码', target_username, '重置用户密码')
         return jsonify({"success": True, "message": "密码已修改"})
     except Exception as e:
         conn.rollback()
@@ -1903,7 +2013,7 @@ def admin_add_user():
 
 @app.route('/api/admin/stats', methods=['GET'])
 def admin_get_stats():
-    """管理员获取平台统计概览"""
+    """管理员获取平台统计概览（增强版）"""
     _ensure_user_table()
     _ensure_message_table()
     conn = sqlite3.connect(DB_PATH)
@@ -1912,11 +2022,21 @@ def admin_get_stats():
     c.execute('SELECT COUNT(*) FROM user WHERE is_admin = 0')
     user_count = c.fetchone()[0]
 
+    c.execute('SELECT COUNT(*) FROM user WHERE is_admin = 0 AND is_active = 1')
+    active_count = c.fetchone()[0]
+
+    c.execute('SELECT COUNT(*) FROM user WHERE is_admin = 0 AND is_active = 0')
+    disabled_count = c.fetchone()[0]
+
     c.execute('SELECT COUNT(*) FROM message WHERE is_read = 0')
     unread_count = c.fetchone()[0]
 
     c.execute('SELECT COUNT(*) FROM message')
     total_messages = c.fetchone()[0]
+
+    today = datetime.datetime.now().strftime('%Y-%m-%d')
+    c.execute("SELECT COUNT(*) FROM user WHERE is_admin = 0 AND created_at LIKE ?", (today + '%',))
+    today_new = c.fetchone()[0]
 
     conn.close()
 
@@ -1924,8 +2044,217 @@ def admin_get_stats():
         "success": True,
         "stats": {
             "total_users": user_count,
+            "active_users": active_count,
+            "disabled_users": disabled_count,
             "unread_messages": unread_count,
-            "total_messages": total_messages
+            "total_messages": total_messages,
+            "today_new_users": today_new
+        }
+    })
+
+
+@app.route('/api/admin/user/<int:user_id>/toggle', methods=['PUT'])
+def admin_toggle_user(user_id):
+    """管理员停用/启用用户"""
+    _ensure_user_table()
+    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
+    if not token:
+        return jsonify({"success": False, "error": "未授权访问"}), 401
+
+    data = request.get_json() or {}
+    is_active = data.get('is_active', 1)
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute('SELECT id, username, is_admin, is_active FROM user WHERE id = ?', (user_id,))
+        row = c.fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "用户不存在"}), 404
+        _, username, is_admin, current_active = row
+        if is_admin == 1:
+            return jsonify({"success": False, "error": "不能操作管理员账号"}), 403
+
+        c.execute('UPDATE user SET is_active = ? WHERE id = ?', (is_active, user_id))
+        conn.commit()
+
+        action = '启用用户' if is_active else '停用用户'
+        _log_admin_action('admin', action, username, f'is_active: {current_active} -> {is_active}')
+
+        return jsonify({"success": True, "message": f"用户已{'启用' if is_active else '停用'}", "is_active": is_active})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route('/api/admin/batch/toggle', methods=['PUT'])
+def admin_batch_toggle():
+    """管理员批量停用/启用用户"""
+    _ensure_user_table()
+    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
+    if not token:
+        return jsonify({"success": False, "error": "未授权访问"}), 401
+
+    data = request.get_json() or {}
+    user_ids = data.get('user_ids', [])
+    is_active = data.get('is_active', 1)
+
+    if not user_ids:
+        return jsonify({"success": False, "error": "未选择用户"}), 400
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        placeholders = ','.join('?' * len(user_ids))
+        c.execute(f'SELECT id, username, is_admin FROM user WHERE id IN ({placeholders})', user_ids)
+        rows = c.fetchall()
+
+        affected = []
+        for row in rows:
+            uid, uname, is_admin = row
+            if is_admin == 1:
+                continue
+            c.execute('UPDATE user SET is_active = ? WHERE id = ?', (is_active, uid))
+            affected.append(uname)
+
+        conn.commit()
+        action = '批量启用' if is_active else '批量停用'
+        _log_admin_action('admin', action, ', '.join(affected), f'共{len(affected)}个用户')
+
+        return jsonify({"success": True, "message": f"{action}成功，影响{len(affected)}个用户", "affected": affected})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route('/api/admin/batch/delete', methods=['POST'])
+def admin_batch_delete():
+    """管理员批量永久删除用户"""
+    _ensure_user_table()
+    _ensure_message_table()
+    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
+    if not token:
+        return jsonify({"success": False, "error": "未授权访问"}), 401
+
+    data = request.get_json() or {}
+    user_ids = data.get('user_ids', [])
+    if not user_ids:
+        return jsonify({"success": False, "error": "未选择用户"}), 400
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        placeholders = ','.join('?' * len(user_ids))
+        c.execute(f'SELECT id, username, is_admin FROM user WHERE id IN ({placeholders})', user_ids)
+        rows = c.fetchall()
+
+        affected = []
+        for row in rows:
+            uid, uname, is_admin = row
+            if is_admin == 1:
+                continue
+            c.execute('DELETE FROM message WHERE sender_id = ?', (uid,))
+            c.execute('DELETE FROM question_completion WHERE user_id = ?', (uid,))
+            c.execute('DELETE FROM user WHERE id = ?', (uid,))
+            affected.append(uname)
+
+        conn.commit()
+        _log_admin_action('admin', '批量删除', ', '.join(affected), f'共{len(affected)}个用户')
+
+        return jsonify({"success": True, "message": f"批量删除成功，影响{len(affected)}个用户", "affected": affected})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route('/api/admin/logs', methods=['GET'])
+def admin_get_logs():
+    """管理员获取操作日志"""
+    _ensure_admin_log_table()
+    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
+    if not token:
+        return jsonify({"success": False, "error": "未授权访问"}), 401
+
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 30))
+    offset = (page - 1) * per_page
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    c.execute('SELECT COUNT(*) FROM admin_log')
+    total = c.fetchone()[0]
+
+    c.execute('SELECT * FROM admin_log ORDER BY created_at DESC LIMIT ? OFFSET ?', (per_page, offset))
+    logs = [dict(row) for row in c.fetchall()]
+    conn.close()
+
+    return jsonify({"success": True, "logs": logs, "total": total, "page": page, "per_page": per_page})
+
+
+@app.route('/api/admin/dashboard', methods=['GET'])
+def admin_dashboard():
+    """管理员仪表盘数据（用户增长趋势、活跃排行、消息统计）"""
+    _ensure_user_table()
+    _ensure_message_table()
+    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
+    if not token:
+        return jsonify({"success": False, "error": "未授权访问"}), 401
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    # 用户增长趋势（最近30天每天注册数）
+    c.execute('''
+        SELECT SUBSTR(created_at, 1, 10) AS day, COUNT(*) AS count
+        FROM user WHERE is_admin = 0
+        GROUP BY day ORDER BY day DESC LIMIT 30
+    ''')
+    growth = [dict(row) for row in c.fetchall()]
+    growth.reverse()
+
+    # 活跃用户排行（按发送消息数排名）
+    c.execute('''
+        SELECT u.id, u.username, u.email, COUNT(m.id) AS msg_count
+        FROM user u LEFT JOIN message m ON u.id = m.sender_id
+        WHERE u.is_admin = 0
+        GROUP BY u.id ORDER BY msg_count DESC LIMIT 10
+    ''')
+    active_users = [dict(row) for row in c.fetchall()]
+
+    # 消息统计（最近7天每天消息数）
+    c.execute('''
+        SELECT SUBSTR(created_at, 1, 10) AS day, COUNT(*) AS count
+        FROM message
+        GROUP BY day ORDER BY day DESC LIMIT 7
+    ''')
+    msg_trend = [dict(row) for row in c.fetchall()]
+    msg_trend.reverse()
+
+    # 回复率
+    c.execute('SELECT COUNT(*) FROM message')
+    total_msg = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM message WHERE reply IS NOT NULL AND reply != ''")
+    replied_msg = c.fetchone()[0]
+    reply_rate = round(replied_msg / total_msg * 100, 1) if total_msg > 0 else 0
+
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "dashboard": {
+            "user_growth": growth,
+            "active_users": active_users,
+            "message_trend": msg_trend,
+            "reply_rate": reply_rate
         }
     })
 
@@ -2063,10 +2392,181 @@ def user_self_delete():
             return jsonify({"success": False, "error": "管理员账号不可自行注销"}), 403
         # 先删除该用户的消息记录
         c.execute('DELETE FROM message WHERE sender_id = ?', (user_id,))
+        # 删除做题记录
+        c.execute('DELETE FROM question_completion WHERE user_id = ?', (user_id,))
         # 再删除用户
         c.execute('DELETE FROM user WHERE id = ?', (user_id,))
         conn.commit()
         return jsonify({"success": True, "message": "账号已成功注销"})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+# ============================
+# 7.5 做题榜单 API
+# ============================
+
+@app.route('/api/question/complete', methods=['POST'])
+def record_question_complete():
+    """记录用户完成题目"""
+    _ensure_user_table()
+    _ensure_question_completion_table()
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "无效请求"}), 400
+
+    email = data.get('email', '').strip()
+    question_text = data.get('question', '').strip()
+    course_title = data.get('course', '').strip()
+    chapter_title = data.get('chapter', '').strip()
+    is_correct = 1 if data.get('correct', True) else 0
+
+    if not email:
+        return jsonify({"success": False, "error": "缺少用户信息"}), 400
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute('SELECT id FROM user WHERE email = ? AND is_admin = 0', (email,))
+        row = c.fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "用户不存在"}), 404
+        user_id = row[0]
+        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        c.execute(
+            'INSERT INTO question_completion (user_id, question_text, course_title, chapter_title, is_correct, completed_at) VALUES (?, ?, ?, ?, ?, ?)',
+            (user_id, question_text, course_title, chapter_title, is_correct, now)
+        )
+        conn.commit()
+        return jsonify({"success": True, "id": c.lastrowid})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route('/api/leaderboard', methods=['GET'])
+def get_leaderboard():
+    """获取做题排行榜"""
+    _ensure_user_table()
+    _ensure_question_completion_table()
+    period = request.args.get('period', 'all').strip()  # day, week, month, all
+    current_email = request.args.get('email', '').strip()
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    try:
+        # 根据时间段构建 WHERE 条件
+        where_clause = ''
+        if period == 'day':
+            where_clause = "AND qc.completed_at >= date('now', 'start of day', 'localtime')"
+        elif period == 'week':
+            where_clause = "AND qc.completed_at >= date('now', '-7 days', 'localtime')"
+        elif period == 'month':
+            where_clause = "AND qc.completed_at >= date('now', '-30 days', 'localtime')"
+
+        # 查询排行榜：做题数 + 正确率
+        query = f'''
+        SELECT
+            u.id as user_id,
+            u.username,
+            u.is_anonymous,
+            COUNT(qc.id) as total_completed,
+            SUM(CASE WHEN qc.is_correct = 1 THEN 1 ELSE 0 END) as correct_count,
+            ROUND(100.0 * SUM(CASE WHEN qc.is_correct = 1 THEN 1 ELSE 0 END) / COUNT(qc.id), 1) as accuracy,
+            MAX(qc.completed_at) as last_active
+        FROM question_completion qc
+        JOIN user u ON qc.user_id = u.id
+        WHERE u.is_admin = 0 AND u.is_active = 1 {where_clause}
+        GROUP BY u.id
+        ORDER BY total_completed DESC, accuracy DESC, last_active ASC
+        '''
+        c.execute(query)
+        rows = c.fetchall()
+
+        # 提前查询当前用户ID，避免循环内重复查询
+        my_user_id = None
+        if current_email:
+            c.execute('SELECT id FROM user WHERE email = ? AND is_admin = 0', (current_email,))
+            u_row = c.fetchone()
+            if u_row:
+                my_user_id = u_row['id']
+
+        rankings = []
+        my_rank = None
+        for idx, row in enumerate(rows, 1):
+            is_me = (my_user_id is not None and row["user_id"] == my_user_id)
+            entry = {
+                "rank": idx,
+                "user_id": row["user_id"],
+                "username": row["username"],
+                "is_anonymous": bool(row["is_anonymous"]),
+                "total_completed": row["total_completed"],
+                "correct_count": row["correct_count"],
+                "accuracy": row["accuracy"],
+                "last_active": row["last_active"],
+                "is_me": is_me
+            }
+            if is_me:
+                my_rank = idx
+            rankings.append(entry)
+
+        # 总统计（只算活跃非管理员用户）
+        c.execute('''
+            SELECT COUNT(DISTINCT qc.user_id)
+            FROM question_completion qc
+            JOIN user u ON qc.user_id = u.id
+            WHERE u.is_admin = 0 AND u.is_active = 1
+        ''')
+        total_users = c.fetchone()[0]
+        c.execute('''
+            SELECT COUNT(*)
+            FROM question_completion qc
+            JOIN user u ON qc.user_id = u.id
+            WHERE u.is_admin = 0 AND u.is_active = 1
+        ''')
+        total_questions = c.fetchone()[0]
+
+        return jsonify({
+            "success": True,
+            "rankings": rankings,
+            "my_rank": my_rank,
+            "total_questions": total_questions,
+            "total_users": total_users,
+            "period": period
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route('/api/user/toggle-anonymous', methods=['PUT'])
+def toggle_anonymous():
+    """切换用户榜单匿名状态"""
+    _ensure_user_table()
+    data = request.get_json() or {}
+    email = data.get('email', '').strip()
+    if not email:
+        return jsonify({"success": False, "error": "缺少邮箱信息"}), 400
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute('SELECT id, is_anonymous FROM user WHERE email = ? AND is_admin = 0', (email,))
+        row = c.fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "用户不存在"}), 404
+        user_id, current = row
+        new_val = 0 if current else 1
+        c.execute('UPDATE user SET is_anonymous = ? WHERE id = ?', (new_val, user_id))
+        conn.commit()
+        return jsonify({"success": True, "is_anonymous": bool(new_val)})
     except Exception as e:
         conn.rollback()
         return jsonify({"success": False, "error": str(e)}), 500
@@ -2081,6 +2581,7 @@ if __name__ == '__main__':
     print("正在启动灵析学习资料后端 API 服务...")
     _ensure_user_table()
     _ensure_admin_account()
+    _ensure_question_completion_table()
     webbrowser.open('http://127.0.0.1:5000')
     
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
