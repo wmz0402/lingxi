@@ -475,16 +475,26 @@ def parse_learning_intent(user_input: str) -> dict:
         clean = result.strip('`').strip()
         if clean.startswith('json'):
             clean = clean[4:].strip()
-        return json.loads(clean)
+        obj = json.loads(clean)
+        intent_type = obj.get('intent_type', 'study')
+        if intent_type == 'study':
+            study_keywords = ["学习", "学", "规划", "路线", "路径", "路线图", "体系", "系统", "视频", "课程", "掌握", "弱点", "薄弱", "画像", "推荐", "资料", "教程", "课"]
+            lower_input = user_input.lower()
+            if not any(kw in lower_input for kw in study_keywords) and len(user_input) < 15:
+                if any(w in lower_input for w in ["谢谢", "感谢", "喜欢", "你好", "哈喽", "hello", "hi", "真棒", "厉害"]):
+                    obj['intent_type'] = 'social'
+                else:
+                    obj['intent_type'] = 'problem'
+        return obj
     except Exception:
         # 解析失败则返回简单结构
         # 简单做个规则兜底，防止调用失败导致判定不准
-        intent_type = "study"
+        intent_type = "problem"
         lower_input = user_input.lower()
         if any(w in lower_input for w in ["谢谢", "感谢", "喜欢", "你好", "哈喽", "hello", "hi", "真棒", "厉害"]):
             intent_type = "social"
-        elif any(w in lower_input for w in ["求函数", "极值", "单调", "解方程", "求导", "极限", "计算", "代码", "报错", "实现", "怎么做"]):
-            intent_type = "problem"
+        elif any(w in lower_input for w in ["学习", "规划", "路线", "路径", "路线图", "推荐"]):
+            intent_type = "study"
         return {"topic": user_input, "difficulty": "初级", "keywords": [], "intent_type": intent_type}
 
 
@@ -786,7 +796,10 @@ def chat():
     clean_question = extract_user_question(user_input)
 
     history = data.get('history', [])
-    print(f"[DEBUG] /api/chat history len={len(history)}, last_msg={history[-1] if history else 'EMPTY'}")
+    try:
+        print(f"[DEBUG] /api/chat history len={len(history)}")
+    except Exception:
+        pass
     system_prompt = "你是一个温和友好、智慧的学习助手。"
 
     # 优先处理图片识别（级联式双AI处理：图像识别 AI 负责把图片转为文字，不直接回复，而是将结果融入上下文由对话 AI 解答）
@@ -1039,24 +1052,29 @@ def chat():
     })
     
     # 调试：打印实际发送给讯飞的messages
-    print(f"[DEBUG] 发送给讯飞的messages数量: {len(messages_list)}")
-    for i, m in enumerate(messages_list):
-        role = m.get('role', 'unknown')
-        content = m.get("content", "")
-        if role == 'system':
-            content_preview = content[:80] + "..."
-        elif role == 'user':
-            # user消息只显示前60字符，避免显示完整的prompt
-            content_preview = content[:60] + "..." if len(content) > 60 else content
-        else:
-            content_preview = content[:60] + "..." if len(content) > 60 else content
-        print(f"[DEBUG] msg[{i}] role={role}, content={content_preview}")
+    try:
+        print(f"[DEBUG] 发送给讯飞的messages数量: {len(messages_list)}")
+        for i, m in enumerate(messages_list):
+            role = m.get('role', 'unknown')
+            content = m.get("content", "")
+            if role == 'system':
+                content_preview = content[:80] + "..."
+            elif role == 'user':
+                # user消息只显示前60字符，避免显示完整的prompt
+                content_preview = content[:60] + "..." if len(content) > 60 else content
+            else:
+                content_preview = content[:60] + "..." if len(content) > 60 else content
+            # 避免 terminal 的 gbk 编码不支持某些特殊字符时崩溃
+            safe_preview = content_preview.encode('gbk', errors='replace').decode('gbk')
+            print(f"[DEBUG] msg[{i}] role={role}, content={safe_preview}")
+    except Exception:
+        pass
     
     advice = call_xunfei_with_history(messages_list)
 
     # 4. 返回结果
-    # 文档诊断模式：隐藏资源推荐和学习路径
-    hide_resources = (intent_type == 'social' and not has_video_request) or bool(doc_context) or bool(is_mindmap) or bool(is_code_fix) or bool(is_quiz_gen) or bool(image_path)
+    # 解题/概念问答（problem）与日常闲聊（social）模式下，如果无视频需求，隐藏资源推荐和学习路径，仅直接回答问题
+    hide_resources = (intent_type in ['social', 'problem'] and not has_video_request) or bool(doc_context) or bool(is_mindmap) or bool(is_code_fix) or bool(is_quiz_gen) or bool(image_path)
     return jsonify({
         "intent": intent,
         "videos": videos,

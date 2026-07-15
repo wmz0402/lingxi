@@ -16,9 +16,16 @@
         skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
       }
     };
+    window.typesetMathJax = function() {
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise().catch(err => console.warn('MathJax error:', err));
+      } else {
+        setTimeout(window.typesetMathJax, 300);
+      }
+    };
   </script>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script id="MathJax-script" defer src="https://cdn.bootcdn.net/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/marked/4.3.0/marked.min.js"></script>
   <style>
     *,
     *::before,
@@ -1554,24 +1561,99 @@
 
     .typing-indicator {
       display: flex;
-      gap: 5px;
-      padding: 8px 4px;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 600px;
+      min-width: 280px;
+      padding: 6px 0;
+      box-sizing: border-box;
     }
 
-    .typing-indicator span {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #94a3b8;
-      animation: typingDot 1.4s ease-in-out infinite;
+    .typing-indicator span,
+    .typing-indicator::after {
+      display: block;
+      height: 14px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.12) 37%, rgba(0, 0, 0, 0.06) 63%);
+      background-size: 400% 100%;
+      animation: skeleton-shimmer 1.4s ease infinite;
+    }
+
+    .typing-indicator span:nth-child(1) {
+      width: 38%;
     }
 
     .typing-indicator span:nth-child(2) {
-      animation-delay: 0.2s;
+      width: 100%;
+      animation-delay: 0.15s;
     }
 
     .typing-indicator span:nth-child(3) {
-      animation-delay: 0.4s;
+      width: 100%;
+      animation-delay: 0.3s;
+    }
+
+    .typing-indicator::after {
+      content: "";
+      width: 61%;
+      animation-delay: 0.45s;
+    }
+
+    /* Border Beam for AI thinking bubbles */
+    #thinking .msg-bubble,
+    #t1 .msg-bubble,
+    #t2 .msg-bubble,
+    #t3 .msg-bubble,
+    [id^="typing_"] .msg-bubble {
+      position: relative;
+      background: transparent !important;
+      z-index: 1;
+      overflow: hidden;
+      border: 1px solid transparent !important;
+    }
+
+    #thinking .msg-bubble::before,
+    #t1 .msg-bubble::before,
+    #t2 .msg-bubble::before,
+    #t3 .msg-bubble::before,
+    [id^="typing_"] .msg-bubble::before {
+      content: '';
+      position: absolute;
+      inset: -150%;
+      z-index: -2;
+      background: conic-gradient(
+        from 0deg,
+        transparent 0%,
+        #7c3aed 5%,
+        #06b6d4 10%,
+        #67e8f9 15%,
+        transparent 20%,
+        transparent 100%
+      );
+      animation: rotate-beam 3.5s linear infinite;
+    }
+
+    #thinking .msg-bubble::after,
+    #t1 .msg-bubble::after,
+    #t2 .msg-bubble::after,
+    #t3 .msg-bubble::after,
+    [id^="typing_"] .msg-bubble::after {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      z-index: -1;
+      background: #ffffff !important;
+      border-radius: inherit;
+    }
+
+    @keyframes rotate-beam {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     @keyframes typingDot {
@@ -1585,6 +1667,33 @@
       30% {
         transform: translateY(-6px);
       }
+    }
+
+    @keyframes skeleton-shimmer {
+      0% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .skeleton-loading {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 600px;
+      min-width: 250px;
+      padding: 6px 0;
+    }
+
+    .skeleton-line {
+      height: 14px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.12) 37%, rgba(0, 0, 0, 0.06) 63%);
+      background-size: 400% 100%;
+      animation: skeleton-shimmer 1.4s ease infinite;
     }
 
     .chat-input-area {
@@ -1982,35 +2091,43 @@
 
     .group-typing-indicator {
       display: flex;
-      gap: 4px;
-      padding: 4px 0;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 600px;
+      min-width: 280px;
+      padding: 6px 0;
+      box-sizing: border-box;
     }
 
-    .group-typing-indicator span {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #94a3b8;
-      animation: groupTyping 1.4s infinite;
+    .group-typing-indicator span,
+    .group-typing-indicator::after {
+      display: block;
+      height: 14px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.12) 37%, rgba(0, 0, 0, 0.06) 63%);
+      background-size: 400% 100%;
+      animation: skeleton-shimmer 1.4s ease infinite;
+    }
+
+    .group-typing-indicator span:nth-child(1) {
+      width: 38%;
     }
 
     .group-typing-indicator span:nth-child(2) {
-      animation-delay: 0.2s;
+      width: 100%;
+      animation-delay: 0.15s;
     }
 
     .group-typing-indicator span:nth-child(3) {
-      animation-delay: 0.4s;
+      width: 100%;
+      animation-delay: 0.3s;
     }
 
-    @keyframes groupTyping {
-      0%, 60%, 100% {
-        transform: translateY(0);
-        opacity: 0.4;
-      }
-      30% {
-        transform: translateY(-6px);
-        opacity: 1;
-      }
+    .group-typing-indicator::after {
+      content: "";
+      width: 61%;
+      animation-delay: 0.45s;
     }
 
     .group-chat-input-area {
@@ -3837,6 +3954,293 @@
       overflow: hidden;
       animation: modalIn 0.25s ease;
     }
+
+    /* Gemini-style Agent Thinking Process Indicators */
+    .gemini-process-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 8px 12px 14px;
+      font-size: 13.5px;
+      color: #475569;
+      border-left: 2px solid rgba(99, 102, 241, 0.2);
+      padding-left: 14px;
+    }
+    .gemini-process-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0.6;
+      transition: all 0.3s ease;
+    }
+    .gemini-process-step.active {
+      opacity: 1;
+      font-weight: 500;
+      color: #6366f1;
+    }
+    .gemini-process-step.done {
+      opacity: 0.9;
+      color: #10b981;
+    }
+    .gemini-process-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      font-size: 12px;
+    }
+    .gemini-process-spinner {
+      border: 2px solid rgba(99, 102, 241, 0.1);
+      border-radius: 50%;
+      border-top: 2px solid #6366f1;
+      width: 14px;
+      height: 14px;
+      animation: gp-spin 1s linear infinite;
+    }
+    @keyframes gp-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* ==================== Gemini Style UI Redesign ==================== */
+    /* Sidebar */
+    .sidebar {
+      background: rgba(255, 255, 255, 0.45) !important;
+      backdrop-filter: blur(20px) saturate(1.3) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
+      border-right: 1px solid rgba(139, 92, 246, 0.08) !important;
+      box-shadow: none !important;
+      padding: 16px 12px !important;
+    }
+
+    /* Hide original agent list and workflow cards in sidebar */
+    .sidebar .sidebar-section,
+    .sidebar .agent-card,
+    #sidebarResizeHandle ~ .sidebar-section,
+    #sidebarResizeHandle ~ .agent-card {
+      display: none !important;
+    }
+
+    /* History list styling */
+    #sidebarHistoryPanel {
+      display: flex !important;
+      flex-direction: column;
+      flex: 1;
+      margin-top: 24px;
+      overflow: hidden;
+    }
+    .awp-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e1f20;
+      margin-bottom: 8px;
+      padding-left: 12px;
+    }
+    #historyChatList {
+      max-height: none !important;
+      flex: 1;
+      overflow-y: auto;
+    }
+    #historyChatList .history-item {
+      padding: 8px 12px !important;
+      border-radius: 20px !important;
+      background: transparent !important;
+      border: none !important;
+      color: #1e1f20 !important;
+      font-size: 14px !important;
+      margin-bottom: 4px !important;
+      transition: background 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #historyChatList .history-item:hover {
+      background: rgba(255, 255, 255, 0.3) !important;
+    }
+    #historyChatList .history-item.active {
+      background: rgba(139, 92, 246, 0.15) !important;
+      font-weight: 500;
+    }
+
+    /* New chat button */
+    .new-chat-btn {
+      background: rgba(255, 255, 255, 0.7) !important;
+      color: #6366f1 !important;
+      border-radius: 24px !important;
+      padding: 10px 16px !important;
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      border: 1px solid rgba(139, 92, 246, 0.15) !important;
+      box-shadow: none !important;
+      margin-bottom: 16px;
+      transition: background 0.2s ease;
+      width: auto !important;
+      display: inline-flex !important;
+      align-items: center;
+      gap: 8px;
+    }
+    .new-chat-btn:hover {
+      background: rgba(255, 255, 255, 0.9) !important;
+    }
+
+    /* Main Area and input container */
+    #chatArea {
+      background: rgba(255, 255, 255, 0.55) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+    }
+    .chat-container {
+      max-width: 820px !important;
+      margin: 0 auto !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+    }
+    .chat-messages {
+      background: transparent !important;
+    }
+
+    /* Input wrap - Set overflow visible to prevent dropdown cutting off */
+    .chat-input-area,
+    .group-chat-input-area {
+      background: transparent !important;
+      border: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      overflow: visible !important;
+    }
+    .chat-input-wrap,
+    .group-chat-input-box {
+      background: rgba(255, 255, 255, 0.8) !important;
+      border: 1px solid rgba(139, 92, 246, 0.15) !important;
+      border-radius: 28px !important;
+      padding: 8px 16px !important;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.04) !important;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 52px;
+      overflow: visible !important;
+    }
+    .chat-input-wrap textarea,
+    .group-chat-input-box textarea {
+      background: transparent !important;
+      border: none !important;
+      color: #1e1f20 !important;
+      font-size: 15px !important;
+      outline: none !important;
+      resize: none !important;
+      padding: 10px 0 !important;
+      flex: 1;
+    }
+
+    /* Hide the resize handle to align with Gemini styling and remove stray line */
+    .resize-handle {
+      display: none !important;
+    }
+
+    /* Gemini Style Agent Dropdown Selector */
+    .gemini-agent-selector {
+      position: relative;
+      margin-right: 4px;
+      flex-shrink: 0;
+      overflow: visible !important;
+    }
+    .gemini-selector-btn {
+      background: rgba(139, 92, 246, 0.08);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #6366f1;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+    .gemini-selector-btn:hover {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+    .gemini-selector-dropdown {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      right: 0;
+      background: #ffffff;
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+      padding: 6px;
+      width: 160px;
+      display: none;
+      z-index: 999;
+      animation: gs-dropdown-fade 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes gs-dropdown-fade {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .gemini-selector-dropdown.show {
+      display: block;
+    }
+    .gs-dropdown-item {
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+    .gs-dropdown-item:hover {
+      background: #f5f3ff;
+      color: #8b5cf6;
+    }
+    .gs-dropdown-item.active {
+      background: #e0e7ff;
+      color: #4f46e5;
+      font-weight: 600;
+    }
+
+    /* Image upload button */
+    .chat-img-btn {
+      background: transparent !important;
+      border: none !important;
+      color: #475569 !important;
+    }
+
+    /* Send button */
+    .send-btn {
+      background: transparent !important;
+      color: #6366f1 !important;
+      box-shadow: none !important;
+    }
+    .send-btn:hover {
+      background: rgba(99, 102, 241, 0.1) !important;
+    }
+
+    /* Top Nav style */
+    .top-nav {
+      background: rgba(255, 255, 255, 0.55) !important;
+      backdrop-filter: blur(20px) saturate(1.3) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.06) !important;
+      box-shadow: none !important;
+    }
+    .nav-brand {
+      gap: 12px !important;
+    }
+    .nav-logo {
+      background: linear-gradient(135deg, #4285f4, #9b72cb) !important;
+    }
+    .nav-title {
+      color: #1e1f20 !important;
+      font-weight: 500 !important;
+    }
   </style>
 </head>
 <body>
@@ -4400,20 +4804,13 @@
       <!-- Center Chat -->
       <div class="chat-area main-content-page" id="chatArea">
         <div class="chat-messages" id="chatMessages">
-          <div class="msg assistant fade-up">
-            <div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div>
-            <div>
-              <div class="msg-sender">灵析助手</div>
-              <div class="msg-bubble">
-                你好！我是<strong>灵析</strong>，你的多智能体协同个性化学习助手。我可以帮你分析学习情况、生成个性化学习资源、规划学习路径。<br><br>
-                你可以直接告诉我你想学什么，比如：<br>
-                <div id="sidebarQuickSuggests" style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
-                  <span class="quick-suggest" onclick="sendQuickSuggest('我想学Python递归')">• "我想学Python递归"</span>
-                  <span class="quick-suggest" onclick="sendQuickSuggest('帮我分析一下我的编程基础')">• "帮我分析一下我的编程基础"</span>
-                  <span class="quick-suggest" onclick="sendQuickSuggest('推荐一些数据结构的学习路径')">• "推荐一些数据结构的学习路径"</span>
-                </div>
-              </div>
-            </div>
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:300px; text-align:center; padding:40px 20px;">
+            <h1 id="geminiGreetingTitle" style="font-size:38px; font-weight:500; background: linear-gradient(74deg, #4285f4 0%, #9b72cb 30%, #d96570 60%, #13b5ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom:24px; letter-spacing:-0.5px;">
+              你好，朋友！我们开始吧
+            </h1>
+            <p style="font-size:16px; color:#475569; margin-bottom:32px; max-width:480px; line-height:1.6;">
+              我是你的多智能体协同个性化学习助手。请在下方选择合适的智能体或直接向我提问。
+            </p>
           </div>
         </div>
 
@@ -4480,6 +4877,22 @@
             </button>
             <textarea id="chatInput" rows="1" placeholder="输入你的学习需求，例如：我想学Python递归..." onkeydown="handleChatKey(event)"
               oninput="autoResize(this)"></textarea>
+
+            <!-- Gemini Style Agent Dropdown Selector -->
+            <div class="gemini-agent-selector" id="chatAgentSelector">
+              <button class="gemini-selector-btn" onclick="toggleAgentDropdown(event, 'chat')">
+                <span id="chatSelectedAgentText">🤖 全体协同</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="gemini-selector-dropdown" id="chatAgentDropdown">
+                <div class="gs-dropdown-item active" onclick="changeGeminiAgent('all', 'chat')">🤖 全体协同</div>
+                <div class="gs-dropdown-item" onclick="changeGeminiAgent('groupChat', 'chat')">👥 AI解题群</div>
+                <div class="gs-dropdown-item" onclick="changeGeminiAgent('analyst', 'chat')">📊 学习分析师</div>
+                <div class="gs-dropdown-item" onclick="changeGeminiAgent('generator', 'chat')">🎨 资源生成师</div>
+                <div class="gs-dropdown-item" onclick="changeGeminiAgent('planner', 'chat')">🗺️ 路径规划师</div>
+              </div>
+            </div>
+
             <button class="send-btn" id="chatSendBtn" onclick="handleSendBtnClick()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2">
                 <line x1="22" y1="2" x2="11" y2="13" />
@@ -4536,6 +4949,22 @@
           <div class="group-chat-input-box">
             <textarea id="groupChatInput" rows="1" placeholder="输入问题，三位AI同时为你解答..." onkeydown="handleGroupChatKey(event)"
               oninput="autoResize(this)"></textarea>
+
+            <!-- Gemini Style Agent Dropdown Selector for Group Chat -->
+            <div class="gemini-agent-selector" id="groupAgentSelector">
+              <button class="gemini-selector-btn" onclick="toggleAgentDropdown(event, 'group')">
+                <span id="groupSelectedAgentText">👥 AI解题群</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="gemini-selector-dropdown" id="groupAgentDropdown">
+                <div class="gs-dropdown-item" onclick="changeGeminiAgent('all', 'group')">🤖 全体协同</div>
+                <div class="gs-dropdown-item active" onclick="changeGeminiAgent('groupChat', 'group')">👥 AI解题群</div>
+                <div class="gs-dropdown-item" onclick="changeGeminiAgent('analyst', 'group')">📊 学习分析师</div>
+                <div class="gs-dropdown-item" onclick="changeGeminiAgent('generator', 'group')">🎨 资源生成师</div>
+                <div class="gs-dropdown-item" onclick="changeGeminiAgent('planner', 'group')">🗺️ 路径规划师</div>
+              </div>
+            </div>
+
             <button class="send-btn" id="groupChatSendBtn" onclick="sendGroupMessage()">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="22" y1="2" x2="11" y2="13" />
@@ -5289,8 +5718,9 @@
     let studyChatSelectedImagePath = null;
     
     function stopGeneration() {
-      if (currentAbortController) {
-        currentAbortController.abort();
+      const activeTask = runningTasks[currentChatId];
+      if (activeTask && activeTask.controller) {
+        activeTask.controller.abort();
       }
     }
     let favoritesList = [];
@@ -5362,6 +5792,8 @@
     };
     let chatHistory = [];
     let activeChatHistoryIndex = null;
+    let currentChatId = null;
+    const runningTasks = {};
     let recentActivities = [];
     const courseTemplates = {
       '高等数学基础': [
@@ -6675,8 +7107,10 @@ function unsubscribeCourse(categoryName, courseTitle, event) {
 function saveUserData() {
     if (!currentUserEmail) return;
 
-    // 实时更新当前活跃对话的历史 HTML
-    if (typeof activeChatHistoryIndex === 'number' && activeChatHistoryIndex >= 0 && activeChatHistoryIndex < chatHistory.length) {
+    // 仅在用户处于对话主界面且有激活历史会话时，才实时更新当前活跃对话的历史 HTML，防止其他页面（如课程中心等）后台保存数据时误擦除/重写历史内容
+    const chatArea = document.getElementById('chatArea');
+    const isChatActive = chatArea && !chatArea.classList.contains('hidden');
+    if (isChatActive && typeof activeChatHistoryIndex === 'number' && activeChatHistoryIndex >= 0 && activeChatHistoryIndex < chatHistory.length) {
         const chatMessages = document.getElementById('chatMessages');
         if (chatMessages) {
             chatHistory[activeChatHistoryIndex].html = chatMessages.innerHTML;
@@ -8810,9 +9244,7 @@ function renderChapterContent() {
       postProcessChapterContent(bodyContainer);
     }
   }
-  if (window.MathJax && window.MathJax.typesetPromise) {
-    window.MathJax.typesetPromise();
-  }
+  window.typesetMathJax();
 }
 
 function selectChapterQuizOption(el, opt) {
@@ -9812,12 +10244,39 @@ window.deleteChatHistory = function(index) {
 }
 
 window.loadChatHistoryItem = function(index) {
+  if (typeof activeChatHistoryIndex === 'number' && activeChatHistoryIndex >= 0 && activeChatHistoryIndex < chatHistory.length) {
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) {
+      chatHistory[activeChatHistoryIndex].html = chatMessages.innerHTML;
+    }
+  }
   activeChatHistoryIndex = index;
   const item = chatHistory[index];
   if (item) {
+    if (!item.id) {
+      item.id = 'chat_' + Date.now() + '_' + index + '_' + Math.random().toString(36).substr(2, 5);
+    }
+    currentChatId = item.id;
     const chatMessages = document.getElementById('chatMessages');
     if (chatMessages) {
-      chatMessages.innerHTML = item.html || '';
+      const rawHtml = typeof item === 'string' ? '' : (item.html || '');
+      if (rawHtml.trim() !== '') {
+        chatMessages.innerHTML = rawHtml;
+      } else {
+        const titleText = typeof item === 'string' ? item : (item.title || '无标题对话');
+        chatMessages.innerHTML = `
+          <div class="msg assistant fade-up">
+            <div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div>
+            <div>
+              <div class="msg-sender">灵析助手</div>
+              <div class="msg-bubble">
+                您点击了历史对话：<strong>“${escapeHtml(titleText)}”</strong>。<br><br>
+                由于这是历史对话记录或之前未保存详细聊天内容，您可以直接在下方输入框中继续提问，我会接着为您解答。
+              </div>
+            </div>
+          </div>
+        `;
+      }
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
   }
@@ -9831,6 +10290,7 @@ window.loadChatHistoryItem = function(index) {
 
   renderChatHistory();
   switchMainPage('chat');
+  updateSendBtnState();
 }
 
 function formatActivityTime(isoStr) {
@@ -9870,19 +10330,82 @@ function renderRecentActivities() {
   container.innerHTML = html;
 }
 
-window.addChatHistoryItem = function(title) {
+window.addChatHistoryItem = function(title, customId) {
   const chatMessages = document.getElementById('chatMessages');
   const currentHtml = chatMessages ? chatMessages.innerHTML : '';
   
+  const cid = customId || ('chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5));
   chatHistory.unshift({
+    id: cid,
     title: title,
     html: currentHtml
   });
   activeChatHistoryIndex = 0;
+  currentChatId = cid;
 
   renderChatHistory();
   saveUserData();
   console.log(`[智能体对话历史同步] 成功创建新历史对话: ${title}`);
+};
+
+window.addChatHistoryItemInBackground = function(customId, title, html) {
+  chatHistory.unshift({
+    id: customId,
+    title: title,
+    html: html
+  });
+  if (activeChatHistoryIndex !== null) {
+    activeChatHistoryIndex++;
+  }
+  renderChatHistory();
+  saveUserData();
+  console.log(`[智能体对话历史后台同步] 成功创建新历史对话: ${title}`);
+};
+
+window.showNotification = function(title, description, targetChatId) {
+  let container = document.getElementById('lingxiNotifications');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'lingxiNotifications';
+    container.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:12px; max-width:380px;';
+    document.body.appendChild(container);
+  }
+  
+  const notif = document.createElement('div');
+  notif.style.cssText = 'background:#ffffff; color:#1e293b; border-radius:12px; padding:16px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); border:1px solid rgba(139,92,246,0.15); display:flex; align-items:flex-start; gap:12px; transform:translateX(120%); transition:transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); min-width:320px; cursor:pointer;';
+  
+  notif.innerHTML = `
+    <div style="background:#f5f3ff; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#8b5cf6;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </svg>
+    </div>
+    <div style="flex:1;">
+      <div style="font-weight:600; font-size:14px; margin-bottom:4px; color:#1e293b;">${escapeHtml(title)}</div>
+      <div style="font-size:12.5px; color:#64748b; line-height:1.4;">${escapeHtml(description)}</div>
+    </div>
+    <button style="background:transparent; border:none; color:#94a3b8; cursor:pointer; font-size:16px; line-height:1; padding:0 4px;" onclick="event.stopPropagation(); this.parentElement.style.transform='translateX(120%)'; setTimeout(() => this.parentElement.remove(), 300);">×</button>
+  `;
+  
+  container.appendChild(notif);
+  setTimeout(() => { notif.style.transform = 'translateX(0)'; }, 50);
+  
+  notif.onclick = () => {
+    const idx = chatHistory.findIndex(h => h.id === targetChatId);
+    if (idx !== -1) {
+      loadChatHistoryItem(idx);
+    }
+    notif.style.transform = 'translateX(120%)';
+    setTimeout(() => notif.remove(), 300);
+  };
+  
+  setTimeout(() => {
+    if (notif.parentElement) {
+      notif.style.transform = 'translateX(120%)';
+      setTimeout(() => notif.remove(), 300);
+    }
+  }, 6000);
 };
 
 window.addRecentActivityItem = function(actionText) {
@@ -10191,18 +10714,70 @@ function saveProfileSettings(e) {
 // ============================================================
 // 3. 选择智能体、切换侧边栏（只保留一个 toggleSidebar）
 // ============================================================
-function selectAgent(el, agent) {
-    document.querySelectorAll('.agent-card').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
+window.changeGeminiAgent = function(agent, type) {
+  const dropdown = document.getElementById(type === 'group' ? 'groupAgentDropdown' : 'chatAgentDropdown');
+  if (dropdown) dropdown.classList.remove('show');
+
+  const agentNames = {
+    'all': '🤖 全体协同',
+    'groupChat': '👥 AI解题群',
+    'analyst': '📊 学习分析师',
+    'generator': '🎨 资源生成师',
+    'planner': '🗺️ 路径规划师'
+  };
+
+  ['chat', 'group'].forEach(t => {
+    const textEl = document.getElementById(t === 'group' ? 'groupSelectedAgentText' : 'chatSelectedAgentText');
+    if (textEl && agentNames[agent]) {
+      textEl.textContent = agentNames[agent];
+    }
+    const list = document.getElementById(t === 'group' ? 'groupAgentDropdown' : 'chatAgentDropdown');
+    if (list) {
+      list.querySelectorAll('.gs-dropdown-item').forEach(item => {
+        const onclickAttr = item.getAttribute('onclick') || '';
+        if (onclickAttr.includes(`'${agent}'`)) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+    }
+  });
+
+  if (agent === 'groupChat') {
+    switchMainPage('groupChat');
+  } else {
     currentAgent = agent;
     switchMainPage('chat');
+  }
+};
+
+window.toggleAgentDropdown = function(event, type) {
+  event.stopPropagation();
+  const dropdown = document.getElementById(type === 'group' ? 'groupAgentDropdown' : 'chatAgentDropdown');
+  if (dropdown) {
+    document.querySelectorAll('.gemini-selector-dropdown').forEach(d => {
+      if (d !== dropdown) d.classList.remove('show');
+    });
+    dropdown.classList.toggle('show');
+  }
+};
+
+window.addEventListener('click', () => {
+  document.querySelectorAll('.gemini-selector-dropdown').forEach(d => {
+    d.classList.remove('show');
+  });
+});
+
+function selectAgent(el, agent) {
+    if (window.changeGeminiAgent) {
+        window.changeGeminiAgent(agent, 'chat');
+    }
 }
 
 function selectAgentByType(agent) {
-    const map = { 'analyst': 1, 'generator': 2, 'planner': 3 };
-    const cards = document.querySelectorAll('.agent-card');
-    if (cards[map[agent]]) {
-        selectAgent(cards[map[agent]], agent);
+    if (window.changeGeminiAgent) {
+        window.changeGeminiAgent(agent, 'chat');
     }
 }
 
@@ -12073,7 +12648,14 @@ function sendQuickSuggest(text) {
 }
 
 function newChat() {
+  if (typeof activeChatHistoryIndex === 'number' && activeChatHistoryIndex >= 0 && activeChatHistoryIndex < chatHistory.length) {
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) {
+      chatHistory[activeChatHistoryIndex].html = chatMessages.innerHTML;
+    }
+  }
   activeChatHistoryIndex = null;
+  currentChatId = 'chat_new_' + Date.now();
   renderChatHistory(); // 刷新高亮状态为不选中
   switchMainPage('chat');
   const data = getInterestBasedSuggestions();
@@ -12092,6 +12674,7 @@ function newChat() {
       </div>
     </div>
   </div>`;
+  updateSendBtnState();
 }
 
 function clearChatHistory() {
@@ -12596,6 +13179,18 @@ function updateSendBtnState() {
 }
 function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function removeThinkingFromHtml(html) {
+  if (!html) return '';
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+  const thinking = temp.querySelector('#thinking');
+  if (thinking) thinking.remove();
+  ['t1', 't2', 't3'].forEach(id => {
+    const el = temp.querySelector('#' + id);
+    if (el) el.remove();
+  });
+  return temp.innerHTML;
+}
 
 // ========== 多智能体协同模块 ==========
 class AnalystAgent {
@@ -12793,19 +13388,28 @@ function enterCourseStudySearch(courseTitle, chapterTitle, tab, autoQuiz = false
 async function sendMessage() {
     const inp = document.getElementById('chatInput');
     const text = inp.value.trim();
-    if (!text && !chatSelectedImagePath || isProcessing) return;
+    
+    if (!currentChatId) {
+        currentChatId = 'chat_new_' + Date.now();
+    }
+    if (!text && !chatSelectedImagePath || runningTasks[currentChatId]) return;
 
-    // 捕获并清空已选择的图片
+    const taskId = currentChatId;
     const currentImagePath = chatSelectedImagePath;
     clearChatImage(null, 'chat');
 
-    isProcessing = true;
+    const controller = new AbortController();
+    const { signal } = controller;
+    runningTasks[taskId] = {
+        controller: controller,
+        text: text,
+        title: text.substring(0, 15) || '新对话',
+        isNewChat: (activeChatHistoryIndex === null),
+        initialHtml: ''
+    };
     updateSendBtnState();
 
-    // 重置工作流状态为全部等待
     updateWF(0);
-    currentAbortController = new AbortController();
-    const { signal } = currentAbortController;
 
     const chat = document.getElementById('chatMessages');
     
@@ -12829,6 +13433,11 @@ async function sendMessage() {
     inp.value = '';
     inp.style.height = 'auto';
     chat.scrollTop = chat.scrollHeight;
+
+    // 如果是新对话，虽未回复完成，但也立刻在左侧历史记录生成条目，提升感知度
+    if (activeChatHistoryIndex === null) {
+        window.addChatHistoryItem(text, taskId);
+    }
 
     // 【修复】用户消息渲染到DOM后再获取历史记录，确保上下文连续
     const history = getChatHistoryContext('chatMessages');
@@ -12855,14 +13464,14 @@ async function sendMessage() {
       updateProfileFromChat(text);
       try {
         if (activeChatHistoryIndex === null) {
-          window.addChatHistoryItem(text);
+          window.addChatHistoryItem(text, taskId);
         } else {
           saveUserData();
         }
       } catch (saveErr) {
         console.warn('保存对话历史失败:', saveErr);
       }
-      isProcessing = false;
+      delete runningTasks[taskId];
       updateSendBtnState();
       return;
     }
@@ -12870,8 +13479,47 @@ async function sendMessage() {
     // 能力画像：对话学习追踪
     updateProfileFromChat(text);
 
-    chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" id="thinking"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div></div>`);
+    let thinkingHtml = '';
+    if (currentAgent === 'all') {
+        thinkingHtml = `
+            <div class="gemini-process-container">
+                <div class="gemini-process-step active" id="gpStep1">
+                    <div class="gemini-process-icon" id="gpIcon1"><div class="gemini-process-spinner"></div></div>
+                    <span>学习分析师正在诊断画像和提取主题...</span>
+                </div>
+                <div class="gemini-process-step" id="gpStep2">
+                    <div class="gemini-process-icon" id="gpIcon2">⏳</div>
+                    <span>资源生成师正在准备个性化学习资料...</span>
+                </div>
+                <div class="gemini-process-step" id="gpStep3">
+                    <div class="gemini-process-icon" id="gpIcon3">⏳</div>
+                    <span>路径规划师正在定制个性化学习路线...</span>
+                </div>
+            </div>
+            <div class="typing-indicator" style="margin-top:10px;"><span></span><span></span><span></span></div>
+        `;
+    } else {
+        let agentTitleText = '灵析助手正在思考工作...';
+        if (currentAgent === 'analyst') agentTitleText = '学习分析师正在诊断画像...';
+        else if (currentAgent === 'generator') agentTitleText = '资源生成师正在搜索匹配资源...';
+        else if (currentAgent === 'planner') agentTitleText = '路径规划师正在定制路线...';
+        thinkingHtml = `
+            <div class="gemini-process-container">
+                <div class="gemini-process-step active" id="gpStep1">
+                    <div class="gemini-process-icon" id="gpIcon1"><div class="gemini-process-spinner"></div></div>
+                    <span>${agentTitleText}</span>
+                </div>
+            </div>
+            <div class="typing-indicator" style="margin-top:10px;"><span></span><span></span><span></span></div>
+        `;
+    }
+
+    chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" id="thinking"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble">${thinkingHtml}</div></div></div>`);
     chat.scrollTop = chat.scrollHeight;
+
+    if (runningTasks[taskId]) {
+        runningTasks[taskId].initialHtml = chat.innerHTML;
+    }
 
     try {
         // 调用后端 API 获取大模型解析意图与建议
@@ -12933,35 +13581,43 @@ async function sendMessage() {
 
         if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
 
-        const analyst = new AnalystAgent();
-        const intent = analyst.analyze(text);
-        if (topic !== text) {
-            intent.topic = topic;
-            intent.difficulty = difficulty;
-            intent.keywords = keywords;
-        }
-        console.log('分析师结果:', intent);
-        if (currentAgent === 'all' || currentAgent === 'analyst') updateWF(currentAgent === 'analyst' ? 1 : 1, currentAgent === 'analyst' ? 'analyst' : null);
-
-        if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
-
-        // 【文档诊断模式】有文档内容时跳过B站搜索，不推荐视频
         let resources = [];
-        if (!docContext) {
-            const searcher = new SearcherAgent();
-            resources = await searcher.search(intent.topic);
-            console.log('搜索资源数量:', resources.length);
+        let plan = [];
+        let intent = { topic: topic, difficulty: difficulty, keywords: keywords };
+
+        if (!hideResources) {
+            const analyst = new AnalystAgent();
+            const analyzedIntent = analyst.analyze(text);
+            intent.topic = (topic && topic !== text) ? topic : analyzedIntent.topic;
+            intent.difficulty = (difficulty && difficulty !== '初级') ? difficulty : analyzedIntent.difficulty;
+            intent.keywords = (keywords && keywords.length > 0) ? keywords : analyzedIntent.keywords;
+
+            console.log('分析师结果:', intent);
+            if (currentAgent === 'all' || currentAgent === 'analyst') updateWF(currentAgent === 'analyst' ? 1 : 1, currentAgent === 'analyst' ? 'analyst' : null);
+
+            if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+
+            // 【文档诊断模式】有文档内容时跳过B站搜索，不推荐视频
+            if (!docContext) {
+                const searcher = new SearcherAgent();
+                resources = await searcher.search(intent.topic);
+                console.log('搜索资源数量:', resources.length);
+            } else {
+                console.log('文档诊断模式：跳过B站搜索');
+            }
+            updateWF(currentAgent === 'all' ? 2 : (currentAgent === 'generator' ? 1 : 0), currentAgent === 'generator' ? 'generator' : null);
+
+            if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+
+            const planner = new PlannerAgent();
+            plan = planner.plan(resources, userProfileDimensions, topic);
+            console.log('规划步骤:', plan);
+            updateWF(currentAgent === 'all' ? 3 : (currentAgent === 'planner' ? 1 : 0), currentAgent === 'planner' ? 'planner' : null);
         } else {
-            console.log('文档诊断模式：跳过B站搜索');
+            if (currentAgent === 'all') {
+                updateWF(4, 'none');
+            }
         }
-        updateWF(currentAgent === 'all' ? 2 : (currentAgent === 'generator' ? 1 : 0), currentAgent === 'generator' ? 'generator' : null);
-
-        if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
-
-        const planner = new PlannerAgent();
-        const plan = planner.plan(resources, userProfileDimensions, topic);
-        console.log('规划步骤:', plan);
-        updateWF(currentAgent === 'all' ? 3 : (currentAgent === 'planner' ? 1 : 0), currentAgent === 'planner' ? 'planner' : null);
 
         const thinking = document.getElementById('thinking');
         if (thinking) thinking.remove();
@@ -13119,20 +13775,31 @@ async function sendMessage() {
 
         chatMessageIndex++;
         let replyHtml = `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:${agentBg}">${agentAvatar}</div><div><div class="msg-sender">${agentName}</div>${wrapAssistantBubble(bubbleContent, chatMessageIndex, favTypeForMsg, favTitleForMsg)}</div></div>`;
-        chat.insertAdjacentHTML('beforeend', replyHtml);
-        chat.scrollTop = chat.scrollHeight;
 
-        if (currentAgent === 'all') updateWF(4);
-        else if (currentAgent === 'analyst' || currentAgent === 'generator' || currentAgent === 'planner') updateWF(4, currentAgent);
-        try {
-            if (activeChatHistoryIndex === null) {
-                window.addChatHistoryItem(text);
-            } else {
+        if (currentChatId === taskId) {
+            const thinking = document.getElementById('thinking');
+            if (thinking) thinking.remove();
+            chat.insertAdjacentHTML('beforeend', replyHtml);
+            chat.scrollTop = chat.scrollHeight;
+            window.typesetMathJax();
+
+            if (currentAgent === 'all') updateWF(4);
+            else if (currentAgent === 'analyst' || currentAgent === 'generator' || currentAgent === 'planner') updateWF(4, currentAgent);
+            try {
+                saveUserData();
+            } catch (saveErr) {
+                console.warn('保存对话历史失败（可能是 localStorage 容量不足）:', saveErr);
+            }
+        } else {
+            // Background task finished: update HTML of existing history item
+            const histItem = chatHistory.find(h => h.id === taskId);
+            if (histItem) {
+                histItem.html = removeThinkingFromHtml(histItem.html) + replyHtml;
                 saveUserData();
             }
-        } catch (saveErr) {
-            console.warn('保存对话历史失败（可能是 localStorage 容量不足）:', saveErr);
+            window.showNotification("任务已完成", `您之前发起的对话“${runningTasks[taskId].title}”已回答完成！`, taskId);
         }
+
         try {
             let actText = '进行了对话学习交流';
             if (currentAgent === 'planner') actText = '定制了定制学习路径';
@@ -13143,22 +13810,39 @@ async function sendMessage() {
 
     } catch (e) {
         if (e.name === 'AbortError' || signal.aborted) {
-            const thinking = document.getElementById('thinking');
-            if (thinking) thinking.remove();
-
-            chatMessageIndex++;
-            chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">❌</div><div><div class="msg-sender">灵析助手</div>${wrapAssistantBubble('<span style="background:#fef2f2; color:#b91c1c; border:1.5px solid #fee2e2; display:block; padding:8px 12px; border-radius:12px;">已终止回答生成。</span>', chatMessageIndex, 'chat', '已终止提示')}</div></div>`);
-            chat.scrollTop = chat.scrollHeight;
+            if (currentChatId === taskId) {
+                const thinking = document.getElementById('thinking');
+                if (thinking) thinking.remove();
+                chatMessageIndex++;
+                chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">❌</div><div><div class="msg-sender">灵析助手</div>${wrapAssistantBubble('<span style="background:#fef2f2; color:#b91c1c; border:1.5px solid #fee2e2; display:block; padding:8px 12px; border-radius:12px;">已终止回答生成。</span>', chatMessageIndex, 'chat', '已终止提示')}</div></div>`);
+                chat.scrollTop = chat.scrollHeight;
+            } else {
+                // Background abort HTML update
+                let abortHtml = `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">❌</div><div><div class="msg-sender">灵析助手</div>${wrapAssistantBubble('<span style="background:#fef2f2; color:#b91c1c; border:1.5px solid #fee2e2; display:block; padding:8px 12px; border-radius:12px;">已终止回答生成。</span>', chatMessageIndex, 'chat', '已终止提示')}</div></div>`;
+                const histItem = chatHistory.find(h => h.id === taskId);
+                if (histItem) {
+                    histItem.html = removeThinkingFromHtml(histItem.html) + abortHtml;
+                    saveUserData();
+                }
+            }
         } else {
             console.error('处理失败:', e, e.stack);
-            const thinking = document.getElementById('thinking');
-            if (thinking) thinking.remove();
-            chatMessageIndex++;
-            chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">!</div><div><div class="msg-sender">系统提示</div>${wrapAssistantBubble('处理请求时发生错误，请稍后再试。', chatMessageIndex, 'chat', '错误提示')}</div></div>`);
+            let errHtml = `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#f87171)">!</div><div><div class="msg-sender">系统提示</div>${wrapAssistantBubble('处理请求时发生错误，请稍后再试。', chatMessageIndex, 'chat', '错误提示')}</div></div>`;
+            if (currentChatId === taskId) {
+                const thinking = document.getElementById('thinking');
+                if (thinking) thinking.remove();
+                chatMessageIndex++;
+                chat.insertAdjacentHTML('beforeend', errHtml);
+            } else {
+                const histItem = chatHistory.find(h => h.id === taskId);
+                if (histItem) {
+                    histItem.html = removeThinkingFromHtml(histItem.html) + errHtml;
+                    saveUserData();
+                }
+            }
         }
     } finally {
-        isProcessing = false;
-        currentAbortController = null;
+        delete runningTasks[taskId];
         updateSendBtnState();
     }
 }
@@ -13342,6 +14026,58 @@ function updateWF(step, agentOnly) {
   const doneSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12" /></svg>';
   const activeSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><circle cx="12" cy="12" r="4" /></svg>';
   const pendingSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><circle cx="12" cy="12" r="4" /></svg>';
+
+  // Update Gemini Process Container steps inside thinking bubble dynamically
+  const gpStep1 = document.getElementById('gpStep1');
+  const gpStep2 = document.getElementById('gpStep2');
+  const gpStep3 = document.getElementById('gpStep3');
+  const gpIcon1 = document.getElementById('gpIcon1');
+  const gpIcon2 = document.getElementById('gpIcon2');
+  const gpIcon3 = document.getElementById('gpIcon3');
+
+  if (gpStep1 && gpStep2 && gpStep3) {
+    if (step === 1) {
+      // Step 1 active
+      gpStep1.className = 'gemini-process-step active';
+      gpIcon1.innerHTML = '<div class="gemini-process-spinner"></div>';
+    } else if (step === 2) {
+      // Step 1 done, Step 2 active
+      gpStep1.className = 'gemini-process-step done';
+      gpIcon1.innerHTML = '✅';
+      gpStep2.className = 'gemini-process-step active';
+      gpIcon2.innerHTML = '<div class="gemini-process-spinner"></div>';
+    } else if (step === 3) {
+      // Step 1, 2 done, Step 3 active
+      gpStep1.className = 'gemini-process-step done';
+      gpIcon1.innerHTML = '✅';
+      gpStep2.className = 'gemini-process-step done';
+      gpIcon2.innerHTML = '✅';
+      gpStep3.className = 'gemini-process-step active';
+      gpIcon3.innerHTML = '<div class="gemini-process-spinner"></div>';
+    } else if (step >= 4) {
+      // All done
+      gpStep1.className = 'gemini-process-step done';
+      gpIcon1.innerHTML = '✅';
+      gpStep2.className = 'gemini-process-step done';
+      gpIcon2.innerHTML = '✅';
+      gpStep3.className = 'gemini-process-step done';
+      gpIcon3.innerHTML = '✅';
+    }
+  }
+
+  // agentOnly === 'none' 模式：全体显示"未参与"
+  if (agentOnly === 'none') {
+    s.forEach((el) => {
+      if (!el) return;
+      const dot = el.querySelector('.step-dot');
+      el.classList.remove('step-done','step-active','step-pending');
+      el.classList.add('step-pending');
+      if (dot) { dot.style.background = '#94a3b8'; dot.innerHTML = pendingSvg; }
+      const desc = el.querySelector('.step-desc');
+      if (desc) desc.textContent = '未参与';
+    });
+    return;
+  }
 
   // agentOnly 模式：只更新指定智能体的步骤，其余显示"未参与"
   if (agentOnly) {
