@@ -7,6 +7,8 @@ from flask_cors import CORS
 import sqlite3
 import os
 import json
+import hashlib
+import datetime
 import urllib.request
 import urllib.parse
 import webbrowser
@@ -1544,10 +1546,541 @@ def run_code():
         return jsonify(remote_res)
 
 # ============================
+# 7.5 用户注册同步 & 管理员接口
+# ============================
+
+def _ensure_user_table():
+    """确保 user 表存在，不存在则自动创建"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS user (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        email TEXT UNIQUE,
+        password_hash TEXT NOT NULL,
+        is_admin INTEGER DEFAULT 0,
+        grade TEXT DEFAULT '',
+        major TEXT DEFAULT '',
+        qq TEXT DEFAULT '',
+        birthday TEXT DEFAULT '',
+        signature TEXT DEFAULT '',
+        intro TEXT DEFAULT '',
+        gender TEXT DEFAULT '',
+        created_at TEXT NOT NULL
+    );
+    ''')
+    conn.commit()
+    conn.close()
+
+
+def _ensure_message_table():
+    """确保 message 表存在"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS message (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sender_id INTEGER NOT NULL,
+        sender_name TEXT NOT NULL,
+        content TEXT NOT NULL,
+        is_read INTEGER DEFAULT 0,
+        reply TEXT DEFAULT '',
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (sender_id) REFERENCES user(id) ON DELETE CASCADE
+    );
+    ''')
+    conn.commit()
+    conn.close()
+
+
+def _ensure_admin_account():
+    """确保唯一管理员账号存在"""
+    _ensure_user_table()
+    _ensure_message_table()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT id FROM user WHERE is_admin = 1')
+    if c.fetchone() is None:
+        admin_username = 'lingxi_admin_2026'
+        admin_email = 'admin@lingxi.com'
+        admin_password = 'LingXi@Admin#2026'
+        pwd_hash = hashlib.sha256(admin_password.encode()).hexdigest()
+        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        try:
+            c.execute(
+                'INSERT INTO user (username, email, password_hash, is_admin, grade, major, signature, created_at) VALUES (?, ?, ?, 1, ?, ?, ?, ?)',
+                (admin_username, admin_email, pwd_hash, '系统管理员', '灵析平台', '灵析唯一超级管理员', now)
+            )
+            conn.commit()
+            print("[管理员] 已自动创建管理员账号: lingxi_admin_2026")
+        except sqlite3.IntegrityError:
+            pass
+    conn.close()
+
+
+@app.route('/api/register', methods=['POST'])
+def register_user():
+    """用户注册时同步写入服务端数据库"""
+    _ensure_user_table()
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "无效请求"}), 400
+
+    username = data.get('username', '').strip()
+    email = data.get('email', '').strip()
+    password = data.get('password', '')
+
+    if not username or not email or not password:
+        return jsonify({"success": False, "error": "用户名、邮箱、密码均为必填"}), 400
+
+    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute(
+            'INSERT INTO user (username, email, password_hash, is_admin, created_at) VALUES (?, ?, ?, 0, ?)',
+            (username, email, pwd_hash, now)
+        )
+        conn.commit()
+        return jsonify({"success": True, "message": "注册同步成功", "user_id": c.lastrowid})
+    except sqlite3.IntegrityError:
+        c.execute('UPDATE user SET password_hash = ? WHERE email = ?', (pwd_hash, email))
+        conn.commit()
+        return jsonify({"success": True, "message": "用户已存在，已同步"})
+    finally:
+        conn.close()
+
+
+@app.route('/api/login', methods=['POST'])
+def user_login():
+    """用户登录验证（服务端认证）"""
+    _ensure_user_table()
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "无效请求"}), 400
+
+    login_id = data.get('email', '').strip() or data.get('username', '').strip()
+    password = data.get('password', '')
+
+    if not login_id or not password:
+        return jsonify({"success": False, "error": "账号和密码不能为空"}), 400
+
+    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    try:
+        # 支持邮箱或用户名登录，排除管理员账号
+        c.execute(
+            'SELECT id, username, email, grade, major, qq, birthday, signature, intro, gender '
+            'FROM user WHERE (email = ? OR username = ?) AND is_admin = 0 AND password_hash = ?',
+            (login_id, login_id, pwd_hash)
+        )
+        row = c.fetchone()
+        if not row:
+            # 检查是否是账号不存在还是密码错误
+            c.execute(
+                'SELECT id FROM user WHERE (email = ? OR username = ?) AND is_admin = 0',
+                (login_id, login_id)
+            )
+            if not c.fetchone():
+                return jsonify({"success": False, "error": "账号不存在或已被注销", "code": "NOT_FOUND"}), 404
+            else:
+                return jsonify({"success": False, "error": "密码错误", "code": "WRONG_PWD"}), 403
+
+        user = dict(row)
+        return jsonify({"success": True, "user": user})
+    finally:
+        conn.close()
+
+
+@app.route('/api/admin/login', methods=['POST'])
+def admin_login():
+    """管理员登录验证"""
+    _ensure_user_table()
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "无效请求"}), 400
+
+    username = data.get('username', '').strip()
+    password = data.get('password', '')
+
+    if not username or not password:
+        return jsonify({"success": False, "error": "请输入用户名和密码"}), 400
+
+    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute(
+        'SELECT * FROM user WHERE (username = ? OR email = ?) AND is_admin = 1',
+        (username, username)
+    )
+    admin = c.fetchone()
+    conn.close()
+
+    if not admin:
+        return jsonify({"success": False, "error": "管理员账号不存在"}), 401
+
+    if admin['password_hash'] != pwd_hash:
+        return jsonify({"success": False, "error": "密码错误"}), 401
+
+    token_str = f"{admin['username']}_{datetime.datetime.now().timestamp()}"
+    token = hashlib.sha256(token_str.encode()).hexdigest()
+
+    return jsonify({
+        "success": True,
+        "token": token,
+        "admin": {
+            "id": admin['id'],
+            "username": admin['username'],
+            "email": admin['email'],
+            "grade": admin['grade'],
+            "major": admin['major'],
+            "signature": admin['signature'],
+            "created_at": admin['created_at']
+        }
+    })
+
+
+@app.route('/api/admin/users', methods=['GET'])
+def admin_get_users():
+    """管理员查看所有用户基本信息"""
+    _ensure_user_table()
+    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
+    if not token:
+        return jsonify({"success": False, "error": "未授权访问"}), 401
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute(
+        'SELECT id, username, email, grade, major, qq, birthday, signature, intro, gender, created_at FROM user WHERE is_admin = 0 ORDER BY created_at DESC'
+    )
+    users = [dict(row) for row in c.fetchall()]
+    conn.close()
+
+    return jsonify({"success": True, "users": users, "total": len(users)})
+
+
+@app.route('/api/admin/user/<int:user_id>', methods=['GET'])
+def admin_get_user_detail(user_id):
+    """管理员查看单个用户详情"""
+    _ensure_user_table()
+    _ensure_message_table()
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute(
+        'SELECT id, username, email, grade, major, qq, birthday, signature, intro, gender, created_at FROM user WHERE id = ?',
+        (user_id,)
+    )
+    user = c.fetchone()
+    if not user:
+        conn.close()
+        return jsonify({"success": False, "error": "用户不存在"}), 404
+
+    user_data = dict(user)
+
+    # 附加统计信息
+    c.execute('SELECT COUNT(*) FROM message WHERE sender_id = ?', (user_id,))
+    user_data['message_count'] = c.fetchone()[0]
+
+    c.execute('SELECT COUNT(*) FROM message WHERE sender_id = ? AND reply IS NOT NULL AND reply != ""', (user_id,))
+    user_data['replied_count'] = c.fetchone()[0]
+
+    c.execute('SELECT COUNT(*) FROM message WHERE sender_id = ? AND is_read = 0', (user_id,))
+    user_data['unread_count'] = c.fetchone()[0]
+
+    conn.close()
+    return jsonify({"success": True, "user": user_data})
+
+
+@app.route('/api/admin/user/<int:user_id>', methods=['DELETE'])
+def admin_delete_user(user_id):
+    """管理员注销（删除）用户"""
+    _ensure_user_table()
+    _ensure_message_table()
+    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
+    if not token:
+        return jsonify({"success": False, "error": "未授权访问"}), 401
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        # 不允许删除管理员
+        c.execute('SELECT is_admin FROM user WHERE id = ?', (user_id,))
+        row = c.fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "用户不存在"}), 404
+        if row[0] == 1:
+            return jsonify({"success": False, "error": "不能注销管理员账号"}), 403
+
+        # 删除该用户的所有消息
+        c.execute('DELETE FROM message WHERE sender_id = ?', (user_id,))
+        # 删除用户
+        c.execute('DELETE FROM user WHERE id = ?', (user_id,))
+        conn.commit()
+        return jsonify({"success": True, "message": "用户已注销"})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route('/api/admin/user/<int:user_id>/password', methods=['PUT'])
+def admin_change_password(user_id):
+    """管理员修改用户密码"""
+    _ensure_user_table()
+    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
+    if not token:
+        return jsonify({"success": False, "error": "未授权访问"}), 401
+
+    data = request.get_json() or {}
+    new_password = data.get('password', '').strip()
+    if not new_password or len(new_password) < 4:
+        return jsonify({"success": False, "error": "新密码不能为空且不少于4位"}), 400
+
+    pwd_hash = hashlib.sha256(new_password.encode()).hexdigest()
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute('SELECT id, is_admin FROM user WHERE id = ?', (user_id,))
+        row = c.fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "用户不存在"}), 404
+        c.execute('UPDATE user SET password_hash = ? WHERE id = ?', (pwd_hash, user_id))
+        conn.commit()
+        return jsonify({"success": True, "message": "密码已修改"})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route('/api/admin/user', methods=['POST'])
+def admin_add_user():
+    """管理员手动添加账户"""
+    _ensure_user_table()
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "无效请求"}), 400
+
+    username = data.get('username', '').strip()
+    email = data.get('email', '').strip()
+    password = data.get('password', '').strip()
+    grade = data.get('grade', '').strip()
+    major = data.get('major', '').strip()
+
+    if not username or not email or not password:
+        return jsonify({"success": False, "error": "用户名、邮箱、密码为必填"}), 400
+
+    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute(
+            'INSERT INTO user (username, email, password_hash, is_admin, grade, major, created_at) VALUES (?, ?, ?, 0, ?, ?, ?)',
+            (username, email, pwd_hash, grade, major, now)
+        )
+        conn.commit()
+        return jsonify({"success": True, "message": "账户添加成功", "user_id": c.lastrowid})
+    except sqlite3.IntegrityError:
+        return jsonify({"success": False, "error": "该用户名或邮箱已存在"}), 409
+    finally:
+        conn.close()
+
+
+@app.route('/api/admin/stats', methods=['GET'])
+def admin_get_stats():
+    """管理员获取平台统计概览"""
+    _ensure_user_table()
+    _ensure_message_table()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+
+    c.execute('SELECT COUNT(*) FROM user WHERE is_admin = 0')
+    user_count = c.fetchone()[0]
+
+    c.execute('SELECT COUNT(*) FROM message WHERE is_read = 0')
+    unread_count = c.fetchone()[0]
+
+    c.execute('SELECT COUNT(*) FROM message')
+    total_messages = c.fetchone()[0]
+
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "stats": {
+            "total_users": user_count,
+            "unread_messages": unread_count,
+            "total_messages": total_messages
+        }
+    })
+
+
+# ---- 消息系统 ----
+
+@app.route('/api/message/send', methods=['POST'])
+def user_send_message():
+    """普通用户给管理员发消息"""
+    _ensure_message_table()
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "无效请求"}), 400
+
+    sender_id = data.get('sender_id', 0)
+    sender_name = data.get('sender_name', '').strip()
+    content = data.get('content', '').strip()
+
+    if not sender_name or not content:
+        return jsonify({"success": False, "error": "发送者名称和消息内容不能为空"}), 400
+
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute(
+        'INSERT INTO message (sender_id, sender_name, content, created_at) VALUES (?, ?, ?, ?)',
+        (sender_id, sender_name, content, now)
+    )
+    conn.commit()
+    msg_id = c.lastrowid
+    conn.close()
+
+    return jsonify({"success": True, "message": "消息发送成功", "message_id": msg_id})
+
+
+@app.route('/api/admin/messages', methods=['GET'])
+def admin_get_messages():
+    """管理员查看所有用户消息（收件箱）"""
+    _ensure_message_table()
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute('SELECT * FROM message ORDER BY created_at DESC LIMIT 200')
+    messages = [dict(row) for row in c.fetchall()]
+    conn.close()
+
+    return jsonify({"success": True, "messages": messages})
+
+
+@app.route('/api/admin/message/<int:msg_id>/read', methods=['PUT'])
+def admin_mark_message_read(msg_id):
+    """管理员标记消息为已读"""
+    _ensure_message_table()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('UPDATE message SET is_read = 1 WHERE id = ?', (msg_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True})
+
+
+@app.route('/api/admin/message/<int:msg_id>/reply', methods=['PUT'])
+def admin_reply_message(msg_id):
+    """管理员回复用户消息"""
+    _ensure_message_table()
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "无效请求"}), 400
+
+    reply = data.get('reply', '').strip()
+    if not reply:
+        return jsonify({"success": False, "error": "回复内容不能为空"}), 400
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('UPDATE message SET reply = ?, is_read = 1 WHERE id = ?', (reply, msg_id))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "message": "回复成功"})
+
+
+@app.route('/api/admin/message/<int:msg_id>', methods=['DELETE'])
+def admin_delete_message(msg_id):
+    """管理员删除消息"""
+    _ensure_message_table()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('DELETE FROM message WHERE id = ?', (msg_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "message": "消息已删除"})
+
+
+@app.route('/api/messages/inbox', methods=['GET'])
+def user_get_inbox():
+    """用户查看管理员对自己消息的回复"""
+    _ensure_message_table()
+    sender_name = request.args.get('sender_name', '').strip()
+    if not sender_name:
+        return jsonify({"success": False, "error": "缺少发送者信息"}), 400
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute(
+        'SELECT * FROM message WHERE sender_name = ? ORDER BY created_at DESC LIMIT 100',
+        (sender_name,)
+    )
+    messages = [dict(row) for row in c.fetchall()]
+    conn.close()
+
+    return jsonify({"success": True, "messages": messages})
+
+
+@app.route('/api/user/self-delete', methods=['DELETE'])
+def user_self_delete():
+    """用户自行注销账号（从服务端数据库删除）"""
+    _ensure_user_table()
+    _ensure_message_table()
+    data = request.get_json() or {}
+    email = data.get('email', '').strip()
+    if not email:
+        return jsonify({"success": False, "error": "缺少邮箱信息"}), 400
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute('SELECT id, is_admin FROM user WHERE email = ?', (email,))
+        row = c.fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "用户不存在"}), 404
+        user_id, is_admin = row
+        if is_admin == 1:
+            return jsonify({"success": False, "error": "管理员账号不可自行注销"}), 403
+        # 先删除该用户的消息记录
+        c.execute('DELETE FROM message WHERE sender_id = ?', (user_id,))
+        # 再删除用户
+        c.execute('DELETE FROM user WHERE id = ?', (user_id,))
+        conn.commit()
+        return jsonify({"success": True, "message": "账号已成功注销"})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+# ============================
 # 8. 启动服务
 # ============================
 if __name__ == '__main__':
     print("正在启动灵析学习资料后端 API 服务...")
+    _ensure_user_table()
+    _ensure_admin_account()
     webbrowser.open('http://127.0.0.1:5000')
     
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)

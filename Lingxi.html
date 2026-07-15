@@ -4437,6 +4437,9 @@
           <div class="auth-links">
             还没有账号？<a href="#" onclick="switchTab('register'); return false;">立即注册</a>
           </div>
+          <div class="auth-links" style="margin-top:6px; text-align:center; font-size:12px;">
+            <a href="#" onclick="showAdminLogin(); return false;" style="color:#8b5cf6; text-decoration:none;">管理员入口</a>
+          </div>
         </form>
 
         <!-- ===== REGISTER FORM ===== -->
@@ -4597,7 +4600,7 @@
   <div id="mainPage" class="page hidden">
     <div class="top-nav">
       <div class="nav-brand">
-        <button class="toggle-sidebar-btn" onclick="toggleSidebar()">
+        <button id="navToggleSidebarBtn" class="toggle-sidebar-btn" onclick="toggleSidebar()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="12" x2="21" y2="12" />
             <line x1="3" y1="6" x2="21" y2="6" />
@@ -4609,7 +4612,7 @@
       </div>
       <div class="nav-actions">
         <!-- 搜索 -->
-        <button title="搜索" onclick="switchMainPage('search')">
+        <button id="navSearchBtn" title="搜索" onclick="switchMainPage('search')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -4617,7 +4620,7 @@
         </button>
 
         <!-- 通知 -->
-        <button title="通知" style="position:relative" onclick="switchMainPage('notification')">
+        <button id="navNotiBtn" title="通知" style="position:relative" onclick="switchMainPage('notification')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
@@ -4625,7 +4628,7 @@
           <span class="nav-badge"></span>
         </button>
         <!-- 题库 -->
-        <button title="题库" onclick="switchMainPage('questionBank')">
+        <button id="navQuestionBankBtn" title="题库" onclick="switchMainPage('questionBank')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M4 6h16v12H4z" />
             <path d="M8 6v12" />
@@ -4634,11 +4637,19 @@
           </svg>
         </button>
         <!-- ===== 新增：切换右侧面板按钮 ===== -->
-        <button title="切换右侧面板" onclick="toggleRightPanel()">
+        <button id="navRightPanelBtn" title="切换右侧面板" onclick="toggleRightPanel()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="4" y="4" width="16" height="16" rx="2" />
             <line x1="4" y1="10" x2="20" y2="10" />
             <line x1="4" y1="14" x2="20" y2="14" />
+          </svg>
+        </button>
+        <!-- ================================= -->
+
+        <!-- ===== 新增：联系管理员按钮 ===== -->
+        <button id="navContactAdminBtn" title="联系管理员" onclick="showContactAdmin()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
         </button>
         <!-- ================================= -->
@@ -4653,7 +4664,7 @@
         </button>
 
         <!-- 个人设置 -->
-        <button class="toggle-panel-btn" title="个人设置" onclick="switchMainPage('setting')">
+        <button id="navSettingsBtn" class="toggle-panel-btn" title="个人设置" onclick="switchMainPage('setting')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
@@ -4661,7 +4672,7 @@
         </button>
 
         <!-- 头像 -->
-        <button class="avatar-btn" onclick="switchMainPage('setting')">U</button>
+        <button id="navAvatarBtn" class="avatar-btn" onclick="switchMainPage('setting')">U</button>
       </div>
     </div>
     <div class="main-body">
@@ -5199,6 +5210,78 @@
               </div>
               <button type="button" onclick="deleteAccount()" style="flex-shrink:0; padding:8px 20px; border-radius:8px; font-size:13px; font-weight:500; color:#fff; background:#ef4444; border:none; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">注销账号</button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Panel (redesigned) -->
+      <div class="admin-panel-area main-content-page hidden" id="adminPanelArea">
+        <div class="noti-container">
+          <!-- Header -->
+          <div class="noti-header">
+            <div>
+              <h2 style="display:flex; align-items:center; gap:10px;">
+                <span style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:14px;">管</span>
+                管理员控制台
+              </h2>
+              <p style="margin:4px 0 0; font-size:13px; color:#64748b;">用户管理与消息收件箱</p>
+            </div>
+            <button class="back-to-chat-btn" onclick="switchMainPage('chat')" style="padding:6px 12px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6" /></svg>
+              返回
+            </button>
+          </div>
+          <!-- Stats Cards -->
+          <div id="adminStatsBar" style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px;"></div>
+          <!-- Tab Navigation -->
+          <div style="display:flex; gap:4px; margin-bottom:18px; background:rgba(139,92,246,0.04); border-radius:12px; padding:4px;">
+            <button id="adminTabUsers" onclick="switchAdminTab('users')" style="flex:1; padding:10px 0; border-radius:10px; border:none; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; background:#fff; color:#6366f1; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              用户管理
+            </button>
+            <button id="adminTabInbox" onclick="switchAdminTab('inbox')" style="flex:1; padding:10px 0; border-radius:10px; border:none; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; background:transparent; color:#94a3b8; position:relative;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              收件箱
+              <span id="adminInboxBadge" style="display:none; position:absolute; top:6px; right:calc(50% - 52px); width:18px; height:18px; border-radius:50%; background:#ef4444; color:#fff; font-size:10px; line-height:18px; text-align:center; font-weight:700;"></span>
+            </button>
+          </div>
+          <!-- Users Tab -->
+          <div id="adminUsersTab">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <span style="font-size:13px; color:#64748b;" id="adminUserCount">加载中...</span>
+              <button onclick="showAddAccountForm()" style="padding:8px 18px; border-radius:10px; border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:12.5px; font-weight:600; cursor:pointer; transition:all 0.2s; box-shadow:0 2px 8px rgba(99,102,241,0.2);" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(99,102,241,0.3)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(99,102,241,0.2)'">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px; margin-right:3px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                添加账户
+              </button>
+            </div>
+            <!-- Add Account Form (hidden by default) -->
+            <div id="addAccountForm" style="display:none; background:rgba(255,255,255,0.8); backdrop-filter:blur(10px); border:1.5px solid rgba(139,92,246,0.1); border-radius:14px; padding:20px; margin-bottom:16px;">
+              <div style="font-size:14px; font-weight:600; color:#1e293b; margin-bottom:14px;">添加新账户</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div><label style="font-size:12px; color:#64748b; margin-bottom:4px; display:block;">用户名 *</label><input id="addAccUser" type="text" placeholder="请输入用户名" style="width:100%; padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'"></div>
+                <div><label style="font-size:12px; color:#64748b; margin-bottom:4px; display:block;">邮箱 *</label><input id="addAccEmail" type="email" placeholder="请输入邮箱" style="width:100%; padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'"></div>
+                <div><label style="font-size:12px; color:#64748b; margin-bottom:4px; display:block;">密码 *</label><input id="addAccPwd" type="password" placeholder="至少6位" style="width:100%; padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'"></div>
+                <div><label style="font-size:12px; color:#64748b; margin-bottom:4px; display:block;">年级</label><input id="addAccGrade" type="text" placeholder="如：大三" style="width:100%; padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'"></div>
+                <div style="grid-column:1/-1;"><label style="font-size:12px; color:#64748b; margin-bottom:4px; display:block;">专业</label><input id="addAccMajor" type="text" placeholder="如：计算机科学" style="width:100%; padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'"></div>
+              </div>
+              <div style="display:flex; gap:10px; margin-top:16px; justify-content:flex-end;">
+                <button onclick="hideAddAccountForm()" style="padding:8px 20px; border-radius:8px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:12.5px; font-weight:500; cursor:pointer;">取消</button>
+                <button onclick="submitAddAccount()" style="padding:8px 20px; border-radius:8px; border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:12.5px; font-weight:600; cursor:pointer;">确认添加</button>
+              </div>
+            </div>
+            <!-- User List -->
+            <div id="adminUserList" class="noti-list"></div>
+          </div>
+          <!-- Inbox Tab (hidden by default) -->
+          <div id="adminInboxTab" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <span style="font-size:13px; color:#64748b;" id="adminMsgCount">加载中...</span>
+              <button onclick="loadAdminInbox()" style="padding:6px 14px; border-radius:8px; border:1.5px solid rgba(139,92,246,0.15); background:rgba(139,92,246,0.04); color:#7c3aed; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.1)'" onmouseout="this.style.background='rgba(139,92,246,0.04)'">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px; margin-right:3px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                刷新
+              </button>
+            </div>
+            <div id="adminInboxList" class="noti-list"></div>
           </div>
         </div>
       </div>
@@ -7142,6 +7225,7 @@ function saveUserData() {
 }
 
 function handleLogin(e) {
+    if (e) e.preventDefault();
     let ok = true;
     const email = document.getElementById('loginEmail').value.trim();
     const pwd = document.getElementById('loginPwd').value;
@@ -7153,40 +7237,95 @@ function handleLogin(e) {
 
     if (!email) { if (emailField) emailField.classList.add('has-error'); ok = false; }
     if (!pwd) { if (pwdField) pwdField.classList.add('has-error'); ok = false; }
-    if (!ok) {
-        if (e) e.preventDefault();
-        return false;
-    }
+    if (!ok) return false;
 
-    // Verify registered user (support logging in with either Username or Email)
-    let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
-    let matchedUserKey = null;
+    // 服务端认证（优先）
+    fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: pwd })
+    })
+    .then(r => r.json().then(data => ({ status: r.status, data })))
+    .then(({ status, data }) => {
+        if (data.success) {
+            // 服务端验证通过，同步到 localStorage
+            const serverUser = data.user;
+            let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+            const userKey = serverUser.email || email;
 
-    if (users[email]) {
-        matchedUserKey = email;
-    } else {
-        // Search by username
-        for (let k in users) {
-            if (users[k].name === email) {
-                matchedUserKey = k;
-                break;
+            // 如果 localStorage 中没有该用户（管理员添加的账户），创建初始条目
+            if (!users[userKey]) {
+                users[userKey] = {
+                    name: serverUser.username,
+                    pwd: pwd,
+                    profile: {
+                        grade: serverUser.grade || '',
+                        major: serverUser.major || '',
+                        intro: serverUser.intro || (serverUser.grade && serverUser.major ? serverUser.grade + ' · ' + serverUser.major : ''),
+                        qq: serverUser.qq || '',
+                        birthday: serverUser.birthday || '',
+                        hobbies: []
+                    },
+                    signature: serverUser.signature || '',
+                    myCourses: [],
+                    chatHistory: [],
+                    recentActivities: [],
+                    learningStats: { days: 1, completedResources: 0, hours: 0.0, favorites: 0 },
+                    favoritesList: [],
+                    wrongQuestions: [],
+                    notificationsList: getInitialNotifications()
+                };
+                localStorage.setItem('lingxi_users', JSON.stringify(users));
+            } else {
+                // 已有本地数据，更新密码（兼容旧数据）
+                users[userKey].pwd = pwd;
+                localStorage.setItem('lingxi_users', JSON.stringify(users));
+            }
+
+            // 继续走本地登录成功流程
+            _completeLogin(userKey, users);
+        } else {
+            // 服务端拒绝
+            if (status === 404) {
+                // 账号不存在或已被管理员删除，清除本地残留
+                let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+                for (let k in users) {
+                    if (k === email || users[k].name === email) {
+                        delete users[k];
+                    }
+                }
+                localStorage.setItem('lingxi_users', JSON.stringify(users));
+                alert('账号不存在或已被注销！');
+                if (emailField) emailField.classList.add('has-error');
+            } else if (status === 403) {
+                alert('密码错误！');
+                if (pwdField) pwdField.classList.add('has-error');
+            } else {
+                alert('登录失败：' + (data.error || '未知错误'));
             }
         }
-    }
+    })
+    .catch(err => {
+        // 服务端不可达，回退到纯本地认证
+        console.warn('服务端登录验证失败，回退本地认证:', err);
+        let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+        let matchedUserKey = null;
+        if (users[email]) {
+            matchedUserKey = email;
+        } else {
+            for (let k in users) {
+                if (users[k].name === email) { matchedUserKey = k; break; }
+            }
+        }
+        if (!matchedUserKey) { alert('账号不存在！请先注册！'); if (emailField) emailField.classList.add('has-error'); return; }
+        if (users[matchedUserKey].pwd !== pwd) { alert('密码错误！'); if (pwdField) pwdField.classList.add('has-error'); return; }
+        _completeLogin(matchedUserKey, users);
+    });
 
-    if (!matchedUserKey) {
-        alert('账号不存在！请先注册！');
-        if (emailField) emailField.classList.add('has-error');
-        if (e) e.preventDefault();
-        return false;
-    }
-    if (users[matchedUserKey].pwd !== pwd) {
-        alert('密码错误！');
-        if (pwdField) pwdField.classList.add('has-error');
-        if (e) e.preventDefault();
-        return false;
-    }
+    return false;
+}
 
+function _completeLogin(matchedUserKey, users) {
     // Logged in successfully
     currentUserEmail = matchedUserKey;
     const rememberMe = document.getElementById('rememberMe') && document.getElementById('rememberMe').checked;
@@ -7350,6 +7489,10 @@ function logout() {
     if (confirm('确定要退出登录吗？退出后需要重新登录才能访问个人数据。')) {
         localStorage.removeItem('lingxi_current_user');
         sessionStorage.removeItem('lingxi_current_user');
+        sessionStorage.removeItem('lingxi_admin_token');
+        sessionStorage.removeItem('lingxi_admin_info');
+        adminToken = null;
+        exitAdminMode();
         window.location.reload();
     }
 }
@@ -7366,7 +7509,14 @@ function deleteAccount() {
     if (!confirm('最后确认：您真的要永久注销账号 "' + userName + '" 吗？所有数据将被删除且无法恢复！')) {
         return;
     }
-    // 执行注销
+    // 同步删除服务端数据库中的用户及其消息
+    const email = currentUserEmail;
+    fetch('/api/user/self-delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+    }).catch(err => console.warn('服务端用户注销失败（本地数据仍会被清除）:', err));
+    // 执行本地注销
     let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
     if (currentUserEmail && users[currentUserEmail]) {
         delete users[currentUserEmail];
@@ -7482,6 +7632,13 @@ function handleRegister(e) {
     ]
   };
   localStorage.setItem('lingxi_users', JSON.stringify(users));
+
+  // 同步注册信息到服务端数据库（供管理员查看）
+  fetch('/api/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: name, email: email, password: pwd })
+  }).catch(err => console.warn('注册同步失败:', err));
 
   // Logged in
   currentUserEmail = email;
@@ -7872,28 +8029,39 @@ function switchMainPage(pageId) {
 
   const mainSidebar = document.getElementById('sidebar');
   const mainRightPanel = document.getElementById('rightPanelMain');
-  
+
+  // 管理员模式下，始终保持侧边栏和右面板隐藏
+  const isAdminMode = !!adminToken;
+
   if (pageId === 'courseStudy' || pageId === 'questionBank') {
       if (mainSidebar) {
-          mainSidebar.style.display = "";
-          mainSidebar.classList.add('collapsed');
-          document.body.classList.add('sidebar-collapsed');
+          mainSidebar.style.display = isAdminMode ? "none" : "";
+          if (!isAdminMode) {
+              mainSidebar.classList.add('collapsed');
+              document.body.classList.add('sidebar-collapsed');
+          }
       }
       if (mainRightPanel) {
-          mainRightPanel.style.display = "";
-          mainRightPanel.classList.add('collapsed');
+          mainRightPanel.style.display = isAdminMode ? "none" : "";
+          if (!isAdminMode) {
+              mainRightPanel.classList.add('collapsed');
+          }
       }
   } else {
       if (mainSidebar) {
-          mainSidebar.style.display = "";
-          const isCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
-          mainSidebar.classList.toggle('collapsed', isCollapsed);
-          document.body.classList.toggle('sidebar-collapsed', isCollapsed);
+          mainSidebar.style.display = isAdminMode ? "none" : "";
+          if (!isAdminMode) {
+              const isCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
+              mainSidebar.classList.toggle('collapsed', isCollapsed);
+              document.body.classList.toggle('sidebar-collapsed', isCollapsed);
+          }
       }
       if (mainRightPanel) {
-          mainRightPanel.style.display = "";
-          const isCollapsed = localStorage.getItem('right_panel_collapsed') === 'true';
-          mainRightPanel.classList.toggle('collapsed', isCollapsed);
+          mainRightPanel.style.display = isAdminMode ? "none" : "";
+          if (!isAdminMode) {
+              const isCollapsed = localStorage.getItem('right_panel_collapsed') === 'true';
+              mainRightPanel.classList.toggle('collapsed', isCollapsed);
+          }
       }
   }
   
@@ -7965,6 +8133,8 @@ function switchMainPage(pageId) {
   } else if (pageId === 'questionBank') {
     document.getElementById('questionBankArea').classList.remove('hidden');
     renderCourseBoard();
+  } else if (pageId === 'adminPanel') {
+    document.getElementById('adminPanelArea').classList.remove('hidden');
   }
 }
 
@@ -10825,6 +10995,8 @@ function toggleSidebar() {
 // ============================================================
 let elfTooltipTimeout = null;
 function toggleRightPanel() {
+    // 管理员模式下禁止显示右侧面板
+    if (adminToken) return;
     // 判断当前是否处于课程学习页面
     const courseStudyArea = document.getElementById('courseStudyArea');
     const isCourseStudy = courseStudyArea && !courseStudyArea.classList.contains('hidden');
@@ -14335,7 +14507,31 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         // ============================================================
 
-        // ========== 新增：初始化小精灵（科大讯飞助手拖拽与展开） ==========
+        // ========== 管理员会话恢复：页面刷新时自动恢复管理员模式 ==========
+        const savedAdminToken = sessionStorage.getItem('lingxi_admin_token');
+        if (savedAdminToken) {
+            adminToken = savedAdminToken;
+            try {
+                const adminInfo = JSON.parse(sessionStorage.getItem('lingxi_admin_info') || '{}');
+                userName = adminInfo.username || 'lingxi_admin_2026';
+            } catch(e) {
+                userName = 'lingxi_admin_2026';
+            }
+            enterAdminMode();
+            const navActions = document.querySelector('.nav-actions');
+            if (navActions && !document.getElementById('adminPanelNavBtn')) {
+                const btn = document.createElement('button');
+                btn.id = 'adminPanelNavBtn'; btn.title = '管理员控制台';
+                btn.style.cssText = 'background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:12px;padding:4px 12px;border-radius:8px;font-weight:600;white-space:nowrap;border:none;cursor:pointer;';
+                btn.onclick = function() { loadAdminPanel(); };
+                btn.textContent = '控制台';
+                navActions.insertBefore(btn, navActions.firstChild);
+            }
+            const pn = document.getElementById('profileName');
+            if (pn) pn.textContent = userName;
+            loadAdminPanel();
+        }
+        // ============================================================
         const elf = document.getElementById('courseAssistantElf');
         if (elf) {
             elf.addEventListener('click', function(e) {
@@ -15438,6 +15634,492 @@ async function sendGlobalFloatingChatMessage() {
       document.getElementById('profileSetupPage').classList.add('hidden');
       startTransition();
     }
+
+// ==================== 管理员功能 ====================
+let adminToken = null;
+let adminCurrentTab = 'users';
+
+function showAdminLogin() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('registerForm').style.display = 'none';
+  let adminForm = document.getElementById('adminLoginForm');
+  if (!adminForm) {
+    adminForm = document.createElement('form');
+    adminForm.id = 'adminLoginForm';
+    adminForm.style.cssText = 'display:block';
+    adminForm.onsubmit = function(e) { return handleAdminLogin(e); };
+    adminForm.innerHTML = `
+      <h2>管理员登录</h2>
+      <p class="auth-subtitle">仅限管理员账号访问</p>
+      <div class="auth-field"><label>管理员用户名</label><div class="input-line"><input type="text" id="adminLoginUser" placeholder="请输入管理员用户名" required></div></div>
+      <div class="auth-field"><label>密码</label><div class="input-line"><input type="password" id="adminLoginPwd" placeholder="请输入管理员密码" required></div></div>
+      <button type="submit" class="auth-btn" style="background:linear-gradient(135deg,#8b5cf6,#6366f1);">管理员登录</button>
+      <div class="auth-links" style="margin-top:12px; text-align:center;"><a href="#" onclick="hideAdminLogin(); return false;">返回普通登录</a></div>
+    `;
+    document.querySelector('.auth-card').appendChild(adminForm);
+  } else {
+    adminForm.style.display = 'block';
+  }
+}
+
+function hideAdminLogin() {
+  const f = document.getElementById('adminLoginForm');
+  if (f) f.style.display = 'none';
+  document.getElementById('loginForm').style.display = 'block';
+}
+
+function enterAdminMode() {
+  // 隐藏用户侧导航按钮
+  ['navSearchBtn','navNotiBtn','navQuestionBankBtn','navRightPanelBtn','navContactAdminBtn','navSettingsBtn','navAvatarBtn','navToggleSidebarBtn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  // 隐藏左侧聊天侧边栏
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) sidebar.style.display = 'none';
+  // 隐藏右侧面板
+  const rightPanel = document.getElementById('rightPanelMain');
+  if (rightPanel) rightPanel.style.display = 'none';
+}
+
+function exitAdminMode() {
+  // 恢复用户侧导航按钮
+  ['navSearchBtn','navNotiBtn','navQuestionBankBtn','navRightPanelBtn','navContactAdminBtn','navSettingsBtn','navAvatarBtn','navToggleSidebarBtn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = '';
+  });
+  // 恢复左侧聊天侧边栏
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) sidebar.style.display = '';
+  // 恢复右侧面板
+  const rightPanel = document.getElementById('rightPanelMain');
+  if (rightPanel) rightPanel.style.display = '';
+  // 移除管理员面板按钮
+  const adminBtn = document.getElementById('adminPanelNavBtn');
+  if (adminBtn) adminBtn.remove();
+}
+
+function handleAdminLogin(e) {
+  e.preventDefault();
+  const username = document.getElementById('adminLoginUser').value.trim();
+  const password = document.getElementById('adminLoginPwd').value;
+  if (!username || !password) { alert('请输入用户名和密码'); return false; }
+
+  fetch('/api/admin/login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  }).then(r => r.json()).then(data => {
+    if (data.success) {
+      adminToken = data.token;
+      sessionStorage.setItem('lingxi_admin_token', adminToken);
+      sessionStorage.setItem('lingxi_admin_info', JSON.stringify(data.admin));
+      // 进入管理员模式：隐藏用户侧UI元素
+      enterAdminMode();
+      // 在顶部导航添加管理员面板按钮
+      const navActions = document.querySelector('.nav-actions');
+      if (navActions && !document.getElementById('adminPanelNavBtn')) {
+        const btn = document.createElement('button');
+        btn.id = 'adminPanelNavBtn'; btn.title = '管理员控制台';
+        btn.style.cssText = 'background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:12px;padding:4px 12px;border-radius:8px;font-weight:600;white-space:nowrap;border:none;cursor:pointer;';
+        btn.onclick = function() { loadAdminPanel(); };
+        btn.textContent = '控制台';
+        navActions.insertBefore(btn, navActions.firstChild);
+      }
+      document.getElementById('authPage').classList.add('hidden');
+      document.getElementById('mainPage').classList.remove('hidden');
+      userName = data.admin.username;
+      const pn = document.getElementById('profileName');
+      if (pn) pn.textContent = userName;
+      loadAdminPanel();
+    } else {
+      alert('登录失败：' + (data.error || '未知错误'));
+    }
+  }).catch(err => alert('网络错误：' + err.message));
+  return false;
+}
+
+function switchAdminTab(tab) {
+  adminCurrentTab = tab;
+  const tabUsers = document.getElementById('adminTabUsers');
+  const tabInbox = document.getElementById('adminTabInbox');
+  const usersTab = document.getElementById('adminUsersTab');
+  const inboxTab = document.getElementById('adminInboxTab');
+  if (tab === 'users') {
+    tabUsers.style.background = '#fff'; tabUsers.style.color = '#6366f1'; tabUsers.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)';
+    tabInbox.style.background = 'transparent'; tabInbox.style.color = '#94a3b8'; tabInbox.style.boxShadow = 'none';
+    usersTab.style.display = ''; inboxTab.style.display = 'none';
+  } else {
+    tabInbox.style.background = '#fff'; tabInbox.style.color = '#6366f1'; tabInbox.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)';
+    tabUsers.style.background = 'transparent'; tabUsers.style.color = '#94a3b8'; tabUsers.style.boxShadow = 'none';
+    usersTab.style.display = 'none'; inboxTab.style.display = '';
+    loadAdminInbox();
+  }
+}
+
+function loadAdminPanel() {
+  switchMainPage('adminPanel');
+  switchAdminTab(adminCurrentTab);
+  loadAdminStats();
+  loadAdminUsers();
+}
+
+function loadAdminStats() {
+  fetch('/api/admin/stats').then(r => r.json()).then(data => {
+    if (!data.success) return;
+    const s = data.stats;
+    document.getElementById('adminStatsBar').innerHTML = `
+      <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:14px;padding:18px 20px;color:#fff;">
+        <div style="font-size:12px;opacity:0.85;">注册用户</div>
+        <div style="font-size:26px;font-weight:700;margin-top:2px;">${s.total_users}</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#0ea5e9,#06b6d4);border-radius:14px;padding:18px 20px;color:#fff;">
+        <div style="font-size:12px;opacity:0.85;">消息总数</div>
+        <div style="font-size:26px;font-weight:700;margin-top:2px;">${s.total_messages}</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:14px;padding:18px 20px;color:#fff;position:relative;">
+        <div style="font-size:12px;opacity:0.85;">未读消息</div>
+        <div style="font-size:26px;font-weight:700;margin-top:2px;">${s.unread_messages}</div>
+      </div>`;
+    // Update inbox badge
+    const badge = document.getElementById('adminInboxBadge');
+    if (s.unread_messages > 0) {
+      badge.style.display = ''; badge.textContent = s.unread_messages > 99 ? '99+' : s.unread_messages;
+    } else {
+      badge.style.display = 'none';
+    }
+  });
+}
+
+function loadAdminUsers() {
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  if (!token) return;
+  fetch('/api/admin/users', { headers: { 'X-Admin-Token': token } })
+    .then(r => r.json()).then(data => {
+      if (data.success) {
+        renderAdminUserCards(data.users);
+        document.getElementById('adminUserCount').textContent = `共 ${data.total} 位注册用户`;
+      }
+    });
+}
+
+function renderAdminUserCards(users) {
+  const list = document.getElementById('adminUserList');
+  if (!users || users.length === 0) {
+    list.innerHTML = '<div style="padding:40px; text-align:center; color:#94a3b8; font-size:13px;">暂无注册用户，点击上方「添加账户」创建第一个用户</div>';
+    return;
+  }
+  const colors = ['#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
+  list.innerHTML = users.map((u, i) => {
+    const initial = (u.username || '?')[0].toUpperCase();
+    const color = colors[i % colors.length];
+    return `
+    <div class="noti-item" style="align-items:flex-start;">
+      <div class="noti-item-icon" style="background:linear-gradient(135deg,${color},${color}cc); font-size:16px; font-weight:700;">${initial}</div>
+      <div class="noti-item-content" style="flex:1; min-width:0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <div class="noti-item-title" style="margin:0;">${u.username || '-'}</div>
+          <div style="display:flex; gap:6px; flex-shrink:0;">
+            <button onclick="showAdminUserDetail(${u.id})" style="padding:3px 10px; border-radius:6px; border:1px solid #e2e8f0; background:#fff; color:#6366f1; font-size:11px; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.background='#6366f1';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#6366f1'">详情</button>
+            <button onclick="adminChangePassword(${u.id},'${(u.username||'').replace(/'/g,"\\'")}')" style="padding:3px 10px; border-radius:6px; border:1px solid #e2e8f0; background:#fff; color:#f59e0b; font-size:11px; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.background='#f59e0b';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#f59e0b'">改密码</button>
+            <button onclick="adminDeleteUser(${u.id},'${(u.username||'').replace(/'/g,"\\'")}')" style="padding:3px 10px; border-radius:6px; border:1px solid #fecaca; background:#fff; color:#ef4444; font-size:11px; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.background='#ef4444';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#ef4444'">注销</button>
+          </div>
+        </div>
+        <div class="noti-item-desc" style="line-height:1.6;">
+          <span style="color:#64748b;">邮箱：</span>${u.email || '-'}<br>
+          <span style="color:#64748b;">年级：</span>${u.grade || '-'}&nbsp;&nbsp;<span style="color:#64748b;">专业：</span>${u.major || '-'}<br>
+          <span style="color:#64748b;">QQ：</span>${u.qq || '-'}&nbsp;&nbsp;<span style="color:#64748b;">生日：</span>${u.birthday || '-'}&nbsp;&nbsp;<span style="color:#64748b;">性别：</span>${u.gender || '-'}
+        </div>
+        <div class="noti-item-time" style="margin-top:4px;">注册于 ${u.created_at || '-'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showAdminUserDetail(userId) {
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/user/' + userId, { headers: { 'X-Admin-Token': token } })
+    .then(r => r.json()).then(data => {
+      if (!data.success) { alert(data.error || '获取详情失败'); return; }
+      const u = data.user;
+      const colors = ['#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
+      const color = colors[(u.id || 0) % colors.length];
+      const initial = (u.username || '?')[0].toUpperCase();
+      const genderMap = {'male':'男','female':'女','other':'其他'};
+      const gender = u.gender ? (genderMap[u.gender] || u.gender) : '-';
+
+      const overlay = document.createElement('div');
+      overlay.id = 'adminUserDetailOverlay';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.2s ease';
+      overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+      const infoRow = (label, value) => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;"><span style="color:#64748b;font-size:12px;min-width:70px;">${label}</span><span style="color:#1e293b;font-size:12px;font-weight:500;text-align:right;flex:1;margin-left:12px;word-break:break-all;">${value || '-'}</span></div>`;
+
+      const statCard = (label, value, clr) => `<div style="flex:1;text-align:center;padding:10px 6px;background:${clr}10;border-radius:8px;"><div style="font-size:18px;font-weight:700;color:${clr};">${value}</div><div style="font-size:10px;color:#94a3b8;margin-top:2px;">${label}</div></div>`;
+
+      overlay.innerHTML = `
+        <div style="background:#fff;border-radius:16px;width:420px;max-width:92vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.15);animation:slideUp 0.25s ease;">
+          <div style="background:linear-gradient(135deg,${color},${color}cc);padding:24px 20px 16px;border-radius:16px 16px 0 0;text-align:center;position:relative;">
+            <button onclick="this.closest('#adminUserDetailOverlay').remove()" style="position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.25);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.4)'" onmouseout="this.style.background='rgba(255,255,255,0.25)'">✕</button>
+            <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.25);display:inline-flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;">${initial}</div>
+            <div style="color:#fff;font-size:16px;font-weight:600;">${u.username || '-'}</div>
+            <div style="color:rgba(255,255,255,0.8);font-size:11px;margin-top:2px;">${u.email || '-'}</div>
+          </div>
+          <div style="padding:16px 20px 8px;">
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+              ${statCard('发送消息', u.message_count || 0, '#6366f1')}
+              ${statCard('已获回复', u.replied_count || 0, '#10b981')}
+              ${statCard('未读消息', u.unread_count || 0, '#ef4444')}
+            </div>
+            <div style="background:#f8fafc;border-radius:10px;padding:12px 16px;">
+              <div style="font-size:11px;color:#8b5cf6;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">基本信息</div>
+              ${infoRow('用户 ID', u.id)}
+              ${infoRow('用户名', u.username)}
+              ${infoRow('邮箱', u.email)}
+              ${infoRow('性别', gender)}
+              ${infoRow('生日', u.birthday)}
+            </div>
+            <div style="background:#f8fafc;border-radius:10px;padding:12px 16px;margin-top:10px;">
+              <div style="font-size:11px;color:#0ea5e9;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">学业信息</div>
+              ${infoRow('年级', u.grade)}
+              ${infoRow('专业', u.major)}
+              ${infoRow('QQ', u.qq)}
+            </div>
+            <div style="background:#f8fafc;border-radius:10px;padding:12px 16px;margin-top:10px;">
+              <div style="font-size:11px;color:#f59e0b;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">个人资料</div>
+              ${infoRow('个性签名', u.signature)}
+              ${infoRow('个人介绍', u.intro)}
+            </div>
+            <div style="text-align:center;padding:10px 0 4px;font-size:11px;color:#94a3b8;">注册于 ${u.created_at || '-'}</div>
+          </div>
+          <div style="padding:0 20px 16px;display:flex;gap:8px;justify-content:flex-end;">
+            <button onclick="adminChangePassword(${u.id},'${(u.username||'').replace(/'/g,"\\'")}');this.closest('#adminUserDetailOverlay').remove();" style="padding:8px 18px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#f59e0b;font-size:12px;cursor:pointer;font-weight:500;transition:all 0.15s;" onmouseover="this.style.background='#fffbeb'" onmouseout="this.style.background='#fff'">修改密码</button>
+            <button onclick="this.closest('#adminUserDetailOverlay').remove()" style="padding:8px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:12px;cursor:pointer;font-weight:500;transition:all 0.15s;">关闭</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+    });
+}
+
+function adminDeleteUser(userId, username) {
+  if (!confirm(`确定要注销用户「${username}」吗？此操作将永久删除该用户及其所有消息，不可恢复！`)) return;
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/user/' + userId, { method: 'DELETE', headers: { 'X-Admin-Token': token } })
+    .then(r => r.json()).then(data => {
+      if (data.success) {
+        alert(`用户「${username}」已成功注销`);
+        loadAdminUsers(); loadAdminStats();
+      } else {
+        alert('注销失败：' + (data.error || '未知错误'));
+      }
+    });
+}
+
+function adminChangePassword(userId, username) {
+  const newPwd = prompt(`请输入用户「${username}」的新密码（不少于4位）：`);
+  if (!newPwd) return;
+  if (newPwd.trim().length < 4) { alert('密码长度不能少于4位'); return; }
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/user/' + userId + '/password', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+    body: JSON.stringify({ password: newPwd.trim() })
+  }).then(r => r.json()).then(data => {
+    if (data.success) {
+      alert(`用户「${username}」的密码已成功修改`);
+    } else {
+      alert('修改密码失败：' + (data.error || '未知错误'));
+    }
+  }).catch(err => alert('网络错误：' + err.message));
+}
+
+function showAddAccountForm() {
+  document.getElementById('addAccountForm').style.display = '';
+  document.getElementById('addAccUser').focus();
+}
+function hideAddAccountForm() {
+  document.getElementById('addAccountForm').style.display = 'none';
+  ['addAccUser','addAccEmail','addAccPwd','addAccGrade','addAccMajor'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+}
+
+function submitAddAccount() {
+  const username = document.getElementById('addAccUser').value.trim();
+  const email = document.getElementById('addAccEmail').value.trim();
+  const password = document.getElementById('addAccPwd').value;
+  const grade = document.getElementById('addAccGrade').value.trim();
+  const major = document.getElementById('addAccMajor').value.trim();
+  if (!username || !email || !password) { alert('用户名、邮箱和密码为必填项'); return; }
+  if (password.length < 6) { alert('密码至少6位'); return; }
+
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/user', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+    body: JSON.stringify({ username, email, password, grade, major })
+  }).then(r => r.json()).then(data => {
+    if (data.success) {
+      alert(`账户「${username}」添加成功！`);
+      hideAddAccountForm();
+      loadAdminUsers(); loadAdminStats();
+    } else {
+      alert('添加失败：' + (data.error || '未知错误'));
+    }
+  });
+}
+
+// ---- 收件箱 ----
+function loadAdminInbox() {
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  if (!token) return;
+  fetch('/api/admin/messages', { headers: { 'X-Admin-Token': token } })
+    .then(r => r.json()).then(data => {
+      if (data.success) {
+        renderAdminInbox(data.messages);
+        const unread = data.messages.filter(m => !m.is_read).length;
+        document.getElementById('adminMsgCount').textContent = `共 ${data.messages.length} 条消息，${unread} 条未读`;
+        const badge = document.getElementById('adminInboxBadge');
+        if (unread > 0) { badge.style.display = ''; badge.textContent = unread > 99 ? '99+' : unread; }
+        else { badge.style.display = 'none'; }
+      }
+    });
+}
+
+function renderAdminInbox(messages) {
+  const list = document.getElementById('adminInboxList');
+  if (!messages || messages.length === 0) {
+    list.innerHTML = '<div style="padding:40px; text-align:center; color:#94a3b8; font-size:13px;">收件箱为空，暂无用户消息</div>';
+    return;
+  }
+  list.innerHTML = messages.map(m => {
+    const initial = (m.sender_name || '?')[0].toUpperCase();
+    const unread = m.is_read ? '' : ' unread';
+    const replyHtml = m.reply ? `<div style="margin-top:10px; padding:10px 14px; background:rgba(99,102,241,0.06); border-radius:10px; border-left:3px solid #8b5cf6;"><div style="font-size:11px; color:#8b5cf6; font-weight:600; margin-bottom:3px;">管理员回复</div><div style="font-size:12.5px; color:#475569; line-height:1.5;">${m.reply}</div></div>` : '';
+    return `
+    <div class="noti-item${unread}" id="msgItem_${m.id}" style="flex-direction:column;">
+      <div style="display:flex; gap:14px; align-items:flex-start;">
+        <div class="noti-item-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6); font-size:15px; font-weight:700;">${initial}</div>
+        <div class="noti-item-content" style="flex:1; min-width:0;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="noti-item-title" style="margin:0;">${m.sender_name}</div>
+            <div style="display:flex; gap:6px;">
+              <button onclick="showReplyForm(${m.id})" style="padding:3px 10px; border-radius:6px; border:1px solid #e2e8f0; background:#fff; color:#6366f1; font-size:11px; cursor:pointer;" onmouseover="this.style.background='#6366f1';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#6366f1'">回复</button>
+              <button onclick="adminDeleteMsg(${m.id})" style="padding:3px 10px; border-radius:6px; border:1px solid #fecaca; background:#fff; color:#ef4444; font-size:11px; cursor:pointer;" onmouseover="this.style.background='#ef4444';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#ef4444'">删除</button>
+            </div>
+          </div>
+          <div class="noti-item-desc" style="margin-top:4px; line-height:1.6; white-space:pre-wrap;">${m.content}</div>
+          <div class="noti-item-time">${m.created_at}</div>
+          ${replyHtml}
+        </div>
+      </div>
+      <div id="replyForm_${m.id}" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid rgba(139,92,246,0.06);">
+        <div style="display:flex; gap:8px;">
+          <input id="replyInput_${m.id}" type="text" placeholder="输入回复内容..." style="flex:1; padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'">
+          <button onclick="submitReply(${m.id})" style="padding:8px 18px; border-radius:8px; border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap;">发送</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showReplyForm(msgId) {
+  const form = document.getElementById('replyForm_' + msgId);
+  if (form) { form.style.display = form.style.display === 'none' ? '' : 'none'; }
+  // Mark as read
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/message/' + msgId + '/read', { method: 'PUT', headers: { 'X-Admin-Token': token } });
+  const item = document.getElementById('msgItem_' + msgId);
+  if (item) item.classList.remove('unread');
+}
+
+function submitReply(msgId) {
+  const input = document.getElementById('replyInput_' + msgId);
+  if (!input || !input.value.trim()) { alert('请输入回复内容'); return; }
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/message/' + msgId + '/reply', {
+    method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+    body: JSON.stringify({ reply: input.value.trim() })
+  }).then(r => r.json()).then(data => {
+    if (data.success) { alert('回复成功'); loadAdminInbox(); }
+    else { alert('回复失败：' + (data.error || '')); }
+  });
+}
+
+function adminDeleteMsg(msgId) {
+  if (!confirm('确定删除这条消息吗？')) return;
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/message/' + msgId, { method: 'DELETE', headers: { 'X-Admin-Token': token } })
+    .then(r => r.json()).then(data => {
+      if (data.success) { loadAdminInbox(); loadAdminStats(); }
+    });
+}
+
+// ==================== 用户端：联系管理员 ====================
+function showContactAdmin() {
+  let overlay = document.getElementById('contactAdminOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'contactAdminOverlay';
+    overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(4px); z-index:9999; display:flex; align-items:center; justify-content:center;';
+    overlay.onclick = function(e) { if (e.target === overlay) hideContactAdmin(); };
+    overlay.innerHTML = `
+    <div style="background:#fff; border-radius:18px; width:440px; max-width:90vw; max-height:80vh; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.15); display:flex; flex-direction:column;">
+      <div style="padding:20px 24px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:13px;">管</span>
+          <span style="font-size:15px; font-weight:700; color:#1e293b;">联系管理员</span>
+        </div>
+        <button onclick="hideContactAdmin()" style="border:none; background:none; cursor:pointer; color:#94a3b8; font-size:20px; line-height:1;">&times;</button>
+      </div>
+      <div id="contactAdminMessages" style="flex:1; overflow-y:auto; padding:16px 20px; min-height:200px;"></div>
+      <div style="padding:14px 20px; border-top:1px solid #f1f5f9; display:flex; gap:8px;">
+        <input id="contactAdminInput" type="text" placeholder="输入你想对管理员说的话..." style="flex:1; padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:13px; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'" onkeydown="if(event.key==='Enter')sendContactAdmin()">
+        <button onclick="sendContactAdmin()" style="padding:10px 20px; border-radius:10px; border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">发送</button>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+  }
+  overlay.style.display = 'flex';
+  loadContactAdminMessages();
+}
+
+function hideContactAdmin() {
+  const overlay = document.getElementById('contactAdminOverlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function sendContactAdmin() {
+  const input = document.getElementById('contactAdminInput');
+  if (!input || !input.value.trim()) return;
+  const content = input.value.trim();
+  input.value = '';
+  fetch('/api/message/send', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sender_id: 0, sender_name: userName || '匿名用户', content })
+  }).then(r => r.json()).then(data => {
+    if (data.success) { loadContactAdminMessages(); }
+    else { alert('发送失败：' + (data.error || '')); }
+  });
+}
+
+function loadContactAdminMessages() {
+  const container = document.getElementById('contactAdminMessages');
+  if (!container || !userName) return;
+  fetch('/api/messages/inbox?sender_name=' + encodeURIComponent(userName))
+    .then(r => r.json()).then(data => {
+      if (!data.success || !data.messages.length) {
+        container.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:13px; padding:30px 0;">暂无消息记录，发送一条消息开始对话吧</div>';
+        return;
+      }
+      container.innerHTML = data.messages.reverse().map(m => {
+        const replyHtml = m.reply ? `<div style="margin-top:8px; padding:8px 12px; background:rgba(99,102,241,0.06); border-radius:8px; border-left:3px solid #8b5cf6; font-size:12px; color:#475569;"><span style="color:#8b5cf6; font-weight:600;">管理员回复：</span>${m.reply}</div>` : '';
+        return `<div style="margin-bottom:12px; padding:10px 14px; background:#f8fafc; border-radius:10px;">
+          <div style="font-size:12.5px; color:#334155; line-height:1.5; white-space:pre-wrap;">${m.content}</div>
+          <div style="font-size:11px; color:#94a3b8; margin-top:4px;">${m.created_at}</div>
+          ${replyHtml}
+        </div>`;
+      }).join('');
+      container.scrollTop = container.scrollHeight;
+    });
+}
+
   </script>
 
 </body>
