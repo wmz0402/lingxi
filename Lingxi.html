@@ -8134,6 +8134,20 @@ function initQuiz() {
 
 // ==================== MAIN APP ====================
 function switchMainPage(pageId) {
+  // 做题中离开课程页面 → 提示确认
+  if (activeChapterQuizState === 'quiz' && pageId !== 'courseStudy') {
+    const course = myCourses[activeCourseIndex];
+    if (course && course.chapters) {
+      const ch = course.chapters[activeChapterIndex];
+      const quizArray = ch && (ch.quizzes || (ch.quiz ? [ch.quiz] : [])) || [];
+      const remaining = quizArray.length - activeChapterQuizIndex;
+      if (remaining > 0) {
+        _showQuizLeaveModal(remaining, pageId);
+        return;
+      }
+    }
+  }
+
   // Hide all content pages
   document.querySelectorAll('.main-content-page').forEach(page => {
     page.classList.add('hidden');
@@ -9015,6 +9029,136 @@ let activeChapterQuizState = 'unsubmitted'; // 'unsubmitted', 'quiz'
 let activeChapterQuizSelectedEl = null;
 let activeChapterQuizIndex = 0;
 
+// ==================== 做题进度管理 ====================
+let _quizLeaveTargetPage = null;
+
+function _quizProgressKey() {
+  const email = currentUserEmail || 'guest';
+  return `quiz_progress_${email}_${activeCourseIndex}_${activeChapterIndex}`;
+}
+
+function saveQuizProgress() {
+  if (activeChapterQuizState !== 'quiz') return;
+  const data = {
+    courseIndex: activeCourseIndex,
+    chapterIndex: activeChapterIndex,
+    quizIndex: activeChapterQuizIndex,
+    timestamp: Date.now()
+  };
+  try {
+    localStorage.setItem(_quizProgressKey(), JSON.stringify(data));
+  } catch(e) {}
+}
+
+function clearQuizProgress() {
+  try {
+    const email = currentUserEmail || 'guest';
+    // 清除当前章节的进度
+    localStorage.removeItem(`quiz_progress_${email}_${activeCourseIndex}_${activeChapterIndex}`);
+  } catch(e) {}
+}
+
+function getQuizProgress(courseIdx, chapterIdx) {
+  const email = currentUserEmail || 'guest';
+  try {
+    const raw = localStorage.getItem(`quiz_progress_${email}_${courseIdx}_${chapterIdx}`);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    // 24小时过期
+    if (Date.now() - data.timestamp > 86400000) {
+      localStorage.removeItem(`quiz_progress_${email}_${courseIdx}_${chapterIdx}`);
+      return null;
+    }
+    return data;
+  } catch(e) { return null; }
+}
+
+function _showQuizLeaveModal(remaining, targetPageId) {
+  _quizLeaveTargetPage = targetPageId;
+  // 先保存当前进度
+  saveQuizProgress();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'quizLeaveModal';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:32px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.15);text-align:center;animation:fadeInUp 0.25s ease;">
+      <div style="font-size:40px;margin-bottom:12px;">📝</div>
+      <div style="font-size:17px;font-weight:700;color:#1e1b4b;margin-bottom:8px;">做题中，确认离开吗？</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:24px;line-height:1.6;">
+        你还有 <span style="color:#6366f1;font-weight:700;">${remaining}</span> 道题未完成<br>
+        进度已自动保存，下次回来可以继续
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button onclick="_quizLeaveConfirm()" style="flex:1;padding:11px 0;border-radius:12px;border:none;background:#6366f1;color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;transition:all 0.2s;">确认离开</button>
+        <button onclick="_quizLeaveCancel()" style="flex:1;padding:11px 0;border-radius:12px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:13.5px;font-weight:600;cursor:pointer;transition:all 0.2s;">继续做题</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function _quizLeaveConfirm() {
+  const modal = document.getElementById('quizLeaveModal');
+  if (modal) modal.remove();
+  activeChapterQuizState = 'unsubmitted';
+  if (_quizLeaveTargetPage) {
+    const target = _quizLeaveTargetPage;
+    _quizLeaveTargetPage = null;
+    switchMainPage(target);
+  }
+}
+
+function _quizLeaveCancel() {
+  const modal = document.getElementById('quizLeaveModal');
+  if (modal) modal.remove();
+  _quizLeaveTargetPage = null;
+}
+
+function _showQuizResumeModal(saved) {
+  const overlay = document.createElement('div');
+  overlay.id = 'quizResumeModal';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+
+  const timeStr = new Date(saved.timestamp).toLocaleString('zh-CN', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:32px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.15);text-align:center;animation:fadeInUp 0.25s ease;">
+      <div style="font-size:40px;margin-bottom:12px;">📖</div>
+      <div style="font-size:17px;font-weight:700;color:#1e1b4b;margin-bottom:8px;">检测到未完成的测验</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:24px;line-height:1.6;">
+        上次做到第 <span style="color:#6366f1;font-weight:700;">${saved.quizIndex + 1}</span> 题<br>
+        <span style="font-size:11.5px;color:#94a3b8;">${timeStr}</span>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button onclick="_quizResumeConfirm()" style="flex:1;padding:11px 0;border-radius:12px;border:none;background:#6366f1;color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;transition:all 0.2s;">继续做题</button>
+        <button onclick="_quizResumeRestart()" style="flex:1;padding:11px 0;border-radius:12px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:13.5px;font-weight:600;cursor:pointer;transition:all 0.2s;">从头开始</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function _quizResumeConfirm() {
+  const modal = document.getElementById('quizResumeModal');
+  if (modal) modal.remove();
+  const saved = getQuizProgress(activeCourseIndex, activeChapterIndex);
+  if (saved) {
+    activeChapterQuizState = 'quiz';
+    activeChapterQuizIndex = saved.quizIndex;
+    activeChapterQuizSelectedEl = null;
+    renderChapterContent();
+  }
+}
+
+function _quizResumeRestart() {
+  const modal = document.getElementById('quizResumeModal');
+  if (modal) modal.remove();
+  clearQuizProgress();
+  activeChapterQuizState = 'quiz';
+  activeChapterQuizIndex = 0;
+  activeChapterQuizSelectedEl = null;
+  renderChapterContent();
+}
+
 // Global Callback Hook for iFlytek Agent (科大讯飞智能体接口预留)
 window.callIflytekAgent = async function(message, callback, imagePath, passedHistory) {
   console.log("科大讯飞智能体接口收到提问: ", message);
@@ -9114,9 +9258,15 @@ function enterCourseStudy(courseIndex) {
       </div>
     </div>
   `;
-  
+
   renderChaptersList();
   renderChapterContent();
+
+  // 检查是否有未完成的测验进度
+  const _savedProgress = getQuizProgress(courseIndex, activeChapterIndex);
+  if (_savedProgress) {
+    setTimeout(() => _showQuizResumeModal(_savedProgress), 400);
+  }
 }
 
 function renderChaptersList() {
@@ -9149,6 +9299,11 @@ function selectChapter(idx) {
   activeChapterQuizState = 'unsubmitted';
   renderChaptersList();
   renderChapterContent();
+  // 检查该章节是否有未完成的测验进度
+  const _sp = getQuizProgress(activeCourseIndex, idx);
+  if (_sp) {
+    setTimeout(() => _showQuizResumeModal(_sp), 300);
+  }
 }
 
 function switchStudyTab(tab) {
@@ -9576,11 +9731,13 @@ function startChapterQuiz() {
   activeChapterQuizState = 'quiz';
   activeChapterQuizIndex = 0;
   activeChapterQuizSelectedEl = null;
+  saveQuizProgress();
   renderChapterContent();
 }
 
 function cancelChapterQuiz() {
   activeChapterQuizState = 'unsubmitted';
+  clearQuizProgress();
   renderChapterContent();
 }
 
@@ -9657,8 +9814,10 @@ function nextChapterQuizQuestion() {
   if (activeChapterQuizIndex < quizArray.length - 1) {
     activeChapterQuizIndex++;
     activeChapterQuizSelectedEl = null;
+    saveQuizProgress();
     renderChapterContent();
   } else {
+    clearQuizProgress();
     advanceCourseChapter();
   }
 }
@@ -13705,6 +13864,13 @@ function enterCourseStudySearch(courseTitle, chapterTitle, tab, autoQuiz = false
     document.getElementById('studyProgressBadge').textContent = `当前进度: ${course.progress}%`;
     renderChaptersList();
     renderChapterContent();
+    // 非自动出题时，检查是否有未完成的测验
+    if (!autoQuiz) {
+        const _sp = getQuizProgress(cIndex, chIndex);
+        if (_sp) {
+            setTimeout(() => _showQuizResumeModal(_sp), 300);
+        }
+    }
 }
 
 async function sendMessage() {
