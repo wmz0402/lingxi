@@ -5148,9 +5148,9 @@
               </h2>
               <p style="color:#64748b; font-size:13.5px; margin-top:6px;">实时追踪全平台学习进度，看看谁是学习达人</p>
             </div>
-            <button class="back-to-chat-btn" onclick="switchMainPage('chat')" style="flex-shrink:0;">
+            <button class="back-to-chat-btn" onclick="switchMainPage(adminToken ? 'adminPanel' : 'chat')" style="flex-shrink:0;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6" /></svg>
-              返回对话
+              <span class="back-btn-label">返回对话</span>
             </button>
           </div>
 
@@ -9074,6 +9074,7 @@ function getQuizProgress(courseIdx, chapterIdx) {
 }
 
 function _showQuizLeaveModal(remaining, targetPageId) {
+  if (document.getElementById('quizLeaveModal')) return;
   _quizLeaveTargetPage = targetPageId;
   // 先保存当前进度
   saveQuizProgress();
@@ -9104,7 +9105,12 @@ function _quizLeaveConfirm() {
   if (_quizLeaveTargetPage) {
     const target = _quizLeaveTargetPage;
     _quizLeaveTargetPage = null;
-    switchMainPage(target);
+    if (target.startsWith('__selectChapter__')) {
+      const chIdx = parseInt(target.replace('__selectChapter__', ''));
+      selectChapter(chIdx);
+    } else {
+      switchMainPage(target);
+    }
   }
 }
 
@@ -9115,6 +9121,10 @@ function _quizLeaveCancel() {
 }
 
 function _showQuizResumeModal(saved) {
+  if (document.getElementById('quizResumeModal')) return;
+  // 第0题不需要弹恢复框，因为"继续"和"从头"效果一样
+  if (saved.quizIndex === 0) return;
+
   const overlay = document.createElement('div');
   overlay.id = 'quizResumeModal';
   overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
@@ -9142,8 +9152,21 @@ function _quizResumeConfirm() {
   if (modal) modal.remove();
   const saved = getQuizProgress(activeCourseIndex, activeChapterIndex);
   if (saved) {
+    const course = myCourses[activeCourseIndex];
+    const ch = course && course.chapters ? course.chapters[activeChapterIndex] : null;
+    const quizArray = ch && (ch.quizzes || (ch.quiz ? [ch.quiz] : [])) || [];
+    const idx = saved.quizIndex >= quizArray.length ? 0 : saved.quizIndex;
+    activeStudyTab = 'lecture';
     activeChapterQuizState = 'quiz';
-    activeChapterQuizIndex = saved.quizIndex;
+    activeChapterQuizIndex = idx;
+    activeChapterQuizSelectedEl = null;
+    saveQuizProgress();
+    renderChapterContent();
+  } else {
+    // 进度已过期，从头开始
+    activeStudyTab = 'lecture';
+    activeChapterQuizState = 'quiz';
+    activeChapterQuizIndex = 0;
     activeChapterQuizSelectedEl = null;
     renderChapterContent();
   }
@@ -9153,6 +9176,7 @@ function _quizResumeRestart() {
   const modal = document.getElementById('quizResumeModal');
   if (modal) modal.remove();
   clearQuizProgress();
+  activeStudyTab = 'lecture';
   activeChapterQuizState = 'quiz';
   activeChapterQuizIndex = 0;
   activeChapterQuizSelectedEl = null;
@@ -9295,6 +9319,22 @@ function renderChaptersList() {
 }
 
 function selectChapter(idx) {
+  if (idx === activeChapterIndex) return;
+  // 做题中切换章节 → 提示确认
+  if (activeChapterQuizState === 'quiz') {
+    const course = myCourses[activeCourseIndex];
+    if (course && course.chapters) {
+      const ch = course.chapters[activeChapterIndex];
+      const quizArray = ch && (ch.quizzes || (ch.quiz ? [ch.quiz] : [])) || [];
+      const remaining = quizArray.length - activeChapterQuizIndex;
+      if (remaining > 0) {
+        saveQuizProgress();
+        _quizLeaveTargetPage = '__selectChapter__' + idx;
+        _showQuizLeaveModal(remaining, '__selectChapter__' + idx);
+        return;
+      }
+    }
+  }
   activeChapterIndex = idx;
   activeChapterQuizState = 'unsubmitted';
   renderChaptersList();
@@ -9307,6 +9347,9 @@ function selectChapter(idx) {
 }
 
 function switchStudyTab(tab) {
+  if (activeChapterQuizState === 'quiz' && tab !== 'lecture') {
+    return; // 做题期间禁止切换到思维导图标签页
+  }
   activeStudyTab = tab;
   document.querySelectorAll('.study-tab-btn').forEach(btn => btn.classList.remove('active'));
   if (tab === 'lecture') {
@@ -9731,7 +9774,6 @@ function startChapterQuiz() {
   activeChapterQuizState = 'quiz';
   activeChapterQuizIndex = 0;
   activeChapterQuizSelectedEl = null;
-  saveQuizProgress();
   renderChapterContent();
 }
 
@@ -14830,8 +14872,10 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 const adminInfo = JSON.parse(sessionStorage.getItem('lingxi_admin_info') || '{}');
                 userName = adminInfo.username || 'king33';
+                currentUserEmail = adminInfo.email || '';
             } catch(e) {
                 userName = 'king33';
+                currentUserEmail = '';
             }
             enterAdminMode();
             const navActions = document.querySelector('.nav-actions');
@@ -15638,24 +15682,33 @@ function loadLeaderboard() {
     .then(r => r.json())
     .then(data => {
       if (!data.success) return;
-      // 更新统计卡片
-      const tu = document.getElementById('lbTotalUsers');
-      const tq = document.getElementById('lbTotalQuestions');
-      const mr = document.getElementById('lbMyRank');
-      if (tu) tu.textContent = data.total_users || 0;
-      // 总做题数显示当前用户自己答对的题目数
-      const myEntry = data.rankings.find(r => r.is_me);
-      if (tq) tq.textContent = myEntry ? myEntry.correct_count : 0;
-      if (mr) mr.textContent = data.my_rank ? ('#' + data.my_rank) : '-';
+      // 管理员模式下隐藏做题统计和匿名设置
+      const isAdmin = !!adminToken;
+      const statsEl = document.getElementById('leaderboardStats');
+      const toggleEl = document.getElementById('lbAnonymousToggle');
+      if (isAdmin) {
+        if (statsEl) statsEl.style.display = 'none';
+        if (toggleEl) toggleEl.style.display = 'none';
+      } else {
+        if (statsEl) statsEl.style.display = '';
+        // 更新统计卡片
+        const tu = document.getElementById('lbTotalUsers');
+        const tq = document.getElementById('lbTotalQuestions');
+        const mr = document.getElementById('lbMyRank');
+        if (tu) tu.textContent = data.total_users || 0;
+        // 总做题数显示当前用户自己答对的题目数
+        const myEntry = data.rankings.find(r => r.is_me);
+        if (tq) tq.textContent = myEntry ? myEntry.correct_count : 0;
+        if (mr) mr.textContent = data.my_rank ? ('#' + data.my_rank) : '-';
 
-      // 显示匿名开关（仅登录用户可见）
-      const toggle = document.getElementById('lbAnonymousToggle');
-      if (toggle && email) {
-        toggle.style.display = 'flex';
-        const me = data.rankings.find(r => r.is_me);
-        if (me) {
-          document.getElementById('lbAnonymousCheckbox').checked = me.is_anonymous;
-          _updateToggleUI(me.is_anonymous);
+        // 显示匿名开关（仅登录用户可见）
+        if (toggleEl && email) {
+          toggleEl.style.display = 'flex';
+          const me = data.rankings.find(r => r.is_me);
+          if (me) {
+            document.getElementById('lbAnonymousCheckbox').checked = me.is_anonymous;
+            _updateToggleUI(me.is_anonymous);
+          }
         }
       }
 
@@ -15690,7 +15743,7 @@ function toggleLeaderboardAnonymous() {
   if (!currentUserEmail) return;
   fetch('/api/user/toggle-anonymous', {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-User-Email': currentUserEmail },
     body: JSON.stringify({ email: currentUserEmail })
   })
   .then(r => r.json())
@@ -15802,7 +15855,7 @@ function reportQuestionComplete(courseTitle, chapterTitle, questionText, isCorre
       chapter: chapterTitle || '',
       correct: !!isCorrect
     })
-  }).catch(() => {});
+  }).catch(err => console.warn('上报做题记录失败:', err));
 }
 
   </script>
@@ -16175,6 +16228,14 @@ function enterAdminMode() {
   // 隐藏右侧面板
   const rightPanel = document.getElementById('rightPanelMain');
   if (rightPanel) rightPanel.style.display = 'none';
+  // 更新榜单返回按钮文字
+  const backLabel = document.querySelector('.back-to-chat-btn .back-btn-label');
+  if (backLabel) backLabel.textContent = '返回控制台';
+  // 隐藏管理员不需要的榜单元素（做题统计、匿名设置）
+  const lbStats = document.getElementById('leaderboardStats');
+  if (lbStats) lbStats.style.display = 'none';
+  const lbAnon = document.getElementById('lbAnonymousToggle');
+  if (lbAnon) lbAnon.style.display = 'none';
 }
 
 function exitAdminMode() {
@@ -16192,6 +16253,14 @@ function exitAdminMode() {
   // 移除管理员面板按钮
   const adminBtn = document.getElementById('adminPanelNavBtn');
   if (adminBtn) adminBtn.remove();
+  // 恢复榜单返回按钮文字
+  const backLabel = document.querySelector('.back-to-chat-btn .back-btn-label');
+  if (backLabel) backLabel.textContent = '返回对话';
+  // 恢复榜单统计和匿名设置
+  const lbStats = document.getElementById('leaderboardStats');
+  if (lbStats) lbStats.style.display = '';
+  const lbAnon = document.getElementById('lbAnonymousToggle');
+  if (lbAnon) lbAnon.style.display = '';
 }
 
 function handleAdminLogin(e) {
@@ -16208,6 +16277,7 @@ function handleAdminLogin(e) {
       adminToken = data.token;
       sessionStorage.setItem('lingxi_admin_token', adminToken);
       sessionStorage.setItem('lingxi_admin_info', JSON.stringify(data.admin));
+      currentUserEmail = data.admin.email || '';
       // 进入管理员模式：隐藏用户侧UI元素
       enterAdminMode();
       // 在顶部导航添加管理员面板按钮

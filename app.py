@@ -2430,12 +2430,22 @@ def record_question_complete():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     try:
-        c.execute('SELECT id FROM user WHERE email = ? AND is_admin = 0', (email,))
+        c.execute('SELECT id, is_active FROM user WHERE email = ? AND is_admin = 0', (email,))
         row = c.fetchone()
         if not row:
             return jsonify({"success": False, "error": "用户不存在"}), 404
-        user_id = row[0]
+        user_id, is_active = row
+        if not is_active:
+            return jsonify({"success": False, "error": "账号已被停用"}), 403
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # 防止重复提交：同一用户同一题目60秒内不重复记录
+        if question_text:
+            c.execute(
+                'SELECT id FROM question_completion WHERE user_id = ? AND question_text = ? AND course_title = ? AND chapter_title = ? AND completed_at > datetime(?, \'-1 minute\')',
+                (user_id, question_text, course_title, chapter_title, now)
+            )
+            if c.fetchone():
+                return jsonify({"success": True, "id": 0, "duplicate": True})
         c.execute(
             'INSERT INTO question_completion (user_id, question_text, course_title, chapter_title, is_correct, completed_at) VALUES (?, ?, ?, ?, ?, ?)',
             (user_id, question_text, course_title, chapter_title, is_correct, now)
@@ -2484,7 +2494,7 @@ def get_leaderboard():
         JOIN user u ON qc.user_id = u.id
         WHERE u.is_admin = 0 AND u.is_active = 1 {where_clause}
         GROUP BY u.id
-        ORDER BY total_completed DESC, accuracy DESC, last_active ASC
+        ORDER BY total_completed DESC, accuracy DESC, last_active DESC
         '''
         c.execute(query)
         rows = c.fetchall()
@@ -2554,6 +2564,13 @@ def toggle_anonymous():
     email = data.get('email', '').strip()
     if not email:
         return jsonify({"success": False, "error": "缺少邮箱信息"}), 400
+    # 简单鉴权：只允许用户操作自己的匿名设置
+    request_email = request.headers.get('X-User-Email', '').strip()
+    if not request_email:
+        # 兼容：也从body中取email作为验证
+        request_email = email
+    if request_email != email:
+        return jsonify({"success": False, "error": "无权操作其他用户的设置"}), 403
 
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
