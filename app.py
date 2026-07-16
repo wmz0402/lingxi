@@ -1672,10 +1672,18 @@ def _ensure_message_table():
         content TEXT NOT NULL,
         is_read INTEGER DEFAULT 0,
         reply TEXT DEFAULT '',
+        user_tag TEXT DEFAULT '',
+        admin_tag TEXT DEFAULT '',
         created_at TEXT NOT NULL,
         FOREIGN KEY (sender_id) REFERENCES user(id) ON DELETE CASCADE
     );
     ''')
+    # 迁移：为旧表添加标签字段
+    for col, default in [('user_tag', "''"), ('admin_tag', "''")]:
+        try:
+            c.execute(f'SELECT {col} FROM message LIMIT 1')
+        except sqlite3.OperationalError:
+            c.execute(f'ALTER TABLE message ADD COLUMN {col} TEXT DEFAULT {default}')
     conn.commit()
     conn.close()
 
@@ -1717,12 +1725,13 @@ def _ensure_admin_account():
 
 @app.route('/api/send-verify-code', methods=['POST'])
 def send_verify_code():
-    """发送邮箱注册验证码"""
+    """发送邮箱验证码（支持注册和找回密码两种用途）"""
     data = request.get_json()
     if not data:
         return jsonify({"success": False, "error": "无效请求"}), 400
 
     email = data.get('email', '').strip().lower()
+    purpose = data.get('purpose', 'register')  # 'register' or 'reset'
     if not email:
         return jsonify({"success": False, "error": "请输入邮箱地址"}), 400
 
@@ -1731,18 +1740,33 @@ def send_verify_code():
     if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
         return jsonify({"success": False, "error": "邮箱格式不正确"}), 400
 
+    # 找回密码时须验证邮箱已注册
+    if purpose == 'reset':
+        _ensure_user_table()
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('SELECT id, is_active FROM user WHERE email = ? AND is_admin = 0', (email,))
+        row = c.fetchone()
+        conn.close()
+        if not row:
+            return jsonify({"success": False, "error": "该邮箱未注册或已被禁用"}), 404
+        if row[1] == 0:
+            return jsonify({"success": False, "error": "该账号已被禁用，无法找回密码"}), 403
+
+    # 验证码 key 加上 purpose 前缀，避免注册和重置互相覆盖
+    code_key = f"{purpose}:{email}"
     now = datetime.datetime.now().timestamp()
 
     with _verify_codes_lock:
         # 冷却检查
-        existing = _verify_codes.get(email)
+        existing = _verify_codes.get(code_key)
         if existing and (now - existing['created_at']) < VERIFY_CODE_COOLDOWN:
             remaining = int(VERIFY_CODE_COOLDOWN - (now - existing['created_at']))
             return jsonify({"success": False, "error": f"发送过于频繁，请 {remaining} 秒后再试"}), 429
 
         # 生成6位验证码
         code = str(random.randint(100000, 999999))
-        _verify_codes[email] = {
+        _verify_codes[code_key] = {
             'code': code,
             'created_at': now,
             'expires_at': now + VERIFY_CODE_EXPIRE
@@ -1750,19 +1774,20 @@ def send_verify_code():
 
     # 发送邮件
     try:
+        purpose_label = '找回密码' if purpose == 'reset' else '注册'
         msg = MIMEMultipart()
         msg['From'] = formataddr((str(Header(SMTP_SENDER_NAME, 'utf-8')), SMTP_USER))
         msg['To'] = email
-        msg['Subject'] = '【灵析】注册验证码'
+        msg['Subject'] = f'【灵析】{purpose_label}验证码'
 
         html_body = f'''
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
           <div style="background: linear-gradient(135deg, #6366f1, #8b5cf6); padding: 28px 24px; text-align: center;">
             <h1 style="color: #fff; margin: 0; font-size: 22px; font-weight: 700;">灵析学习平台</h1>
-            <p style="color: rgba(255,255,255,0.85); margin: 6px 0 0; font-size: 13px;">注册验证码</p>
+            <p style="color: rgba(255,255,255,0.85); margin: 6px 0 0; font-size: 13px;">{purpose_label}验证码</p>
           </div>
           <div style="padding: 32px 24px; text-align: center;">
-            <p style="color: #475569; font-size: 14px; margin: 0 0 20px;">您的注册验证码为：</p>
+            <p style="color: #475569; font-size: 14px; margin: 0 0 20px;">您的{purpose_label}验证码为：</p>
             <div style="background: #f1f5f9; border-radius: 12px; padding: 20px; margin: 0 auto; max-width: 240px;">
               <span style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #6366f1;">{code}</span>
             </div>
@@ -1816,17 +1841,18 @@ def register_user():
         return jsonify({"success": False, "error": "请输入邮箱验证码"}), 400
 
     now_ts = datetime.datetime.now().timestamp()
+    code_key = f"register:{email}"
     with _verify_codes_lock:
-        stored = _verify_codes.get(email)
+        stored = _verify_codes.get(code_key)
         if not stored:
             return jsonify({"success": False, "error": "请先获取邮箱验证码"}), 400
         if now_ts > stored['expires_at']:
-            del _verify_codes[email]
+            del _verify_codes[code_key]
             return jsonify({"success": False, "error": "验证码已过期，请重新获取"}), 400
         if stored['code'] != verify_code:
             return jsonify({"success": False, "error": "验证码不正确"}), 400
         # 验证通过，删除已使用的验证码
-        del _verify_codes[email]
+        del _verify_codes[code_key]
 
     pwd_hash = hashlib.sha256(password.encode()).hexdigest()
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -1834,18 +1860,94 @@ def register_user():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     try:
+        # 查重：邮箱是否已被注册
+        c.execute('SELECT id FROM user WHERE email = ?', (email,))
+        if c.fetchone():
+            return jsonify({"success": False, "error": "该邮箱已被注册"}), 409
+        # 查重：用户名是否已被占用
+        c.execute('SELECT id FROM user WHERE LOWER(username) = LOWER(?)', (username,))
+        if c.fetchone():
+            return jsonify({"success": False, "error": "该用户名已被占用，请换一个用户名"}), 409
+
         c.execute(
             'INSERT INTO user (username, email, password_hash, is_admin, created_at) VALUES (?, ?, ?, 0, ?)',
             (username, email, pwd_hash, now)
         )
         conn.commit()
-        return jsonify({"success": True, "message": "注册同步成功", "user_id": c.lastrowid})
+        return jsonify({"success": True, "message": "注册成功", "user_id": c.lastrowid})
     except sqlite3.IntegrityError:
-        c.execute('UPDATE user SET password_hash = ? WHERE email = ?', (pwd_hash, email))
-        conn.commit()
-        return jsonify({"success": True, "message": "用户已存在，已同步"})
+        return jsonify({"success": False, "error": "该邮箱或用户名已被注册"}), 409
     finally:
         conn.close()
+
+
+@app.route('/api/reset-password', methods=['POST'])
+def reset_password():
+    """通过邮箱验证码重置密码"""
+    _ensure_user_table()
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "无效请求"}), 400
+
+    email = data.get('email', '').strip().lower()
+    verify_code = data.get('verify_code', '').strip()
+    new_password = data.get('new_password', '')
+
+    if not email or not verify_code or not new_password:
+        return jsonify({"success": False, "error": "邮箱、验证码和新密码均为必填"}), 400
+
+    if len(new_password) < 6:
+        return jsonify({"success": False, "error": "新密码长度不能少于6位"}), 400
+
+    # 验证码校验
+    code_key = f"reset:{email}"
+    now_ts = datetime.datetime.now().timestamp()
+    with _verify_codes_lock:
+        stored = _verify_codes.get(code_key)
+        if not stored:
+            return jsonify({"success": False, "error": "请先获取邮箱验证码"}), 400
+        if now_ts > stored['expires_at']:
+            del _verify_codes[code_key]
+            return jsonify({"success": False, "error": "验证码已过期，请重新获取"}), 400
+        if stored['code'] != verify_code:
+            return jsonify({"success": False, "error": "验证码不正确"}), 400
+        del _verify_codes[code_key]
+
+    pwd_hash = hashlib.sha256(new_password.encode()).hexdigest()
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute('UPDATE user SET password_hash = ? WHERE email = ? AND is_admin = 0', (pwd_hash, email))
+        conn.commit()
+        if c.rowcount == 0:
+            return jsonify({"success": False, "error": "未找到该邮箱对应的用户"}), 404
+        return jsonify({"success": True, "message": "密码重置成功，请使用新密码登录"})
+    finally:
+        conn.close()
+
+
+@app.route('/api/lookup-username', methods=['POST'])
+def lookup_username():
+    """通过邮箱查询用户名（用于找回密码第一步显示）"""
+    _ensure_user_table()
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "无效请求"}), 400
+
+    email = data.get('email', '').strip().lower()
+    if not email:
+        return jsonify({"success": False, "error": "请输入邮箱"}), 400
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT username FROM user WHERE email = ? AND is_admin = 0 AND is_active = 1', (email,))
+    row = c.fetchone()
+    conn.close()
+
+    if not row:
+        return jsonify({"success": False, "error": "该邮箱未注册或已被禁用"}), 404
+    return jsonify({"success": True, "username": row[0]})
 
 
 @app.route('/api/login', methods=['POST'])
@@ -2392,6 +2494,7 @@ def user_send_message():
     sender_id = data.get('sender_id', 0)
     sender_name = data.get('sender_name', '').strip()
     content = data.get('content', '').strip()
+    user_tag = data.get('tag', '').strip()
 
     if not sender_name or not content:
         return jsonify({"success": False, "error": "发送者名称和消息内容不能为空"}), 400
@@ -2401,8 +2504,8 @@ def user_send_message():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
-        'INSERT INTO message (sender_id, sender_name, content, created_at) VALUES (?, ?, ?, ?)',
-        (sender_id, sender_name, content, now)
+        'INSERT INTO message (sender_id, sender_name, content, user_tag, created_at) VALUES (?, ?, ?, ?, ?)',
+        (sender_id, sender_name, content, user_tag, now)
     )
     conn.commit()
     msg_id = c.lastrowid
@@ -2413,12 +2516,17 @@ def user_send_message():
 
 @app.route('/api/admin/messages', methods=['GET'])
 def admin_get_messages():
-    """管理员查看所有用户消息（收件箱）"""
+    """管理员查看所有用户消息（收件箱），支持按标签筛选"""
     _ensure_message_table()
+    tag_filter = request.args.get('tag', '').strip()
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    c.execute('SELECT * FROM message ORDER BY created_at DESC LIMIT 200')
+    if tag_filter:
+        c.execute('SELECT * FROM message WHERE user_tag = ? OR admin_tag = ? ORDER BY created_at DESC LIMIT 200',
+                  (tag_filter, tag_filter))
+    else:
+        c.execute('SELECT * FROM message ORDER BY created_at DESC LIMIT 200')
     messages = [dict(row) for row in c.fetchall()]
     conn.close()
 
@@ -2467,6 +2575,48 @@ def admin_delete_message(msg_id):
     conn.commit()
     conn.close()
     return jsonify({"success": True, "message": "消息已删除"})
+
+
+@app.route('/api/admin/message/<int:msg_id>/tag', methods=['PUT'])
+def admin_tag_message(msg_id):
+    """管理员给消息打标签"""
+    _ensure_message_table()
+    data = request.get_json()
+    if not data:
+        return jsonify({"success": False, "error": "无效请求"}), 400
+    tag = data.get('tag', '').strip()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('UPDATE message SET admin_tag = ? WHERE id = ?', (tag, msg_id))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "admin_tag": tag})
+
+
+@app.route('/api/admin/messages/mark-all-read', methods=['PUT'])
+def admin_mark_all_read():
+    """管理员一键标记所有消息为已读"""
+    _ensure_message_table()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('UPDATE message SET is_read = 1 WHERE is_read = 0')
+    count = c.rowcount
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "marked": count})
+
+
+@app.route('/api/admin/messages/clear-all-tags', methods=['PUT'])
+def admin_clear_all_tags():
+    """管理员清空所有消息的管理员标签"""
+    _ensure_message_table()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("UPDATE message SET admin_tag = '' WHERE admin_tag != ''")
+    count = c.rowcount
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "cleared": count})
 
 
 @app.route('/api/messages/inbox', methods=['GET'])

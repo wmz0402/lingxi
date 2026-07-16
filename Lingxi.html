@@ -5484,39 +5484,34 @@
         </div>
       </form>
 
-      <!-- ===== FORGOT PASSWORD FORM ===== -->
+      <!-- ===== FORGOT PASSWORD FORM (邮箱验证码找回) ===== -->
       <form id="forgotForm" style="display:none" onsubmit="return handleForgotSubmit(event)">
         <h2>找回密码</h2>
-        <p class="auth-subtitle">请输入您的用户名和注册邮箱以进行核对</p>
+        <p class="auth-subtitle">通过注册邮箱发送验证码重置密码</p>
 
         <div id="forgotStep1">
-          <div class="auth-field" id="forgotNameField">
-            <label>用户名</label>
-            <div class="input-line">
-              <input type="text" id="forgotName" placeholder="请输入用户名" required>
-            </div>
-          </div>
           <div class="auth-field" id="forgotEmailField">
-            <label>邮箱</label>
-            <div class="input-line">
-              <input type="email" id="forgotEmail" placeholder="请输入注册邮箱" required>
+            <label>注册邮箱</label>
+            <div class="input-line" style="display:flex; gap:8px; align-items:center;">
+              <input type="email" id="forgotEmail" placeholder="请输入注册时使用的邮箱" required style="flex:1;">
+              <button type="button" id="forgotSendCodeBtn" onclick="sendForgotVerifyCode()" style="padding:10px 16px; border-radius:10px; border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap;">发送验证码</button>
             </div>
           </div>
-          <button type="button" class="auth-btn" onclick="verifyForgotUser()" style="margin-top: 10px;">验证身份</button>
+          <div id="forgotUserInfo" style="display:none; margin-top:12px; padding:12px 16px; background:rgba(99,102,241,0.06); border-radius:10px; border-left:3px solid #6366f1;">
+            <div style="font-size:11px; color:#6366f1; font-weight:600; margin-bottom:2px;">找到账号</div>
+            <div id="forgotUserName" style="font-size:13px; color:#475569;"></div>
+          </div>
         </div>
 
         <div id="forgotStep2" style="display:none">
-          <div class="auth-field">
-            <label>您的安全问题是：</label>
-            <div id="forgotQuestionText" class="auth-question-box">安全问题加载中...</div>
-          </div>
-          <div class="auth-field" id="forgotAnswerField">
-            <label>您的回答</label>
+          <div class="auth-field" id="forgotCodeField">
+            <label>邮箱验证码</label>
             <div class="input-line">
-              <input type="text" id="forgotAnswer" placeholder="请输入安全问题答案" required>
+              <input type="text" id="forgotCode" placeholder="请输入6位验证码" maxlength="6" required>
             </div>
+            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">验证码已发送至 <span id="forgotEmailHint" style="color:#6366f1;"></span></div>
           </div>
-          <button type="button" class="auth-btn" onclick="verifyForgotAnswer()" style="margin-top: 10px;">验证答案</button>
+          <button type="button" class="auth-btn" onclick="verifyForgotCode()" style="margin-top: 10px;">验证</button>
         </div>
 
         <div id="forgotStep3" style="display:none">
@@ -6629,12 +6624,24 @@
           </div>
           <!-- Inbox Tab (hidden by default) -->
           <div id="adminInboxTab" style="display:none;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <span style="font-size:13px; color:#64748b;" id="adminMsgCount">加载中...</span>
-              <button onclick="loadAdminInbox()" style="padding:6px 14px; border-radius:8px; border:1.5px solid rgba(139,92,246,0.15); background:rgba(139,92,246,0.04); color:#7c3aed; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.1)'" onmouseout="this.style.background='rgba(139,92,246,0.04)'">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px; margin-right:3px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                刷新
-              </button>
+              <div style="display:flex; gap:6px;">
+                <button onclick="adminMarkAllRead()" style="padding:6px 12px; border-radius:8px; border:1.5px solid rgba(34,197,94,0.2); background:rgba(34,197,94,0.06); color:#16a34a; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(34,197,94,0.15)'" onmouseout="this.style.background='rgba(34,197,94,0.06)'">一键已读</button>
+                <button onclick="adminClearAllTags()" style="padding:6px 12px; border-radius:8px; border:1.5px solid rgba(234,179,8,0.2); background:rgba(234,179,8,0.06); color:#ca8a04; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(234,179,8,0.15)'" onmouseout="this.style.background='rgba(234,179,8,0.06)'">清空标签</button>
+                <button onclick="loadAdminInbox()" style="padding:6px 14px; border-radius:8px; border:1.5px solid rgba(139,92,246,0.15); background:rgba(139,92,246,0.04); color:#7c3aed; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.1)'" onmouseout="this.style.background='rgba(139,92,246,0.04)'">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px; margin-right:3px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                  刷新
+                </button>
+              </div>
+            </div>
+            <div id="adminInboxTagFilters" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
+              <button class="inbox-tag-filter active" data-tag="" onclick="filterInboxByTag('')" style="padding:4px 12px; border-radius:16px; border:1.5px solid #6366f1; background:#6366f1; color:#fff; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;">全部</button>
+              <button class="inbox-tag-filter" data-tag="反馈问题" onclick="filterInboxByTag('反馈问题')" style="padding:4px 12px; border-radius:16px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;">反馈问题</button>
+              <button class="inbox-tag-filter" data-tag="功能建议" onclick="filterInboxByTag('功能建议')" style="padding:4px 12px; border-radius:16px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;">功能建议</button>
+              <button class="inbox-tag-filter" data-tag="账号问题" onclick="filterInboxByTag('账号问题')" style="padding:4px 12px; border-radius:16px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;">账号问题</button>
+              <button class="inbox-tag-filter" data-tag="学习资料" onclick="filterInboxByTag('学习资料')" style="padding:4px 12px; border-radius:16px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;">学习资料</button>
+              <button class="inbox-tag-filter" data-tag="其他" onclick="filterInboxByTag('其他')" style="padding:4px 12px; border-radius:16px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;">其他</button>
             </div>
             <div id="adminInboxList" class="noti-list"></div>
           </div>
@@ -8307,93 +8314,142 @@ function togglePassword(id, btn) {
   inp.type = inp.type === 'password' ? 'text' : 'password';
 }
 
-let forgotUserEmail = '';
+let forgotEmailAddr = '';
 function showForgot() {
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('registerForm').style.display = 'none';
     const adminForm = document.getElementById('adminLoginForm');
     if (adminForm) adminForm.style.display = 'none';
-    
+
     const forgotForm = document.getElementById('forgotForm');
-    if (forgotForm) {
-        forgotForm.style.display = 'block';
-    }
-    
+    if (forgotForm) forgotForm.style.display = 'block';
+
     document.getElementById('forgotStep1').style.display = 'block';
     document.getElementById('forgotStep2').style.display = 'none';
     document.getElementById('forgotStep3').style.display = 'none';
-    
-    document.getElementById('forgotName').value = '';
+
     document.getElementById('forgotEmail').value = '';
-    document.getElementById('forgotAnswer').value = '';
+    document.getElementById('forgotCode').value = '';
     document.getElementById('forgotNewPwd').value = '';
     document.getElementById('forgotNewPwd2').value = '';
+    document.getElementById('forgotUserInfo').style.display = 'none';
+
+    const btn = document.getElementById('forgotSendCodeBtn');
+    if (btn) { btn.disabled = false; btn.textContent = '发送验证码'; }
 }
 
-function verifyForgotUser() {
-    const name = document.getElementById('forgotName').value.trim();
+async function sendForgotVerifyCode() {
     const email = document.getElementById('forgotEmail').value.trim();
-    if (!name || !email) {
-        alert('请输入用户名和邮箱！');
-        return;
+    if (!email) { alert('请输入注册邮箱！'); return; }
+
+    const btn = document.getElementById('forgotSendCodeBtn');
+    btn.disabled = true;
+    btn.textContent = '查询中...';
+
+    try {
+        // Step 1: 查用户名（确认邮箱已注册）
+        const r1 = await fetch('/api/lookup-username', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
+        });
+        const d1 = await r1.json();
+        if (!d1.success) {
+            alert(d1.error || '未找到该邮箱对应的用户');
+            btn.disabled = false;
+            btn.textContent = '发送验证码';
+            return;
+        }
+
+        // 显示找到的用户名
+        forgotEmailAddr = email;
+        document.getElementById('forgotUserName').textContent = '用户名：' + d1.username;
+        document.getElementById('forgotUserInfo').style.display = 'block';
+
+        btn.textContent = '发送中...';
+        // Step 2: 发送验证码
+        const r2 = await fetch('/api/send-verify-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, purpose: 'reset' })
+        });
+        const d2 = await r2.json();
+        if (!d2.success) {
+            alert(d2.error || '验证码发送失败');
+            btn.disabled = false;
+            btn.textContent = '发送验证码';
+            return;
+        }
+
+        // 发送成功，60秒倒计时
+        let sec = 60;
+        btn.textContent = sec + 's';
+        const timer = setInterval(() => {
+            sec--;
+            if (sec <= 0) {
+                clearInterval(timer);
+                btn.disabled = false;
+                btn.textContent = '重新发送';
+            } else {
+                btn.textContent = sec + 's';
+            }
+        }, 1000);
+
+        // 进入步骤2
+        document.getElementById('forgotEmailHint').textContent = email;
+        document.getElementById('forgotStep1').style.display = 'none';
+        document.getElementById('forgotStep2').style.display = 'block';
+
+    } catch (err) {
+        alert('操作失败：' + err.message + '\n请确保已重启服务器以加载最新功能。');
+        btn.disabled = false;
+        btn.textContent = '发送验证码';
     }
-    
-    let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
-    if (!users[email]) {
-        alert('未找到该注册邮箱对应的用户！');
-        return;
-    }
-    if (users[email].name !== name) {
-        alert('用户名与该邮箱绑定的用户名不匹配！');
-        return;
-    }
-    
-    forgotUserEmail = email;
-    const question = users[email].securityQuestion || '安全验证：请输入您注册时的密保答案';
-    document.getElementById('forgotQuestionText').textContent = question;
-    
-    document.getElementById('forgotStep1').style.display = 'none';
-    document.getElementById('forgotStep2').style.display = 'block';
 }
 
-function verifyForgotAnswer() {
-    const answer = document.getElementById('forgotAnswer').value.trim();
-    if (!answer) {
-        alert('请输入安全问题的答案！');
-        return;
-    }
-    
-    let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
-    const storedAnswer = users[forgotUserEmail].securityAnswer || '';
-    if (storedAnswer.toLowerCase() !== answer.toLowerCase()) {
-        alert('安全问题答案错误！');
-        return;
-    }
-    
+function verifyForgotCode() {
+    const code = document.getElementById('forgotCode').value.trim();
+    if (!code || code.length !== 6) { alert('请输入6位验证码！'); return; }
+    // 直接跳到设置密码步骤，验证码在提交时由后端校验
     document.getElementById('forgotStep2').style.display = 'none';
     document.getElementById('forgotStep3').style.display = 'block';
 }
 
-function handleForgotSubmit(e) {
+async function handleForgotSubmit(e) {
     if (e) e.preventDefault();
     const pwd1 = document.getElementById('forgotNewPwd').value;
     const pwd2 = document.getElementById('forgotNewPwd2').value;
-    
-    if (!pwd1 || pwd1.length < 6) {
-        alert('新密码长度不能少于 6 位！');
-        return false;
-    }
-    if (pwd1 !== pwd2) {
-        alert('两次输入的密码不一致！');
-        return false;
-    }
-    
-    let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
-    if (users[forgotUserEmail]) {
-        users[forgotUserEmail].pwd = pwd1;
-        localStorage.setItem('lingxi_users', JSON.stringify(users));
-        alert('密码重置成功！请使用新密码进行登录。');
-        switchTab('login');
+    const code = document.getElementById('forgotCode').value.trim();
+
+    if (!pwd1 || pwd1.length < 6) { alert('新密码长度不能少于 6 位！'); return false; }
+    if (pwd1 !== pwd2) { alert('两次输入的密码不一致！'); return false; }
+    if (!code) { alert('请输入验证码！'); return false; }
+    if (!forgotEmailAddr) { alert('请先发送验证码！'); return false; }
+
+    try {
+        const r = await fetch('/api/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: forgotEmailAddr, verify_code: code, new_password: pwd1 })
+        });
+        const data = await r.json();
+        if (data.success) {
+            alert('密码重置成功！请使用新密码登录。');
+            let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+            if (users[forgotEmailAddr]) {
+                users[forgotEmailAddr].pwd = pwd1;
+                localStorage.setItem('lingxi_users', JSON.stringify(users));
+            }
+            switchTab('login');
+        } else {
+            alert('重置失败：' + (data.error || ''));
+            if (data.error && (data.error.includes('过期') || data.error.includes('不正确'))) {
+                document.getElementById('forgotStep3').style.display = 'none';
+                document.getElementById('forgotStep2').style.display = 'block';
+            }
+        }
+    } catch (err) {
+        alert('网络错误：' + err.message);
     }
     return false;
 }
@@ -8993,17 +9049,8 @@ function handleRegister(e) {
   }
   if (!ok) return false;
 
-  // 本地查重
+  // 读取本地用户数据（用于注册成功后保存）
   let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
-  if (users[email]) {
-    alert('该邮箱已被注册！');
-    return false;
-  }
-  let usernameExists = Object.values(users).some(u => u.name && u.name.toLowerCase() === name.toLowerCase());
-  if (usernameExists) {
-    alert('该用户名已被占用，请换个用户名！');
-    return false;
-  }
 
   // 显示注册中状态
   const submitBtn = document.querySelector('.register-btn');
@@ -16209,9 +16256,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (navActions && !document.getElementById('adminPanelNavBtn')) {
                 const btn = document.createElement('button');
                 btn.id = 'adminPanelNavBtn'; btn.title = '管理员控制台';
-                btn.style.cssText = 'background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:12px;padding:4px 12px;border-radius:8px;font-weight:600;white-space:nowrap;border:none;cursor:pointer;';
+                btn.style.cssText = 'background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:12px;padding:6px 14px;border-radius:10px;font-weight:600;white-space:nowrap;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(99,102,241,0.25);transition:all 0.2s;';
+                btn.onmouseover = function() { this.style.boxShadow='0 4px 16px rgba(99,102,241,0.4)'; this.style.transform='translateY(-1px)'; };
+                btn.onmouseout = function() { this.style.boxShadow='0 2px 8px rgba(99,102,241,0.25)'; this.style.transform='none'; };
                 btn.onclick = function() { loadAdminPanel(); };
-                btn.textContent = '控制台';
+                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>控制台';
                 navActions.insertBefore(btn, navActions.firstChild);
             }
             const pn = document.getElementById('profileName');
@@ -17614,9 +17663,11 @@ function handleAdminLogin(e) {
       if (navActions && !document.getElementById('adminPanelNavBtn')) {
         const btn = document.createElement('button');
         btn.id = 'adminPanelNavBtn'; btn.title = '管理员控制台';
-        btn.style.cssText = 'background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:12px;padding:4px 12px;border-radius:8px;font-weight:600;white-space:nowrap;border:none;cursor:pointer;';
+        btn.style.cssText = 'background:linear-gradient(135deg,#8b5cf6,#6366f1);color:#fff;font-size:12px;padding:6px 14px;border-radius:10px;font-weight:600;white-space:nowrap;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(99,102,241,0.25);transition:all 0.2s;';
+        btn.onmouseover = function() { this.style.boxShadow='0 4px 16px rgba(99,102,241,0.4)'; this.style.transform='translateY(-1px)'; };
+        btn.onmouseout = function() { this.style.boxShadow='0 2px 8px rgba(99,102,241,0.25)'; this.style.transform='none'; };
         btn.onclick = function() { loadAdminPanel(); };
-        btn.textContent = '控制台';
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>控制台';
         navActions.insertBefore(btn, navActions.firstChild);
       }
       document.getElementById('authPage').classList.add('hidden');
@@ -18058,10 +18109,32 @@ function submitAddAccount() {
 }
 
 // ---- 收件箱 ----
+let _inboxCurrentTag = '';
+const _tagColors = {
+  '反馈问题': { bg: '#fef2f2', color: '#ef4444', border: '#fecaca' },
+  '功能建议': { bg: '#eff6ff', color: '#3b82f6', border: '#bfdbfe' },
+  '账号问题': { bg: '#fefce8', color: '#eab308', border: '#fde68a' },
+  '学习资料': { bg: '#f0fdf4', color: '#22c55e', border: '#bbf7d0' },
+  '其他': { bg: '#f8fafc', color: '#64748b', border: '#e2e8f0' },
+  '已解决': { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
+  '待处理': { bg: '#fefce8', color: '#ca8a04', border: '#fde68a' }
+};
+function filterInboxByTag(tag) {
+  _inboxCurrentTag = tag;
+  document.querySelectorAll('.inbox-tag-filter').forEach(btn => {
+    const isActive = btn.dataset.tag === tag;
+    btn.style.background = isActive ? '#6366f1' : '#fff';
+    btn.style.color = isActive ? '#fff' : '#64748b';
+    btn.style.borderColor = isActive ? '#6366f1' : '#e2e8f0';
+  });
+  loadAdminInbox();
+}
+
 function loadAdminInbox() {
   const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
   if (!token) return;
-  fetch('/api/admin/messages', { headers: { 'X-Admin-Token': token } })
+  const tagParam = _inboxCurrentTag ? '&tag=' + encodeURIComponent(_inboxCurrentTag) : '';
+  fetch('/api/admin/messages?' + tagParam, { headers: { 'X-Admin-Token': token } })
     .then(r => r.json()).then(data => {
       if (data.success) {
         renderAdminInbox(data.messages);
@@ -18074,6 +18147,8 @@ function loadAdminInbox() {
     });
 }
 
+const _adminTagOptions = ['反馈问题','功能建议','账号问题','学习资料','其他','已解决','待处理'];
+
 function renderAdminInbox(messages) {
   const list = document.getElementById('adminInboxList');
   if (!messages || messages.length === 0) {
@@ -18083,6 +18158,16 @@ function renderAdminInbox(messages) {
   list.innerHTML = messages.map(m => {
     const initial = (m.sender_name || '?')[0].toUpperCase();
     const unread = m.is_read ? '' : ' unread';
+    const ut = m.user_tag || '';
+    const at = m.admin_tag || '';
+    const utc = _tagColors[ut] || _tagColors['其他'];
+    const userTagHtml = ut ? `<span style="display:inline-block;padding:1px 8px;border-radius:10px;background:${utc.bg};color:${utc.color};border:1px solid ${utc.border};font-size:10px;font-weight:600;">${ut}</span>` : '';
+    const atc = _tagColors[at] || { bg: '#f8fafc', color: '#64748b', border: '#e2e8f0' };
+    const tagOptions = _adminTagOptions.map(t => {
+      const tc = _tagColors[t] || _tagColors['其他'];
+      return `<div onclick="adminTagMessage(${m.id}, '${t}'); event.stopPropagation();" style="display:inline-block;padding:2px 10px;border-radius:10px;background:${tc.bg};color:${tc.color};border:1px solid ${tc.border};font-size:10px;font-weight:600;cursor:pointer;transition:all 0.15s;${at === t ? 'box-shadow:0 0 0 2px ' + tc.color + '33;' : ''}" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">${t}</div>`;
+    }).join('');
+    const clearTagBtn = at ? `<div onclick="adminTagMessage(${m.id}, ''); event.stopPropagation();" style="display:inline-block;padding:2px 10px;border-radius:10px;background:#fff;color:#94a3b8;border:1px dashed #d1d5db;font-size:10px;cursor:pointer;" onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'" onmouseout="this.style.borderColor='#d1d5db';this.style.color='#94a3b8'">清除</div>` : '';
     const replyHtml = m.reply ? `<div style="margin-top:10px; padding:10px 14px; background:rgba(99,102,241,0.06); border-radius:10px; border-left:3px solid #8b5cf6;"><div style="font-size:11px; color:#8b5cf6; font-weight:600; margin-bottom:3px;">管理员回复</div><div style="font-size:12.5px; color:#475569; line-height:1.5;">${m.reply}</div></div>` : '';
     return `
     <div class="noti-item${unread}" id="msgItem_${m.id}" style="flex-direction:column;">
@@ -18094,6 +18179,21 @@ function renderAdminInbox(messages) {
             <div style="display:flex; gap:6px;">
               <button onclick="showReplyForm(${m.id})" style="padding:3px 10px; border-radius:6px; border:1px solid #e2e8f0; background:#fff; color:#6366f1; font-size:11px; cursor:pointer;" onmouseover="this.style.background='#6366f1';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#6366f1'">回复</button>
               <button onclick="adminDeleteMsg(${m.id})" style="padding:3px 10px; border-radius:6px; border:1px solid #fecaca; background:#fff; color:#ef4444; font-size:11px; cursor:pointer;" onmouseover="this.style.background='#ef4444';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#ef4444'">删除</button>
+            </div>
+          </div>
+          <div style="display:flex; gap:6px; align-items:center; margin-top:4px; flex-wrap:wrap;">
+            ${userTagHtml}
+            <div style="position:relative; display:inline-block;">
+              <div onclick="toggleAdminTagPop(${m.id}, event)" style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:10px;background:${atc.bg};color:${atc.color};border:1px solid ${atc.border};font-size:10px;font-weight:600;cursor:pointer;transition:all 0.15s;user-select:none;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                ${at ? '<span style="font-size:9px;opacity:0.7;">管</span> ' + at : '打标签'}
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </div>
+              <div id="tagPop_${m.id}" class="admin-tag-pop" style="display:none;position:fixed;z-index:9999;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.06);padding:10px;min-width:240px;max-width:320px;border:1px solid #f1f5f9;">
+                <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                  ${tagOptions}
+                  ${clearTagBtn}
+                </div>
+              </div>
             </div>
           </div>
           <div class="noti-item-desc" style="margin-top:4px; line-height:1.6; white-space:pre-wrap;">${m.content}</div>
@@ -18109,6 +18209,74 @@ function renderAdminInbox(messages) {
       </div>
     </div>`;
   }).join('');
+}
+
+function adminTagMessage(msgId, tag) {
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/message/' + msgId + '/tag', {
+    method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token },
+    body: JSON.stringify({ tag: tag })
+  }).then(r => r.json()).then(data => {
+    if (data.success) { loadAdminInbox(); }
+    else { alert('标签更新失败：' + (data.error || '')); }
+  }).catch(err => { alert('标签更新失败：' + err.message); });
+}
+
+function toggleAdminTagPop(msgId, e) {
+  if (e) e.stopPropagation();
+  const pop = document.getElementById('tagPop_' + msgId);
+  if (!pop) return;
+  const wasOpen = pop.style.display !== 'none';
+  // close all first
+  document.querySelectorAll('.admin-tag-pop').forEach(el => el.style.display = 'none');
+  if (!wasOpen) {
+    const trigger = e.currentTarget || e.target;
+    const rect = trigger.getBoundingClientRect();
+    const popH = 120; // estimated popover height
+    const spaceBelow = window.innerHeight - rect.bottom;
+    // flip above if not enough space below
+    const topPos = spaceBelow < popH ? rect.top - popH - 6 : rect.bottom + 6;
+    pop.style.top = topPos + 'px';
+    pop.style.left = Math.max(8, Math.min(rect.left - 40, window.innerWidth - 260)) + 'px';
+    pop.style.display = 'block';
+  }
+}
+
+// Close popovers on scroll (debounced to avoid layout-shift false triggers)
+let _tagScrollTimer = null;
+window.addEventListener('scroll', function() {
+  clearTimeout(_tagScrollTimer);
+  _tagScrollTimer = setTimeout(function() {
+    document.querySelectorAll('.admin-tag-pop').forEach(el => el.style.display = 'none');
+  }, 80);
+}, true);
+window.addEventListener('resize', function() {
+  document.querySelectorAll('.admin-tag-pop').forEach(el => el.style.display = 'none');
+});
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.admin-tag-pop') && !e.target.closest('[onclick*="toggleAdminTagPop"]')) {
+    document.querySelectorAll('.admin-tag-pop').forEach(el => el.style.display = 'none');
+  }
+});
+
+function adminMarkAllRead() {
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/messages/mark-all-read', {
+    method: 'PUT', headers: { 'X-Admin-Token': token }
+  }).then(r => r.json()).then(data => {
+    if (data.success) { loadAdminInbox(); loadAdminStats(); }
+  });
+}
+
+function adminClearAllTags() {
+  if (!confirm('确定要清空所有消息的管理员标签吗？')) return;
+  const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+  fetch('/api/admin/messages/clear-all-tags', {
+    method: 'PUT', headers: { 'X-Admin-Token': token }
+  }).then(r => r.json()).then(data => {
+    if (data.success) { loadAdminInbox(); }
+  });
 }
 
 function showReplyForm(msgId) {
@@ -18161,6 +18329,13 @@ function showContactAdmin() {
         <button onclick="hideContactAdmin()" style="border:none; background:none; cursor:pointer; color:#94a3b8; font-size:20px; line-height:1;">&times;</button>
       </div>
       <div id="contactAdminMessages" style="flex:1; overflow-y:auto; padding:16px 20px; min-height:200px;"></div>
+      <div style="padding:8px 20px 0; display:flex; gap:6px; flex-wrap:wrap;" id="contactAdminTags">
+        <button class="ca-tag-btn active" data-tag="反馈问题" onclick="selectContactTag(this)" style="padding:4px 12px; border-radius:16px; border:1.5px solid #6366f1; background:#6366f1; color:#fff; font-size:11px; cursor:pointer; transition:all 0.2s;">反馈问题</button>
+        <button class="ca-tag-btn" data-tag="功能建议" onclick="selectContactTag(this)" style="padding:4px 12px; border-radius:16px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:11px; cursor:pointer; transition:all 0.2s;">功能建议</button>
+        <button class="ca-tag-btn" data-tag="账号问题" onclick="selectContactTag(this)" style="padding:4px 12px; border-radius:16px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:11px; cursor:pointer; transition:all 0.2s;">账号问题</button>
+        <button class="ca-tag-btn" data-tag="学习资料" onclick="selectContactTag(this)" style="padding:4px 12px; border-radius:16px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:11px; cursor:pointer; transition:all 0.2s;">学习资料</button>
+        <button class="ca-tag-btn" data-tag="其他" onclick="selectContactTag(this)" style="padding:4px 12px; border-radius:16px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:11px; cursor:pointer; transition:all 0.2s;">其他</button>
+      </div>
       <div style="padding:14px 20px; border-top:1px solid #f1f5f9; display:flex; gap:8px;">
         <input id="contactAdminInput" type="text" placeholder="输入你想对管理员说的话..." style="flex:1; padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:13px; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'" onkeydown="if(event.key==='Enter')sendContactAdmin()">
         <button onclick="sendContactAdmin()" style="padding:10px 20px; border-radius:10px; border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">发送</button>
@@ -18177,6 +18352,21 @@ function hideContactAdmin() {
   if (overlay) overlay.style.display = 'none';
 }
 
+let _contactSelectedTag = '反馈问题';
+function selectContactTag(btn) {
+  document.querySelectorAll('.ca-tag-btn').forEach(b => {
+    b.classList.remove('active');
+    b.style.background = '#fff';
+    b.style.color = '#64748b';
+    b.style.borderColor = '#e2e8f0';
+  });
+  btn.classList.add('active');
+  btn.style.background = '#6366f1';
+  btn.style.color = '#fff';
+  btn.style.borderColor = '#6366f1';
+  _contactSelectedTag = btn.dataset.tag;
+}
+
 function sendContactAdmin() {
   const input = document.getElementById('contactAdminInput');
   if (!input || !input.value.trim()) return;
@@ -18184,11 +18374,18 @@ function sendContactAdmin() {
   input.value = '';
   fetch('/api/message/send', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sender_id: 0, sender_name: userName || '匿名用户', content })
+    body: JSON.stringify({ sender_id: 0, sender_name: userName || '匿名用户', content, tag: _contactSelectedTag })
   }).then(r => r.json()).then(data => {
     if (data.success) { loadContactAdminMessages(); }
     else { alert('发送失败：' + (data.error || '')); }
   });
+}
+
+function _tagBadgeHtml(tag, isUserTag) {
+  if (!tag) return '';
+  const c = _tagColors[tag] || _tagColors['其他'];
+  const prefix = isUserTag ? '' : '<span style="font-size:9px;opacity:0.7;">管</span> ';
+  return `<span style="display:inline-block;padding:1px 8px;border-radius:10px;background:${c.bg};color:${c.color};border:1px solid ${c.border};font-size:10px;font-weight:600;margin-right:4px;vertical-align:middle;">${prefix}${tag}</span>`;
 }
 
 function loadContactAdminMessages() {
@@ -18201,8 +18398,10 @@ function loadContactAdminMessages() {
         return;
       }
       container.innerHTML = data.messages.reverse().map(m => {
+        const tagHtml = _tagBadgeHtml(m.user_tag, true) + _tagBadgeHtml(m.admin_tag, false);
         const replyHtml = m.reply ? `<div style="margin-top:8px; padding:8px 12px; background:rgba(99,102,241,0.06); border-radius:8px; border-left:3px solid #8b5cf6; font-size:12px; color:#475569;"><span style="color:#8b5cf6; font-weight:600;">管理员回复：</span>${m.reply}</div>` : '';
         return `<div style="margin-bottom:12px; padding:10px 14px; background:#f8fafc; border-radius:10px;">
+          <div style="margin-bottom:4px;">${tagHtml}</div>
           <div style="font-size:12.5px; color:#334155; line-height:1.5; white-space:pre-wrap;">${m.content}</div>
           <div style="font-size:11px; color:#94a3b8; margin-top:4px;">${m.created_at}</div>
           ${replyHtml}
