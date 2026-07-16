@@ -2869,63 +2869,68 @@
     }
 
     .course-item {
-      padding: 14px;
+      padding: 16px 20px;
       background: #fff;
       border-radius: 14px;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
       border: 1px solid rgba(0, 0, 0, 0.04);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.01);
     }
 
     .course-item:hover {
       border-color: #a78bfa;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(124, 58, 237, 0.06);
     }
 
     .course-title {
-      font-size: 13.5px;
+      font-size: 14px;
       font-weight: 600;
       color: #1e293b;
     }
 
     .course-meta {
       display: flex;
-      gap: 12px;
-      margin-top: 6px;
-      font-size: 11px;
-      color: #94a3b8;
+      gap: 16px;
+      margin-top: 8px;
+      font-size: 11.5px;
+      color: #64748b;
     }
 
     .course-progress {
-      height: 4px;
+      height: 5px;
       background: #f1f5f9;
-      border-radius: 2px;
-      margin-top: 8px;
+      border-radius: 3px;
+      margin-top: 12px;
       overflow: hidden;
     }
 
     .course-progress-fill {
       height: 100%;
-      border-radius: 2px;
+      border-radius: 3px;
     }
 
     .panel-section-header {
-      font-size: 13px;
-      font-weight: 600;
-      color: #334155;
-      margin-bottom: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      letter-spacing: -0.01em;
     }
 
     .panel-section-header .count {
-      font-size: 11px;
+      font-size: 11.5px;
       background: #f5f3ff;
       color: #7c3aed;
-      padding: 2px 8px;
+      padding: 3px 10px;
       border-radius: 20px;
       font-weight: 600;
+      border: 1px solid rgba(124, 58, 237, 0.08);
     }
 
     .auth-overlay {
@@ -6613,28 +6618,28 @@
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><polyline points="9 18 15 12 9 6" /></svg>
           </div>
-          <div id="panelCoursesList"></div>
-          <div class="panel-section-header" style="margin-top:20px"><span>学习统计</span></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div id="panelCoursesList" style="margin-bottom: 24px;"></div>
+          <div class="panel-section-header" style="margin-top:28px"><span>学习统计</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
             <div
-              style="background:#fff;border-radius:12px;padding:14px;text-align:center;border:1px solid rgba(0,0,0,0.04)">
-              <div id="statsDays" style="font-size:24px;font-weight:700;color:#6366f1">1</div>
-              <div style="font-size:11px;color:#94a3b8;margin-top:4px">累计学习天数</div>
+              style="background:#fff;border-radius:16px;padding:20px 14px;text-align:center;border:1px solid rgba(0,0,0,0.03);box-shadow:0 4px 20px rgba(99,102,241,0.02);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+              <div id="statsDays" style="font-size:28px;font-weight:800;color:#6366f1;line-height:1.2">1</div>
+              <div style="font-size:12px;color:#64748b;margin-top:6px;font-weight:500">累计学习天数</div>
             </div>
             <div
-              style="background:#fff;border-radius:12px;padding:14px;text-align:center;border:1px solid rgba(0,0,0,0.04)">
-              <div id="statsResources" style="font-size:24px;font-weight:700;color:#10b981">0</div>
-              <div style="font-size:11px;color:#94a3b8;margin-top:4px">已完成资源</div>
+              style="background:#fff;border-radius:16px;padding:20px 14px;text-align:center;border:1px solid rgba(0,0,0,0.03);box-shadow:0 4px 20px rgba(16,185,129,0.02);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+              <div id="statsResources" style="font-size:28px;font-weight:800;color:#10b981;line-height:1.2">0</div>
+              <div style="font-size:12px;color:#64748b;margin-top:6px;font-weight:500">已完成资源</div>
             </div>
             <div
-              style="background:#fff;border-radius:12px;padding:14px;text-align:center;border:1px solid rgba(0,0,0,0.04)">
-              <div id="statsHours" style="font-size:24px;font-weight:700;color:#f59e0b">0.0</div>
-              <div style="font-size:11px;color:#94a3b8;margin-top:4px">学习时长(h)</div>
+              style="background:#fff;border-radius:16px;padding:20px 14px;text-align:center;border:1px solid rgba(0,0,0,0.03);box-shadow:0 4px 20px rgba(245,158,11,0.02);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+              <div id="statsHours" style="font-size:28px;font-weight:800;color:#f59e0b;line-height:1.2">0.0</div>
+              <div style="font-size:12px;color:#64748b;margin-top:6px;font-weight:500">学习时长(h)</div>
             </div>
             <div
-              style="background:#fff;border-radius:12px;padding:14px;text-align:center;border:1px solid rgba(0,0,0,0.04)">
-              <div id="statsFavorites" style="font-size:24px;font-weight:700;color:#ec4899">5</div>
-              <div style="font-size:11px;color:#94a3b8;margin-top:4px">收藏资源</div>
+              style="background:#fff;border-radius:16px;padding:20px 14px;text-align:center;border:1px solid rgba(0,0,0,0.03);box-shadow:0 4px 20px rgba(236,72,153,0.02);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+              <div id="statsFavorites" style="font-size:28px;font-weight:800;color:#ec4899;line-height:1.2">5</div>
+              <div style="font-size:12px;color:#64748b;margin-top:6px;font-weight:500">收藏资源</div>
             </div>
           </div>
         </div>
@@ -8405,6 +8410,7 @@ let myCourses = [];
 function applyAvatar(dataUrl) {
     const navBtn = document.querySelector('.avatar-btn');
     const sideAv = document.querySelector('.profile-avatar');
+    const sidebarUserAv = document.getElementById('sidebarUserAvatar');
     const preview = document.getElementById('settingAvatarPreview');
     const firstChar = userName ? userName.charAt(0).toUpperCase() : 'U';
 
@@ -8424,6 +8430,13 @@ function applyAvatar(dataUrl) {
             sideAv.style.backgroundImage = `url(${dataUrl})`;
             sideAv.style.backgroundSize = 'cover';
             sideAv.style.backgroundPosition = 'center';
+        }
+
+        if (sidebarUserAv) {
+            sidebarUserAv.textContent = '';
+            sidebarUserAv.style.backgroundImage = `url(${dataUrl})`;
+            sidebarUserAv.style.backgroundSize = 'cover';
+            sidebarUserAv.style.backgroundPosition = 'center';
         }
 
         if (preview) {
@@ -8455,6 +8468,13 @@ function applyAvatar(dataUrl) {
             sideAv.style.backgroundImage = 'none';
             sideAv.style.backgroundColor = '';
             sideAv.style.background = 'linear-gradient(135deg, #8b5cf6, #c084fc)';
+        }
+
+        if (sidebarUserAv) {
+            sidebarUserAv.textContent = firstChar;
+            sidebarUserAv.style.backgroundImage = 'none';
+            sidebarUserAv.style.backgroundColor = '';
+            sidebarUserAv.style.background = 'linear-gradient(135deg, #8b5cf6, #a78bfa)';
         }
 
         if (preview) {
