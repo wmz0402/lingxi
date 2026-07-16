@@ -5689,6 +5689,10 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #64748b;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34" /><path d="M12 2a5 5 0 0 0-5 5v3c0 2.21 1.79 4 4 4s4-1.79 4-4V7a5 5 0 0 0-5-5z" /></svg>
             <span>学习排名</span>
           </button>
+          <button onclick="handleDropdownAction('achievements')" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 16px; border: none; border-radius: 10px; background: rgba(0,0,0,0.04); color: #1e293b; font-size: 13px; font-weight: 500; text-align: left; cursor: pointer; transition: all 0.2s; box-sizing: border-box;" onmouseover="this.style.background='rgba(0,0,0,0.08)'" onmouseout="this.style.background='rgba(0,0,0,0.04)'">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #64748b;"><circle cx="12" cy="8" r="7" /><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" /></svg>
+            <span>我的成就</span>
+          </button>
         </div>
         
         <!-- 搜索小组件 (Gemini Style) -->
@@ -6257,6 +6261,69 @@
             <div id="lbRankingList" style="max-height:500px; overflow-y:auto;">
               <div style="padding:40px; text-align:center; color:#94a3b8; font-size:13px;">加载中...</div>
             </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Achievements Page -->
+      <div class="achievements-area main-content-page hidden" id="achievementsArea"
+        style="overflow-y:auto; padding:32px 48px; width:100%; box-sizing:border-box; background:linear-gradient(180deg,#f8fafc 0%,#faf5ff 100%);">
+        <div style="max-width:960px; margin:0 auto;">
+
+          <!-- Header -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px;">
+            <div>
+              <h2 style="font-size:28px; font-weight:800; color:#1e1b4b; margin:0; display:flex; align-items:center; gap:10px;">
+                <span style="font-size:32px;">🏆</span> 我的成就
+              </h2>
+              <p style="color:#64748b; font-size:13.5px; margin-top:6px;">记录每一步成长，解锁专属学习勋章</p>
+            </div>
+            <button class="back-to-chat-btn" onclick="switchMainPage(adminToken ? 'adminPanel' : 'chat')" style="flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6" /></svg>
+              <span class="back-btn-label">返回对话</span>
+            </button>
+          </div>
+
+          <!-- Stats Summary -->
+          <div id="achievementStats" style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px;">
+            <div style="background:#fff; border-radius:16px; padding:18px; box-shadow:0 2px 8px rgba(99,102,241,0.08); text-align:center;">
+              <div style="font-size:26px; font-weight:800; color:#6366f1;" id="achvTotalUnlocked">0</div>
+              <div style="font-size:11.5px; color:#94a3b8; margin-top:4px;">已解锁</div>
+            </div>
+            <div style="background:#fff; border-radius:16px; padding:18px; box-shadow:0 2px 8px rgba(99,102,241,0.08); text-align:center;">
+              <div style="font-size:26px; font-weight:800; color:#8b5cf6;" id="achvTotalAll">0</div>
+              <div style="font-size:11.5px; color:#94a3b8; margin-top:4px;">全部成就</div>
+            </div>
+            <div style="background:#fff; border-radius:16px; padding:18px; box-shadow:0 2px 8px rgba(99,102,241,0.08); text-align:center;">
+              <div style="font-size:26px; font-weight:800; color:#10b981;" id="achvProgressPct">0%</div>
+              <div style="font-size:11.5px; color:#94a3b8; margin-top:4px;">完成度</div>
+            </div>
+            <div style="background:#fff; border-radius:16px; padding:18px; box-shadow:0 2px 8px rgba(99,102,241,0.08); text-align:center;">
+              <div style="font-size:26px; font-weight:800; color:#f59e0b;" id="achvLatestDate">-</div>
+              <div style="font-size:11.5px; color:#94a3b8; margin-top:4px;">最近解锁</div>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div style="background:#fff; border-radius:14px; padding:16px 20px; margin-bottom:24px; box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:13px; font-weight:600; color:#334155;">总进度</span>
+              <span style="font-size:12px; color:#94a3b8;" id="achvProgressBar">0 / 0</span>
+            </div>
+            <div style="height:8px; background:#e2e8f0; border-radius:8px; overflow:hidden;">
+              <div id="achvProgressFill" style="height:100%; background:linear-gradient(90deg,#6366f1,#a78bfa,#c084fc); border-radius:8px; transition:width 0.6s ease; width:0%;"></div>
+            </div>
+          </div>
+
+          <!-- Category Tabs -->
+          <div id="achievementCatTabs" style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap;">
+            <!-- Tabs rendered dynamically -->
+          </div>
+
+          <!-- Achievement Cards Grid -->
+          <div id="achievementCardsGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
+            <!-- Cards rendered dynamically -->
           </div>
 
         </div>
@@ -7054,6 +7121,248 @@
       hours: 0.0,
       favorites: 0
     };
+
+    // ===== 成就系统 =====
+    let userAchievements = []; // [{id, unlockedAt}]
+    let _redemptionCount = 0;  // 错题重做正确次数
+
+    const ALL_ACHIEVEMENTS = [
+      // ---- 学习里程碑 (10) ----
+      { id:'first_chapter', cat:'milestone', icon:'🌱', title:'初出茅庐', desc:'完成第一个章节', target:1, check:()=>countCompletedChapters()>=1 },
+      { id:'five_chapters', cat:'milestone', icon:'📗', title:'学有小成', desc:'完成 5 个章节', target:5, check:()=>countCompletedChapters()>=5 },
+      { id:'ten_chapters', cat:'milestone', icon:'📘', title:'勤学不辍', desc:'完成 10 个章节', target:10, check:()=>countCompletedChapters()>=10 },
+      { id:'twenty_chapters', cat:'milestone', icon:'📙', title:'博览群书', desc:'完成 20 个章节', target:20, check:()=>countCompletedChapters()>=20 },
+      { id:'fifty_chapters', cat:'milestone', icon:'📚', title:'学富五车', desc:'完成 50 个章节', target:50, check:()=>countCompletedChapters()>=50 },
+      { id:'first_course', cat:'milestone', icon:'🎓', title:'课程达人', desc:'完整学完一门课程', target:1, check:()=>countCompletedCourses()>=1 },
+      { id:'three_courses', cat:'milestone', icon:'🏅', title:'学霸养成', desc:'完整学完三门课程', target:3, check:()=>countCompletedCourses()>=3 },
+      { id:'five_courses', cat:'milestone', icon:'👑', title:'学霸之王', desc:'完整学完五门课程', target:5, check:()=>countCompletedCourses()>=5 },
+      { id:'ten_courses', cat:'milestone', icon:'🏛️', title:'学术巨擘', desc:'完整学完十门课程', target:10, check:()=>countCompletedCourses()>=10 },
+      { id:'first_activity', cat:'milestone', icon:'📝', title:'初试锋芒', desc:'完成第一个学习资源', target:1, check:()=>(learningStats.completedResources||0)>=1 },
+      // ---- 坚持打卡 (10) ----
+      { id:'first_login', cat:'streak', icon:'👋', title:'初来乍到', desc:'首次登录灵析平台', target:1, check:()=>learningStats.days>=1 },
+      { id:'three_days', cat:'streak', icon:'🔥', title:'三天打鱼', desc:'累计学习 3 天', target:3, check:()=>learningStats.days>=3 },
+      { id:'seven_days', cat:'streak', icon:'📅', title:'周周不落', desc:'累计学习 7 天', target:7, check:()=>learningStats.days>=7 },
+      { id:'fourteen_days', cat:'streak', icon:'🗓️', title:'双周战士', desc:'累计学习 14 天', target:14, check:()=>learningStats.days>=14 },
+      { id:'thirty_days', cat:'streak', icon:'⭐', title:'月度之星', desc:'累计学习 30 天', target:30, check:()=>learningStats.days>=30 },
+      { id:'sixty_days', cat:'streak', icon:'🌟', title:'双月达人', desc:'累计学习 60 天', target:60, check:()=>learningStats.days>=60 },
+      { id:'ninety_days', cat:'streak', icon:'💫', title:'季度传奇', desc:'累计学习 90 天', target:90, check:()=>learningStats.days>=90 },
+      { id:'hundred_days', cat:'streak', icon:'💎', title:'百日筑基', desc:'累计学习 100 天', target:100, check:()=>learningStats.days>=100 },
+      { id:'early_bird', cat:'streak', icon:'🐦', title:'早起鸟儿', desc:'在早上 6 点前学习过', target:1, check:()=>learningStats.studiedEarlyMorning===true },
+      { id:'night_owl', cat:'streak', icon:'🦉', title:'夜猫子', desc:'在凌晨 0-5 点学习过', target:1, check:()=>learningStats.studiedLateNight===true },
+      // ---- 答题达人 (8) ----
+      { id:'ten_questions', cat:'quiz', icon:'✏️', title:'小试牛刀', desc:'累计完成约 10 道题', target:10, check:()=>countQuestionsDone()>=10 },
+      { id:'fifty_questions', cat:'quiz', icon:'📝', title:'题海战术', desc:'累计完成约 50 道题', target:50, check:()=>countQuestionsDone()>=50 },
+      { id:'hundred_questions', cat:'quiz', icon:'💯', title:'百炼成钢', desc:'累计完成约 100 道题', target:100, check:()=>countQuestionsDone()>=100 },
+      { id:'two_hundred_q', cat:'quiz', icon:'🏋️', title:'题海无涯', desc:'累计完成约 200 道题', target:200, check:()=>countQuestionsDone()>=200 },
+      { id:'five_hundred_q', cat:'quiz', icon:'🧠', title:'脑力全开', desc:'累计完成约 500 道题', target:500, check:()=>countQuestionsDone()>=500 },
+      { id:'perfect_chapter', cat:'quiz', icon:'⭐', title:'完美通关', desc:'某章节测验全部答对', target:1, check:()=>hasPerfectChapter() },
+      { id:'accuracy_80', cat:'quiz', icon:'🎯', title:'神射手', desc:'答题正确率超过 80%', target:80, check:()=>getAccuracy()>=80 && countQuestionsDone()>=10 },
+      { id:'redemption', cat:'quiz', icon:'🔄', title:'触类旁通', desc:'重新做对 3 道错题', target:3, check:()=>_redemptionCount>=3 },
+      // ---- 探索发现 (13) ----
+      { id:'three_courses_sub', cat:'explore', icon:'🗺️', title:'好奇宝宝', desc:'订阅 3 门不同课程', target:3, check:()=>myCourses.length>=3 },
+      { id:'five_courses_sub', cat:'explore', icon:'🌍', title:'探索者', desc:'订阅 5 门不同课程', target:5, check:()=>myCourses.length>=5 },
+      { id:'ten_courses_sub', cat:'explore', icon:'🌌', title:'知识星球', desc:'订阅 10 门不同课程', target:10, check:()=>myCourses.length>=10 },
+      { id:'first_search', cat:'explore', icon:'🔍', title:'求知若渴', desc:'使用搜索功能查找资源', target:1, check:()=>userAchievements.some(a=>a.id==='first_search') },
+      { id:'ten_chats', cat:'explore', icon:'💬', title:'畅聊达人', desc:'与 AI 助手对话 10 次', target:10, check:()=>countChats()>=10 },
+      { id:'fifty_chats', cat:'explore', icon:'🗣️', title:'话痨学者', desc:'与 AI 助手对话 50 次', target:50, check:()=>countChats()>=50 },
+      { id:'hundred_chats', cat:'explore', icon:'📡', title:'AI 密友', desc:'与 AI 助手对话 100 次', target:100, check:()=>countChats()>=100 },
+      { id:'first_favorite', cat:'explore', icon:'⭐', title:'收藏爱好者', desc:'收藏第一个资源', target:1, check:()=>(favoritesList||[]).length>=1 },
+      { id:'five_favorites', cat:'explore', icon:'📦', title:'知识仓库', desc:'收藏 5 个资源', target:5, check:()=>(favoritesList||[]).length>=5 },
+      { id:'twenty_favorites', cat:'explore', icon:'🏪', title:'收藏大师', desc:'收藏 20 个资源', target:20, check:()=>(favoritesList||[]).length>=20 },
+      { id:'wrong_book', cat:'explore', icon:'📕', title:'错题猎人', desc:'错题本收录 10 道错题', target:10, check:()=>(wrongQuestions||[]).length>=10 },
+      { id:'upload_doc', cat:'explore', icon:'📤', title:'文档诊断师', desc:'上传文档进行 AI 诊断', target:1, check:()=>userAchievements.some(a=>a.id==='upload_doc') },
+      { id:'group_chat', cat:'explore', icon:'👥', title:'集思广益', desc:'使用多 AI 群聊解题', target:1, check:()=>userAchievements.some(a=>a.id==='group_chat') },
+      // ---- 隐藏成就 (8) ----
+      { id:'first_step', cat:'hidden', icon:'🚀', title:'万事开头难', desc:'完成首次学习资源', target:1, check:()=>(learningStats.completedResources||0)>=1 },
+      { id:'all_rounder', cat:'hidden', icon:'🌈', title:'全科精通', desc:'订阅 5 个不同类别的课程', target:5, check:()=>countUniqueCategories()>=5 },
+      { id:'persistent', cat:'hidden', icon:'🔨', title:'百折不挠', desc:'错题本收录 20 道题仍坚持', target:20, check:()=>(wrongQuestions||[]).length>=20 },
+      { id:'marathon', cat:'hidden', icon:'🏃', title:'学习马拉松', desc:'累计学习时长超过 10 小时', target:10, check:()=>learningStats.hours>=10 },
+      { id:'code_runner', cat:'hidden', icon:'💻', title:'代码先锋', desc:'使用代码运行功能执行代码', target:1, check:()=>userAchievements.some(a=>a.id==='code_runner') },
+      { id:'deep_night', cat:'hidden', icon:'🌙', title:'深夜苦读', desc:'在 23 点后学习过', target:1, check:()=>learningStats.studiedLateNight===true },
+      { id:'weekend_warrior', cat:'hidden', icon:'📖', title:'周末不休', desc:'在周末学习过', target:1, check:()=>learningStats.studiedWeekend===true },
+      { id:'comeback', cat:'hidden', icon:'🔥', title:'逆袭之路', desc:'错题重做正确 10 次', target:10, check:()=>_redemptionCount>=10 },
+    ];
+
+    const ACHIEVEMENT_CATS = [
+      { key:'all', label:'全部', icon:'🏆' },
+      { key:'milestone', label:'学习里程碑', icon:'🎓' },
+      { key:'streak', label:'坚持打卡', icon:'🔥' },
+      { key:'quiz', label:'答题达人', icon:'📝' },
+      { key:'explore', label:'探索发现', icon:'🗺️' },
+      { key:'hidden', label:'隐藏成就', icon:'🔮' },
+    ];
+
+    // ===== 成就辅助统计函数 =====
+    function countCompletedChapters() {
+      let count = 0;
+      myCourses.forEach(c => { if(c.chapters) count += Math.min(c.unlockedChapterIndex||0, c.chapters.length); });
+      return count;
+    }
+    function countCompletedCourses() {
+      return myCourses.filter(c => c.status === '已完成' || c.progress >= 100).length;
+    }
+    function countQuestionsDone() {
+      // 每完成一个章节约做 5 道题
+      return countCompletedChapters() * 5;
+    }
+    function getAccuracy() {
+      const wrong = (wrongQuestions||[]).length;
+      const total = countQuestionsDone();
+      if(total === 0) return 0;
+      return Math.max(0, Math.round((total - wrong) / total * 100));
+    }
+    function hasPerfectChapter() {
+      // 只要完成过章节且当前错题本中有少于总完成章节数的错题（即至少有一章全对）
+      const chapters = countCompletedChapters();
+      if(chapters === 0) return false;
+      // 简化判定：完成过章节且错题数 < chapters*5（不可能每章全错）
+      return (wrongQuestions||[]).length < chapters * 5;
+    }
+    function countChats() { return (chatHistory||[]).length; }
+    function countUniqueCategories() {
+      const titles = new Set(myCourses.map(c=>c.title));
+      const cats = new Set();
+      ALL_COURSES_DATA.forEach(mod => { mod.courses.forEach(c => { if(titles.has(c.title)) cats.add(mod.category); }); });
+      return cats.size;
+    }
+
+    function checkAndUnlockAchievements() {
+      let newlyUnlocked = [];
+      ALL_ACHIEVEMENTS.forEach(a => {
+        if(userAchievements.some(u=>u.id===a.id)) return;
+        try {
+          if(a.check()) {
+            userAchievements.push({ id:a.id, unlockedAt: new Date().toISOString() });
+            newlyUnlocked.push(a);
+          }
+        } catch(e) {}
+      });
+      if(newlyUnlocked.length > 0) {
+        saveUserData();
+        showAchievementToast(newlyUnlocked);
+      }
+      return newlyUnlocked;
+    }
+
+    function showAchievementToast(achievements) {
+      // 只显示一个汇总通知
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;top:80px;right:24px;z-index:99999;background:linear-gradient(135deg,#1e1b4b,#312e81);color:#fff;padding:16px 22px;border-radius:16px;box-shadow:0 8px 32px rgba(99,102,241,0.4);display:flex;align-items:center;gap:12px;animation:achieveSlideIn 0.5s ease-out;font-size:14px;max-width:320px;';
+
+      let content = '';
+      if (achievements.length === 1) {
+        const a = achievements[0];
+        content = `<span style="font-size:28px;">${a.icon}</span><div><div style="font-weight:700;font-size:13px;color:#a5b4fc;margin-bottom:2px;">🏆 成就解锁!</div><div style="font-weight:600;">${a.title}</div><div style="font-size:11px;opacity:0.7;margin-top:2px;">${a.desc}</div></div>`;
+      } else {
+        const icons = achievements.slice(0, 3).map(a => a.icon).join('');
+        const titles = achievements.map(a => a.title).join('、');
+        content = `<span style="font-size:28px;">${icons}</span><div><div style="font-weight:700;font-size:13px;color:#a5b4fc;margin-bottom:2px;">🏆 解锁 ${achievements.length} 个成就!</div><div style="font-weight:600;font-size:12px;">${titles}</div></div>`;
+      }
+
+      toast.innerHTML = content;
+      document.body.appendChild(toast);
+      setTimeout(()=>{toast.style.opacity='0';toast.style.transition='opacity 0.5s';setTimeout(()=>toast.remove(),500);}, 3500);
+
+      if(!document.getElementById('achieveToastStyle')) {
+        const st = document.createElement('style');
+        st.id = 'achieveToastStyle';
+        st.textContent = '@keyframes achieveSlideIn{from{transform:translateX(120px);opacity:0}to{transform:translateX(0);opacity:1}}';
+        document.head.appendChild(st);
+      }
+    }
+    // ===== 成就页面渲染 =====
+    let _achvCurrentCat = 'all';
+    function renderAchievements() {
+      const total = ALL_ACHIEVEMENTS.length;
+      const unlocked = userAchievements.length;
+      const pct = total > 0 ? Math.round(unlocked / total * 100) : 0;
+
+      // Stats
+      const elUnlocked = document.getElementById('achvTotalUnlocked');
+      const elTotal = document.getElementById('achvTotalAll');
+      const elPct = document.getElementById('achvProgressPct');
+      const elLatest = document.getElementById('achvLatestDate');
+      const elBar = document.getElementById('achvProgressBar');
+      const elFill = document.getElementById('achvProgressFill');
+      if(elUnlocked) elUnlocked.textContent = unlocked;
+      if(elTotal) elTotal.textContent = total;
+      if(elPct) elPct.textContent = pct + '%';
+      if(elBar) elBar.textContent = unlocked + ' / ' + total;
+      if(elFill) elFill.style.width = pct + '%';
+      // Latest unlock date
+      let latest = '-';
+      if(userAchievements.length > 0) {
+        const sorted = userAchievements.slice().sort((a,b)=> (b.unlockedAt||'').localeCompare(a.unlockedAt||''));
+        if(sorted[0].unlockedAt) {
+          const d = new Date(sorted[0].unlockedAt);
+          latest = (d.getMonth()+1) + '/' + d.getDate();
+        }
+      }
+      if(elLatest) elLatest.textContent = latest;
+
+      // Category tabs
+      const tabsContainer = document.getElementById('achievementCatTabs');
+      if(tabsContainer) {
+        tabsContainer.innerHTML = '';
+        ACHIEVEMENT_CATS.forEach(cat => {
+          const isActive = _achvCurrentCat === cat.key;
+          const catCount = cat.key === 'all' ? ALL_ACHIEVEMENTS.length : ALL_ACHIEVEMENTS.filter(a=>a.cat===cat.key).length;
+          const catUnlocked = cat.key === 'all' ? unlocked : ALL_ACHIEVEMENTS.filter(a=>a.cat===cat.key && userAchievements.some(u=>u.id===a.id)).length;
+          const btn = document.createElement('button');
+          btn.style.cssText = `padding:8px 16px; border-radius:10px; border:1.5px solid ${isActive?'#6366f1':'#e2e8f0'}; background:${isActive?'linear-gradient(135deg,#6366f1,#8b5cf6)':'#fff'}; color:${isActive?'#fff':'#64748b'}; font-size:13px; font-weight:${isActive?'600':'500'}; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;`;
+          btn.innerHTML = `<span>${cat.icon}</span><span>${cat.label}</span><span style="font-size:11px; opacity:0.7; margin-left:2px;">${catUnlocked}/${catCount}</span>`;
+          btn.onclick = () => { _achvCurrentCat = cat.key; renderAchievements(); };
+          tabsContainer.appendChild(btn);
+        });
+      }
+
+      // Cards grid
+      const grid = document.getElementById('achievementCardsGrid');
+      if(!grid) return;
+      grid.innerHTML = '';
+      const filtered = _achvCurrentCat === 'all' ? ALL_ACHIEVEMENTS : ALL_ACHIEVEMENTS.filter(a=>a.cat===_achvCurrentCat);
+      filtered.forEach(a => {
+        const isUnlocked = userAchievements.some(u=>u.id===a.id);
+        const unlockData = userAchievements.find(u=>u.id===a.id);
+        const catInfo = ACHIEVEMENT_CATS.find(c=>c.key===a.cat) || {};
+        const isHidden = a.cat === 'hidden';
+
+        const card = document.createElement('div');
+        card.style.cssText = `background:${isUnlocked?'#fff':'#f8fafc'}; border-radius:16px; padding:20px; box-shadow:${isUnlocked?'0 4px 16px rgba(99,102,241,0.1)':'0 1px 4px rgba(0,0,0,0.04)'}; border:1.5px solid ${isUnlocked?'rgba(99,102,241,0.2)':'#e2e8f0'}; transition:all 0.3s; opacity:${isUnlocked?'1':'0.7'}; position:relative; overflow:hidden;`;
+        card.onmouseover = () => { card.style.transform = 'translateY(-2px)'; card.style.boxShadow = '0 8px 24px rgba(99,102,241,0.15)'; };
+        card.onmouseout = () => { card.style.transform = ''; card.style.boxShadow = isUnlocked?'0 4px 16px rgba(99,102,241,0.1)':'0 1px 4px rgba(0,0,0,0.04)'; };
+
+        let dateStr = '';
+        if(isUnlocked && unlockData && unlockData.unlockedAt) {
+          const d = new Date(unlockData.unlockedAt);
+          dateStr = `<div style="font-size:10.5px; color:#94a3b8; margin-top:8px;">解锁于 ${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}</div>`;
+        }
+
+        const lockOverlay = !isUnlocked ? `<div style="position:absolute; top:12px; right:12px; width:28px; height:28px; border-radius:50%; background:#e2e8f0; display:flex; align-items:center; justify-content:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>` : `<div style="position:absolute; top:12px; right:12px; width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#8b5cf6); display:flex; align-items:center; justify-content:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>`;
+
+        const displayTitle = (isHidden && !isUnlocked) ? '???隐藏成就???' : a.title;
+        const displayDesc = (isHidden && !isUnlocked) ? '完成特定条件后解锁' : a.desc;
+        const displayIcon = (isHidden && !isUnlocked) ? '🔒' : a.icon;
+
+        card.innerHTML = `
+          ${lockOverlay}
+          <div style="display:flex; align-items:center; gap:14px; margin-bottom:10px;">
+            <div style="width:48px; height:48px; border-radius:14px; background:${isUnlocked?'linear-gradient(135deg,#eef2ff,#ede9fe)':'#f1f5f9'}; display:flex; align-items:center; justify-content:center; font-size:24px; filter:${isUnlocked?'none':'grayscale(0.5)'};">
+              ${displayIcon}
+            </div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:15px; font-weight:700; color:${isUnlocked?'#1e1b4b':'#94a3b8'}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${displayTitle}</div>
+              <div style="font-size:11.5px; color:#94a3b8; margin-top:2px; display:flex; align-items:center; gap:4px;">
+                <span style="font-size:10px; padding:1px 6px; border-radius:4px; background:${isUnlocked?'rgba(99,102,241,0.1)':'rgba(0,0,0,0.04)'}; color:${isUnlocked?'#6366f1':'#94a3b8'};">${catInfo.icon||''} ${catInfo.label||''}</span>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:12.5px; color:${isUnlocked?'#64748b':'#94a3b8'}; line-height:1.5;">${displayDesc}</div>
+          ${dateStr}
+        `;
+        grid.appendChild(card);
+      });
+    }
     // ===== 六维学习特征全息画像 =====
     // 知识(knowledge)、认知(cognition)、错误(error)、兴趣(interest)、目标(goal)、行为(behavior)
     let userProfileDimensions = {
@@ -8525,6 +8834,7 @@ function quickStartChapter(categoryName, courseTitle, chapterIndex) {
       chapters: courseData.chapters
     });
     saveUserData();
+    checkAndUnlockAchievements();
     renderMyCourses();
     subIdx = myCourses.length - 1;
   } else {
@@ -8556,6 +8866,7 @@ function startOrSubscribeCourse(categoryName, courseTitle) {
       chapters: courseData.chapters
     });
     saveUserData();
+    checkAndUnlockAchievements();
     renderMyCourses();
     subIdx = myCourses.length - 1;
   }
@@ -8607,6 +8918,7 @@ function saveUserData() {
             users[currentUserEmail].favoritesList = favoritesList;
             users[currentUserEmail].wrongQuestions = wrongQuestions;
             users[currentUserEmail].notificationsList = notificationsList;
+            users[currentUserEmail].achievements = userAchievements;
             users[currentUserEmail].avatar = uploadedAvatarDataUrl;
             localStorage.setItem('lingxi_users', JSON.stringify(users));
         }
@@ -8799,6 +9111,7 @@ function _completeLogin(matchedUserKey, users) {
     initChatMessageIndex();
     wrongQuestions = users[matchedUserKey].wrongQuestions || [];
     notificationsList = users[matchedUserKey].notificationsList || getInitialNotifications();
+    userAchievements = users[matchedUserKey].achievements || [];
 
     // Re-render UI components with restored user data
     renderMyCourses();
@@ -8809,6 +9122,9 @@ function _completeLogin(matchedUserKey, users) {
     renderFavorites();
     renderWrongs();
     renderNotifications();
+
+    // 登录时检查并解锁成就（如首次登录、连续天数等）
+    checkAndUnlockAchievements();
 
     // ========== 新增：检查配置并更新个人介绍与扩展字段 ==========
     if (users[matchedUserKey].profile) {
@@ -9605,6 +9921,9 @@ function switchMainPage(pageId) {
   } else if (pageId === 'leaderboard') {
     document.getElementById('leaderboardArea').classList.remove('hidden');
     loadLeaderboard();
+  } else if (pageId === 'achievements') {
+    document.getElementById('achievementsArea').classList.remove('hidden');
+    renderAchievements();
   } else if (pageId === 'adminPanel') {
     document.getElementById('adminPanelArea').classList.remove('hidden');
   }
@@ -9700,9 +10019,7 @@ function showResource(title, type) {
   if (newBubble && typeof postProcessChapterContent === 'function') {
     postProcessChapterContent(newBubble);
   }
-  if (window.MathJax && window.MathJax.typesetPromise) {
-    window.MathJax.typesetPromise();
-  }
+  window.typesetMathJax();
 }
 
 const quizQuestions_duplicate = [{
@@ -9821,16 +10138,16 @@ function renderQuestion(index) {
   q.options.forEach(opt => {
     optionsHtml += `
       <div class="quiz-option" onclick="selectQuizOption(this, '${opt.key}')" ${opt.correct ? 'data-correct="true"' : ''}>
-        <span>${opt.key}.</span> ${escapeHtml(opt.text)}
+        <span>${opt.key}.</span> ${renderQuizOptionText(opt.text)}
       </div>
     `;
   });
-  
+
   container.innerHTML = `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
       <span style="font-size:12px; font-weight:600; color:#8b5cf6;">当前进度: ${index + 1} / ${quizQuestions.length}</span>
     </div>
-    <div class="quiz-question">${q.question}</div>
+    <div class="quiz-question markdown-body">${safeMarkdownParse(q.question)}</div>
     <div id="quizOptionsList">
       ${optionsHtml}
     </div>
@@ -9848,9 +10165,7 @@ function renderQuestion(index) {
       <strong>回答错误。</strong> 再试一次吧！
     </div>
   `;
-  if (window.MathJax && window.MathJax.typesetPromise) {
-    window.MathJax.typesetPromise();
-  }
+  window.typesetMathJax();
 }
 
 function selectQuizOption(el, opt) {
@@ -9902,6 +10217,7 @@ function submitQuiz() {
   const _sq = quizQuestions[currentQuestionIndex];
   reportQuestionComplete('综合模拟测验', '随机测试题', _sq ? _sq.question : '', isCorrect);
   saveUserData();
+  checkAndUnlockAchievements();
 }
 
 function nextQuizQuestion() {
@@ -9918,6 +10234,11 @@ function nextQuizQuestion() {
 function runSimulatedCode() {
   const consoleBody = document.getElementById('codeConsoleBody');
   consoleBody.textContent = '正在编译并执行 Python 代码...\n';
+  // 代码先锋成就触发
+  if(!userAchievements.some(a=>a.id==='code_runner')) {
+    userAchievements.push({ id:'code_runner', unlockedAt: new Date().toISOString() });
+    checkAndUnlockAchievements();
+  }
   setTimeout(() => {
     consoleBody.textContent += '--- 汉诺塔演练开始 ---\n';
   }, 400);
@@ -9993,6 +10314,12 @@ function performSearch(query) {
 async function performLocalSearch(query) {
     const section = document.getElementById('searchResultsSection');
     if (!section) return;
+
+    // 搜索成就触发
+    if(!userAchievements.some(a=>a.id==='first_search')) {
+      userAchievements.push({ id:'first_search', unlockedAt: new Date().toISOString() });
+      checkAndUnlockAchievements();
+    }
 
     const sectionTitle = section.querySelector('h3');
     if (sectionTitle) {
@@ -10089,9 +10416,7 @@ async function performLocalSearch(query) {
         console.log('B站视频搜索失败:', e);
     }
 
-    if (window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise();
-    }
+    window.typesetMathJax();
 }
 
 function localSearch(query) {
@@ -10994,7 +11319,7 @@ function renderChapterContent() {
   
   if (activeStudyTab === 'mindmap') {
     container.innerHTML = ch.mindmapHtml || `<div style="text-align: center; color: #94a3b8; font-size: 13px; padding-top: 40px;">暂无脑图</div>`;
-    if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise();
+    window.typesetMathJax();
     return;
   }
   
@@ -11003,7 +11328,7 @@ function renderChapterContent() {
     const q = quizArray[activeChapterQuizIndex];
     if (!q) {
       container.innerHTML = `<div style="text-align: center; padding: 20px; color: #64748b;">本章暂无测试习题。</div>`;
-      if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise();
+      window.typesetMathJax();
       return;
     }
     const isLast = activeChapterQuizIndex === quizArray.length - 1;
@@ -11022,7 +11347,7 @@ function renderChapterContent() {
       q.options.forEach(opt => {
         optionsHtml += `
           <div class="quiz-option" onclick="selectChapterQuizOption(this, '${opt.key}')" ${opt.correct ? 'data-correct="true"' : ''}>
-            <span>${opt.key}.</span> ${escapeHtml(opt.text)}
+            <span>${opt.key}.</span> ${renderQuizOptionText(opt.text)}
           </div>
         `;
       });
@@ -12306,9 +12631,10 @@ function advanceCourseChapter() {
     
     renderMyCourses();
     saveUserData();
+    checkAndUnlockAchievements();
     document.getElementById('studyProgressBadge').textContent = `当前进度: ${course.progress}%`;
   }
-  
+
   if (activeChapterIndex < course.chapters.length - 1) {
     activeChapterIndex++;
     activeChapterQuizState = 'unsubmitted';
@@ -12391,9 +12717,7 @@ function sendStudyAssistantMessage() {
       const bubble = typingEl.querySelector('.msg-bubble');
       bubble.innerHTML = `<div class="markdown-body" style="font-size: 12.5px; line-height: 1.5; color: #334155;">${safeMarkdownParse(response)}</div>`;
       container.scrollTop = container.scrollHeight;
-      if (window.MathJax && window.MathJax.typesetPromise) {
-          window.MathJax.typesetPromise();
-      }
+      window.typesetMathJax();
     }
   }, currentImagePath, history);
 }
@@ -13065,6 +13389,7 @@ function favoriteCurrentChapter() {
     renderFavorites();
     renderLearningStats();
     saveUserData();
+    checkAndUnlockAchievements();
     updateFavoriteBtnState();
     addRecentActivityItem('收藏了章节「' + favTitle + '」');
   }
@@ -13244,13 +13569,9 @@ function restoreFavoriteToChat(index) {
   chat.scrollTop = chat.scrollHeight;
 
   // 数学公式渲染（延迟执行确保 DOM 已更新）
-  if (window.MathJax && window.MathJax.typesetPromise) {
-    setTimeout(function() {
-      if (window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise([chat.lastElementChild]);
-      }
-    }, 100);
-  }
+  setTimeout(function() {
+    window.typesetMathJax();
+  }, 100);
 }
 
 // ===== 统一收藏功能：包装AI消息气泡，添加收藏按钮 =====
@@ -13436,7 +13757,7 @@ function renderWrongs() {
     wq.options.forEach(opt => {
       optionsHtml += `
         <div class="quiz-option" style="padding:8px 12px; font-size:12px; margin-bottom:5px; border-radius:8px; border:1px solid #cbd5e1; cursor:pointer;" onclick="selectWrongOption(this, '${opt.key}', '${wq.id}')" ${opt.correct ? 'data-correct="true"' : ''}>
-          <span>${opt.key}.</span> ${escapeHtml(opt.text)}
+          <span>${opt.key}.</span> ${renderQuizOptionText(opt.text)}
         </div>
       `;
     });
@@ -13469,9 +13790,7 @@ function renderWrongs() {
   container.innerHTML = html;
   
   // 渲染完成后重新驱动 MathJax 对公式进行排版编译
-  if (window.MathJax && window.MathJax.typesetPromise) {
-    window.MathJax.typesetPromise();
-  }
+  window.typesetMathJax();
 }
 
 let selectedWrongOptions = {};
@@ -13517,8 +13836,10 @@ function submitWrongAnswer(wqId) {
     setTimeout(() => {
       wrongQuestions = wrongQuestions.filter(wq => wq.id !== wqId);
       delete selectedWrongOptions[wqId];
+      _redemptionCount++;
       renderWrongs();
       saveUserData();
+      checkAndUnlockAchievements();
     }, 1200);
   } else {
     selectedEl.classList.add('wrong');
@@ -13802,7 +14123,7 @@ async function sendDocDiagnose() {
       chatMessageIndex++;
       chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div>${wrapAssistantBubble(formattedAdvice, chatMessageIndex, 'doc', '文档诊断回复')}</div></div>`);
       chat.scrollTop = chat.scrollHeight;
-      if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise();
+      window.typesetMathJax();
       // 创建历史记录
       if (typeof window.addChatHistoryItem === 'function') {
         if (activeChatHistoryIndex === null) {
@@ -13812,6 +14133,11 @@ async function sendDocDiagnose() {
         }
       }
       try { window.addRecentActivityItem('进行了学习文档诊断'); } catch(e) { console.warn(e); }
+      // 文档诊断师成就触发
+      if(!userAchievements.some(a=>a.id==='upload_doc')) {
+        userAchievements.push({ id:'upload_doc', unlockedAt: new Date().toISOString() });
+        checkAndUnlockAchievements();
+      }
     } else {
       const thinkingEl = document.getElementById('thinking');
       if (thinkingEl) thinkingEl.remove();
@@ -14213,7 +14539,7 @@ async function sendCodeFix() {
       chatMessageIndex++;
       chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div>${wrapAssistantBubble(formattedAdvice, chatMessageIndex, 'chat', '代码纠错回复')}</div></div>`);
       chat.scrollTop = chat.scrollHeight;
-      if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise();
+      window.typesetMathJax();
       // 创建历史记录
       if (typeof window.addChatHistoryItem === 'function') {
         if (activeChatHistoryIndex === null) {
@@ -14354,6 +14680,7 @@ async function sendQuizGenerate() {
         currentQuizQuestions = questions;
         const quizHtml = renderQuizPractice(questions);
         chat.insertAdjacentHTML('beforeend', `<div class="msg assistant"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div><div class="msg-bubble"><div style="margin-bottom:8px;font-weight:600;color:#7c3aed">已为你生成 ${questions.length} 道关于「${escapeHtml(topic)}」的${difficulty}测试题，请作答：</div>${quizHtml}${renderAllQuizSubmitBtn(questions.length)}</div></div></div>`);
+        window.typesetMathJax();
       } else {
         // 解析失败，按普通消息渲染
         const formattedAdvice = typeof safeMarkdownParse !== 'undefined' ? safeMarkdownParse(advice) : escapeHtml(advice);
@@ -14390,11 +14717,11 @@ function renderQuizPractice(questions) {
   let html = '';
   questions.forEach((q, idx) => {
     html += `<div class="quiz-item" data-index="${idx}" style="margin-bottom:16px;padding:14px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0">`;
-    html += `<div style="font-size:14px;font-weight:600;color:#334155;margin-bottom:10px">${idx + 1}. ${escapeHtml(q.question)}</div>`;
+    html += `<div class="markdown-body" style="font-size:14px;font-weight:600;color:#334155;margin-bottom:10px">${idx + 1}. ${safeMarkdownParse(q.question)}</div>`;
     html += `<div class="quiz-options" data-qindex="${idx}">`;
     q.options.forEach((opt, oi) => {
       html += `<div class="quiz-option" data-index="${idx}" data-option="${oi}" onclick="selectQuizOption(${idx}, ${oi})" style="padding:8px 12px;font-size:13px;margin-bottom:6px;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;transition:all 0.2s;color:#475569">`;
-      html += `<span style="font-weight:600;margin-right:6px">${opt.key}.</span>${escapeHtml(opt.text)}`;
+      html += `<span style="font-weight:600;margin-right:6px">${opt.key}.</span>${renderQuizOptionText(opt.text)}`;
       html += `</div>`;
     });
     html += `</div>`;
@@ -14402,7 +14729,7 @@ function renderQuizPractice(questions) {
     html += `<button onclick="submitQuizAnswer(${idx})" class="quiz-submit-btn" data-qindex="${idx}" style="padding:6px 16px;border-radius:8px;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:12px;cursor:pointer">提交本题答案</button>`;
     html += `<button onclick="toggleQuizAnalysis(${idx})" class="quiz-analysis-btn" data-qindex="${idx}" style="padding:6px 16px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:12px;cursor:pointer">查看解析</button>`;
     html += `</div>`;
-    html += `<div class="quiz-analysis" data-qindex="${idx}" style="display:none;margin-top:10px;padding:10px;background:#fefce8;border-radius:8px;border:1px solid #fde68a;font-size:12.5px;color:#92400e;line-height:1.6">${escapeHtml(q.analysis)}</div>`;
+    html += `<div class="quiz-analysis markdown-body" data-qindex="${idx}" style="display:none;margin-top:10px;padding:10px;background:#fefce8;border-radius:8px;border:1px solid #fde68a;font-size:12.5px;color:#92400e;line-height:1.6">${safeMarkdownParse(q.analysis || '')}</div>`;
     html += `<div class="quiz-result" data-qindex="${idx}" style="margin-top:8px"></div>`;
     if (idx < questions.length - 1) {
       html += `<hr style="border:none;border-top:1px solid #e2e8f0;margin:14px 0 0 0">`;
@@ -14831,6 +15158,11 @@ async function sendGroupMessage() {
 
   isGroupChatProcessing = true;
   updateGroupSendBtnState();
+  // 集思广益成就触发
+  if(!userAchievements.some(a=>a.id==='group_chat')) {
+    userAchievements.push({ id:'group_chat', unlockedAt: new Date().toISOString() });
+    checkAndUnlockAchievements();
+  }
 
   const chat = document.getElementById('groupChatMessages');
   
@@ -14967,9 +15299,7 @@ async function sendGroupMessage() {
     }
 
     // 重新渲染数学公式
-    if (window.MathJax) {
-      MathJax.typesetPromise([chat]).catch(() => {});
-    }
+    window.typesetMathJax();
 
     chat.scrollTop = chat.scrollHeight;
 
@@ -15093,6 +15423,18 @@ function updateSendBtnState() {
 }
 function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+// quiz 选项文本渲染：支持 LaTeX 数学公式（通过 safeMarkdownParse + 去除 <p> 包裹标签）
+function renderQuizOptionText(text) {
+  if (!text) return '';
+  try {
+    let html = safeMarkdownParse(text);
+    // 去除 marked 生成的 <p>...</p> 包裹，使选项文本保持行内样式
+    html = html.replace(/^\s*<p[^>]*>/i, '').replace(/<\/p>\s*$/i, '');
+    return html;
+  } catch(e) {
+    return escapeHtml(text);
+  }
+}
 function removeThinkingFromHtml(html) {
   if (!html) return '';
   const temp = document.createElement('div');
@@ -15280,6 +15622,7 @@ function _autoSubscribeCourse(courseTitle) {
         chapters: courseData.chapters
     });
     saveUserData();
+    checkAndUnlockAchievements();
     renderMyCourses();
     return myCourses.length - 1;
 }
@@ -15972,6 +16315,16 @@ function updateLearningHours() {
     learningStats.hours += diffHours;
     // 保留两位小数
     learningStats.hours = Math.round(learningStats.hours * 100) / 100;
+
+    // 时段成就追踪
+    const d = new Date();
+    const hour = d.getHours();
+    const dayOfWeek = d.getDay(); // 0=Sunday, 6=Saturday
+    if (hour >= 5 && hour < 6) learningStats.studiedEarlyMorning = true;
+    if (hour >= 0 && hour < 5) learningStats.studiedLateNight = true;
+    if (hour >= 23) learningStats.studiedLateNight = true;
+    if (dayOfWeek === 0 || dayOfWeek === 6) learningStats.studiedWeekend = true;
+
     renderLearningStats();
     saveUserData();
     // 能力画像：学习时长追踪
@@ -17609,6 +17962,7 @@ function reportQuestionComplete(courseTitle, chapterTitle, questionText, isCorre
       }
       
       renderMyCourses();
+      checkAndUnlockAchievements();
       
       document.getElementById('courseRecommendOverlay').style.display = 'none';
       document.getElementById('profileSetupPage').classList.add('hidden');
