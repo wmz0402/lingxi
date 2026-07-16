@@ -394,6 +394,23 @@ def init_database():
     for q in questions:
         cursor.execute("INSERT INTO question (chapter_id, type, question, option_a, option_b, option_c, option_d, answer, analysis) VALUES (?,?,?,?,?,?,?,?,?);", (ch_id, *q))
 
+    # ==================== 7. 题库表（供 sync_md_data.py 使用） ====================
+    cursor.execute("DROP TABLE IF EXISTS question_bank;")
+    cursor.execute('''
+    CREATE TABLE question_bank (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        subject TEXT NOT NULL,
+        chapter TEXT NOT NULL,
+        question TEXT NOT NULL,
+        option_a TEXT DEFAULT '',
+        option_b TEXT DEFAULT '',
+        option_c TEXT DEFAULT '',
+        option_d TEXT DEFAULT '',
+        answer TEXT NOT NULL,
+        analysis TEXT DEFAULT ''
+    );
+    ''')
+
     conn.commit()
     conn.close()
     print("数据库初始化完成，已为您生成丰富的 6 门课程、18 章节、共 90 道高质量课后选择题！")

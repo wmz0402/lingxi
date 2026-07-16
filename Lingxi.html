@@ -8900,13 +8900,24 @@ function deleteAccount() {
     if (!confirm('最后确认：您真的要永久注销账号 "' + userName + '" 吗？所有数据将被删除且无法恢复！')) {
         return;
     }
+    // 输入密码验证
+    const pwd = prompt('请输入您的登录密码以完成注销验证：');
+    if (!pwd) {
+        alert('密码验证取消，注销已中止。');
+        return;
+    }
     // 同步删除服务端数据库中的用户及其消息
     const email = currentUserEmail;
     fetch('/api/user/self-delete', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email })
-    }).catch(err => console.warn('服务端用户注销失败（本地数据仍会被清除）:', err));
+        body: JSON.stringify({ email: email, password: pwd })
+    }).then(res => res.json()).then(data => {
+        if (!data.success) {
+            alert('注销失败: ' + (data.error || '未知错误'));
+            return;
+        }
+    }).catch(err => console.warn('服务端用户注销请求失败:', err));
     // 执行本地注销
     let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
     if (currentUserEmail && users[currentUserEmail]) {
@@ -15241,24 +15252,67 @@ class PlannerAgent {
         return steps;
     }
 }
+function _findCourseInAllData(courseTitle) {
+    // 在 ALL_COURSES_DATA 中模糊查找课程，返回 { category, course } 或 null
+    const normalizedTarget = courseTitle.replace(/\s*\(.*?\)\s*$/, '').trim().toLowerCase();
+    for (const cat of ALL_COURSES_DATA) {
+        for (const c of cat.courses) {
+            const normalizedC = c.title.replace(/\s*\(.*?\)\s*$/, '').trim().toLowerCase();
+            if (c.title === courseTitle || normalizedC === normalizedTarget
+                || normalizedTarget.includes(normalizedC) || normalizedC.includes(normalizedTarget)) {
+                return { category: cat.category, course: c };
+            }
+        }
+    }
+    return null;
+}
+function _autoSubscribeCourse(courseTitle) {
+    // 从 ALL_COURSES_DATA 自动订阅课程到 myCourses，返回 myCourses 中的索引；找不到返回 -1
+    const result = _findCourseInAllData(courseTitle);
+    if (!result) return -1;
+    const courseData = result.course;
+    myCourses.push({
+        title: courseData.title,
+        resources: courseData.chapters.length * 5,
+        status: '进行中',
+        progress: 0,
+        unlockedChapterIndex: 0,
+        chapters: courseData.chapters
+    });
+    saveUserData();
+    renderMyCourses();
+    return myCourses.length - 1;
+}
 function enterCourseByTitle(courseTitle) {
-    const foundCourse = findCourseByFuzzyTitle(courseTitle);
-    if (foundCourse) {
-        const index = myCourses.indexOf(foundCourse);
-        enterCourseStudy(index);
-    } else {
+    let foundCourse = findCourseByFuzzyTitle(courseTitle);
+    if (!foundCourse) {
+        // 未订阅时自动从 ALL_COURSES_DATA 订阅
+        const idx = _autoSubscribeCourse(courseTitle);
+        if (idx >= 0) {
+            enterCourseStudy(idx);
+            return;
+        }
         alert(`未找到课程”${courseTitle}”，可先通过搜索添加。`);
         switchMainPage('search');
         document.getElementById('searchInput').value = courseTitle;
         performSearch(courseTitle);
+        return;
     }
+    const index = myCourses.indexOf(foundCourse);
+    enterCourseStudy(index);
 }
 
 function enterCourseStudySearch(courseTitle, chapterTitle, tab, autoQuiz = false) {
-    const foundCourse = findCourseByFuzzyTitle(courseTitle);
+    let foundCourse = findCourseByFuzzyTitle(courseTitle);
     if (!foundCourse) {
-        alert(`未找到课程”${courseTitle}”`);
-        return;
+        // 未订阅时自动从 ALL_COURSES_DATA 订阅
+        const idx = _autoSubscribeCourse(courseTitle);
+        if (idx >= 0) {
+            foundCourse = myCourses[idx];
+        } else {
+            alert(`未找到课程”${courseTitle}”`);
+            return;
+        }
     }
     const cIndex = myCourses.indexOf(foundCourse);
     const course = myCourses[cIndex];
@@ -15268,10 +15322,6 @@ function enterCourseStudySearch(courseTitle, chapterTitle, tab, autoQuiz = false
         return;
     }
     const chIndex = course.chapters.indexOf(foundChapter);
-    if (chIndex > course.unlockedChapterIndex) {
-        alert(`该章节尚未解锁，请先完成前面的章节！`);
-        return;
-    }
     activeCourseIndex = cIndex;
     activeChapterIndex = chIndex;
     activeStudyTab = tab || 'lecture';
@@ -15589,7 +15639,7 @@ async function sendMessage() {
                         <span style="font-size:11px;color:#86efac;background:#166534;padding:1px 8px;border-radius:10px;">找到 ${resources.length} 个资源</span>
                       </div>
                       <div class="resource-grid">`;
-                    resources.slice(0, 4).forEach(r => {
+                    resources.forEach(r => {
                         let icon = '📄';
                         let dataAttrs = '';
                         if (r.type === 'bilibili') { icon = '▶️'; dataAttrs = `data-type="bilibili" data-url="${r.url}"`; }

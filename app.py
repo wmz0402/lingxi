@@ -1,11 +1,30 @@
 print("=" * 60)
-print("[启动] app.py 正在加载... (版本 v3.0 含文档诊断修复)")
+print("[启动] app.py 正在加载... (版本 v3.1 安全加固)")
 print("=" * 60)
+
+# 自动加载 .env 文件（无需安装 python-dotenv）
+import os as _os
+_env_path = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '.env')
+if _os.path.isfile(_env_path):
+    with open(_env_path, 'r', encoding='utf-8') as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if not _line or _line.startswith('#'):
+                continue
+            if '=' in _line:
+                _key, _val = _line.split('=', 1)
+                _key, _val = _key.strip(), _val.strip()
+                # 不覆盖已有的系统环境变量
+                if _key and _key not in _os.environ:
+                    _os.environ[_key] = _val
+    print(f"[配置] 已从 {_env_path} 加载环境变量")
+del _env_path, _os
 
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import sqlite3
 import os
+import sys
 import json
 import hashlib
 import datetime
@@ -13,12 +32,47 @@ import urllib.request
 import urllib.parse
 import webbrowser
 import smtplib
-import random
+import secrets
+import subprocess as _subprocess
 import threading
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.header import Header
 from email.utils import formataddr
+
+# 安全密码哈希工具（werkzeug 是 Flask 的依赖，一定存在）
+try:
+    from werkzeug.security import generate_password_hash, check_password_hash
+    _USE_WERKZEUG_HASH = True
+except ImportError:
+    _USE_WERKZEUG_HASH = False
+
+def _hash_password(password):
+    """生成安全密码哈希（优先使用 werkzeug pbkdf2，回退到加盐 SHA-256）"""
+    if _USE_WERKZEUG_HASH:
+        return generate_password_hash(password)
+    # 回退方案：随机盐 + SHA-256，格式 salt$hash
+    salt = secrets.token_hex(16)
+    h = hashlib.sha256((salt + password).encode()).hexdigest()
+    return f"{salt}${h}"
+
+def _verify_password(password, stored_hash):
+    """验证密码（自动兼容旧版纯 SHA-256 和新版哈希）"""
+    if _USE_WERKZEUG_HASH:
+        # check_password_hash 能识别 pbkdf2: 前缀
+        if stored_hash.startswith('pbkdf2:') or stored_hash.startswith('scrypt:'):
+            return check_password_hash(stored_hash, password)
+    # 兼容新版加盐哈希 salt$hash
+    if '$' in stored_hash:
+        salt, h = stored_hash.split('$', 1)
+        return hashlib.sha256((salt + password).encode()).hexdigest() == h
+    # 兼容旧版纯 SHA-256（无盐，用于平滑迁移）
+    return hashlib.sha256(password.encode()).hexdigest() == stored_hash
+
+# 服务端管理员 token 存储: { token_str: { admin_id, username, created_at } }
+_admin_tokens = {}
+_admin_tokens_lock = threading.Lock()
+ADMIN_TOKEN_EXPIRE = 86400  # token 有效期 24 小时（秒）
 # 基于脚本所在目录的绝对路径，确保无论从哪个目录启动都能找到文件
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -31,33 +85,32 @@ except ImportError:
     SPARKAI_AVAILABLE = False
 
 # ============================
-# 1. 配置区（请替换为你的真实凭证）
+# 1. 配置区（请通过环境变量设置凭证，不要硬编码）
 # ============================
-SPARK_APP_ID = os.getenv("SPARK_APP_ID", "d3c1b0f3")
-SPARK_API_SECRET = os.getenv("SPARK_API_SECRET", "Y2Q1YWMzNWE2M2I0YTM3OWMxZDk2YWQ0")
-SPARK_API_KEY = os.getenv("SPARK_API_KEY", "cc4d24e4a9dcc2b82dc0665409de43f6")
+SPARK_APP_ID = os.getenv("SPARK_APP_ID", "")
+SPARK_API_SECRET = os.getenv("SPARK_API_SECRET", "")
+SPARK_API_KEY = os.getenv("SPARK_API_KEY", "")
 
 # DeepSeek API 配置
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "sk-deepseek-api-key-placeholder")
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions"
 
 # 讯飞 MaaS Qwen3-1.7B 模型配置（群聊解题用，OpenAI 兼容 HTTP 接口）
-QWEN_API_KEY = os.getenv("QWEN_API_KEY", "BUNaTHzexwnuCHDXPGVq:XglgTOCfFdeBWXMbIrVh")
+QWEN_API_KEY = os.getenv("QWEN_API_KEY", "")
 QWEN_API_URL = "https://maas-api.cn-huabei-1.xf-yun.com/v2/chat/completions"
 QWEN_MODEL = "xop3qwen1b7"
 
 # 讯飞翻译服务（MaaS 平台 Hy-MT2-7B 翻译模型，OpenAI 兼容 HTTP 接口）
-TRANSLATE_API_KEY = os.getenv("TRANSLATE_API_KEY", "BUNaTHzexwnuCHDXPGVq:XglgTOCfFdeBWXMbIrVh")
+TRANSLATE_API_KEY = os.getenv("TRANSLATE_API_KEY", "")
 TRANSLATE_API_URL = "https://maas-api.cn-huabei-1.xf-yun.com/v2/chat/completions"
 TRANSLATE_MODEL = "xophunyuan7bmt"
 
 # QQ邮箱 SMTP 配置（用于注册验证码）
-# 请将下方替换为你的真实 QQ 邮箱和授权码
 # 授权码获取方式：QQ邮箱 → 设置 → 账户 → POP3/SMTP服务 → 开启 → 获取授权码
 SMTP_HOST = 'smtp.qq.com'
 SMTP_PORT = 465  # SSL
-SMTP_USER = os.getenv("SMTP_USER", "2631296163@qq.com")      # ← 替换为你的QQ邮箱
-SMTP_PASS = os.getenv("SMTP_PASS", "ccqgylsrzvfgeaae")  # ← 替换为QQ邮箱授权码
+SMTP_USER = os.getenv("SMTP_USER", "")
+SMTP_PASS = os.getenv("SMTP_PASS", "")
 SMTP_SENDER_NAME = '灵析学习平台'
 VERIFY_CODE_EXPIRE = 300   # 验证码有效期（秒），5分钟
 VERIFY_CODE_COOLDOWN = 60  # 发送冷却时间（秒），防止频繁发送
@@ -599,6 +652,16 @@ def index():
 
 @app.route('/<path:path>', methods=['GET'])
 def serve_file(path):
+    # 阻止访问敏感文件（数据库、源码、配置、环境变量等）
+    _blocked_extensions = {'.db', '.py', '.pyc', '.env', '.git', '.gitignore',
+                           '.md', '.bak', '.bak2', '.bak3', '.idea', '.vscode',
+                           '.json', '.txt', '.csv', '.log'}
+    _, ext = os.path.splitext(path)
+    if ext.lower() in _blocked_extensions:
+        return "Not Found", 404
+    # 阻止访问隐藏目录
+    if path.startswith('.') or '/.' in path:
+        return "Not Found", 404
     return send_from_directory(BASE_DIR, path)
 
 
@@ -645,11 +708,19 @@ def upload_file():
     file = request.files['image']
     if file.filename == '':
         return jsonify({"error": "未选择任何文件"}), 400
-    
+
     allowed_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
     ext = os.path.splitext(file.filename)[1].lower()
     if ext not in allowed_extensions:
         return jsonify({"error": "不支持的图片格式，仅支持 JPG, JPEG, PNG, GIF, WEBP"}), 400
+
+    # 文件大小限制：10MB
+    MAX_FILE_SIZE = 10 * 1024 * 1024
+    file.seek(0, 2)
+    file_size = file.tell()
+    file.seek(0)
+    if file_size > MAX_FILE_SIZE:
+        return jsonify({"error": "文件过大，最大允许 10MB"}), 413
         
     import uuid
     import tempfile
@@ -667,6 +738,9 @@ def upload_file():
 def get_tmp_image(filename):
     from flask import send_from_directory
     import tempfile
+    # 防止路径遍历攻击
+    if '..' in filename or '/' in filename or '\\' in filename:
+        return "非法文件名", 400
     upload_dir = tempfile.gettempdir()
     return send_from_directory(upload_dir, filename)
 
@@ -687,6 +761,7 @@ def upload_documents():
     allowed_extensions = {'.txt', '.pdf', '.docx', '.doc', '.md', '.csv'}
     import tempfile
     upload_dir = tempfile.gettempdir()
+    MAX_DOC_SIZE = 20 * 1024 * 1024  # 单个文档最大 20MB
 
     all_text_parts = []
     file_summaries = []
@@ -698,6 +773,14 @@ def upload_documents():
 
         if ext not in allowed_extensions:
             file_summaries.append(f"[{file.filename}] 格式不支持，已跳过")
+            continue
+
+        # 文件大小检查
+        file.seek(0, 2)
+        fsize = file.tell()
+        file.seek(0)
+        if fsize > MAX_DOC_SIZE:
+            file_summaries.append(f"[{file.filename}] 文件过大（>{MAX_DOC_SIZE // 1024 // 1024}MB），已跳过")
             continue
 
         # 保存文件
@@ -1385,19 +1468,16 @@ def search_questions():
     return jsonify({"questions": [dict(row) for row in rows]})
 
 # JDoodle Credentials (Vercel Redeploy Triggered)
-JDOODLE_CLIENT_ID = os.getenv("JDOODLE_CLIENT_ID", "f72e2812a62727efccd0a8b027f43493")
-JDOODLE_CLIENT_SECRET = os.getenv("JDOODLE_CLIENT_SECRET", "ea347b5ac72de27c36ae48adf1d6e387bcec2ce5dbee1a4be85c18925a6e26fc")
+JDOODLE_CLIENT_ID = os.getenv("JDOODLE_CLIENT_ID", "")
+JDOODLE_CLIENT_SECRET = os.getenv("JDOODLE_CLIENT_SECRET", "")
 
 def run_code_via_jdoodle(language, code):
     """当本地无编译环境时（如 Vercel），通过配置的 JDoodle 密钥进行远程编译执行"""
-    # 强制防空提纯与长度过滤（防止 Vercel 网页上添加了空的环境变量导致覆盖失效）
     client_id = JDOODLE_CLIENT_ID.strip() if (JDOODLE_CLIENT_ID and isinstance(JDOODLE_CLIENT_ID, str)) else ""
     client_secret = JDOODLE_CLIENT_SECRET.strip() if (JDOODLE_CLIENT_SECRET and isinstance(JDOODLE_CLIENT_SECRET, str)) else ""
-    
-    if not client_id or len(client_id) < 10:
-        client_id = "f72e2812a62727efccd0a8b027f43493"
-    if not client_secret or len(client_secret) < 10:
-        client_secret = "ea347b5ac72de27c36ae48adf1d6e387bcec2ce5dbee1a4be85c18925a6e26fc"
+
+    if not client_id or not client_secret:
+        return {"success": False, "output": "代码执行服务未配置，请联系管理员设置 JDOODLE_CLIENT_ID 和 JDOODLE_CLIENT_SECRET 环境变量。"}
         
     import urllib.request
     import json
@@ -1484,35 +1564,33 @@ def run_code():
     data = request.json or {}
     code = data.get('code', '')
     language = data.get('language', 'python').lower()
-    
-    import subprocess
+
     import tempfile
-    import os
     import re
-    
+
     if language in ['python', 'py']:
-        import sys
-        import io
-        import traceback
-        old_stdout = sys.stdout
-        redirected_output = sys.stdout = io.StringIO()
+        # 使用子进程隔离执行 Python 代码，避免 exec() 直接访问服务器内存和数据库
+        import uuid as _uuid
+        tmp_dir = tempfile.gettempdir()
+        tmp_file = os.path.join(tmp_dir, f"_user_code_{_uuid.uuid4().hex[:8]}.py")
         try:
-            local_scope = {}
-            exec(code, {}, local_scope)
-            sys.stdout = old_stdout
-            output = redirected_output.getvalue()
-            return jsonify({"success": True, "output": output or "运行成功（无输出结果）。"})
+            with open(tmp_file, 'w', encoding='utf-8') as f:
+                f.write(code)
+            result = _subprocess.run(
+                [sys.executable, tmp_file],
+                capture_output=True, text=True, timeout=10
+            )
+            output = (result.stdout or '') + (result.stderr or '')
+            return jsonify({"success": result.returncode == 0, "output": output.strip() or "运行成功（无输出结果）。"})
+        except _subprocess.TimeoutExpired:
+            return jsonify({"success": False, "output": "执行超时（限时10秒）。"})
         except Exception as e:
-            sys.stdout = old_stdout
-            error_output = traceback.format_exc()
-            lines = error_output.split('\n')
-            cleaned_lines = []
-            for line in lines:
-                if "File \"<string>\"" in line or line.startswith("Traceback") or "exec(code" in line:
-                    continue
-                cleaned_lines.append(line)
-            output = "\n".join(cleaned_lines).strip()
-            return jsonify({"success": False, "output": output})
+            return jsonify({"success": False, "output": f"执行错误：{str(e)}"})
+        finally:
+            try:
+                os.remove(tmp_file)
+            except OSError:
+                pass
             
     elif language in ['c', 'cpp']:
         temp_dir = tempfile.gettempdir()
@@ -1528,7 +1606,7 @@ def run_code():
             
         compiler = "gcc" if language == 'c' else "g++"
         try:
-            compile_process = subprocess.run(
+            compile_process = _subprocess.run(
                 [compiler, source_file, "-o", exe_file],
                 capture_output=True,
                 text=True
@@ -1541,14 +1619,14 @@ def run_code():
             return jsonify(remote_res)
             
         try:
-            run_process = subprocess.run(
+            run_process = _subprocess.run(
                 [exe_file],
                 capture_output=True,
                 text=True,
                 timeout=5
             )
             return jsonify({"success": run_process.returncode == 0, "output": run_process.stdout + run_process.stderr})
-        except subprocess.TimeoutExpired:
+        except _subprocess.TimeoutExpired:
             return jsonify({"success": False, "output": "执行超时（限时5秒）。"})
         except Exception as e:
             return jsonify({"success": False, "output": f"执行错误：\n{str(e)}"})
@@ -1564,7 +1642,7 @@ def run_code():
             f.write(code)
             
         try:
-            compile_process = subprocess.run(
+            compile_process = _subprocess.run(
                 ["javac", "-encoding", "utf-8", source_file],
                 capture_output=True,
                 text=True
@@ -1577,14 +1655,14 @@ def run_code():
             return jsonify(remote_res)
             
         try:
-            run_process = subprocess.run(
+            run_process = _subprocess.run(
                 ["java", "-cp", temp_dir, class_name],
                 capture_output=True,
                 text=True,
                 timeout=5
             )
             return jsonify({"success": run_process.returncode == 0, "output": run_process.stdout + run_process.stderr})
-        except subprocess.TimeoutExpired:
+        except _subprocess.TimeoutExpired:
             return jsonify({"success": False, "output": "执行超时（限时5秒）。"})
         except Exception as e:
             return jsonify({"success": False, "output": f"执行错误：\n{str(e)}"})
@@ -1596,6 +1674,30 @@ def run_code():
 # ============================
 # 7.5 用户注册同步 & 管理员接口
 # ============================
+
+def _cleanup_expired_tokens():
+    """清理过期的管理员 token"""
+    now = datetime.datetime.now().timestamp()
+    with _admin_tokens_lock:
+        expired = [k for k, v in _admin_tokens.items()
+                   if now - v['created_at'] > ADMIN_TOKEN_EXPIRE]
+        for k in expired:
+            del _admin_tokens[k]
+
+def _validate_admin_token():
+    """验证管理员 token 是否有效（存在且未过期）。成功返回 True，失败返回 Flask Response。"""
+    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
+    if not token:
+        return False, (jsonify({"success": False, "error": "未授权访问"}), 401)
+    now = datetime.datetime.now().timestamp()
+    with _admin_tokens_lock:
+        info = _admin_tokens.get(token)
+        if not info:
+            return False, (jsonify({"success": False, "error": "无效的管理员令牌"}), 401)
+        if now - info['created_at'] > ADMIN_TOKEN_EXPIRE:
+            del _admin_tokens[token]
+            return False, (jsonify({"success": False, "error": "管理员令牌已过期，请重新登录"}), 401)
+    return True, None
 
 def _ensure_user_table():
     """确保 user 表存在，不存在则自动创建"""
@@ -1715,13 +1817,13 @@ def _ensure_message_table():
 
 
 def _ensure_admin_account():
-    """确保唯一管理员账号存在，并强制更新为最新凭据"""
+    """确保管理员账号存在。仅在数据库中无管理员时才创建默认账号，不会重置已有密码。"""
     _ensure_user_table()
     _ensure_message_table()
-    admin_username = 'king33'
-    admin_email = 'admin@lingxi.com'
-    admin_password = 'dnl946'
-    pwd_hash = hashlib.sha256(admin_password.encode()).hexdigest()
+    admin_username = os.getenv("ADMIN_USERNAME", "admin")
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@lingxi.com")
+    admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
+    pwd_hash = _hash_password(admin_password)
 
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -1732,20 +1834,14 @@ def _ensure_admin_account():
         try:
             c.execute(
                 'INSERT INTO user (username, email, password_hash, is_admin, grade, major, signature, created_at) VALUES (?, ?, ?, 1, ?, ?, ?, ?)',
-                (admin_username, admin_email, pwd_hash, '系统管理员', '灵析平台', '灵析唯一超级管理员', now)
+                (admin_username, admin_email, pwd_hash, '系统管理员', '灵析平台', '灵析超级管理员', now)
             )
             conn.commit()
             print(f"[管理员] 已自动创建管理员账号: {admin_username}")
         except sqlite3.IntegrityError:
             pass
     else:
-        # 强制更新管理员用户名和密码
-        c.execute(
-            'UPDATE user SET username = ?, email = ?, password_hash = ? WHERE is_admin = 1',
-            (admin_username, admin_email, pwd_hash)
-        )
-        conn.commit()
-        print(f"[管理员] 已更新管理员账号: {admin_username}")
+        print(f"[管理员] 管理员账号已存在，跳过初始化")
     conn.close()
 
 
@@ -1790,8 +1886,8 @@ def send_verify_code():
             remaining = int(VERIFY_CODE_COOLDOWN - (now - existing['created_at']))
             return jsonify({"success": False, "error": f"发送过于频繁，请 {remaining} 秒后再试"}), 429
 
-        # 生成6位验证码
-        code = str(random.randint(100000, 999999))
+        # 生成6位验证码（使用密码学安全随机数）
+        code = str(secrets.randbelow(900000) + 100000)
         _verify_codes[code_key] = {
             'code': code,
             'created_at': now,
@@ -1880,7 +1976,7 @@ def register_user():
         # 验证通过，删除已使用的验证码
         del _verify_codes[code_key]
 
-    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
+    pwd_hash = _hash_password(password)
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     conn = sqlite3.connect(DB_PATH)
@@ -1939,7 +2035,7 @@ def reset_password():
             return jsonify({"success": False, "error": "验证码不正确"}), 400
         del _verify_codes[code_key]
 
-    pwd_hash = hashlib.sha256(new_password.encode()).hexdigest()
+    pwd_hash = _hash_password(new_password)
 
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -1990,31 +2086,25 @@ def user_login():
     if not login_id or not password:
         return jsonify({"success": False, "error": "账号和密码不能为空"}), 400
 
-    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
-
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
     try:
         # 支持邮箱或用户名登录，排除管理员账号
         c.execute(
-            'SELECT id, username, email, is_active, grade, major, qq, birthday, signature, intro, gender '
-            'FROM user WHERE (email = ? OR username = ?) AND is_admin = 0 AND password_hash = ?',
-            (login_id, login_id, pwd_hash)
+            'SELECT id, username, email, password_hash, is_active, grade, major, qq, birthday, signature, intro, gender '
+            'FROM user WHERE (email = ? OR username = ?) AND is_admin = 0',
+            (login_id, login_id)
         )
         row = c.fetchone()
         if not row:
-            # 检查是否是账号不存在还是密码错误
-            c.execute(
-                'SELECT id FROM user WHERE (email = ? OR username = ?) AND is_admin = 0',
-                (login_id, login_id)
-            )
-            if not c.fetchone():
-                return jsonify({"success": False, "error": "账号不存在或已被注销", "code": "NOT_FOUND"}), 404
-            else:
-                return jsonify({"success": False, "error": "密码错误", "code": "WRONG_PWD"}), 403
+            return jsonify({"success": False, "error": "账号不存在或已被注销", "code": "NOT_FOUND"}), 404
+
+        if not _verify_password(password, row['password_hash']):
+            return jsonify({"success": False, "error": "密码错误", "code": "WRONG_PWD"}), 403
 
         user = dict(row)
+        del user['password_hash']  # 不返回密码哈希到前端
         # 检查账号是否被停用
         if user.get('is_active') == 0:
             return jsonify({"success": False, "error": "账号已被管理员停用，请联系管理员", "code": "DISABLED"}), 403
@@ -2037,8 +2127,6 @@ def admin_login():
     if not username or not password:
         return jsonify({"success": False, "error": "请输入用户名和密码"}), 400
 
-    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
-
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
@@ -2052,11 +2140,20 @@ def admin_login():
     if not admin:
         return jsonify({"success": False, "error": "管理员账号不存在"}), 401
 
-    if admin['password_hash'] != pwd_hash:
+    if not _verify_password(password, admin['password_hash']):
         return jsonify({"success": False, "error": "密码错误"}), 401
 
-    token_str = f"{admin['username']}_{datetime.datetime.now().timestamp()}"
+    # 生成并存储 token
+    token_str = f"{admin['username']}_{datetime.datetime.now().timestamp()}_{secrets.token_hex(8)}"
     token = hashlib.sha256(token_str.encode()).hexdigest()
+    with _admin_tokens_lock:
+        _admin_tokens[token] = {
+            'admin_id': admin['id'],
+            'username': admin['username'],
+            'created_at': datetime.datetime.now().timestamp()
+        }
+    # 定期清理过期 token
+    _cleanup_expired_tokens()
 
     return jsonify({
         "success": True,
@@ -2077,9 +2174,9 @@ def admin_login():
 def admin_get_users():
     """管理员查看所有用户基本信息（支持搜索、排序、状态筛选）"""
     _ensure_user_table()
-    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
-    if not token:
-        return jsonify({"success": False, "error": "未授权访问"}), 401
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
 
     keyword = request.args.get('keyword', '').strip()
     sort = request.args.get('sort', 'newest').strip()
@@ -2125,6 +2222,9 @@ def admin_get_user_detail(user_id):
     """管理员查看单个用户详情"""
     _ensure_user_table()
     _ensure_message_table()
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
@@ -2158,9 +2258,9 @@ def admin_delete_user(user_id):
     """管理员注销（删除）用户"""
     _ensure_user_table()
     _ensure_message_table()
-    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
-    if not token:
-        return jsonify({"success": False, "error": "未授权访问"}), 401
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
 
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -2194,16 +2294,16 @@ def admin_delete_user(user_id):
 def admin_change_password(user_id):
     """管理员修改用户密码"""
     _ensure_user_table()
-    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
-    if not token:
-        return jsonify({"success": False, "error": "未授权访问"}), 401
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
 
     data = request.get_json() or {}
     new_password = data.get('password', '').strip()
     if not new_password or len(new_password) < 4:
         return jsonify({"success": False, "error": "新密码不能为空且不少于4位"}), 400
 
-    pwd_hash = hashlib.sha256(new_password.encode()).hexdigest()
+    pwd_hash = _hash_password(new_password)
 
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -2228,6 +2328,9 @@ def admin_change_password(user_id):
 def admin_add_user():
     """管理员手动添加账户"""
     _ensure_user_table()
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
     data = request.get_json()
     if not data:
         return jsonify({"success": False, "error": "无效请求"}), 400
@@ -2241,7 +2344,7 @@ def admin_add_user():
     if not username or not email or not password:
         return jsonify({"success": False, "error": "用户名、邮箱、密码为必填"}), 400
 
-    pwd_hash = hashlib.sha256(password.encode()).hexdigest()
+    pwd_hash = _hash_password(password)
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     conn = sqlite3.connect(DB_PATH)
@@ -2264,6 +2367,9 @@ def admin_get_stats():
     """管理员获取平台统计概览（增强版）"""
     _ensure_user_table()
     _ensure_message_table()
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
@@ -2305,9 +2411,9 @@ def admin_get_stats():
 def admin_toggle_user(user_id):
     """管理员停用/启用用户"""
     _ensure_user_table()
-    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
-    if not token:
-        return jsonify({"success": False, "error": "未授权访问"}), 401
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
 
     data = request.get_json() or {}
     is_active = data.get('is_active', 1)
@@ -2341,9 +2447,9 @@ def admin_toggle_user(user_id):
 def admin_batch_toggle():
     """管理员批量停用/启用用户"""
     _ensure_user_table()
-    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
-    if not token:
-        return jsonify({"success": False, "error": "未授权访问"}), 401
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
 
     data = request.get_json() or {}
     user_ids = data.get('user_ids', [])
@@ -2384,9 +2490,9 @@ def admin_batch_delete():
     """管理员批量永久删除用户"""
     _ensure_user_table()
     _ensure_message_table()
-    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
-    if not token:
-        return jsonify({"success": False, "error": "未授权访问"}), 401
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
 
     data = request.get_json() or {}
     user_ids = data.get('user_ids', [])
@@ -2425,9 +2531,9 @@ def admin_batch_delete():
 def admin_get_logs():
     """管理员获取操作日志"""
     _ensure_admin_log_table()
-    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
-    if not token:
-        return jsonify({"success": False, "error": "未授权访问"}), 401
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
 
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 30))
@@ -2452,9 +2558,9 @@ def admin_dashboard():
     """管理员仪表盘数据（用户增长趋势、活跃排行、消息统计）"""
     _ensure_user_table()
     _ensure_message_table()
-    token = request.headers.get('X-Admin-Token', '') or request.args.get('token', '')
-    if not token:
-        return jsonify({"success": False, "error": "未授权访问"}), 401
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
 
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -2544,6 +2650,9 @@ def user_send_message():
 def admin_get_messages():
     """管理员查看所有用户消息（收件箱），支持按标签筛选"""
     _ensure_message_table()
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
     tag_filter = request.args.get('tag', '').strip()
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -2563,6 +2672,9 @@ def admin_get_messages():
 def admin_mark_message_read(msg_id):
     """管理员标记消息为已读"""
     _ensure_message_table()
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('UPDATE message SET is_read = 1 WHERE id = ?', (msg_id,))
@@ -2575,6 +2687,9 @@ def admin_mark_message_read(msg_id):
 def admin_reply_message(msg_id):
     """管理员回复用户消息"""
     _ensure_message_table()
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
     data = request.get_json()
     if not data:
         return jsonify({"success": False, "error": "无效请求"}), 400
@@ -2595,6 +2710,9 @@ def admin_reply_message(msg_id):
 def admin_delete_message(msg_id):
     """管理员删除消息"""
     _ensure_message_table()
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('DELETE FROM message WHERE id = ?', (msg_id,))
@@ -2607,6 +2725,9 @@ def admin_delete_message(msg_id):
 def admin_tag_message(msg_id):
     """管理员给消息打标签"""
     _ensure_message_table()
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
     data = request.get_json()
     if not data:
         return jsonify({"success": False, "error": "无效请求"}), 400
@@ -2623,6 +2744,9 @@ def admin_tag_message(msg_id):
 def admin_mark_all_read():
     """管理员一键标记所有消息为已读"""
     _ensure_message_table()
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('UPDATE message SET is_read = 1 WHERE is_read = 0')
@@ -2636,6 +2760,9 @@ def admin_mark_all_read():
 def admin_clear_all_tags():
     """管理员清空所有消息的管理员标签"""
     _ensure_message_table()
+    ok, err = _validate_admin_token()
+    if not ok:
+        return err
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("UPDATE message SET admin_tag = '' WHERE admin_tag != ''")
@@ -2668,24 +2795,31 @@ def user_get_inbox():
 
 @app.route('/api/user/self-delete', methods=['DELETE'])
 def user_self_delete():
-    """用户自行注销账号（从服务端数据库删除）"""
+    """用户自行注销账号（从服务端数据库删除），需验证密码"""
     _ensure_user_table()
     _ensure_message_table()
+    _ensure_question_completion_table()
     data = request.get_json() or {}
     email = data.get('email', '').strip()
+    password = data.get('password', '')
     if not email:
         return jsonify({"success": False, "error": "缺少邮箱信息"}), 400
+    if not password:
+        return jsonify({"success": False, "error": "请输入密码以确认注销"}), 400
 
     conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
     try:
-        c.execute('SELECT id, is_admin FROM user WHERE email = ?', (email,))
+        c.execute('SELECT id, is_admin, password_hash FROM user WHERE email = ?', (email,))
         row = c.fetchone()
         if not row:
             return jsonify({"success": False, "error": "用户不存在"}), 404
-        user_id, is_admin = row
+        user_id, is_admin = row['id'], row['is_admin']
         if is_admin == 1:
             return jsonify({"success": False, "error": "管理员账号不可自行注销"}), 403
+        if not _verify_password(password, row['password_hash']):
+            return jsonify({"success": False, "error": "密码错误，注销失败"}), 403
         # 先删除该用户的消息记录
         c.execute('DELETE FROM message WHERE sender_id = ?', (user_id,))
         # 删除做题记录
@@ -2896,5 +3030,6 @@ if __name__ == '__main__':
     _ensure_admin_account()
     _ensure_question_completion_table()
     webbrowser.open('http://127.0.0.1:5000')
-    
-    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
+
+    _debug = os.getenv("FLASK_DEBUG", "0") == "1"
+    app.run(host='0.0.0.0', port=5000, debug=_debug, use_reloader=False)
