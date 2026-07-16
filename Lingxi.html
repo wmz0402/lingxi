@@ -4167,6 +4167,14 @@
       from { opacity: 0; transform: translateY(30px) scale(0.97); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     .doc-diagnose-header {
       display: flex;
@@ -6192,74 +6200,158 @@
 
       <!-- Leaderboard -->
       <div class="leaderboard-area main-content-page hidden" id="leaderboardArea"
-        style="overflow-y:auto; padding:32px 48px; width:100%; box-sizing:border-box; background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 100%);">
-        <div style="max-width:900px; margin:0 auto;">
+        style="overflow-y:auto; padding:32px 48px; width:100%; box-sizing:border-box; background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 50%,#faf5ff 100%);">
+        <div style="max-width:960px; margin:0 auto;">
 
-          <!-- Header -->
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px;">
+          <!-- Header with gradient text -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px;">
             <div>
-              <h2 style="font-size:28px; font-weight:800; color:#1e1b4b; margin:0; display:flex; align-items:center; gap:10px;">
-                <span style="font-size:32px;">🏆</span> 学习榜单
+              <h2 style="font-size:32px; font-weight:900; margin:0; display:flex; align-items:center; gap:12px;">
+                <span style="font-size:38px; filter:drop-shadow(0 2px 4px rgba(251,191,36,0.3));">🏆</span>
+                <span style="background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">学习榜单</span>
               </h2>
-              <p style="color:#64748b; font-size:13.5px; margin-top:6px;">实时追踪全平台学习进度，看看谁是学习达人</p>
+              <p style="color:#64748b; font-size:14px; margin-top:8px; font-weight:500;">实时追踪全平台学习进度，看看谁是学习达人</p>
             </div>
             <button class="back-to-chat-btn" onclick="switchMainPage(adminToken ? 'adminPanel' : 'chat')" style="flex-shrink:0;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6" /></svg>
-              <span class="back-btn-label">返回对话</span>
+              <span class="back-to-chat-label">返回对话</span>
             </button>
           </div>
 
-          <!-- Stats summary -->
-          <div id="leaderboardStats" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px;">
-            <div style="background:#fff; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(99,102,241,0.08); text-align:center;">
-              <div style="font-size:28px; font-weight:800; color:#6366f1;" id="lbTotalUsers">0</div>
-              <div style="font-size:12px; color:#94a3b8; margin-top:4px;">参与学习</div>
+          <!-- My Performance Card -->
+          <div id="lbMyPerformance" style="background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%); border-radius:24px; padding:28px; margin-bottom:28px; box-shadow:0 8px 32px rgba(99,102,241,0.25); color:#fff; position:relative; overflow:hidden;">
+            <div style="position:absolute; top:-50px; right:-50px; width:200px; height:200px; background:rgba(255,255,255,0.1); border-radius:50%;"></div>
+            <div style="position:absolute; bottom:-80px; right:80px; width:160px; height:160px; background:rgba(255,255,255,0.08); border-radius:50%;"></div>
+            <div style="position:relative; z-index:1; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
+              <div>
+                <div style="font-size:13px; opacity:0.9; font-weight:600; margin-bottom:6px;">我的学习数据</div>
+                <div style="font-size:28px; font-weight:800; margin-bottom:4px;" id="lbMyName">加载中...</div>
+                <div style="font-size:13px; opacity:0.85; display:flex; align-items:center; gap:12px; margin-top:8px;">
+                  <span style="display:flex; align-items:center; gap:4px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    <span id="lbMyCourses">0</span> 门课程
+                  </span>
+                  <span style="display:flex; align-items:center; gap:4px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span id="lbMyHours">0</span> 小时
+                  </span>
+                  <span style="display:flex; align-items:center; gap:4px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span id="lbMyAchievements">0</span> 个成就
+                  </span>
+                </div>
+              </div>
+              <div style="display:flex; gap:24px; flex-wrap:wrap;">
+                <div style="text-align:center;">
+                  <div style="font-size:36px; font-weight:900; line-height:1;" id="lbMyScore">0</div>
+                  <div style="font-size:11px; opacity:0.85; margin-top:4px; font-weight:600;">答对题数</div>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-size:36px; font-weight:900; line-height:1;" id="lbMyAccuracy">0%</div>
+                  <div style="font-size:11px; opacity:0.85; margin-top:4px; font-weight:600;">正确率</div>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-size:36px; font-weight:900; line-height:1;" id="lbMyStreak">0</div>
+                  <div style="font-size:11px; opacity:0.85; margin-top:4px; font-weight:600;">连续天数</div>
+                </div>
+              </div>
             </div>
-            <div style="background:#fff; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(99,102,241,0.08); text-align:center;">
-              <div style="font-size:28px; font-weight:800; color:#0ea5e9;" id="lbTotalQuestions">0</div>
-              <div style="font-size:12px; color:#94a3b8; margin-top:4px;">答对题数</div>
+            <div style="position:relative; z-index:1; margin-top:20px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:20px;" id="lbMyRankBadge">🥉</span>
+                <div>
+                  <div style="font-size:12px; opacity:0.85;">当前排名</div>
+                  <div style="font-size:18px; font-weight:800;" id="lbMyRankText">-</div>
+                </div>
+              </div>
+              <div id="lbRankTier" style="background:rgba(255,255,255,0.2); padding:8px 16px; border-radius:12px; backdrop-filter:blur(10px);">
+                <div style="font-size:11px; opacity:0.85;">等级</div>
+                <div style="font-size:14px; font-weight:700;" id="lbRankTierText">青铜</div>
+              </div>
             </div>
-            <div style="background:#fff; border-radius:16px; padding:20px; box-shadow:0 2px 8px rgba(99,102,241,0.08); text-align:center;">
-              <div style="font-size:28px; font-weight:800; color:#10b981;" id="lbMyRank">-</div>
-              <div style="font-size:12px; color:#94a3b8; margin-top:4px;">我的排名</div>
+          </div>
+
+          <!-- Stats grid -->
+          <div id="leaderboardStats" style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px;">
+            <div style="background:#fff; border-radius:18px; padding:20px; box-shadow:0 2px 12px rgba(99,102,241,0.08); text-align:center; border:1px solid rgba(99,102,241,0.08);">
+              <div style="width:40px; height:40px; background:linear-gradient(135deg,#6366f1,#8b5cf6); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div style="font-size:32px; font-weight:900; color:#6366f1;" id="lbTotalUsers">0</div>
+              <div style="font-size:12px; color:#94a3b8; margin-top:4px; font-weight:600;">参与学习</div>
+            </div>
+            <div style="background:#fff; border-radius:18px; padding:20px; box-shadow:0 2px 12px rgba(99,102,241,0.08); text-align:center; border:1px solid rgba(99,102,241,0.08);">
+              <div style="width:40px; height:40px; background:linear-gradient(135deg,#0ea5e9,#06b6d4); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              </div>
+              <div style="font-size:32px; font-weight:900; color:#0ea5e9;" id="lbTotalQuestions">0</div>
+              <div style="font-size:12px; color:#94a3b8; margin-top:4px; font-weight:600;">总答题数</div>
+            </div>
+            <div style="background:#fff; border-radius:18px; padding:20px; box-shadow:0 2px 12px rgba(99,102,241,0.08); text-align:center; border:1px solid rgba(99,102,241,0.08);">
+              <div style="width:40px; height:40px; background:linear-gradient(135deg,#10b981,#059669); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div style="font-size:32px; font-weight:900; color:#10b981;" id="lbAvgAccuracy">0%</div>
+              <div style="font-size:12px; color:#94a3b8; margin-top:4px; font-weight:600;">平均正确率</div>
+            </div>
+            <div style="background:#fff; border-radius:18px; padding:20px; box-shadow:0 2px 12px rgba(99,102,241,0.08); text-align:center; border:1px solid rgba(99,102,241,0.08);">
+              <div style="width:40px; height:40px; background:linear-gradient(135deg,#f59e0b,#d97706); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <div style="font-size:32px; font-weight:900; color:#f59e0b;" id="lbTotalAchievements">0</div>
+              <div style="font-size:12px; color:#94a3b8; margin-top:4px; font-weight:600;">解锁成就</div>
             </div>
           </div>
 
           <!-- Anonymous toggle -->
-          <div id="lbAnonymousToggle" style="display:none; background:#fff; border-radius:14px; padding:14px 20px; margin-bottom:20px; box-shadow:0 1px 4px rgba(0,0,0,0.04); align-items:center; justify-content:space-between;">
+          <div id="lbAnonymousToggle" style="display:none; background:#fff; border-radius:16px; padding:16px 22px; margin-bottom:24px; box-shadow:0 2px 8px rgba(0,0,0,0.04); border:1px solid rgba(99,102,241,0.08); align-items:center; justify-content:space-between;">
             <div>
-              <div style="font-size:13px; font-weight:600; color:#334155;">匿名上榜</div>
-              <div style="font-size:11.5px; color:#94a3b8; margin-top:2px;">开启后其他用户将看不到你的真实姓名</div>
+              <div style="font-size:14px; font-weight:700; color:#1e1b4b; display:flex; align-items:center; gap:8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M1 21v-2a4 4 0 0 1 3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                匿名上榜
+              </div>
+              <div style="font-size:12px; color:#94a3b8; margin-top:4px;">开启后其他用户将看不到你的真实姓名</div>
             </div>
-            <label style="position:relative; display:inline-block; width:44px; height:24px; cursor:pointer;">
+            <label style="position:relative; display:inline-block; width:48px; height:26px; cursor:pointer;">
               <input type="checkbox" id="lbAnonymousCheckbox" onchange="toggleLeaderboardAnonymous()" style="opacity:0; width:0; height:0;">
-              <span style="position:absolute; top:0; left:0; right:0; bottom:0; background:#cbd5e1; border-radius:24px; transition:0.3s;" id="lbToggleSlider">
-                <span style="position:absolute; content:''; height:18px; width:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:0.3s;" id="lbToggleKnob"></span>
+              <span style="position:absolute; top:0; left:0; right:0; bottom:0; background:#cbd5e1; border-radius:26px; transition:0.3s;" id="lbToggleSlider">
+                <span style="position:absolute; content:''; height:20px; width:20px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.2);" id="lbToggleKnob"></span>
               </span>
             </label>
           </div>
 
-          <!-- Period filter tabs -->
-          <div style="display:flex; gap:8px; margin-bottom:20px;">
-            <button class="lb-period-btn active" data-period="all" onclick="switchLeaderboardPeriod('all')" style="padding:8px 18px; border-radius:20px; border:1.5px solid #e2e8f0; background:#6366f1; color:#fff; font-size:12.5px; font-weight:600; cursor:pointer; transition:all 0.2s;">全部</button>
-            <button class="lb-period-btn" data-period="month" onclick="switchLeaderboardPeriod('month')" style="padding:8px 18px; border-radius:20px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:12.5px; font-weight:600; cursor:pointer; transition:all 0.2s;">本月</button>
-            <button class="lb-period-btn" data-period="week" onclick="switchLeaderboardPeriod('week')" style="padding:8px 18px; border-radius:20px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:12.5px; font-weight:600; cursor:pointer; transition:all 0.2s;">本周</button>
-            <button class="lb-period-btn" data-period="day" onclick="switchLeaderboardPeriod('day')" style="padding:8px 18px; border-radius:20px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:12.5px; font-weight:600; cursor:pointer; transition:all 0.2s;">今日</button>
+          <!-- Period filter tabs with improved design -->
+          <div style="display:flex; gap:10px; margin-bottom:28px; flex-wrap:wrap;">
+            <button class="lb-period-btn active" data-period="all" onclick="switchLeaderboardPeriod('all')" style="padding:10px 22px; border-radius:24px; border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.3s; box-shadow:0 4px 12px rgba(99,102,241,0.3);">全部</button>
+            <button class="lb-period-btn" data-period="month" onclick="switchLeaderboardPeriod('month')" style="padding:10px 22px; border-radius:24px; border:none; background:#fff; color:#64748b; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.3s; box-shadow:0 2px 8px rgba(0,0,0,0.06);">本月</button>
+            <button class="lb-period-btn" data-period="week" onclick="switchLeaderboardPeriod('week')" style="padding:10px 22px; border-radius:24px; border:none; background:#fff; color:#64748b; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.3s; box-shadow:0 2px 8px rgba(0,0,0,0.06);">本周</button>
+            <button class="lb-period-btn" data-period="day" onclick="switchLeaderboardPeriod('day')" style="padding:10px 22px; border-radius:24px; border:none; background:#fff; color:#64748b; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.3s; box-shadow:0 2px 8px rgba(0,0,0,0.06);">今日</button>
           </div>
 
-          <!-- Top 3 podium -->
-          <div id="lbPodium" style="display:flex; align-items:flex-end; justify-content:center; gap:16px; margin-bottom:28px; min-height:180px;">
+          <!-- Top 3 podium with enhanced design -->
+          <div id="lbPodium" style="display:flex; align-items:flex-end; justify-content:center; gap:20px; margin-bottom:36px; min-height:220px; perspective:1000px;">
             <!-- Dynamically filled -->
           </div>
 
-          <!-- Full ranking list -->
-          <div style="background:#fff; border-radius:18px; box-shadow:0 2px 12px rgba(99,102,241,0.06); overflow:hidden;">
-            <div style="padding:16px 24px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:14px; font-weight:700; color:#1e1b4b;">完整排行</span>
-              <span style="font-size:11px; color:#94a3b8;" id="lbUpdateHint">实时更新</span>
+          <!-- Full ranking list with improved cards -->
+          <div style="background:#fff; border-radius:24px; box-shadow:0 4px 20px rgba(99,102,241,0.08); overflow:hidden; border:1px solid rgba(99,102,241,0.08);">
+            <div style="padding:20px 28px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg,#faf5ff,#eef2ff);">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                <span style="font-size:15px; font-weight:800; color:#1e1b4b;">完整排行</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:#64748b; font-weight:500;">
+                <div style="width:6px; height:6px; background:#10b981; border-radius:50%; animation:pulse 2s infinite;"></div>
+                <span id="lbUpdateHint">实时更新</span>
+              </div>
             </div>
-            <div id="lbRankingList" style="max-height:500px; overflow-y:auto;">
-              <div style="padding:40px; text-align:center; color:#94a3b8; font-size:13px;">加载中...</div>
+            <div id="lbRankingList" style="max-height:600px; overflow-y:auto;">
+              <div style="padding:60px 40px; text-align:center; color:#94a3b8; font-size:14px;">
+                <div style="width:48px; height:48px; background:linear-gradient(135deg,#e0e7ff,#f3e8ff); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" style="animation:spin 1s linear infinite;"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                </div>
+                加载中...
+              </div>
             </div>
           </div>
 
@@ -17471,20 +17563,92 @@ function loadLeaderboard() {
       const isAdmin = !!adminToken;
       const statsEl = document.getElementById('leaderboardStats');
       const toggleEl = document.getElementById('lbAnonymousToggle');
+      const myPerfEl = document.getElementById('lbMyPerformance');
       if (isAdmin) {
         if (statsEl) statsEl.style.display = 'none';
         if (toggleEl) toggleEl.style.display = 'none';
+        if (myPerfEl) myPerfEl.style.display = 'none';
       } else {
         if (statsEl) statsEl.style.display = '';
-        // 更新统计卡片
+        if (myPerfEl) myPerfEl.style.display = '';
+
+        // 获取当前用户数据
+        const myEntry = data.rankings.find(r => r.is_me);
+        const myRank = data.my_rank;
+
+        // 更新个人成就卡片
+        const lbMyName = document.getElementById('lbMyName');
+        const lbMyScore = document.getElementById('lbMyScore');
+        const lbMyAccuracy = document.getElementById('lbMyAccuracy');
+        const lbMyStreak = document.getElementById('lbMyStreak');
+        const lbMyCourses = document.getElementById('lbMyCourses');
+        const lbMyHours = document.getElementById('lbMyHours');
+        const lbMyAchievements = document.getElementById('lbMyAchievements');
+        const lbMyRankBadge = document.getElementById('lbMyRankBadge');
+        const lbMyRankText = document.getElementById('lbMyRankText');
+        const lbRankTierText = document.getElementById('lbRankTierText');
+
+        if (myEntry) {
+          // 从 localStorage 获取当前用户的额外数据
+          let userCourses = 0, userHours = 0, userAchievements = 0, userStreak = 0;
+          try {
+            const users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+            const userData = users[currentUserEmail] || {};
+            userCourses = (userData.myCourses || []).length || 0;
+            userHours = userData.learningHours || 0;
+            userAchievements = (userData.achievements || []).length || 0;
+            userStreak = userData.currentStreak || 0;
+          } catch(e) {}
+
+          if (lbMyName) lbMyName.textContent = myEntry.username || '学习者';
+          if (lbMyScore) lbMyScore.textContent = myEntry.total_completed || 0;
+          if (lbMyAccuracy) lbMyAccuracy.textContent = (myEntry.accuracy || 0) + '%';
+          if (lbMyStreak) lbMyStreak.textContent = userStreak;
+          if (lbMyCourses) lbMyCourses.textContent = userCourses;
+          if (lbMyHours) lbMyHours.textContent = Math.round((userHours || 0) * 10) / 10;
+          if (lbMyAchievements) lbMyAchievements.textContent = userAchievements;
+          if (lbMyRankText) lbMyRankText.textContent = myRank ? `第 ${myRank} 名` : '未上榜';
+          if (lbMyRankBadge) {
+            lbMyRankBadge.textContent = myRank === 1 ? '🥇' : myRank === 2 ? '🥈' : myRank === 3 ? '🥉' : '🏅';
+          }
+          // 更新等级
+          const tier = getRankTier(myEntry.total_completed || 0);
+          if (lbRankTierText) lbRankTierText.textContent = tier.name;
+        } else {
+          if (lbMyName) lbMyName.textContent = '暂无数据';
+          if (lbMyScore) lbMyScore.textContent = '0';
+          if (lbMyAccuracy) lbMyAccuracy.textContent = '0%';
+          if (lbMyStreak) lbMyStreak.textContent = '0';
+          if (lbMyCourses) lbMyCourses.textContent = '0';
+          if (lbMyHours) lbMyHours.textContent = '0';
+          if (lbMyAchievements) lbMyAchievements.textContent = '0';
+          if (lbMyRankText) lbMyRankText.textContent = '未上榜';
+          if (lbMyRankBadge) lbMyRankBadge.textContent = '🎯';
+          if (lbRankTierText) lbRankTierText.textContent = '青铜';
+        }
+
+        // 更新统计网格
         const tu = document.getElementById('lbTotalUsers');
         const tq = document.getElementById('lbTotalQuestions');
-        const mr = document.getElementById('lbMyRank');
+        const aa = document.getElementById('lbAvgAccuracy');
+        const ta = document.getElementById('lbTotalAchievements');
         if (tu) tu.textContent = data.total_users || 0;
-        // 总做题数显示当前用户自己答对的题目数
-        const myEntry = data.rankings.find(r => r.is_me);
-        if (tq) tq.textContent = myEntry ? myEntry.correct_count : 0;
-        if (mr) mr.textContent = data.my_rank ? ('#' + data.my_rank) : '-';
+        if (tq) tq.textContent = data.total_questions || 0;
+        // 计算平均正确率
+        const avgAcc = data.rankings && data.rankings.length > 0
+          ? Math.round(data.rankings.reduce((sum, r) => sum + (r.accuracy || 0), 0) / data.rankings.length)
+          : 0;
+        if (aa) aa.textContent = avgAcc + '%';
+        // 从 localStorage 获取成就总数
+        let totalAchv = 0;
+        try {
+          const users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+          totalAchv = data.rankings.reduce((sum, r) => {
+            const uEmail = Object.keys(users).find(e => users[e].username === r.username);
+            return sum + ((uEmail && users[uEmail].achievements) ? users[uEmail].achievements.length : 0);
+          }, 0);
+        } catch(e) {}
+        if (ta) ta.textContent = totalAchv || '-';
 
         // 显示匿名开关（仅登录用户可见）
         if (toggleEl && email) {
@@ -17517,6 +17681,23 @@ function loadLeaderboard() {
     .catch(err => console.error('榜单加载失败:', err));
 }
 
+// 等级系统
+function getRankTier(score) {
+  const tiers = [
+    { name: '青铜', minScore: 0, icon: '🥉', color: '#cd7f32' },
+    { name: '白银', minScore: 50, icon: '🥈', color: '#94a3b8' },
+    { name: '黄金', minScore: 150, icon: '🥇', color: '#f59e0b' },
+    { name: '铂金', minScore: 300, icon: '💎', color: '#06b6d4' },
+    { name: '钻石', minScore: 600, icon: '💠', color: '#8b5cf6' },
+    { name: '大师', minScore: 1000, icon: '👑', color: '#ec4899' },
+    { name: '宗师', minScore: 2000, icon: '🏆', color: '#ef4444' }
+  ];
+  for (let i = tiers.length - 1; i >= 0; i--) {
+    if (score >= tiers[i].minScore) return tiers[i];
+  }
+  return tiers[0];
+}
+
 function _updateToggleUI(isOn) {
   const slider = document.getElementById('lbToggleSlider');
   const knob = document.getElementById('lbToggleKnob');
@@ -17545,9 +17726,10 @@ function switchLeaderboardPeriod(period) {
   _lbCurrentPeriod = period;
   document.querySelectorAll('.lb-period-btn').forEach(btn => {
     const isActive = btn.getAttribute('data-period') === period;
-    btn.style.background = isActive ? '#6366f1' : '#fff';
+    btn.style.background = isActive ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : '#fff';
     btn.style.color = isActive ? '#fff' : '#64748b';
-    btn.style.borderColor = isActive ? '#6366f1' : '#e2e8f0';
+    btn.style.boxShadow = isActive ? '0 4px 12px rgba(99,102,241,0.3)' : '0 2px 8px rgba(0,0,0,0.06)';
+    btn.style.fontWeight = isActive ? '700' : '600';
   });
   loadLeaderboard();
 }
@@ -17556,32 +17738,59 @@ function renderLbPodium(top3) {
   const podium = document.getElementById('lbPodium');
   if (!podium) return;
   if (!top3 || top3.length === 0) {
-    podium.innerHTML = '<div style="padding:40px; color:#94a3b8; font-size:13px; text-align:center; width:100;">暂无排行数据，快去做几道题吧</div>';
+    podium.innerHTML = '<div style="padding:60px; color:#94a3b8; font-size:14px; text-align:center; width:100%;"><div style="width:64px; height:64px; background:linear-gradient(135deg,#e0e7ff,#f3e8ff); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34"/><path d="M12 2a5 5 0 0 0-5 5v3c0 2.21 1.79 4 4 4s4-1.79 4-4V7a5 5 0 0 0-5-5z"/></svg></div>暂无排行数据，快去做几道题吧</div>';
     return;
   }
 
   const medals = ['🥇', '🥈', '🥉'];
   const colors = ['#f59e0b', '#94a3b8', '#cd7f32'];
-  const bgColors = ['linear-gradient(135deg,#fef3c7,#fde68a)', 'linear-gradient(135deg,#f1f5f9,#e2e8f0)', 'linear-gradient(135deg,#fed7aa,#fdba74)'];
-  const heights = [160, 130, 110];
+  const bgGradients = [
+    'linear-gradient(180deg,#fef3c7 0%,#fde68a 50%,#fbbf24 100%)',
+    'linear-gradient(180deg,#f1f5f9 0%,#e2e8f0 50%,#cbd5e1 100%)',
+    'linear-gradient(180deg,#fed7aa 0%,#fdba74 50%,#fb923c 100%)'
+  ];
+  const heights = [180, 140, 115];
   const order = top3.length >= 3 ? [1, 0, 2] : top3.length === 2 ? [1, 0] : [0];
 
   podium.innerHTML = order.map(i => {
     const u = top3[i];
     if (!u) return '';
     const isMe = u.is_me;
+    const tier = getRankTier(u.total_completed || 0);
+    const initials = (u.is_me ? u.username : (u.is_anonymous ? '匿' : u.username))[0].toUpperCase();
+    const avatarColors = ['#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
+    const avatarBg = avatarColors[(u.user_id || 0) % avatarColors.length];
+
     return `
-    <div style="display:flex; flex-direction:column; align-items:center; width:160px;
-      ${isMe ? 'filter:drop-shadow(0 0 8px rgba(99,102,241,0.3));' : ''}">
-      <div style="font-size:36px; margin-bottom:6px;">${medals[i]}</div>
-      <div style="font-size:14px; font-weight:700; color:#1e1b4b; margin-bottom:2px; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+    <div style="display:flex; flex-direction:column; align-items:center; width:180px; animation:fadeInUp 0.5s ease-out ${i * 0.1}s both;
+      ${isMe ? 'filter:drop-shadow(0 8px 16px rgba(99,102,241,0.3));' : 'filter:drop-shadow(0 4px 8px rgba(0,0,0,0.1));'}">
+      <!-- Avatar and Medal -->
+      <div style="position:relative; margin-bottom:12px;">
+        <div style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,${avatarBg},${avatarBg}cc); display:flex; align-items:center; justify-content:center; color:#fff; font-size:20px; font-weight:700; border:3px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+          ${initials}
+        </div>
+        <div style="position:absolute; top:-8px; right:-8px; font-size:28px; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2));">${medals[i]}</div>
+      </div>
+
+      <!-- Name and Tier -->
+      <div style="font-size:15px; font-weight:800; color:#1e1b4b; margin-bottom:4px; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center;">
         ${u.is_me ? u.username : (u.is_anonymous ? '***' : u.username)}
       </div>
-      ${u.is_me ? '<div style="font-size:10px; color:#6366f1; font-weight:600; margin-bottom:4px;">（我）</div>' : '<div style="height:16px;"></div>'}
-      <div style="width:100%; background:${bgColors[i]}; border-radius:14px 14px 0 0; padding:16px 10px; text-align:center; height:${heights[i]}px; display:flex; flex-direction:column; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-        <div style="font-size:26px; font-weight:800; color:${colors[i]};">${u.total_completed}</div>
-        <div style="font-size:11px; color:#64748b; margin-top:2px;">题</div>
-        <div style="font-size:11px; color:#64748b; margin-top:4px;">正确率 ${u.accuracy}%</div>
+      ${u.is_me ? '<div style="font-size:10px; color:#6366f1; font-weight:700; margin-bottom:6px; background:rgba(99,102,241,0.1); padding:2px 10px; border-radius:10px;">（我）</div>' : '<div style="height:22px;"></div>'}
+      <div style="font-size:11px; color:${tier.color}; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:4px;">
+        <span>${tier.icon}</span>
+        <span>${tier.name}</span>
+      </div>
+
+      <!-- Podium Block -->
+      <div style="width:100%; background:${bgGradients[i]}; border-radius:16px 16px 8px 8px; padding:20px 12px; text-align:center; height:${heights[i]}px; display:flex; flex-direction:column; justify-content:center; position:relative; overflow:hidden;">
+        <div style="position:absolute; top:0; left:0; right:0; height:4px; background:${colors[i]};"></div>
+        <div style="font-size:32px; font-weight:900; color:${colors[i]}; line-height:1; text-shadow:0 2px 4px rgba(0,0,0,0.1);">${u.total_completed}</div>
+        <div style="font-size:12px; color:#64748b; margin-top:6px; font-weight:600;">题</div>
+        <div style="font-size:11px; color:#64748b; margin-top:8px; display:flex; align-items:center; justify-content:center; gap:4px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          ${u.accuracy}%
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -17591,37 +17800,76 @@ function renderLbRankingList(rankings) {
   const list = document.getElementById('lbRankingList');
   if (!list) return;
   if (!rankings || rankings.length === 0) {
-    list.innerHTML = '<div style="padding:40px; text-align:center; color:#94a3b8; font-size:13px;">暂无排行数据</div>';
+    list.innerHTML = '<div style="padding:60px 40px; text-align:center; color:#94a3b8; font-size:14px;"><div style="width:48px; height:48px; background:linear-gradient(135deg,#e0e7ff,#f3e8ff); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>暂无排行数据</div>';
     return;
   }
 
-  list.innerHTML = rankings.map(u => {
+  list.innerHTML = rankings.map((u, idx) => {
     const isMe = u.is_me;
+    const tier = getRankTier(u.total_completed || 0);
     const rankColor = u.rank <= 3 ? ['#f59e0b','#94a3b8','#cd7f32'][u.rank - 1] : '#64748b';
     const rankBg = u.rank <= 3 ? ['#fef3c7','#f1f5f9','#fed7aa'][u.rank - 1] : '#f8fafc';
     const initials = (u.is_me ? u.username : (u.is_anonymous ? '匿' : u.username))[0].toUpperCase();
     const avatarColors = ['#6366f1','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
     const avatarBg = avatarColors[(u.user_id || 0) % avatarColors.length];
+
+    // 计算进度条（相对于第一名）
+    const maxScore = rankings[0]?.total_completed || 1;
+    const progressPercent = Math.min(100, Math.round((u.total_completed / maxScore) * 100));
+
     return `
-    <div style="display:flex; align-items:center; padding:12px 24px; border-bottom:1px solid #f8fafc; transition:background 0.15s; ${isMe ? 'background:linear-gradient(90deg,#eef2ff,#f8fafc); border-left:3px solid #6366f1;' : ''}"
-      onmouseover="if(!${isMe})this.style.background='#f8fafc'" onmouseout="if(!${isMe})this.style.background=''">
-      <div style="width:32px; height:32px; border-radius:10px; background:${u.rank <= 3 ? rankBg : '#f1f5f9'}; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; color:${rankColor}; margin-right:14px; flex-shrink:0;">
-        ${u.rank}
+    <div style="display:flex; align-items:center; padding:16px 24px; border-bottom:1px solid #f1f5f9; transition:all 0.2s; ${isMe ? 'background:linear-gradient(90deg,rgba(99,102,241,0.08),rgba(139,92,246,0.04)); border-left:4px solid #6366f1;' : 'border-left:4px solid transparent;'}"
+      onmouseover="if(!${isMe}){this.style.background='#faf5ff';this.style.transform='translateX(2px)';}" onmouseout="if(!${isMe}){this.style.background='';this.style.transform='';}">
+
+      <!-- Rank Badge -->
+      <div style="width:40px; height:40px; border-radius:12px; background:${u.rank <= 3 ? rankBg : '#f1f5f9'}; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:900; color:${rankColor}; margin-right:16px; flex-shrink:0; ${u.rank <= 3 ? 'box-shadow:0 2px 8px rgba(0,0,0,0.08);' : ''}">
+        ${u.rank <= 3 ? ['🥇','🥈','🥉'][u.rank - 1] : u.rank}
       </div>
-      <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,${avatarBg},${avatarBg}cc); display:flex; align-items:center; justify-content:center; color:#fff; font-size:14px; font-weight:700; margin-right:14px; flex-shrink:0;">
-        ${initials}
-      </div>
-      <div style="flex:1; min-width:0;">
-        <div style="font-size:13.5px; font-weight:600; color:#1e1b4b; display:flex; align-items:center; gap:6px;">
-          ${u.is_me ? u.username : (u.is_anonymous ? '***' : u.username)}
-          ${isMe ? '<span style="font-size:10px; background:#6366f1; color:#fff; padding:1px 7px; border-radius:8px; font-weight:600;">我</span>' : ''}
-          ${u.is_anonymous && !u.is_me ? '<span style="font-size:10px; color:#94a3b8;">匿名</span>' : ''}
+
+      <!-- Avatar -->
+      <div style="position:relative; margin-right:16px; flex-shrink:0;">
+        <div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,${avatarBg},${avatarBg}dd); display:flex; align-items:center; justify-content:center; color:#fff; font-size:16px; font-weight:700; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+          ${initials}
         </div>
-        <div style="font-size:11.5px; color:#94a3b8; margin-top:2px;">最近活跃：${u.last_active || '-'}</div>
+        <div style="position:absolute; bottom:-2px; right:-2px; font-size:14px;">
+          ${tier.icon}
+        </div>
       </div>
-      <div style="text-align:right; flex-shrink:0; margin-left:12px;">
-        <div style="font-size:18px; font-weight:800; color:#6366f1;">${u.total_completed}</div>
-        <div style="font-size:11px; color:#94a3b8;">正确率 ${u.accuracy}%</div>
+
+      <!-- User Info -->
+      <div style="flex:1; min-width:0;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <span style="font-size:14px; font-weight:700; color:#1e1b4b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;">
+            ${u.is_me ? u.username : (u.is_anonymous ? '***' : u.username)}
+          </span>
+          ${isMe ? '<span style="font-size:10px; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; padding:2px 8px; border-radius:10px; font-weight:700; box-shadow:0 2px 4px rgba(99,102,241,0.3);">我</span>' : ''}
+          ${u.is_anonymous && !u.is_me ? '<span style="font-size:10px; color:#94a3b8; background:#f1f5f9; padding:2px 8px; border-radius:10px;">匿名</span>' : ''}
+          <span style="font-size:10px; color:${tier.color}; font-weight:700; background:${tier.color}15; padding:2px 8px; border-radius:10px;">${tier.name}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; font-size:12px; color:#94a3b8;">
+          <span style="display:flex; align-items:center; gap:3px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            ${u.last_active || '-'}
+          </span>
+          ${u.streak_days ? `<span style="display:flex; align-items:center; gap:3px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            ${u.streak_days}天
+          </span>` : ''}
+        </div>
+        <!-- Progress Bar -->
+        <div style="margin-top:8px; height:4px; background:#f1f5f9; border-radius:4px; overflow:hidden;">
+          <div style="height:100%; width:${progressPercent}%; background:linear-gradient(90deg,${tier.color},${tier.color}cc); border-radius:4px; transition:width 0.5s ease-out;"></div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div style="text-align:right; flex-shrink:0; margin-left:16px; padding-left:16px; border-left:1px solid #f1f5f9;">
+        <div style="font-size:22px; font-weight:900; color:#6366f1; line-height:1;">${u.total_completed}</div>
+        <div style="font-size:11px; color:#94a3b8; margin-top:4px; font-weight:600;">答对</div>
+        <div style="margin-top:6px; display:flex; align-items:center; justify-content:flex-end; gap:4px; font-size:12px; color:#10b981; font-weight:700;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          ${u.accuracy}%
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -18024,6 +18272,8 @@ function enterAdminMode() {
   if (lbStats) lbStats.style.display = 'none';
   const lbAnon = document.getElementById('lbAnonymousToggle');
   if (lbAnon) lbAnon.style.display = 'none';
+  const lbMyPerf = document.getElementById('lbMyPerformance');
+  if (lbMyPerf) lbMyPerf.style.display = 'none';
 }
 
 function exitAdminMode() {
@@ -18049,6 +18299,8 @@ function exitAdminMode() {
   if (lbStats) lbStats.style.display = '';
   const lbAnon = document.getElementById('lbAnonymousToggle');
   if (lbAnon) lbAnon.style.display = '';
+  const lbMyPerf = document.getElementById('lbMyPerformance');
+  if (lbMyPerf) lbMyPerf.style.display = '';
 }
 
 function handleAdminLogin(e) {
