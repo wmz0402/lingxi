@@ -87,7 +87,8 @@ except ImportError:
 # ============================
 # 1. 配置区（请通过环境变量设置凭证，不要硬编码）
 # ============================
-SPARK_APP_ID = os.getenv("SPARK_APP_ID", "")
+# 讯飞星火配置（同时设置两套变量名以兼容不同版本 SDK）
+SPARK_APP_ID = os.getenv("SPARK_APP_ID", os.getenv("IFLYTEK_SPARK_APP_ID", ""))
 SPARK_API_SECRET = os.getenv("SPARK_API_SECRET", "")
 SPARK_API_KEY = os.getenv("SPARK_API_KEY", "")
 
@@ -112,6 +113,10 @@ SMTP_PORT = 465  # SSL
 SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASS = os.getenv("SMTP_PASS", "")
 SMTP_SENDER_NAME = '灵析学习平台'
+
+# 讯飞星火 WebSocket 调用的认证参数
+SPARK_AUTH_URL = "wss://spark-api.xf-yun.com/v4.0/chat"
+SPARK_DOMAIN = "4.0Ultra"
 VERIFY_CODE_EXPIRE = 300   # 验证码有效期（秒），5分钟
 VERIFY_CODE_COOLDOWN = 60  # 发送冷却时间（秒），防止频繁发送
 
@@ -640,39 +645,112 @@ def get_db_connection():
 # 6.5 内容安全过滤与防幻觉处理
 # ============================
 
-# 内容安全过滤关键词
+import re as _re
+
+# 内容安全过滤关键词（扩展版）
 CONTENT_SAFETY_KEYWORDS = [
-    # 暴力相关
-    '杀人方法', '制造炸弹', '制作毒品', '自杀方法',
-    # 违法相关
-    '伪造证件', '黑客攻击', '盗取密码',
-    # 其他敏感内容
+    # 暴力/伤害相关
+    '杀人方法', '制造炸弹', '制作毒品', '自杀方法', '伤害他人', '投毒方法',
+    '制毒教程', '爆炸物制作', '枪支制作',
+    # 违法/犯罪相关
+    '伪造证件', '黑客攻击', '盗取密码', '洗钱方法', '诈骗教程',
+    '入侵系统', '木马制作', '钓鱼网站制作',
+    # 不良信息
+    '色情内容', '赌博网站', '传销组织',
 ]
 
+# 敏感模式正则（用于检测更复杂的违规内容）
+SENSITIVE_PATTERNS = [
+    (_re.compile(r'(?:教|怎么|如何|方法).*(?:制作|制造|合成).*(?:毒品|炸弹|武器)', _re.IGNORECASE), '[违规内容已过滤]'),
+    (_re.compile(r'(?:教|怎么|如何|方法).*(?:入侵|攻击|破解).*(?:系统|服务器|数据库)', _re.IGNORECASE), '[违规内容已过滤]'),
+    (_re.compile(r'(?:获取|盗取|窃取).*(?:密码|账号|隐私|个人信息)', _re.IGNORECASE), '[违规内容已过滤]'),
+]
+
+# 置信度不确定表述模式
+UNCERTAIN_PATTERNS = ['可能', '也许', '大概', '不确定', '据说', '听说', '猜测', '大概', '似乎', '大约', '或许', '应该是']
+
+# 学术关键词（触发来源标注）
+ACADEMIC_KEYWORDS = ['定理', '公式', '定义', '原理', '证明', '推导', '算法', '复杂度', '概率', '积分',
+                     '微分', '矩阵', '向量', '函数', '编译', '进程', '线程', '协议', '网络模型',
+                     '数据结构', '排序', '查找', '递归', '动态规划', '贪心', '回溯', '图论']
+
+
 def content_safety_filter(text):
-    """过滤不安全内容，返回 (filtered_text, is_safe)"""
+    """过滤不安全内容，返回 (filtered_text, is_safe)
+    
+    多层过滤：
+    1. 关键词精确匹配过滤
+    2. 正则模式匹配过滤
+    3. 检测是否包含违规内容并标记
+    """
+    if not text:
+        return text, True
+    
+    is_safe = True
+    filtered = text
+    
+    # 1. 关键词精确匹配
     for keyword in CONTENT_SAFETY_KEYWORDS:
-        if keyword in text:
-            text = text.replace(keyword, '[内容已过滤]')
-    return text, True
+        if keyword in filtered:
+            filtered = filtered.replace(keyword, '[内容已过滤]')
+            is_safe = False
+            print(f"[安全过滤] 检测到敏感关键词: {keyword}")
+    
+    # 2. 正则模式匹配
+    for pattern, replacement in SENSITIVE_PATTERNS:
+        if pattern.search(filtered):
+            filtered = pattern.sub(replacement, filtered)
+            is_safe = False
+            print(f"[安全过滤] 检测到敏感模式，已替换")
+    
+    return filtered, is_safe
 
 
-def anti_hallucination_check(text, doc_context=None):
-    """对AI回复进行防幻觉处理"""
+def anti_hallucination_check(text, doc_context=None, has_course_content=False):
+    """对AI回复进行防幻觉处理
+    
+    多层防护：
+    1. 文档来源标注：如果基于文档上下文，标注来源
+    2. 学术内容来源声明：涉及学术关键词时添加"基于课程内容"声明
+    3. 置信度标识：对不确定的表述添加验证提示
+    4. 通用免责声明：长篇学术回复添加免责声明
+    """
+    if not text:
+        return text
+    
+    # 跳过短回复（纯社交/闲聊）
+    if len(text) < 100 and not any(w in text for w in ACADEMIC_KEYWORDS):
+        return text
+    
+    # 跳过纯社交回复
+    if any(w in text for w in ['你好', '谢谢', '不客气', '再见', '很高兴']) and len(text) < 80:
+        return text
+    
+    additions = []
+    
     # 1. 如果有文档上下文，添加来源标注
     if doc_context:
-        text += "\n\n---\n*以上内容基于您提供的文档资料生成，建议对照原文核实关键信息。*"
-
-    # 2. 对不确定的表述添加提示
-    uncertain_patterns = ['可能', '也许', '大概', '不确定', '据说', '听说']
-    has_uncertain = any(p in text for p in uncertain_patterns)
-    if has_uncertain:
-        text += "\n\n*注：以上回答中部分内容存在不确定性，建议查阅权威资料进行验证。*"
-
-    # 3. 通用免责声明（仅在学术/技术回答中添加）
-    if len(text) > 500 and not any(w in text for w in ['你好', '谢谢', '不客气']):
-        text += "\n\n---\n*AI生成内容仅供参考，重要知识点请参考教材或权威资料。*"
-
+        additions.append("*以上内容基于您提供的文档资料生成，建议对照原文核实关键信息。*")
+    
+    # 2. 学术内容来源声明
+    has_academic = any(kw in text for kw in ACADEMIC_KEYWORDS)
+    if has_academic or has_course_content:
+        additions.append("*以上知识点基于课程教学内容整理，如需深入了解请参考对应教材或权威学术资料。*")
+    
+    # 3. 置信度标识：检测不确定表述
+    uncertain_count = sum(1 for p in UNCERTAIN_PATTERNS if p in text)
+    if uncertain_count >= 2:
+        additions.append("*注：以上回答中部分内容存在不确定性，建议查阅权威教材或咨询教师进行验证。*")
+    elif uncertain_count == 1 and has_academic:
+        additions.append("*注：部分结论可能存在偏差，建议进一步验证。*")
+    
+    # 4. 通用免责声明（学术/技术长回复）
+    if len(text) > 200:
+        additions.append("*AI生成内容仅供参考，请以教材和教师讲解为准。*")
+    
+    if additions:
+        text += "\n\n---\n" + "\n\n".join(additions)
+    
     return text
 
 
@@ -1521,6 +1599,10 @@ def group_chat():
         
         for future in as_completed(futures):
             model_key, content, elapsed, success = future.result()
+            # 对每个AI的回复应用内容安全过滤和防幻觉处理
+            if success and content:
+                content, _is_safe = content_safety_filter(content)
+                content = anti_hallucination_check(content, has_course_content=True)
             results[model_key]["content"] = content
             results[model_key]["elapsed"] = elapsed
             results[model_key]["status"] = "done" if success else "error"
@@ -3273,7 +3355,13 @@ if __name__ == '__main__':
     _ensure_user_table()
     _ensure_admin_account()
     _ensure_question_completion_table()
-    webbrowser.open('http://127.0.0.1:5000')
+
+    # 延迟打开浏览器，等服务启动后再打开
+    def _delayed_open_browser():
+        import time
+        time.sleep(1.5)
+        webbrowser.open('http://127.0.0.1:5000')
+    threading.Thread(target=_delayed_open_browser, daemon=True).start()
 
     _debug = os.getenv("FLASK_DEBUG", "0") == "1"
     app.run(host='0.0.0.0', port=5000, debug=_debug, use_reloader=False)
