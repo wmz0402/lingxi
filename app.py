@@ -1025,7 +1025,7 @@ def chat():
         recommend_prompt = system_prompt + f"\n\n{DOC_CONTEXT_BLOCK}用户输入：{clean_question}" + ANTI_LEAK
     elif intent_type == 'problem':
         # 针对题目解答：专业、严谨、步骤清晰，绝对不要加可爱的颜文字和语气词
-        system_prompt = f"""你是一个专业、严谨且耐心的计算机与数学学习导师。请针对用户提出的具体题目、计算或技术问题，给出非常详细、步骤清晰、逻辑严密的讲解与答复。
+        system_prompt = f"""你是一个专业、严谨且耐心的全学科学习导师，能够解答数学、计算机、物理、化学、英语、语文、历史、地理、政治、生物、经济学等各学科问题。请针对用户提出的具体题目、计算、技术或知识问题，给出非常详细、步骤清晰、逻辑严密的讲解与答复。
 在回答时，请遵循以下规则：
 1. 语气一定要专业、严谨、专注且清晰，拒绝任何随意的敷衍。
 2. 绝对不能使用任何可爱的颜文字表情（例如：(๑•ㅂ•)9✧、^_^、(*^▽^*)）或可爱的表情符号，也不要使用口语化的语气词（如"呀"、"哒"、"呢"）。
@@ -1117,20 +1117,46 @@ def group_chat():
 
     user_id = data.get('user_id', 'default')
     user_input = data.get('message', '').strip()
+    image_path = data.get('image_path', '')
     history = data.get('history', [])
     
     if not user_input:
         return jsonify({"error": "消息不能为空"}), 400
 
-    print(f"[DEBUG] /api/group_chat 收到: message='{user_input[:50]}', history_len={len(history)}")
+    print(f"[DEBUG] /api/group_chat 收到: message='{user_input[:50]}', history_len={len(history)}, image_path='{image_path}'")
+
+    # 处理图片识别
+    image_extracted_context = ""
+    if image_path:
+        filename = os.path.basename(image_path)
+        import tempfile
+        if "/api/tmp_images/" in image_path:
+            safe_path = os.path.join(tempfile.gettempdir(), filename)
+        else:
+            safe_path = os.path.join(BASE_DIR, 'static', 'uploads', filename)
+        if os.path.exists(safe_path):
+            image_extract_prompt = (
+                "请仔细识别并客观描述或提取这张图片中的关键信息：\n"
+                "1. 如果图片中包含文字、数学公式、图表数据、手写内容或代码，请完整且准确地提取出图片中所有的文本内容。\n"
+                "2. 如果图片是人物、风景、物品或非文字的日常图像，请非常详细、客观地描述画面中的视觉内容。\n"
+                "注意：您的职责是客观还原图片内容以供对话系统使用，不需要对用户提问进行解答。"
+            )
+            image_description = call_xunfei_image(safe_path, image_extract_prompt)
+            if "图片识别调用失败" not in image_description and image_description.strip():
+                image_extracted_context = image_description.strip()
+
+    # 如果有图片，将图片内容拼接到用户消息中
+    if image_extracted_context:
+        user_input = f"[用户上传了一张图片，图片内容如下：\n{image_extracted_context}\n]\n\n{user_input}"
 
     # 构建通用的解题系统提示
-    system_prompt = """你是一个专业、严谨且耐心的计算机与数学学习导师。请针对用户提出的具体题目、计算或技术问题，给出非常详细、步骤清晰、逻辑严密的讲解与答复。
+    system_prompt = """你是一个专业、严谨且耐心的全学科学习导师，能够解答数学、计算机、物理、化学、英语、语文、历史、地理、政治、生物、经济学等各学科问题。请针对用户提出的具体题目、计算、技术或知识问题，给出非常详细、步骤清晰、逻辑严密的讲解与答复。
 在回答时，请遵循以下规则：
 1. 语气一定要专业、严谨、专注且清晰。
 2. 详细给出解题步骤、推导过程或代码说明，引导用户彻底理解。
 3. 所有数学公式都必须使用 LaTeX 格式，且在 Markdown 里严格使用数学包裹符号：行间公式必须使用双美元符号 $$ 包裹，行内公式必须使用单美元符号 $ 包裹。
-4. 如果是编程问题，给出完整的代码实现并逐行解释关键逻辑。"""
+4. 如果是编程问题，给出完整的代码实现并逐行解释关键逻辑。
+5. 如果是非计算机和数学的学科问题，同样给出专业、准确的解答，使用该学科的标准表述和术语。"""
 
     # === 构建 OpenAI 兼容格式的 messages（给 DeepSeek 和通义千问用） ===
     openai_messages = [{"role": "system", "content": system_prompt}]
