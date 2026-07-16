@@ -5100,6 +5100,23 @@
 </style>
 </head>
 <body>
+<script>
+// 防闪烁：在 DOMContentLoaded 前就隐藏 authPage（如果用户已登录）
+(function(){
+  try {
+    var u = localStorage.getItem('lingxi_current_user') || sessionStorage.getItem('lingxi_current_user');
+    if (u) {
+      var users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+      if (users[u]) {
+        var ap = document.getElementById('authPage');
+        if (ap) ap.style.display = 'none';
+        var mp = document.getElementById('mainPage');
+        if (mp) mp.style.display = '';
+      }
+    }
+  } catch(e) {}
+})();
+</script>
   
   <!-- 悬浮侧边栏折叠按钮 (只在侧边栏折叠时可见) -->
   <button id="mainToggleSidebarBtn" onclick="toggleSidebar()" style="position: fixed; top: 16px; left: 16px; z-index: 999; display: none; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); color: #475569; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: background 0.2s;" onmouseover="this.style.background='#fff'" onmouseout="this.style.background='rgba(255,255,255,0.85)'">
@@ -10673,12 +10690,19 @@ function localSearch(query) {
 
 async function loadBackendCourses() {
   try {
-    const response = await fetch('/api/courses');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const response = await fetch('/api/courses', { signal: controller.signal });
+    clearTimeout(timeoutId);
     if (!response.ok) throw new Error('网络响应错误');
     const courses = await response.json();
     console.log('成功从后端加载课程列表:', courses);
   } catch (error) {
-    console.error('加载后端课程数据失败:', error);
+    if (error.name === 'AbortError') {
+      console.warn('加载后端课程超时，已跳过');
+    } else {
+      console.error('加载后端课程数据失败:', error);
+    }
   }
 }
 
@@ -12940,7 +12964,8 @@ function sendStudyAssistantMessage() {
     const typingEl = document.getElementById(typingId);
     if (typingEl) {
       const bubble = typingEl.querySelector('.msg-bubble');
-      bubble.innerHTML = `<div class="markdown-body" style="font-size: 12.5px; line-height: 1.5; color: #334155;">${safeMarkdownParse(response)}</div>`;
+      const disclaimer = `<div class="ai-disclaimer" style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(0,0,0,0.04); display:flex; align-items:center; gap:4px; font-size:10.5px; color:#94a3b8;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>AI生成内容，仅供参考</span></div>`;
+      bubble.innerHTML = `<div class="markdown-body" style="font-size: 12.5px; line-height: 1.5; color: #334155;">${safeMarkdownParse(response)}</div>${disclaimer}`;
       container.scrollTop = container.scrollHeight;
       window.typesetMathJax();
     }
@@ -13862,11 +13887,12 @@ function wrapAssistantBubble(bubbleInnerHtml, chatIndex, favType, favTitle) {
   if (!favTitle) favTitle = 'AI回复 #' + chatIndex;
   // 检查是否已收藏
   const isFav = favoritesList.some(f => f.chatIndex === chatIndex);
+  const disclaimer = `<div class="ai-disclaimer" style="margin-top:10px; padding-top:8px; border-top:1px solid rgba(0,0,0,0.04); display:flex; align-items:center; gap:4px; font-size:11px; color:#94a3b8;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>AI生成内容，仅供参考，请以教材和教师讲解为准</span></div>`;
   return `<div class="msg-bubble-wrap" data-chat-index="${chatIndex}" data-fav-type="${favType}" data-fav-title="${escapeHtml(favTitle)}">
     <button class="fav-bubble-btn ${isFav ? 'favorited' : ''}" onclick="toggleFavoriteBubble(${chatIndex})" title="${isFav ? '取消收藏' : '收藏此消息'}">
       <span class="fav-star">${isFav ? '&#9733;' : '&#9734;'}</span>
     </button>
-    <div class="msg-bubble">${bubbleInnerHtml}</div>
+    <div class="msg-bubble">${bubbleInnerHtml}${disclaimer}</div>
   </div>`;
 }
 
@@ -15497,7 +15523,8 @@ async function sendGroupMessage() {
         
         // 渲染Markdown内容
         const parsedContent = safeMarkdownParse(result.content);
-        contentEl.innerHTML = `<div class="markdown-body">${parsedContent}</div>`;
+        const disclaimer = `<div class="ai-disclaimer" style="margin-top:8px; padding-top:6px; border-top:1px solid rgba(0,0,0,0.04); display:flex; align-items:center; gap:4px; font-size:10.5px; color:#94a3b8;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>AI生成内容，仅供参考</span></div>`;
+        contentEl.innerHTML = `<div class="markdown-body">${parsedContent}</div>${disclaimer}`;
         
         // 更新状态
         statusEl.className = `group-msg-status ${result.status}`;
