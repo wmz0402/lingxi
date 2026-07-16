@@ -143,15 +143,20 @@ def parse_quizzes(text):
             if in_analysis and not in_code_block and (line_str.startswith('#') or line_str.startswith('---') or line_str.startswith('***')):
                 break
                 
-            # Match options
-            opt_match = re.match(r'^-?\s*([A-D])[\.\s、:]+(.*)', line_str)
-            if opt_match:
-                options.append({"key": opt_match.group(1), "text": opt_match.group(2).strip()})
+            # Match options (can be multiple on one line, e.g. A. xxx  B. yyy)
+            # Find all options matching A/B/C/D on the line, ensuring it's an option letter prefix
+            # Skip matching if the line is an answer, explanation, or header line to avoid misidentifying details
+            opt_line_matches = []
+            if not any(keyword in line_str for keyword in ["正确答案", "答案", "解析", "详解", "解："]):
+                opt_line_matches = list(re.finditer(r'(?:^|[\s　]+)([A-D])[\.\s、:]+\s*(.*?)(?=(?:[\s　]+[A-D][\.\s、:])|$)', line_str))
+            if opt_line_matches:
+                for m in opt_line_matches:
+                    options.append({"key": m.group(1), "text": m.group(2).strip()})
                 in_options = True
                 continue
                 
             # Match answer
-            ans_match = re.search(r'(?:正确答案|答案)[：:\s]*\**([A-D])', line_str)
+            ans_match = re.search(r'(?:正确答案|答案)[：:\s]*\**([A-D]+)', line_str)
             if ans_match:
                 answer = ans_match.group(1)
                 continue

@@ -11672,6 +11672,9 @@ function submitChapterQuiz() {
     successBox.style.display = 'block';
     failBox.style.display = 'none';
     
+    // 渲染 LaTeX 数学公式
+    window.typesetMathJax();
+    
     const questionTopic = ch.title ? ch.title.replace(/^第?\s*\d+\s*[章章节节]\s*[：:\s]*/, '').trim() : '通用';
     updateProfileFromQuiz(course.title, questionTopic, true, null);
     // 上报做题记录（填空题视为正确）
@@ -11703,6 +11706,9 @@ function submitChapterQuiz() {
     // Record wrong question
     recordWrongQuestion(course.title, ch.title, q);
   }
+  
+  // 渲染 LaTeX 数学公式
+  window.typesetMathJax();
   
   // 动态更新能力画像
   const questionTopic = ch.title ? ch.title.replace(/^第?\s*\d+\s*[章章节节]\s*[：:\s]*/, '').trim() : '通用';
@@ -17827,19 +17833,19 @@ function loadLeaderboard() {
         const lbMyRankText = document.getElementById('lbMyRankText');
         const lbRankTierText = document.getElementById('lbRankTierText');
 
-        if (myEntry) {
-          // 从 localStorage 获取当前用户的额外数据
-          let userCourses = 0, userHours = 0, userAchievements = 0, userStreak = 0;
-          try {
-            const users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
-            const userData = users[currentUserEmail] || {};
-            userCourses = (userData.myCourses || []).length || 0;
-            userHours = userData.learningHours || 0;
-            userAchievements = (userData.achievements || []).length || 0;
-            userStreak = userData.currentStreak || 0;
-          } catch(e) {}
+        // 从 localStorage 获取当前用户的额外数据（即使未做题也能显示基础学习数据）
+        let userCourses = 0, userHours = 0, userAchievements = 0, userStreak = 0;
+        try {
+          const users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+          const userData = users[currentUserEmail] || {};
+          userCourses = (userData.myCourses || []).length || 0;
+          userHours = userData.learningHours || 0;
+          userAchievements = (userData.achievements || []).length || 0;
+          userStreak = userData.currentStreak || 0;
+        } catch(e) {}
 
-          if (lbMyName) lbMyName.textContent = myEntry.username || '学习者';
+        if (myEntry) {
+          if (lbMyName) lbMyName.textContent = myEntry.username || userName || '学习者';
           if (lbMyScore) lbMyScore.textContent = myEntry.total_completed || 0;
           if (lbMyAccuracy) lbMyAccuracy.textContent = (myEntry.accuracy || 0) + '%';
           if (lbMyStreak) lbMyStreak.textContent = userStreak;
@@ -17854,13 +17860,13 @@ function loadLeaderboard() {
           const tier = getRankTier(myEntry.total_completed || 0);
           if (lbRankTierText) lbRankTierText.textContent = tier.name;
         } else {
-          if (lbMyName) lbMyName.textContent = '暂无数据';
+          if (lbMyName) lbMyName.textContent = userName || '学习者';
           if (lbMyScore) lbMyScore.textContent = '0';
           if (lbMyAccuracy) lbMyAccuracy.textContent = '0%';
-          if (lbMyStreak) lbMyStreak.textContent = '0';
-          if (lbMyCourses) lbMyCourses.textContent = '0';
-          if (lbMyHours) lbMyHours.textContent = '0';
-          if (lbMyAchievements) lbMyAchievements.textContent = '0';
+          if (lbMyStreak) lbMyStreak.textContent = userStreak;
+          if (lbMyCourses) lbMyCourses.textContent = userCourses;
+          if (lbMyHours) lbMyHours.textContent = Math.round((userHours || 0) * 10) / 10;
+          if (lbMyAchievements) lbMyAchievements.textContent = userAchievements;
           if (lbMyRankText) lbMyRankText.textContent = '未上榜';
           if (lbMyRankBadge) lbMyRankBadge.textContent = '🎯';
           if (lbRankTierText) lbRankTierText.textContent = '青铜';

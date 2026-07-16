@@ -215,7 +215,7 @@ const ALL_COURSES_DATA = [
                     "text": "$f(x)$ 在 $x_0$ 可导"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "暂无详细解析"
               },
               {
@@ -238,7 +238,7 @@ const ALL_COURSES_DATA = [
                     "text": "振荡间断点"
                   }
                 ],
-                "answer": "A",
+                "answer": "AB",
                 "analysis": "暂无详细解析"
               },
               {
@@ -261,7 +261,7 @@ const ALL_COURSES_DATA = [
                     "text": "闭区间上的连续函数一定有最大值和最小值"
                   }
                 ],
-                "answer": "A",
+                "answer": "ACD",
                 "analysis": "暂无详细解析"
               },
               {
@@ -284,7 +284,7 @@ const ALL_COURSES_DATA = [
                     "text": "重要极限"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "暂无详细解析"
               }
             ],
@@ -500,7 +500,7 @@ const ALL_COURSES_DATA = [
                     "text": "$(ku)' = k u'$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "暂无详细解析"
               },
               {
@@ -523,7 +523,7 @@ const ALL_COURSES_DATA = [
                     "text": "$y = x^2 + 3x$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "D 为简单多项式，无需链式法则。"
               },
               {
@@ -546,7 +546,7 @@ const ALL_COURSES_DATA = [
                     "text": "$dy = f'(x) dx$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "暂无详细解析"
               },
               {
@@ -569,7 +569,7 @@ const ALL_COURSES_DATA = [
                     "text": "高阶导数求导"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "暂无详细解析"
               }
             ],
@@ -693,7 +693,7 @@ const ALL_COURSES_DATA = [
                     "text": "$\\int \\sec^2 x \\, dx = \\tan x + C$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "暂无详细解析"
               },
               {
@@ -762,7 +762,7 @@ const ALL_COURSES_DATA = [
                     "text": "只能用于正函数"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "暂无详细解析"
               },
               {
@@ -785,7 +785,7 @@ const ALL_COURSES_DATA = [
                     "text": "只能计算正数区间"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "暂无详细解析"
               },
               {
@@ -808,7 +808,7 @@ const ALL_COURSES_DATA = [
                     "text": "洛必达换元"
                   }
                 ],
-                "answer": "A",
+                "answer": "AB",
                 "analysis": "暂无详细解析"
               },
               {
@@ -831,7 +831,7 @@ const ALL_COURSES_DATA = [
                     "text": "积分区间可以是无穷"
                   }
                 ],
-                "answer": "A",
+                "answer": "AB",
                 "analysis": "暂无详细解析"
               },
               {
@@ -854,7 +854,7 @@ const ALL_COURSES_DATA = [
                     "text": "$\\int_a^b f(x) \\, dx = F(b) - F(a)$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "暂无详细解析"
               }
             ],
@@ -872,26 +872,256 @@ const ALL_COURSES_DATA = [
             "content": "\n## 1.1 多元函数的基本概念\n\n### 1.1.1 多元函数的定义\n多元函数是指因变量依赖于多个自变量的函数。最常见的是二元函数和三元函数。\n\n**定义**：设 $D$ 是 $\\mathbb{R}^n$ 中的一个非空子集，如果对于 $D$ 中的每一个点 $\\mathbf{x} = (x_1, x_2, \\dots, x_n)$，都有唯一确定的实数 $z$ 与之对应，则称 $z$ 是 $\\mathbf{x}$ 的函数，记作：\n$$\nz = f(x_1, x_2, \\dots, x_n), \\quad (x_1, x_2, \\dots, x_n) \\in D\n$$\n$D$ 称为函数的**定义域**，$f(D)$ 称为**值域**。\n\n- **二元函数**：$z = f(x, y)$\n- **三元函数**：$u = f(x, y, z)$\n\n**例1**：$z = \\sqrt{1 - x^2 - y^2}$，定义域为单位圆盘 $x^2 + y^2 \\leq 1$。\n\n### 1.1.2 多元函数的极限与连续性\n\n**二元函数极限**：\n$$\n\\lim_{(x,y) \\to (x_0,y_0)} f(x,y) = A\n$$\n表示当点 $(x,y)$ 以任意方式趋近于 $(x_0,y_0)$ 时，$f(x,y)$ 趋近于 $A$。\n\n**注意**：多元函数极限比一元复杂，必须沿所有路径趋近结果相同，否则极限不存在。\n\n**连续性**：若 $\\lim_{(x,y) \\to (x_0,y_0)} f(x,y) = f(x_0,y_0)$，则 $f$ 在 $(x_0,y_0)$ 处连续。\n\n**例**：证明 $f(x,y) = \\frac{xy}{x^2 + y^2}$ 在 $(0,0)$ 处极限不存在（沿 $y=0$ 和 $y=x$ 路径结果不同）。\n\n## 1.2 偏导数\n\n### 1.2.1 一阶偏导数的定义\n**定义**：设 $z = f(x,y)$，在点 $(x_0,y_0)$ 处固定 $y = y_0$，对 $x$ 求导：\n$$\nf_x(x_0, y_0) = \\frac{\\partial z}{\\partial x}\\bigg|_{(x_0,y_0)} = \\lim_{\\Delta x \\to 0} \\frac{f(x_0 + \\Delta x, y_0) - f(x_0, y_0)}{\\Delta x}\n$$\n类似定义 $f_y(x_0, y_0)$。\n\n**几何意义**：\n- $f_x$ 表示曲面 $z = f(x,y)$ 沿 $x$ 方向（固定 $y$）的切线斜率。\n- $f_y$ 表示沿 $y$ 方向的切线斜率。\n\n**计算方法**：将其他变量视为常数，按一元函数求导规则计算。\n\n**例1**：求 $z = x^2 y + 3xy^2$ 的偏导数。\n$$\n\\frac{\\partial z}{\\partial x} = 2xy + 3y^2, \\quad \\frac{\\partial z}{\\partial y} = x^2 + 6xy\n$$\n\n**例2**：$f(x,y) = e^{xy} \\sin(x+y)$ 的偏导数。\n\n### 1.2.2 高阶偏导数\n二阶偏导数：\n- $f_{xx} = \\frac{\\partial^2 z}{\\partial x^2}$\n- $f_{xy} = \\frac{\\partial^2 z}{\\partial x \\partial y}$\n- $f_{yx} = \\frac{\\partial^2 z}{\\partial y \\partial x}$\n- $f_{yy} = \\frac{\\partial^2 z}{\\partial y^2}$\n\n**定理**（混合偏导数相等）：若 $f_{xy}$ 和 $f_{yx}$ 在区域内连续，则 $f_{xy} = f_{yx}$。\n\n**例**：计算 $z = x^3 y^2 + \\sin(xy)$ 的所有二阶偏导数并验证 $f_{xy} = f_{yx}$。\n\n## 1.3 全微分\n\n### 1.3.1 全微分的定义\n**定义**：若函数 $z = f(x,y)$ 在点 $(x_0,y_0)$ 的全增量可表示为：\n$$\n\\Delta z = A \\Delta x + B \\Delta y + o(\\rho)\n$$\n其中 $\\rho = \\sqrt{(\\Delta x)^2 + (\\Delta y)^2} \\to 0$，则称 $z$ 在该点可微，$dz = A \\Delta x + B \\Delta y$ 为全微分，其中 $A = f_x(x_0,y_0)$，$B = f_y(x_0,y_0)$。\n\n**可微与连续、偏导数的关系**：\n- 可微 $\\Rightarrow$ 偏导数存在且连续 $\\Rightarrow$ 函数连续。\n- 但偏导数存在 $\\not\\Rightarrow$ 可微。\n\n### 1.3.2 线性逼近与误差估计\n全微分用于近似计算：\n$$\nf(x_0 + \\Delta x, y_0 + \\Delta y) \\approx f(x_0, y_0) + f_x \\Delta x + f_y \\Delta y\n$$\n\n**相对误差**：$\\frac{|dz|}{|z|} \\approx$ 相对误差上界。\n\n**例**：用全微分估计 $z = \\sqrt{x^2 + y^2}$ 在 $(3,4)$ 附近的变化。\n\n## 1.4 多元复合函数的微分法（链式法则）\n\n### 1.4.1 链式法则\n设 $z = f(u,v)$，$u = g(x,y)$，$v = h(x,y)$，则：\n$$\n\\frac{\\partial z}{\\partial x} = \\frac{\\partial z}{\\partial u} \\frac{\\partial u}{\\partial x} + \\frac{\\partial z}{\\partial v} \\frac{\\partial v}{\\partial x}\n$$\n$$\n\\frac{\\partial z}{\\partial y} = \\frac{\\partial z}{\\partial u} \\frac{\\partial u}{\\partial y} + \\frac{\\partial z}{\\partial v} \\frac{\\partial v}{\\partial y}\n$$\n\n**树状图记忆法**：画出变量依赖关系树。\n\n**例**：$z = e^{u} \\sin v$，$u = x^2 + y^2$，$v = xy$，求 $\\frac{\\partial z}{\\partial x}$ 和 $\\frac{\\partial z}{\\partial y}$。\n\n**一般形式**（多层复合）：\n对于 $z = f(x, y, u(x,y), v(x,y), \\dots)$ 类似处理。\n\n### 1.4.2 隐函数微分法\n设 $F(x,y,z) = 0$ 确定 $z = z(x,y)$，则：\n$$\n\\frac{\\partial z}{\\partial x} = -\\frac{F_x}{F_z}, \\quad \\frac{\\partial z}{\\partial y} = -\\frac{F_y}{F_z} \\quad (F_z \\neq 0)\n$$\n\n**例**：$x^2 + y^2 + z^2 = 1$，求 $\\frac{\\partial z}{\\partial x}$。\n\n## 1.5 方向导数与梯度\n\n### 1.5.1 方向导数\n**定义**：函数 $f$ 在点 $P_0$ 沿单位向量 $\\mathbf{u} = (\\cos\\theta, \\sin\\theta)$ 的方向导数：\n$$\nD_{\\mathbf{u}} f(P_0) = \\lim_{h \\to 0} \\frac{f(P_0 + h\\mathbf{u}) - f(P_0)}{h}\n$$\n\n**与偏导数关系**：\n$$\nD_{\\mathbf{u}} f = f_x \\cos\\theta + f_y \\sin\\theta\n$$\n\n### 1.5.2 梯度向量\n**定义**：$\\nabla f = \\left( \\frac{\\partial f}{\\partial x}, \\frac{\\partial f}{\\partial y} \\right)$\n\n**性质**：\n- 梯度方向是函数值增加最快的方向，其模为最大方向导数。\n- 梯度垂直于等值线（水平曲线）。\n\n**例**：求 $f(x,y) = x^2 + y^2$ 在 $(1,1)$ 处的梯度及最大变化率方向。\n\n## 1.6 切平面与法线\n\n**切平面方程**：在点 $(x_0,y_0,z_0)$ 处：\n$$\nz - z_0 = f_x(x_0,y_0)(x - x_0) + f_y(x_0,y_0)(y - y_0)\n$$\n\n**法线方程**：方向向量为 $(f_x, f_y, -1)$。\n\n**例**：求曲面 $z = x^2 + y^2$ 在 $(1,1,2)$ 处的切平面。\n\n## 1.7 二元函数的极值\n\n### 1.7.1 无约束极值\n设 $f(x,y)$ 在 $(x_0,y_0)$ 有驻点（$f_x = f_y = 0$）。\n\n**二阶偏导数判别法**：\n令 $A = f_{xx}$，$B = f_{xy}$，$C = f_{yy}$，$\\Delta = AC - B^2$。\n- $\\Delta > 0$ 且 $A > 0$：局部极小\n- $\\Delta > 0$ 且 $A < 0$：局部极大\n- $\\Delta < 0$：鞍点\n- $\\Delta = 0$：无法判断\n\n### 1.7.2 拉格朗日乘数法（约束极值）\n求 $f(x,y)$ 在约束 $g(x,y) = c$ 下的极值。\n\n**方法**：引入 $\\lambda$，解方程组：\n$$\n\\nabla f = \\lambda \\nabla g, \\quad g(x,y) = c\n$$\n\n**例**：求 $f(x,y) = xy$ 在 $x + y = 1$ 下的极值。\n\n## 1.8 应用举例\n- 最小二乘法\n- 经济学中的边际分析\n- 物理中的最优路径问题\n\n## 习题建议\n1. 计算各种函数的偏导数和高阶偏导数。\n2. 验证混合偏导数相等。\n3. 使用全微分进行近似计算。\n4. 应用链式法则求复合函数导数。\n5. 计算方向导数和梯度。\n6. 求切平面和法线方程。\n7. 寻找二元函数的极值点。\n\n---\n\n\n**学习提示**：\n- 多画图像理解几何意义（等值线、曲面、梯度场）。\n- 熟练掌握符号运算和链式法则。\n- 结合向量观点理解梯度和方向导数。\n",
             "quizzes": [
               {
+                "question": "$z=xy$ 在$(1,2)$处 $\\dfrac{\\partial z}{\\partial x}=$（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "1"
+                  },
+                  {
+                    "key": "B",
+                    "text": "2"
+                  },
+                  {
+                    "key": "C",
+                    "text": "$x$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "$y$"
+                  }
+                ],
+                "answer": "B",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "二元函数可微的必要条件是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "一阶偏导数存在"
+                  },
+                  {
+                    "key": "B",
+                    "text": "二阶偏导数连续"
+                  },
+                  {
+                    "key": "C",
+                    "text": "函数单调"
+                  },
+                  {
+                    "key": "D",
+                    "text": "极值唯一"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "梯度向量 $\\nabla f(x,y)$ 等于（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "$\\left( \\dfrac{\\partial f}{\\partial x}, \\dfrac{\\partial f}{\\partial y} \\right)$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$\\dfrac{\\partial^2 f}{\\partial x \\partial y}$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "$f_x + f_y$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "常数"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "函数 $f(x,y)=x^2 + 2y^2$ 的极小值点是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "$(0,0)$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$(1,2)$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "$(2,1)$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "无极小值"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "下列函数在 $(0,0)$ 处偏导数存在但不可微的是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "$z = x + y$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$z = |x| + |y|$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "$z = \\sqrt{x^2 + y^2}$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "$z = xy$"
+                  }
+                ],
+                "answer": "B",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "方向导数 $D_{\\mathbf{u}} f$ 的最大值等于（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "$|\\nabla f|$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$\\nabla f$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "$f_x + f_y$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "0"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "对于 $z = f(x,y)$，全微分 $dz$ 的表达式为（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "$f_x dx + f_y dy$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$f_x + f_y$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "$df$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "$\\Delta z$"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "若 $f_{xy}$ 与 $f_{yx}$ 连续，则（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "$f_{xy} = f_{yx}$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$f_{xx} = f_{yy}$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "函数一定可微"
+                  },
+                  {
+                    "key": "D",
+                    "text": "梯度为零"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "多元复合函数求导的链式法则适用条件包括（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "$z = f(x+y, xy)$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$z = \\sin(x^2 y)$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "$z = e^{x-y}$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "$z = x + y$"
+                  }
+                ],
+                "answer": "ABC",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "二元函数极值判别法中需要用到的量有（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "$A = f_{xx}$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$B = f_{xy}$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "$C = f_{yy}$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "$\\Delta = AC - B^2$"
+                  }
+                ],
+                "answer": "ABCD",
+                "analysis": "暂无详细解析"
+              },
+              {
                 "question": "关于梯度向量 $\\nabla f$ 的正确描述是（）",
                 "options": [
                   {
                     "key": "A",
-                    "text": "方向是函数值增加最快的方向　B. 模长是最大方向导数"
+                    "text": "方向是函数值增加最快的方向"
+                  },
+                  {
+                    "key": "B",
+                    "text": "模长是最大方向导数"
                   },
                   {
                     "key": "C",
-                    "text": "垂直于等值线　D. 在驻点处一定为零"
-                  },
-                  {
-                    "key": "C",
-                    "text": "选项C"
+                    "text": "垂直于等值线"
                   },
                   {
                     "key": "D",
-                    "text": "选项D"
+                    "text": "在驻点处一定为零"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "暂无详细解析"
               },
               {
@@ -899,19 +1129,19 @@ const ALL_COURSES_DATA = [
                 "options": [
                   {
                     "key": "A",
-                    "text": "一阶偏导数存在　B. 一阶偏导数连续"
+                    "text": "一阶偏导数存在"
+                  },
+                  {
+                    "key": "B",
+                    "text": "一阶偏导数连续"
                   },
                   {
                     "key": "C",
-                    "text": "函数连续　D. 二阶偏导数存在"
-                  },
-                  {
-                    "key": "C",
-                    "text": "选项C"
+                    "text": "函数连续"
                   },
                   {
                     "key": "D",
-                    "text": "选项D"
+                    "text": "二阶偏导数存在"
                   }
                 ],
                 "answer": "B",
@@ -927,26 +1157,279 @@ const ALL_COURSES_DATA = [
             "content": "\n## 2.1 多重积分的概念与性质\n\n### 2.1.1 二重积分\n**定义**：设 $f(x,y)$ 在有界闭区域 $D$ 上有界，将 $D$ 任意分成 $n$ 个小区域 $\\Delta \\sigma_i$，面积为 $\\Delta \\sigma_i$，任取 $(\\xi_i, \\eta_i) \\in \\Delta \\sigma_i$，作和式 $\\sum f(\\xi_i,\\eta_i)\\Delta \\sigma_i$。若当各小区域直径趋于0时，和式的极限存在，则称此极限为 $f(x,y)$ 在 $D$ 上的**二重积分**：\n$$\n\\iint_D f(x,y)\\, d\\sigma = \\lim \\sum f(\\xi_i,\\eta_i)\\Delta \\sigma_i\n$$\n\n**几何意义**：当 $f(x,y) \\geq 0$ 时，二重积分表示以曲面 $z=f(x,y)$ 为顶、$D$ 为底的曲顶柱体的体积。\n\n**性质**（与定积分类似）：\n- 线性性质\n- 对区域的可加性\n- 保序性（若 $f \\leq g$，则积分 $\\leq$）\n- 估值定理、中值定理\n\n### 2.1.2 三重积分\n类似定义在空间有界闭区域 $\\Omega$ 上：\n$$\n\\iiint_\\Omega f(x,y,z)\\, dV\n$$\n表示空间物体的质量（若 $f$ 为密度）或体积等。\n\n## 2.2 二重积分的计算\n\n### 2.2.1 直角坐标系下的计算（累次积分）\n**Fubini定理**：在适当条件下，\n$$\n\\iint_D f(x,y)\\, dA = \\int_a^b \\left[ \\int_{g_1(x)}^{g_2(x)} f(x,y)\\, dy \\right] dx = \\int_c^d \\left[ \\int_{h_1(y)}^{h_2(y)} f(x,y)\\, dx \\right] dy\n$$\n\n**例1**：计算 $\\iint_D xy\\, dA$，其中 $D$ 是由 $y=x$，$y=0$，$x=1$ 围成的三角形区域。\n\n**例2**：交换积分次序。\n\n### 2.2.2 极坐标系下的二重积分\n$$\nx = r \\cos\\theta,\\ y = r \\sin\\theta,\\ dA = r\\, dr\\, d\\theta\n$$\n$$\n\\iint_D f(x,y)\\, dA = \\iint_{D'} f(r\\cos\\theta, r\\sin\\theta) r\\, dr\\, d\\theta\n$$\n\n**适用情形**：圆域、扇形区域或被积函数含 $x^2 + y^2$。\n\n**例**：计算单位圆内 $\\iint_D e^{-(x^2+y^2)}\\, dA$。\n\n## 2.3 三重积分的计算\n\n### 2.3.1 直角坐标\n累次积分：$\\int \\int \\int f(x,y,z)\\, dx\\, dy\\, dz$（根据区域选择顺序）。\n\n### 2.3.2 柱面坐标\n$x = r \\cos\\theta$，$y = r \\sin\\theta$，$z=z$，$dV = r\\, dr\\, d\\theta\\, dz$\n\n### 2.3.3 球面坐标\n$x = \\rho \\sin\\phi \\cos\\theta$，$y = \\rho \\sin\\phi \\sin\\theta$，$z = \\rho \\cos\\phi$，$dV = \\rho^2 \\sin\\phi\\, d\\rho\\, d\\phi\\, d\\theta$\n\n**例**：求球体 $x^2 + y^2 + z^2 \\leq a^2$ 的体积。\n\n## 2.4 重积分的应用\n\n- **体积**：$\\iint_D f(x,y)\\, dA$ 或 $\\iiint_\\Omega 1\\, dV$\n- **质量**：$\\iint_D \\rho(x,y)\\, dA$\n- **质心（重心）**：$\\bar{x} = \\frac{\\iint_D x \\rho\\, dA}{M}$ 等\n- **转动惯量**、**形心**等\n\n## 2.5 曲线积分\n\n### 2.5.1 对弧长的曲线积分（第一类）\n$$\n\\int_L f(x,y)\\, ds\n$$\n$ds = \\sqrt{(dx)^2 + (dy)^2}$，参数方程下化为定积分。\n\n**物理意义**：曲线形构件的质量。\n\n### 2.5.2 对坐标的曲线积分（第二类）\n$$\n\\int_L P\\, dx + Q\\, dy\n$$\n\n**与路径的关系**：若 $\\frac{\\partial P}{\\partial y} = \\frac{\\partial Q}{\\partial x}$，则积分与路径无关（保守场）。\n\n## 2.6 曲面积分\n\n### 2.6.1 对面积的曲面积分（第一类）\n$$\n\\iint_S f(x,y,z)\\, dS\n$$\n\n### 2.6.2 对坐标的曲面积分（第二类）\n$$\n\\iint_S P\\, dy\\, dz + Q\\, dz\\, dx + R\\, dx\\, dy\n$$\n\n## 2.7 向量分析中的重要定理\n\n### 2.7.1 格林公式（Green's Theorem）\n设 $D$ 是平面单连通区域，$L$ 是其正向边界，则：\n$$\n\\oint_L P\\, dx + Q\\, dy = \\iint_D \\left( \\frac{\\partial Q}{\\partial x} - \\frac{\\partial P}{\\partial y} \\right) dA\n$$\n\n**应用**：计算闭曲线积分、面积等。\n\n### 2.7.2 高斯公式（Gauss/Divergence Theorem）\n$$\n\\oiint_S \\mathbf{F} \\cdot d\\mathbf{S} = \\iiint_\\Omega \\nabla \\cdot \\mathbf{F}\\, dV\n$$\n（通量形式：闭曲面外侧通量等于散度在体积内的积分）\n\n### 2.7.3 斯托克斯公式（Stokes' Theorem）\n$$\n\\oint_L \\mathbf{F} \\cdot d\\mathbf{r} = \\iint_S (\\nabla \\times \\mathbf{F}) \\cdot d\\mathbf{S}\n$$\n（环量等于旋度在曲面上的通量）\n\n**向量场基本运算**：\n- 梯度 $\\nabla f$\n- 散度 $\\nabla \\cdot \\mathbf{F}$\n- 旋度 $\\nabla \\times \\mathbf{F}$\n\n## 2.8 向量场的保守性与势函数\n\n若 $\\nabla \\times \\mathbf{F} = \\mathbf{0}$（无旋），则 $\\mathbf{F}$ 为保守场，存在势函数 $\\varphi$ 使 $\\mathbf{F} = \\nabla \\varphi$。\n\n## 学习要点与例题\n\n**核心公式记忆**：\n- 极坐标、柱坐标、球坐标的体积元素\n- 三大积分定理（格林、高斯、斯托克斯）的联系\n- 曲线积分与路径无关的条件\n\n**典型例题**：\n1. 用极坐标计算 $\\iint_D \\sqrt{x^2 + y^2}\\, dA$（$D: x^2 + y^2 \\leq 1$）\n2. 用高斯公式计算向量场通量\n3. 验证斯托克斯公式\n\n---\n\n**学习提示**：\n- 重积分重点掌握坐标变换和累次积分次序选择。\n- 向量部分理解物理意义（通量、环量、保守场）。\n- 多练习用定理简化计算（尤其是闭曲线/曲面积分）。\n\n",
             "quizzes": [
               {
+                "question": "二重积分极坐标面积微元 $d\\sigma =$（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "$dx\\,dy$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$r\\,dr\\,d\\theta$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "$dr\\,d\\theta$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "$r^2\\,dr\\,d\\theta$"
+                  }
+                ],
+                "answer": "B",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "区域 $x^2 + y^2 \\leq 4$ 在极坐标下 $r$ 的范围是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "$0 \\leq r \\leq 2$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$0 \\leq r \\leq 4$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "$2 \\leq r \\leq 4$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "$r > 0$"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "第二类曲线积分的物理意义通常是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "曲面面积"
+                  },
+                  {
+                    "key": "B",
+                    "text": "变力做功"
+                  },
+                  {
+                    "key": "C",
+                    "text": "平面面积"
+                  },
+                  {
+                    "key": "D",
+                    "text": "体积"
+                  }
+                ],
+                "answer": "B",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "格林公式适用的区域是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "平面单连通闭区域"
+                  },
+                  {
+                    "key": "B",
+                    "text": "空间曲面"
+                  },
+                  {
+                    "key": "C",
+                    "text": "无限区域"
+                  },
+                  {
+                    "key": "D",
+                    "text": "离散点"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "三重积分在球坐标下的体积元素是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "$r\\,dr\\,d\\theta\\,dz$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$\\rho^2 \\sin\\phi\\, d\\rho\\, d\\phi\\, d\\theta$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "$dx\\,dy\\,dz$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "$r\\,dr\\,d\\theta$"
+                  }
+                ],
+                "answer": "B",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "若向量场 $\\mathbf{F}$ 满足 $\\nabla \\times \\mathbf{F} = \\mathbf{0}$，则 $\\mathbf{F}$ 是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "无源场"
+                  },
+                  {
+                    "key": "B",
+                    "text": "保守场"
+                  },
+                  {
+                    "key": "C",
+                    "text": "旋度场"
+                  },
+                  {
+                    "key": "D",
+                    "text": "散度场"
+                  }
+                ],
+                "answer": "B",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "高斯公式将（）转化为三重积分。",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "曲线积分"
+                  },
+                  {
+                    "key": "B",
+                    "text": "闭曲面积分（通量）"
+                  },
+                  {
+                    "key": "C",
+                    "text": "线积分"
+                  },
+                  {
+                    "key": "D",
+                    "text": "二重积分"
+                  }
+                ],
+                "answer": "B",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "计算 $\\iint_D (x^2 + y^2)\\, dA$（$D: x^2 + y^2 \\leq 1$）最简便的坐标是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "直角坐标"
+                  },
+                  {
+                    "key": "B",
+                    "text": "极坐标"
+                  },
+                  {
+                    "key": "C",
+                    "text": "柱坐标"
+                  },
+                  {
+                    "key": "D",
+                    "text": "球坐标"
+                  }
+                ],
+                "answer": "B",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "二重积分可用于计算（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "平面图形面积"
+                  },
+                  {
+                    "key": "B",
+                    "text": "曲顶柱体体积"
+                  },
+                  {
+                    "key": "C",
+                    "text": "平面薄片质量"
+                  },
+                  {
+                    "key": "D",
+                    "text": "曲线弧长"
+                  }
+                ],
+                "answer": "ABC",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "矢量场的基本运算量包括（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "梯度"
+                  },
+                  {
+                    "key": "B",
+                    "text": "散度"
+                  },
+                  {
+                    "key": "C",
+                    "text": "旋度"
+                  },
+                  {
+                    "key": "D",
+                    "text": "积分"
+                  }
+                ],
+                "answer": "ABC",
+                "analysis": "暂无详细解析"
+              },
+              {
                 "question": "曲线积分与路径无关的条件有（）",
                 "options": [
                   {
                     "key": "A",
-                    "text": "向量场为保守场　B. $\\frac{\\partial P}{\\partial y} = \\frac{\\partial Q}{\\partial x}$"
+                    "text": "向量场为保守场"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$\\frac{\\partial P}{\\partial y} = \\frac{\\partial Q}{\\partial x}$"
                   },
                   {
                     "key": "C",
-                    "text": "区域单连通　D. 起点终点相同"
-                  },
-                  {
-                    "key": "C",
-                    "text": "选项C"
+                    "text": "区域单连通"
                   },
                   {
                     "key": "D",
-                    "text": "选项D"
+                    "text": "起点终点相同"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "下列公式属于向量分析基本定理的是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "格林公式"
+                  },
+                  {
+                    "key": "B",
+                    "text": "高斯公式"
+                  },
+                  {
+                    "key": "C",
+                    "text": "斯托克斯公式"
+                  },
+                  {
+                    "key": "D",
+                    "text": "牛顿-莱布尼茨公式"
+                  }
+                ],
+                "answer": "ABC",
                 "analysis": "暂无详细解析"
               }
             ],
@@ -959,26 +1442,233 @@ const ALL_COURSES_DATA = [
             "content": "\n## 3.1 常数项级数的基本概念\n\n### 3.1.1 定义与收敛性\n**定义**：无穷级数 $\\sum_{n=1}^\\infty a_n$ 的部分和 $S_n = a_1 + a_2 + \\dots + a_n$。若 $\\lim_{n\\to\\infty} S_n = S$（有限数），则称级数**收敛**于 $S$，否则**发散**。\n\n**必要条件**：若级数收敛，则 $\\lim_{n\\to\\infty} a_n = 0$（反之不成立）。\n\n**例**：调和级数 $\\sum \\frac{1}{n}$ 发散（尽管 $a_n \\to 0$）。\n\n### 3.1.2 基本性质\n- 收敛级数可加减\n- 收敛级数乘常数仍收敛\n- 改变有限项不影响敛散性\n\n## 3.2 常数项级数敛散性判别法\n\n### 3.2.1 正项级数判别法\n1. **比较判别法**：$0 \\leq a_n \\leq b_n$，若 $\\sum b_n$ 收敛则 $\\sum a_n$ 收敛；若 $\\sum a_n$ 发散则 $\\sum b_n$ 发散。\n2. **比值判别法**（D'Alembert）：$\\lim_{n\\to\\infty} \\left| \\frac{a_{n+1}}{a_n} \\right| = \\rho$\n   - $\\rho < 1$ 收敛，$\\rho > 1$ 发散，$\\rho=1$ 失效。\n3. **根值判别法**（Cauchy）：$\\lim_{n\\to\\infty} \\sqrt[n]{|a_n|} = \\rho$，同上。\n4. **积分判别法**：若 $f(x)$ 正、连续、递减，则 $\\sum a_n$ 与 $\\int_1^\\infty f(x)\\, dx$ 同敛散。\n\n### 3.2.2 交错级数判别法（Leibniz判别法）\n交错级数 $\\sum (-1)^{n+1} b_n$（$b_n > 0$ 递减且 $\\lim b_n = 0$），则收敛。\n\n### 3.2.3 绝对收敛与条件收敛\n- 若 $\\sum |a_n|$ 收敛，则 $\\sum a_n$ **绝对收敛**（必收敛）。\n- 绝对收敛 $\\Rightarrow$ 收敛，但反之不一定（条件收敛，如交错调和级数）。\n\n## 3.3 幂级数\n\n### 3.3.1 定义与收敛半径\n**幂级数**：$\\sum_{n=0}^\\infty a_n (x - x_0)^n$\n\n**收敛半径** $R$：\n- $\\frac{1}{R} = \\lim_{n\\to\\infty} \\left| \\frac{a_{n+1}}{a_n} \\right|$（或根值法）\n- 收敛区间：$(x_0 - R, x_0 + R)$，端点需单独判别。\n\n### 3.3.2 运算性质\n- 逐项求导、逐项积分后收敛半径不变。\n- 四则运算（在公共收敛区间内）。\n\n## 3.4 函数的幂级数展开（Taylor级数）\n\n### 3.4.1 Taylor公式与余项\n$$\nf(x) = \\sum_{k=0}^n \\frac{f^{(k)}(x_0)}{k!} (x - x_0)^k + R_n(x)\n$$\n\n**Lagrange余项**：$R_n(x) = \\frac{f^{(n+1)}(\\xi)}{(n+1)!} (x - x_0)^{n+1}$\n\n### 3.4.2 常见Taylor展开\n- $e^x = \\sum_{n=0}^\\infty \\frac{x^n}{n!}$（$R=\\infty$）\n- $\\sin x = \\sum_{n=0}^\\infty (-1)^n \\frac{x^{2n+1}}{(2n+1)!}$\n- $\\cos x = \\sum_{n=0}^\\infty (-1)^n \\frac{x^{2n}}{(2n)!}$\n- $\\frac{1}{1-x} = \\sum_{n=0}^\\infty x^n$（$|x|<1$）\n- $\\ln(1+x) = \\sum_{n=1}^\\infty (-1)^{n+1} \\frac{x^n}{n}$（$|x|<1$）\n\n## 3.5 Fourier级数（选学）\n\n周期函数展开为三角级数：\n$$\nf(x) = \\frac{a_0}{2} + \\sum_{n=1}^\\infty \\left( a_n \\cos\\frac{n\\pi x}{L} + b_n \\sin\\frac{n\\pi x}{L} \\right)\n$$\n\n系数通过积分计算。\n\n## 3.6 级数的应用\n\n- 近似计算（如 $\\pi$、$e$ 的逼近）\n- 求解微分方程（幂级数解法）\n- 数值分析中的逼近理论\n\n---\n\n**学习要点**：\n- 熟练掌握各种敛散性判别法（尤其是正项级数）。\n- 记住常见函数的Taylor展开及收敛区间。\n- 注意绝对收敛与条件收敛的区别。\n- 多练习用比值/根值法求收敛半径。\n",
             "quizzes": [
               {
+                "question": "调和级数 $\\sum_{n=1}^\\infty \\frac{1}{n}$ 的敛散性是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "收敛"
+                  },
+                  {
+                    "key": "B",
+                    "text": "发散"
+                  },
+                  {
+                    "key": "C",
+                    "text": "条件收敛"
+                  },
+                  {
+                    "key": "D",
+                    "text": "绝对收敛"
+                  }
+                ],
+                "answer": "B",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "幂级数 $\\sum \\frac{x^n}{3^n}$ 的收敛半径 $R=$（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "3"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$\\frac{1}{3}$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "1"
+                  },
+                  {
+                    "key": "D",
+                    "text": "$\\infty$"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "交错级数收敛的常用判别方法是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "莱布尼茨判别法"
+                  },
+                  {
+                    "key": "B",
+                    "text": "比值判别法"
+                  },
+                  {
+                    "key": "C",
+                    "text": "洛必达法则"
+                  },
+                  {
+                    "key": "D",
+                    "text": "积分判别法"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "$e^x$ 的麦克劳林展开式中常数项为（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "0"
+                  },
+                  {
+                    "key": "B",
+                    "text": "1"
+                  },
+                  {
+                    "key": "C",
+                    "text": "$x$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "$x^2$"
+                  }
+                ],
+                "answer": "B",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "级数 $\\sum (-1)^n \\frac{1}{\\sqrt{n}}$ 是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "绝对收敛"
+                  },
+                  {
+                    "key": "B",
+                    "text": "条件收敛"
+                  },
+                  {
+                    "key": "C",
+                    "text": "发散"
+                  },
+                  {
+                    "key": "D",
+                    "text": "收敛但非条件"
+                  }
+                ],
+                "answer": "B",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "幂级数收敛半径用比值法计算时，当 $\\rho = \\lim \\left| \\frac{a_{n+1}}{a_n} \\right|$，则 $R=$（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "$\\rho$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$\\frac{1}{\\rho}$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "$\\rho^2$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "$\\infty$"
+                  }
+                ],
+                "answer": "B",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "下列级数绝对收敛的是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "$\\sum \\frac{(-1)^n}{n}$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "$\\sum \\frac{1}{n^2}$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "$\\sum (-1)^n \\frac{1}{\\sqrt{n}}$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "$\\sum \\frac{1}{n}$"
+                  }
+                ],
+                "answer": "B",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "Taylor级数展开中，余项 $R_n(x) \\to 0$ 是保证级数收敛到原函数的（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "充分条件"
+                  },
+                  {
+                    "key": "B",
+                    "text": "必要条件"
+                  },
+                  {
+                    "key": "C",
+                    "text": "充要条件"
+                  },
+                  {
+                    "key": "D",
+                    "text": "无关"
+                  }
+                ],
+                "answer": "C",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "正项级数常用的敛散判别法有（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "比值判别法"
+                  },
+                  {
+                    "key": "B",
+                    "text": "比较判别法"
+                  },
+                  {
+                    "key": "C",
+                    "text": "积分判别法"
+                  },
+                  {
+                    "key": "D",
+                    "text": "莱布尼茨判别法"
+                  }
+                ],
+                "answer": "ABC",
+                "analysis": "暂无详细解析"
+              },
+              {
                 "question": "绝对收敛级数的性质包括（）",
                 "options": [
                   {
                     "key": "A",
-                    "text": "重排后和不变　B. 满足四则运算"
+                    "text": "重排后和不变"
+                  },
+                  {
+                    "key": "B",
+                    "text": "满足四则运算"
                   },
                   {
                     "key": "C",
-                    "text": "一定条件收敛　D. 通项极限为0"
-                  },
-                  {
-                    "key": "C",
-                    "text": "选项C"
+                    "text": "一定条件收敛"
                   },
                   {
                     "key": "D",
-                    "text": "选项D"
+                    "text": "通项极限为0"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABD",
                 "analysis": "暂无详细解析"
               },
               {
@@ -986,22 +1676,45 @@ const ALL_COURSES_DATA = [
                 "options": [
                   {
                     "key": "A",
-                    "text": "收敛区间为开区间或闭区间　B. 逐项求导后收敛半径不变"
+                    "text": "收敛区间为开区间或闭区间"
+                  },
+                  {
+                    "key": "B",
+                    "text": "逐项求导后收敛半径不变"
                   },
                   {
                     "key": "C",
-                    "text": "端点处需单独检验　D. 仅在 $x=0$ 处收敛"
-                  },
-                  {
-                    "key": "C",
-                    "text": "选项C"
+                    "text": "端点处需单独检验"
                   },
                   {
                     "key": "D",
-                    "text": "选项D"
+                    "text": "仅在 $x=0$ 处收敛"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "级数 $\\sum a_n$ 收敛的必要条件是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "$a_n \\to 0$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "部分和有界"
+                  },
+                  {
+                    "key": "C",
+                    "text": "绝对收敛"
+                  },
+                  {
+                    "key": "D",
+                    "text": "通项单调"
+                  }
+                ],
+                "answer": "AB",
                 "analysis": "暂无详细解析"
               }
             ],
@@ -1222,7 +1935,7 @@ const ALL_COURSES_DATA = [
                     "text": "交换列值不变"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "D错误，交换列同样会变号（与交换行性质一致）。这些性质是高斯消元计算行列式的理论基础。"
               },
               {
@@ -1245,7 +1958,7 @@ const ALL_COURSES_DATA = [
                     "text": "$(kA)B = k(AB)$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABD",
                 "analysis": "矩阵乘法不满足交换律（C错误），但满足左右分配律和数乘结合律。"
               },
               {
@@ -1268,7 +1981,7 @@ const ALL_COURSES_DATA = [
                     "text": "$(kA)^T = k A^T$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "转置运算满足这些基本性质，常用于证明对称矩阵相关结论。"
               },
               {
@@ -1280,7 +1993,11 @@ const ALL_COURSES_DATA = [
                   },
                   {
                     "key": "B",
-                    "text": "$A - A = O$"
+                    "text": "$A -"
+                  },
+                  {
+                    "key": "A",
+                    "text": "= O$"
                   },
                   {
                     "key": "C",
@@ -1291,7 +2008,7 @@ const ALL_COURSES_DATA = [
                     "text": "$A(BC) = (AB)C$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "这些都是矩阵运算的基本性质，等同于数的运算规律（除交换律外）。"
               }
             ],
@@ -1507,7 +2224,7 @@ const ALL_COURSES_DATA = [
                     "text": "$\\alpha \\cdot \\beta = 0$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "D错误，向量空间中没有定义向量点乘（内积是额外结构）。公理保证加法和数乘的封闭性与普通数的类似性质。"
               },
               {
@@ -1530,7 +2247,7 @@ const ALL_COURSES_DATA = [
                     "text": "唯一一组解"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "D错误，基础解系不唯一，但任意两个基础解系可相互线性表示。"
               },
               {
@@ -1553,7 +2270,7 @@ const ALL_COURSES_DATA = [
                     "text": "两个向量线性相关当且仅当它们共线"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "这些都是线性相关的重要结论，常用于判断向量组的独立性。"
               },
               {
@@ -1576,7 +2293,7 @@ const ALL_COURSES_DATA = [
                     "text": "秩为0的矩阵是零矩阵"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "秩的这些性质是线性代数中重要的不变量。"
               }
             ],
@@ -1750,29 +2467,6 @@ const ALL_COURSES_DATA = [
                 "analysis": "这是矩阵可对角化的充要条件之一。"
               },
               {
-                "question": "二次型 $\\mathbf{x}^T A \\mathbf{x}$ 中，矩阵 $A$ 必须是（）",
-                "options": [
-                  {
-                    "key": "A",
-                    "text": "对称矩阵"
-                  },
-                  {
-                    "key": "B",
-                    "text": "可逆矩阵"
-                  },
-                  {
-                    "key": "C",
-                    "text": "正交矩阵"
-                  },
-                  {
-                    "key": "D",
-                    "text": "上三角矩阵"
-                  }
-                ],
-                "answer": "A",
-                "analysis": "只有对称矩阵才能保证二次型通过正交变换化为标准形。"
-              },
-              {
                 "question": "特征值的基本性质正确的是（）",
                 "options": [
                   {
@@ -1792,7 +2486,7 @@ const ALL_COURSES_DATA = [
                     "text": "$A^2$ 的特征值为 $\\lambda^2$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "这些性质直接来自特征多项式和特征方程，是特征值理论的重要工具。"
               },
               {
@@ -1815,7 +2509,7 @@ const ALL_COURSES_DATA = [
                     "text": "一定是实对称矩阵"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "D错误，正交矩阵不一定对称（如旋转矩阵）。正交矩阵保持向量内积（保距变换）。"
               },
               {
@@ -1838,7 +2532,7 @@ const ALL_COURSES_DATA = [
                     "text": "不定二次型既有正又有负特征值"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "这些是二次型几何与代数性质的核心总结。"
               },
               {
@@ -1861,8 +2555,31 @@ const ALL_COURSES_DATA = [
                     "text": "判断二次型正定性"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "对角化是线性代数中最强大的工具之一，广泛应用于工程和数据科学。"
+              },
+              {
+                "question": "证明：相似矩阵具有相同的特征值。",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "P$，则"
+                  },
+                  {
+                    "key": "A",
+                    "text": "P - \\lambda I) = \\det(P^{-1}(A - \\lambda I)P) = \\det(P^{-1}) \\det(A - \\lambda I) \\det(P) = \\det(A - \\lambda I)$。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "选项C"
+                  },
+                  {
+                    "key": "D",
+                    "text": "选项D"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "相似矩阵代表同一变换的不同矩阵表示，内在特征相同。"
               }
             ],
             "mindmapHtml": ""
@@ -1923,29 +2640,6 @@ const ALL_COURSES_DATA = [
                 ],
                 "answer": "A",
                 "analysis": "条件概率是在事件 $B$ 已经发生的条件下，事件 $A$ 发生的概率，相当于将样本空间限制在 $B$ 上重新归一化。"
-              },
-              {
-                "question": "若 $A,B$ 为互斥事件（$A \\cap B = \\emptyset$），则 $P(A \\cup B)=$（）",
-                "options": [
-                  {
-                    "key": "A",
-                    "text": "$P(A) + P(B)$"
-                  },
-                  {
-                    "key": "B",
-                    "text": "$P(A)P(B)$"
-                  },
-                  {
-                    "key": "C",
-                    "text": "0"
-                  },
-                  {
-                    "key": "D",
-                    "text": "1"
-                  }
-                ],
-                "answer": "A",
-                "analysis": "互斥事件概率加法公式是概率可加性的直接应用。"
               },
               {
                 "question": "全概率公式应用的核心是（）",
@@ -2082,7 +2776,7 @@ const ALL_COURSES_DATA = [
                     "text": "$P(\\emptyset) = 1$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "D错误，空事件概率为0。这些公理是Kolmogorov公理体系的基础。"
               },
               {
@@ -2105,7 +2799,7 @@ const ALL_COURSES_DATA = [
                     "text": "独立事件概率计算"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "D属于独立事件乘法公式。Bayes公式在不确定性推理中极为重要。"
               },
               {
@@ -2128,7 +2822,7 @@ const ALL_COURSES_DATA = [
                     "text": "互斥事件满足 $P(A \\cap B) = 0$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "这些是概率运算的基本公式和性质。"
               },
               {
@@ -2151,7 +2845,7 @@ const ALL_COURSES_DATA = [
                     "text": "事件可连续取值"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "D属于几何概率模型的范畴。"
               }
             ],
@@ -2367,7 +3061,7 @@ const ALL_COURSES_DATA = [
                     "text": "正态分布"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "D是连续型分布。离散型用概率质量函数描述。"
               },
               {
@@ -2390,7 +3084,7 @@ const ALL_COURSES_DATA = [
                     "text": "相关系数"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "这些特征从不同角度刻画随机变量的统计规律。"
               },
               {
@@ -2413,7 +3107,7 @@ const ALL_COURSES_DATA = [
                     "text": "常数方差为0"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "方差是二阶中心矩，是风险评估的重要指标。"
               },
               {
@@ -2436,7 +3130,7 @@ const ALL_COURSES_DATA = [
                     "text": "中心极限定理的极限分布"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "正态分布在概率统计中具有核心地位。"
               }
             ],
@@ -2652,7 +3346,7 @@ const ALL_COURSES_DATA = [
                     "text": "正态分布"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "这些分布在区间估计和假设检验中扮演核心角色。正态分布是基础。"
               },
               {
@@ -2675,7 +3369,7 @@ const ALL_COURSES_DATA = [
                     "text": "唯一性"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "这些是评价点估计好坏的主要准则。"
               },
               {
@@ -2698,7 +3392,7 @@ const ALL_COURSES_DATA = [
                     "text": "样本容量"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "区间宽度与样本量、置信水平和总体变异程度有关。"
               },
               {
@@ -2721,7 +3415,7 @@ const ALL_COURSES_DATA = [
                     "text": "是常用的点估计方法"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "MLE具有良好渐近性质。"
               }
             ],
@@ -2942,7 +3636,7 @@ const ALL_COURSES_DATA = [
                     "text": "$P \\to Q \\equiv Q \\to P$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "D错误，蕴涵不具有对称性。"
               },
               {
@@ -2965,7 +3659,7 @@ const ALL_COURSES_DATA = [
                     "text": "任意量词 $\\forall !$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "$\\exists !$ 表示存在唯一，D不是标准量词。"
               },
               {
@@ -2988,7 +3682,7 @@ const ALL_COURSES_DATA = [
                     "text": "蕴涵 $\\to$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "这些是构造复合命题的核心运算符。"
               },
               {
@@ -3011,7 +3705,7 @@ const ALL_COURSES_DATA = [
                     "text": "归谬法"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "这些是构造有效论证的基础。"
               }
             ],
@@ -3093,29 +3787,6 @@ const ALL_COURSES_DATA = [
                 "analysis": "满足这三条的关系可将集合划分为等价类。"
               },
               {
-                "question": "集合差 $A - B =$（）",
-                "options": [
-                  {
-                    "key": "A",
-                    "text": "$\\{x \\mid x \\in A \\text{ 且 } x \\notin B\\}$"
-                  },
-                  {
-                    "key": "B",
-                    "text": "$A \\cap B$"
-                  },
-                  {
-                    "key": "C",
-                    "text": "$A \\cup B$"
-                  },
-                  {
-                    "key": "D",
-                    "text": "$\\complement A$"
-                  }
-                ],
-                "answer": "A",
-                "analysis": "差集表示属于 $A$ 但不属于 $B$ 的元素。"
-              },
-              {
                 "question": "两个集合 $A,B$ 相等的充要条件是（）",
                 "options": [
                   {
@@ -3124,7 +3795,11 @@ const ALL_COURSES_DATA = [
                   },
                   {
                     "key": "B",
-                    "text": "$A \\cup B = A$"
+                    "text": "$A \\cup"
+                  },
+                  {
+                    "key": "B",
+                    "text": "= A$"
                   },
                   {
                     "key": "C",
@@ -3132,34 +3807,15 @@ const ALL_COURSES_DATA = [
                   },
                   {
                     "key": "D",
-                    "text": "$A \\cap B = \\emptyset$"
+                    "text": "$A \\cap"
+                  },
+                  {
+                    "key": "B",
+                    "text": "= \\emptyset$"
                   }
                 ],
                 "answer": "A",
                 "analysis": "集合相等即相互包含。"
-              },
-              {
-                "question": "函数 $f: A \\to B$ 是双射的条件是（）",
-                "options": [
-                  {
-                    "key": "A",
-                    "text": "既单射又满射"
-                  },
-                  {
-                    "key": "B",
-                    "text": "仅单射"
-                  },
-                  {
-                    "key": "C",
-                    "text": "仅满射"
-                  },
-                  {
-                    "key": "D",
-                    "text": "任意映射"
-                  }
-                ],
-                "answer": "A",
-                "analysis": "双射存在逆函数。"
               },
               {
                 "question": "下列运算满足交换律的是（）",
@@ -3227,7 +3883,7 @@ const ALL_COURSES_DATA = [
                     "text": "对称差 $\\oplus$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "这些是集合代数的核心运算。"
               },
               {
@@ -3250,7 +3906,7 @@ const ALL_COURSES_DATA = [
                     "text": "对称"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "D是对称关系的性质，偏序不要求对称。"
               },
               {
@@ -3273,7 +3929,7 @@ const ALL_COURSES_DATA = [
                     "text": "$A \\subseteq B$ 则 $|A| \\leq |B|$"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "这些是集合论基本事实。"
               },
               {
@@ -3296,8 +3952,31 @@ const ALL_COURSES_DATA = [
                     "text": "反对称性"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "不同关系可满足不同组合性质。"
+              },
+              {
+                "question": "证明集合分配律：$A \\cap (B \\cup C) = (A \\cap B) \\cup (A \\cap C)$。\n**证明**：",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "\\cap (B \\cup C)$，则 $x \\in A$ 且 $x \\in B$ 或 $x \\in C$，故 $x \\in"
+                  },
+                  {
+                    "key": "A",
+                    "text": "\\cap B$ 或 $x \\in"
+                  },
+                  {
+                    "key": "A",
+                    "text": "\\cap C$，即 $x \\in (A \\cap B) \\cup (A \\cap C)$。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "选项D"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "分配律是集合运算的重要性质，可用元素法证明。"
               }
             ],
             "mindmapHtml": ""
@@ -3512,7 +4191,7 @@ const ALL_COURSES_DATA = [
                     "text": "哈希表"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "这些是图的主要数据结构表示方法。"
               },
               {
@@ -3535,7 +4214,7 @@ const ALL_COURSES_DATA = [
                     "text": "加一条边必产生环"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "这些是树的等价定义。"
               },
               {
@@ -3558,7 +4237,7 @@ const ALL_COURSES_DATA = [
                     "text": "关键路径"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "这些是图论的经典应用方向。"
               },
               {
@@ -3581,7 +4260,7 @@ const ALL_COURSES_DATA = [
                     "text": "割点"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "这些是分析图结构的核心术语。"
               }
             ],
@@ -3602,7 +4281,307 @@ const ALL_COURSES_DATA = [
             "title": "第1章：计算机起源与图灵机模型",
             "intro": "学习关于 计算机起源与图灵机模型 的核心专业理论与应用。",
             "content": "\n## 1.1 本章导言\n\n欢迎来到《计算机导论》第一章！本章我们将一起探索**计算机是如何诞生的**，以及计算机科学中最核心的理论基础——**图灵机模型**。\n\n即使你完全没有计算机背景也没关系，我们会从最基础的概念开始，用生活中的例子逐步讲解。学完本章，你将理解：\n- 计算机不是“魔法”，而是人类一步步发明的工具。\n- 什么是“计算”？一台机器到底能做什么、不能做什么？\n- 图灵机为什么被誉为“现代计算机的理论祖先”？\n\n---\n\n## 1.2 计算机的起源与发展简史\n\n### 2.1 古代计算工具\n人类很早就需要进行计算：\n- **算筹**（中国古代）：用竹棍摆放进行加减乘除。\n- **算盘**：世界上最早的“机械计算器”之一，通过珠子的移动完成计算。\n- **雅卡尔提花机**（1801年，法国）：使用**打孔卡**控制织布图案，这是“程序控制”思想的早期体现。\n\n### 2.2 机械计算时代（17-19世纪）\n- **帕斯卡加法机**（1642年，布莱斯·帕斯卡）：世界上第一台机械加法器，只能做加减法。\n- **莱布尼茨乘法机**（1673年）：能进行四则运算。\n- **巴贝奇的差分机与分析机**（19世纪，英国）：\n  - 查尔斯·巴贝奇被誉为“计算机之父”。\n  - **差分机**：用于计算数学表格（对数表等）。\n  - **分析机**：设计了现代计算机的**五大基本部件**雏形（输入、输出、存储、运算、控制），并首次提出了**程序**的概念（使用打孔卡输入指令）。\n  - 遗憾的是，由于当时的制造技术限制，分析机未能完全建成。\n\n### 2.3 电子计算机时代（20世纪）\n- **1930s-1940s**：二战期间对计算能力的需求极大推动了发展。\n  - **ABC计算机**（1942，美国）：第一台电子数字计算机（使用真空管）。\n  - **ENIAC**（1945，美国）：第一台通用电子数字计算机，重达30吨，耗电巨大，能在几秒内完成此前需要几天的人工计算。\n  - **冯·诺依曼架构**（1945）：约翰·冯·诺依曼提出“**存储程序**”概念，即程序和数据都存储在内存中。这是至今绝大多数计算机遵循的架构。\n\n**计算机发展四代**（简要记忆）：\n1. **第一代**（1940s-1950s）：真空管 → 体积大、耗电、易坏。\n2. **第二代**（1950s-1960s）：晶体管 → 体积缩小、可靠性提升。\n3. **第三代**（1960s-1970s）：集成电路（芯片） → 小型化。\n4. **第四代**（1970s至今）：大规模/超大规模集成电路 → 个人电脑、智能手机时代。\n\n---\n\n## 1.3 计算的本质：什么是“计算”？\n\n在深入图灵机之前，我们先思考一个根本问题：\n\n> **一台机器到底能做什么样的“计算”？**\n\n- 简单的加法、乘法？\n- 复杂的微积分？\n- 玩游戏、下棋、写文章？\n\n图灵机模型正是为了回答这个“能做什么”和“不能做什么”的理论工具。\n\n---\n\n## 1.4 阿兰·图灵与图灵机\n\n### 4.1 阿兰·图灵简介\n- 阿兰·图灵（Alan Turing，1912-1954），英国数学家、逻辑学家、计算机科学家。\n- 被誉为“计算机科学之父”和“人工智能之父”。\n- 二战期间，他领导团队破解德国恩尼格玛密码机，为盟军胜利做出巨大贡献。\n- 1950年提出“图灵测试”，奠定人工智能基础。\n- 因同性恋身份遭受迫害，1954年逝世（2013年英国女王为其平反）。\n\n### 4.2 图灵机模型（Turing Machine）\n\n**图灵机是一个抽象的数学模型**，不是真实存在的物理机器。它用来严格定义“什么是可计算的”。\n\n#### 图灵机的组成部分（非常形象的比喻）\n想象一台**无限长的纸带**（像打印机纸），上面分成一个个小格子，每个格子可以写一个**符号**（通常是0、1或空白）。\n\n1. **纸带（Tape）**：无限长，可向左右无限延伸。存储数据和程序。\n2. **读写头（Head）**：当前正在查看/修改的那个格子。可以左右移动。\n3. **状态寄存器（State）**：机器当前的“心情”或“记忆状态”（有限个状态，如 q0、q1、q2...）。\n4. **转换规则（Transition Function）**：一张表格，告诉机器“在当前状态下，看到某个符号时，应该做什么”。\n\n**转换规则的格式**：\n> 当前状态 + 当前符号 → 新符号 + 移动方向（左/右） + 新状态\n\n#### 图灵机的工作流程（步步讲解）\n1. 初始时，纸带上写好**输入**，读写头指向起始位置，状态为起始状态 q0。\n2. 机器根据**当前状态**和**当前符号**，查转换规则表：\n   - 擦掉当前符号，写上新符号。\n   - 读写头向左或向右移动一格。\n   - 切换到新状态。\n3. 重复步骤2，直到进入**停机状态**（Halt）。\n4. 停机时，纸带上剩余的内容就是**计算结果**。\n\n#### 简单例子：加法图灵机\n假设我们要计算 1 + 1 = 2（用一进制表示：1个“1”代表数字1）。\n\n- 输入纸带：`... 1 1 ...`（两个1中间可能有分隔符）\n- 图灵机规则会：\n  - 把两个1“合并”成两个1（即“11”代表2）。\n- 这只是最简单的例子，实际图灵机可以实现任意复杂的算法。\n\n---\n\n## 1.5 图灵机的理论意义\n\n### 5.1 图灵完备性（Turing Completeness）\n如果一个编程语言或计算模型**能模拟图灵机**，那么它就具有**图灵完备性**，意味着它**理论上能计算任何可计算的问题**。\n\n现代编程语言（Python、Java、C++ 等）都是图灵完备的。\n\n### 5.2 停机问题（Halting Problem）\n图灵证明了一个重要结论：\n> **不存在一个通用算法，能判断任意图灵机在给定输入下是否会停机。**\n\n这说明**计算机存在根本的局限性**——有些问题**理论上不可解**。这是计算机科学中最重要的理论结果之一。\n\n### 5.3 丘奇-图灵论题（Church-Turing Thesis）\n- 阿兰·图灵和阿隆佐·丘奇几乎同时提出。\n- **直观表述**：任何“直觉上可计算”的函数，都可以用图灵机来计算。\n- 这是一个**论题**（无法严格证明，但被广泛接受），奠定了整个计算机科学的理论基础。\n\n---\n\n## 1.6 图灵机与现代计算机的关系\n\n- 图灵机是**理论模型**，强调**逻辑本质**。\n- 现代计算机是**物理实现**（使用电子元件）。\n- 冯·诺依曼架构 + 图灵完备的指令集 → 实现了图灵机的思想。\n- 任何一台能运行通用编程语言的计算机，本质上都能模拟图灵机。\n\n**类比**：\n- 图灵机 ≈ 计算机科学的“原子模型”。\n- 真实计算机 ≈ 用硅芯片实现的“宏观物体”。\n\n---\n\n## 1.7 扩展阅读与思考题（推荐初学者练习）\n\n### 思考题：\n1. 为什么说图灵机是“最简单却最强大”的计算模型？\n2. 生活中哪些设备可以看作是“特殊用途的图灵机”？（例如计算器、洗衣机）\n3. 如果给你无限纸带和一套转换规则，你想设计一个什么功能的图灵机？\n\n### 推荐资源（可进一步学习）：\n- 《图灵的秘密》或《Gödel, Escher, Bach》相关章节。\n- YouTube搜索：“Turing Machine explained for beginners”（推荐3Blue1Brown或Computerphile频道）。\n- 在线图灵机模拟器：搜索 “Turing Machine Simulator” 可自己动手实验。\n\n---\n\n## 1.8 本章小结\n\n- 计算机起源于人类对**自动化计算**的需求，从算盘到机械计算机，再到电子计算机。\n- 阿兰·图灵提出了**图灵机**这一抽象模型，严格定义了“计算”的边界。\n- 图灵机 + 停机问题 + 丘奇-图灵论题构成了计算机科学的**理论基石**。\n- 下一章我们将学习**信息如何在计算机中表示**（二进制、布尔逻辑等）。\n\n**学习建议**：\n- 尝试在纸上画一个简单的图灵机运行过程。\n- 不要担心细节，先建立直观理解，后续章节会逐步深入。\n\n---\n\n**恭喜你完成第1章！**  \n继续保持好奇心，下一步我们将进入数字世界的基础 —— 信息表示与数制系统。\n\n",
-            "quizzes": [],
+            "quizzes": [
+              {
+                "question": "图灵机核心组成不包含（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "纸带"
+                  },
+                  {
+                    "key": "B",
+                    "text": "读写头"
+                  },
+                  {
+                    "key": "C",
+                    "text": "状态控制器"
+                  },
+                  {
+                    "key": "D",
+                    "text": "**显卡**"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "图灵机是抽象数学模型，由无限纸带、读写头、有限状态集和转移函数组成。显卡是现代计算机的硬件部件，不属于理论模型。"
+              },
+              {
+                "question": "第一台电子数字计算机ENIAC采用的核心元件是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**电子管**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "晶体管"
+                  },
+                  {
+                    "key": "C",
+                    "text": "集成电路"
+                  },
+                  {
+                    "key": "D",
+                    "text": "超大规模集成电路"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "ENIAC（1945年）是第一台通用电子数字计算机，使用约1.8万个真空电子管，体积庞大、耗电量高，标志着电子计算机时代的开始。"
+              },
+              {
+                "question": "图灵提出的“停机问题”结论是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**不存在通用判定算法**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "存在多项式算法"
+                  },
+                  {
+                    "key": "C",
+                    "text": "可通过暴力枚举解决"
+                  },
+                  {
+                    "key": "D",
+                    "text": "有限步骤内一定可判定"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "停机问题证明了不存在一个通用程序能判断任意图灵机在给定输入下是否会停机。这是可计算性理论中的核心不可判定性结果。"
+              },
+              {
+                "question": "冯·诺依曼提出的“存储程序”概念诞生于（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**1945年**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "1950年"
+                  },
+                  {
+                    "key": "C",
+                    "text": "1960年"
+                  },
+                  {
+                    "key": "D",
+                    "text": "1970年"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "1945年冯·诺依曼在《EDVAC报告初稿》中首次明确提出程序和数据共同存储在内存中的思想，成为现代计算机体系结构的基础。"
+              },
+              {
+                "question": "被誉为“计算机之父”的是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "阿兰·图灵"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**查尔斯·巴贝奇**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "约翰·冯·诺依曼"
+                  },
+                  {
+                    "key": "D",
+                    "text": "布莱斯·帕斯卡"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "巴贝奇设计了差分机和分析机，首次提出了现代计算机的五大基本部件雏形和程序控制思想。"
+              },
+              {
+                "question": "图灵机模型中，纸带的作用是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "仅用于输出结果"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**存储输入、输出和中间计算结果**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "控制状态转换"
+                  },
+                  {
+                    "key": "D",
+                    "text": "限制计算长度"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "纸带是无限长的存储介质，读写头可在上面读写符号，实现数据的持久化和计算过程的记录。"
+              },
+              {
+                "question": "现代通用计算机在理论上等价于（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "有限自动机"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**图灵机**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "栈自动机"
+                  },
+                  {
+                    "key": "D",
+                    "text": "正则表达式"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "只要编程语言是图灵完备的（能模拟图灵机），它就具备与图灵机相同的计算能力。"
+              },
+              {
+                "question": "以下哪项不属于计算机发展的第一代（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "电子管"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**晶体管**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "ENIAC"
+                  },
+                  {
+                    "key": "D",
+                    "text": "UNIVAC"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "第一代（1940s-1950s）使用电子管；第二代（1950s-1960s）使用晶体管。"
+              },
+              {
+                "question": "图灵机的核心组成部分包括（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**无限纸带**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**读写头**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "**状态寄存器**"
+                  },
+                  {
+                    "key": "D",
+                    "text": "**转移函数**"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "图灵机由这四个部分组成，转移函数定义了状态转换规则，是计算逻辑的核心。"
+              },
+              {
+                "question": "计算机硬件发展的四代划分依据是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**电子管**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**晶体管**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "**集成电路**"
+                  },
+                  {
+                    "key": "D",
+                    "text": "**超大规模集成电路**"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "四代计算机的标志性硬件依次为上述四种，反映了计算机体积缩小、性能提升、成本降低的过程。"
+              },
+              {
+                "question": "以下哪些人是计算机发展史上的重要人物（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**查尔斯·巴贝奇**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**阿兰·图灵**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "**约翰·冯·诺依曼**"
+                  },
+                  {
+                    "key": "D",
+                    "text": "**阿隆佐·丘奇**"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "巴贝奇（机械计算机）、图灵（理论模型）、冯·诺依曼（体系结构）、丘奇（λ演算，与图灵机等价）均做出了奠基性贡献。"
+              },
+              {
+                "question": "图灵机能模拟的计算特征包括（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**顺序执行**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**条件分支**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "**循环**"
+                  },
+                  {
+                    "key": "D",
+                    "text": "**无限存储**"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "通过状态转换和无限纸带，图灵机可以实现任何算法的计算逻辑。"
+              },
+              {
+                "question": "以下属于图灵机理论重要结论的是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**停机问题不可判定**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**图灵完备性**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "**丘奇-图灵论题**"
+                  },
+                  {
+                    "key": "D",
+                    "text": "**所有问题均可计算**"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "D错误，并非所有问题都是可计算的（如停机问题）。"
+              }
+            ],
             "mindmapHtml": ""
           },
           {
@@ -3610,7 +4589,307 @@ const ALL_COURSES_DATA = [
             "title": "第2章：信息表示与数字系统",
             "intro": "学习关于 信息表示与数字系统 的核心专业理论与应用。",
             "content": "\n## 2.1 本章导言（适合初学者）\n\n欢迎来到《计算机导论》第二章！  \n\n计算机本质上是一个**信息处理机器**。但它只能认识**二进制**（0和1），无法直接理解文字、图片、声音等人类信息。本章我们将详细学习：\n\n- 计算机如何用0和1表示所有信息？\n- 不同数制（二进制、十进制、十六进制）之间的转换。\n- 布尔逻辑与逻辑门——计算机“思考”的基础。\n- 字符、数字、图像、声音在计算机中的编码方式。\n\n**学习目标**：  \n理解“信息在计算机中如何表示”，为后续学习硬件、编程打下坚实基础。即使你是零基础，也能轻松跟上——我们会用大量生活例子解释。\n\n---\n\n## 2.2 信息与数据的基本概念\n\n### 2.2.1 什么是信息？什么是数据？\n- **数据**：记录信息的符号（如数字、文字、图像）。\n- **信息**：数据所承载的意义。\n- **计算机视角**：所有信息最终都要转化为**二进制**（0和1的序列）。\n\n**例子**：\n- 你输入的文字“hello” → 计算机内部变成一串0和1。\n- 一张照片 → 变成像素点的颜色值（也是0和1）。\n\n### 2.2.2 为什么用二进制？\n- 电子元件最可靠的状态只有两种：**高电压（1）** 和 **低电压（0）**。\n- 二进制电路简单、可靠、抗干扰能力强。\n- 任何复杂信息都可以通过0和1的组合表示（类似摩尔斯电码）。\n\n---\n\n## 2.3 数制系统\n\n### 3.1 常见数制\n1. **十进制（Decimal）**：日常使用的数制，基数10，数码0-9。\n2. **二进制（Binary）**：基数2，数码0、1。计算机内部使用。\n3. **八进制（Octal）**：基数8，数码0-7（较少使用）。\n4. **十六进制（Hexadecimal）**：基数16，数码0-9 + A-F。常用于内存地址、颜色表示。\n\n### 3.2 数制转换（详细步骤 + 例子）\n\n#### 十进制 → 二进制（除2取余法）\n**例子**：将13转为二进制\n\n3 ÷ 2 = 6 余 1\n\n6 ÷ 2 = 3 余 0\n\n3 ÷ 2 = 1 余 1\n\n1 ÷ 2 = 0 余 1\n\n从下往上读余数 → **1101**（二进制）\n\n#### 二进制 → 十进制（按权展开法）\n**例子**：1101₂ 转十进制\n\n1×2³ + 1×2² + 0×2¹ + 1×2⁰ = 8 + 4 + 0 + 1 = 13₁₀\n\n\n#### 二进制与十六进制转换（非常实用）\n- 4位二进制 = 1位十六进制\n- 例子：`1010 1111` → `AF`（十六进制）\n\n**练习**：\n- 十进制 255 → 二进制？（答案：11111111）\n- 二进制 1010 → 十六进制？（答案：A）\n\n### 3.3 带符号数的表示\n- **原码**：最高位表示符号（0正1负），其余位表示数值。\n- **反码**：正数同原码，负数是原码除符号位外取反。\n- **补码**：正数同原码，负数是反码+1。**计算机实际使用补码**（便于加减法统一处理）。\n\n**例子**（8位）：\n- +13：`00001101`\n- -13（补码）：先原码 `10001101` → 反码 `11110010` → 补码 `11110011`\n\n---\n\n## 2.4 布尔逻辑与逻辑门\n\n### 4.1 布尔代数基础\n- 布尔值：只有**True（1）** 和 **False（0）**。\n- 基本运算：\n  - **与（AND）**：`1 AND 1 = 1`，其余为0（都为真才真）\n  - **或（OR）**：`0 OR 0 = 0`，其余为1（有一个为真就真）\n  - **非（NOT）**：取反（0→1，1→0）\n\n### 4.2 常见逻辑门（计算机硬件基础）\n- **与门（AND）**、**或门（OR）**、**非门（NOT）**、**异或门（XOR）**、**与非门（NAND）** 等。\n- 复杂电路（如加法器）由这些基本门组合而成。\n\n**生活例子**：\n- 客厅灯 = 开关A AND 开关B（两个开关都开灯才亮）\n- 防盗报警 = 门传感器 OR 窗传感器（任何一个触发就报警）\n\n### 4.3 逻辑表达式化简\n可以使用**卡诺图**或**布尔代数定律**简化逻辑表达式，减少硬件使用。\n\n---\n\n## 2.5 信息编码方式\n\n### 5.1 字符编码\n- **ASCII**：最早的字符编码，用7位或8位表示128个字符（英文字母、数字、符号）。\n- **Unicode**：现代标准，支持全球所有文字（UTF-8 是最常用实现）。\n- **例子**：\n  - 'A' 的 ASCII = 65（十进制）= 01000001（二进制）\n\n### 5.2 数字编码\n- 整数：补码表示。\n- 浮点数：**IEEE 754标准**（符号位 + 指数位 + 尾数位）。\n  - 例子：32位单精度浮点数。\n\n### 5.3 图像表示\n- **位图（Bitmap）**：每个像素用颜色值表示（如RGB，每个通道8位 → 24位真彩色）。\n- **矢量图**：用数学公式描述图形（可无限缩放）。\n\n### 5.4 音频与视频\n- 音频：采样 + 量化（PCM编码）。\n- 视频：图像序列 + 音频 + 压缩（MPEG等）。\n\n---\n\n## 2.6 信息存储单位\n\n- **bit（比特）**：最小单位，0或1。\n- **Byte（字节）**：8 bit。\n- **KB、MB、GB、TB** 换算：1KB=1024 Byte（计算机中使用2的幂）。\n\n**记忆口诀**：1024 ≈ 1000（但严格是1024）。\n\n---\n\n## 2.7 本章常见易错点\n\n1. 二进制转换时忘记“从下往上读余数”。\n2. 混淆原码、反码、补码（记住计算机用补码）。\n3. 逻辑运算中“与”和“或”的区别。\n4. UTF-8 与 ASCII 的关系（UTF-8兼容ASCII）。\n\n---\n\n## 2.8 扩展思考与练习\n\n### 思考题：\n1. 为什么现代计算机普遍采用补码表示负数？\n2. 一张1080P（1920×1080）照片（24位真彩）大约占多少存储空间？\n3. 如果只有与非门（NAND），能否搭建出完整的计算机？（答案：能，NAND是万能门）\n\n### 动手练习：\n- 用纸笔完成十进制与二进制的互转（至少10个数字）。\n- 在线工具：搜索 “Binary Converter” 或 “Logic Gate Simulator” 进行实验。\n\n### 推荐资源：\n- 《编码：隐匿在计算机软硬件背后的语言》（推荐阅读前几章）\n- 3Blue1Brown 或 Crash Course Computer Science 相关视频\n- 在线模拟器：Logicly、Turing Machine + Logic Gate simulators\n\n---\n\n## 2.9 本章小结\n\n- 计算机只认识**0和1**，所有信息都需要**编码**成二进制。\n- **数制转换**和**补码**是理解底层表示的关键。\n- **布尔逻辑**是硬件实现计算的基础。\n- **Unicode、IEEE 754** 等标准让计算机能处理复杂多媒体信息。\n\n**下一章预告**：算法与数据结构基础 —— 我们将学习如何用计算机高效解决问题。\n\n---\n\n**学习建议**：\n- 每天练习数制转换10分钟，直到熟练。\n- 尝试画几个逻辑门电路图。\n- 将本章内容与第1章图灵机结合思考：图灵机如何用纸带上的0/1完成计算？\n\n---\n",
-            "quizzes": [],
+            "quizzes": [
+              {
+                "question": "8位无符号二进制数能表示的最大值是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "127"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**255**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "256"
+                  },
+                  {
+                    "key": "D",
+                    "text": "128"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "8位无符号二进制范围是 0~2⁸-1 = 0~255。256需要9位（100000000）。"
+              },
+              {
+                "question": "十进制数10转换为二进制是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**1010**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "1100"
+                  },
+                  {
+                    "key": "C",
+                    "text": "0101"
+                  },
+                  {
+                    "key": "D",
+                    "text": "1001"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "除2取余法：10→5余0，5→2余1，2→1余0，1→0余1 → 1010。"
+              },
+              {
+                "question": "标准ASCII字符编码使用（）位表示",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**7**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "8"
+                  },
+                  {
+                    "key": "C",
+                    "text": "16"
+                  },
+                  {
+                    "key": "D",
+                    "text": "32"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "ASCII最初使用7位，可表示128个字符（0-127），扩展ASCII使用8位。"
+              },
+              {
+                "question": "计算机内部存储负数主要采用（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**补码**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "原码"
+                  },
+                  {
+                    "key": "C",
+                    "text": "反码"
+                  },
+                  {
+                    "key": "D",
+                    "text": "真值"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "补码使加减法统一用加法器实现，且0只有唯一表示，避免电路复杂化。"
+              },
+              {
+                "question": "以下进制中，计算机内存地址常用（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "二进制"
+                  },
+                  {
+                    "key": "B",
+                    "text": "十进制"
+                  },
+                  {
+                    "key": "C",
+                    "text": "**十六进制**"
+                  },
+                  {
+                    "key": "D",
+                    "text": "八进制"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "十六进制简洁（4位二进制对应1位十六进制），便于阅读和调试。"
+              },
+              {
+                "question": "1KB等于（）字节",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "1000"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**1024**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "1023"
+                  },
+                  {
+                    "key": "D",
+                    "text": "2048"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "计算机存储单位采用2的幂：1KB = 2¹⁰ = 1024字节。"
+              },
+              {
+                "question": "逻辑运算中，“与”运算（AND）的结果为1的条件是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "至少一个操作数为1"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**两个操作数都为1**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "两个操作数都为0"
+                  },
+                  {
+                    "key": "D",
+                    "text": "至少一个操作数为0"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "AND是“都真才真”，对应电路中的串联开关。"
+              },
+              {
+                "question": "IEEE 754单精度浮点数总位数是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "16"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**32**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "64"
+                  },
+                  {
+                    "key": "D",
+                    "text": "128"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "单精度（float）：1位符号 + 8位阶码 + 23位尾数 = 32位。"
+              },
+              {
+                "question": "计算机中常用的数制包括（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**二进制**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**八进制**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "**十进制**"
+                  },
+                  {
+                    "key": "D",
+                    "text": "**十六进制**"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "二进制（内部）、十进制（人读）、十六进制（调试）、八进制（早期Unix权限等）。"
+              },
+              {
+                "question": "IEEE 754浮点数格式的组成部分有（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**符号位**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**阶码（指数）**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "**尾数（有效位）**"
+                  },
+                  {
+                    "key": "D",
+                    "text": "校验位"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "无校验位，校验一般由其他机制完成。"
+              },
+              {
+                "question": "以下属于字符编码标准的是（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**ASCII**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**Unicode**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "**UTF-8**"
+                  },
+                  {
+                    "key": "D",
+                    "text": "GB2312"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "ASCII是最早国际标准，Unicode及其实现UTF-8支持全球文字，GB2312为中文编码。"
+              },
+              {
+                "question": "补码相比原码的优势包括（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**0的表示唯一**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**减法可转为加法**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "**简化硬件电路**"
+                  },
+                  {
+                    "key": "D",
+                    "text": "表示范围更大"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "D错误，相同位数下补码和原码表示范围相同（但符号位处理不同）。"
+              },
+              {
+                "question": "信息在计算机中常见的编码对象包括（）",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "**字符**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**数值**"
+                  },
+                  {
+                    "key": "C",
+                    "text": "**图像**"
+                  },
+                  {
+                    "key": "D",
+                    "text": "**音频**"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "所有信息最终都编码为二进制。"
+              }
+            ],
             "mindmapHtml": ""
           },
           {
@@ -3836,7 +5115,7 @@ const ALL_COURSES_DATA = [
                     "text": "输入设备和输出设备"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "冯·诺依曼将计算机硬件划分为运算器（ALU）、控制器（CU）、存储器（Memory）、输入设备（Input）和输出设备（Output）五大部件。选项 D 包含两个部件，合起来共五个。"
               },
               {
@@ -3859,7 +5138,7 @@ const ALL_COURSES_DATA = [
                     "text": "片上存储（Scratchpad Memory）"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "\n> - **A（多级Cache）**：利用局部性原理，将常用数据放在靠近 CPU 的高速缓存中，减少对主存的访问。\n> - **B（哈佛架构）**：指令和数据各走独立通道，取指和取数可以并行。\n> - **C（超标量流水线）**：多条指令在不同阶段重叠执行，提高吞吐率。\n> - **D（片上存储）**：在 CPU 芯片内部集成小容量高速存储器，减少对外部内存的依赖。"
               },
               {
@@ -3882,7 +5161,7 @@ const ALL_COURSES_DATA = [
                     "text": "Cache 容量越大越好，应该完全取代主存"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "\n> - **A 正确**：时间局部性指刚访问的数据很可能再次被访问；空间局部性指刚访问的数据附近的数据很可能被访问。Cache 正是利用这两个原理预存数据。\n> - **B 正确**：Cache 层级越靠近 CPU（L1），速度越快、容量越小、成本越高。\n> - **C 正确**：命中率越高，CPU 需要等待主存的次数越少，整体性能越好。\n> - **D 错误**：Cache 采用 SRAM 工艺，成本远高于 DRAM 主存，不可能完全取代主存。合理的做法是构建多级存储层次。"
               },
               {
@@ -3905,7 +5184,7 @@ const ALL_COURSES_DATA = [
                     "text": "输入设备将数据送入存储器"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABD",
                 "analysis": "\n> - **A、B 正确**：CPU 与主存之间的所有数据交换（取指令、读数据、写结果）都必须通过系统总线。\n> - **D 正确**：输入设备需要通过 I/O 接口和总线将数据传送到存储器。\n> - **C 错误**：CPU 内部寄存器之间的数据传送通过内部数据通路完成，不占用外部系统总线。"
               }
             ],
@@ -4121,7 +5400,7 @@ const ALL_COURSES_DATA = [
                     "text": "存储冒险（Storage Hazard）"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "流水线冒险分为三类：结构冒险（多条指令争抢同一硬件资源）、数据冒险（后续指令依赖前面指令尚未就绪的结果）、控制冒险（分支指令导致取指方向不确定）。不存在\"存储冒险\"这一分类。"
               },
               {
@@ -4144,7 +5423,7 @@ const ALL_COURSES_DATA = [
                     "text": "分支预测（Branch Prediction）"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "\n> - **A（数据旁路转发）**：将 ALU 运算结果直接前递给下一条指令的输入端，无需等待写回寄存器堆，是最有效的硬件解决方案。\n> - **B（插入 NOP）**：在存在依赖的指令之间插入空操作指令，等待结果就绪。简单但浪费周期。\n> - **C（乱序执行）**：当某条指令等待操作数时，先执行后面不相关的指令，提高利用率。\n> - **D 错误**：分支预测解决的是控制冒险，而非数据冒险。"
               },
               {
@@ -4167,7 +5446,7 @@ const ALL_COURSES_DATA = [
                     "text": "流水线各级延迟不均匀会降低实际加速比"
                   }
                 ],
-                "answer": "A",
+                "answer": "ACD",
                 "analysis": "\n> - **A 正确**：流水线充满后，理想情况下每个时钟周期有一条指令在 WB 阶段完成。\n> - **B 错误**：流水线级数过多会导致各级延迟极小但控制开销增大，且流水线冒险（如分支预测错误的冲刷代价）也会增大。过深的流水线反而可能降低性能。\n> - **C 正确**：理想加速比 ≈ 流水线级数 k（当指令数 n >> k 时）。\n> - **D 正确**：流水线时钟周期由最慢的那一级决定，各级延迟不均匀意味着快的阶段在\"等待\"慢的阶段，降低了效率。"
               },
               {
@@ -4190,7 +5469,7 @@ const ALL_COURSES_DATA = [
                     "text": "指令存储器和数据存储器完全分离"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "\n> - **A 正确**：保留站存放已译码但尚未执行的指令，等待操作数就绪后发射执行。\n> - **B 正确**：ROB 记录指令的原始程序顺序，确保乱序执行后按序提交结果。\n> - **C 正确**：分支预测器也是乱序执行处理器的关键组件——如果分支预测错误，需要冲刷流水线并恢复到正确路径。\n> - **D 错误**：指令和数据存储器分离是哈佛架构的特征，与乱序执行无直接关系。乱序执行可以在冯·诺依曼架构上实现。"
               }
             ],
@@ -4266,10 +5545,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "查找速度更快"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：组相联需要 N 个比较器（N=路数），比直接映射的 1 个比较器更复杂。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：组相联仍然需要 Tag 比较（只是比较组内的 N 个 Tag）。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：组相联需要并行比较 N 个 Tag，速度略慢于直接映射。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "直接映射中每个主存块只能映射到唯一一行，如果两个频繁使用的块恰好映射到同一行，就会反复替换（冲突缺失/抖动）。组相联映射允许块在组内任意存放（如 4 路组相联可放在 4 行中的任一行），大幅减少了冲突缺失。\n> - B 错误：组相联需要 N 个比较器（N=路数），比直接映射的 1 个比较器更复杂。\n> - C 错误：组相联仍然需要 Tag 比较（只是比较组内的 N 个 Tag）。\n> - D 错误：组相联需要并行比较 N 个 Tag，速度略慢于直接映射。"
+                "analysis": "直接映射中每个主存块只能映射到唯一一行，如果两个频繁使用的块恰好映射到同一行，就会反复替换（冲突缺失/抖动）。组相联映射允许块在组内任意存放（如 4 路组相联可放在 4 行中的任一行），大幅减少了冲突缺失。"
               },
               {
                 "question": "TLB（Translation Lookaside Buffer，快表）的作用是加速（  ）",
@@ -4312,10 +5603,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "32 组"
+                  },
+                  {
+                    "key": "B",
+                    "text": "= 16384 / 64 = 256 行"
                   }
                 ],
                 "answer": "A",
-                "analysis": "\n> - Cache 总行数 = 16 KB / 64 B = 16384 / 64 = 256 行\n> - 4 路组相联 → 每组 4 行\n> - 总组数 = 256 / 4 = 64 组\n>\n> 主存地址划分：块内偏移 6 位（64B），组号 6 位（64 组），剩余为 Tag。"
+                "analysis": "\n> - 4 路组相联 → 每组 4 行\n> - 总组数 = 256 / 4 = 64 组\n>\n> 主存地址划分：块内偏移 6 位（64B），组号 6 位（64 组），剩余为 Tag。"
               },
               {
                 "question": "以下关于 Write-Back（写回）策略的描述，正确的是（  ）",
@@ -4381,10 +5676,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "9.0 ns"
+                  },
+                  {
+                    "key": "A",
+                    "text": "的 4.6 ns 反推：L1 命中时间 = 2 ns，L2 命中时间 = 12 ns"
                   }
                 ],
                 "answer": "A",
-                "analysis": "\n>\n> 先计算 L2 的 AMAT：\n> $$\\text{AMAT}_{L2} = \\text{Hit}_{L2} + \\text{Miss}_{L2} \\times \\text{Penalty}_{L2} = 10 + 0.20 \\times 100 = 30 \\text{ ns}$$\n>\n> 再计算 L1 的 AMAT（L1 未命中惩罚 = L2 的 AMAT = 30 ns）：\n> $$\\text{AMAT}_{L1} = \\text{Hit}_{L1} + \\text{Miss}_{L1} \\times \\text{Penalty}_{L1} = 1 + 0.08 \\times 30 = 3.4 \\text{ ns}$$\n>\n> 等等，让我重新验证选项。如果题目中 L1 命中时间取 2 ns：\n> $$\\text{AMAT}_{L1} = 2 + 0.08 \\times 30 = 4.4 \\text{ ns}$$\n>\n> 按照选项 A 的 4.6 ns 反推：L1 命中时间 = 2 ns，L2 命中时间 = 12 ns\n> $$\\text{AMAT}_{L2} = 12 + 0.2 \\times 100 = 32 \\text{ ns}$$\n> $$\\text{AMAT}_{L1} = 2 + 0.08 \\times 32 = 4.56 \\approx 4.6 \\text{ ns}$$ ✓"
+                "analysis": "\n>\n> 先计算 L2 的 AMAT：\n> $$\\text{AMAT}_{L2} = \\text{Hit}_{L2} + \\text{Miss}_{L2} \\times \\text{Penalty}_{L2} = 10 + 0.20 \\times 100 = 30 \\text{ ns}$$\n>\n> 再计算 L1 的 AMAT（L1 未命中惩罚 = L2 的 AMAT = 30 ns）：\n> $$\\text{AMAT}_{L1} = \\text{Hit}_{L1} + \\text{Miss}_{L1} \\times \\text{Penalty}_{L1} = 1 + 0.08 \\times 30 = 3.4 \\text{ ns}$$\n>\n> 等等，让我重新验证选项。如果题目中 L1 命中时间取 2 ns：\n> $$\\text{AMAT}_{L1} = 2 + 0.08 \\times 30 = 4.4 \\text{ ns}$$\n>\n> $$\\text{AMAT}_{L2} = 12 + 0.2 \\times 100 = 32 \\text{ ns}$$\n> $$\\text{AMAT}_{L1} = 2 + 0.08 \\times 32 = 4.56 \\approx 4.6 \\text{ ns}$$ ✓"
               },
               {
                 "question": "MESI 缓存一致性协议的四种状态包括（  ）",
@@ -4406,7 +5705,7 @@ const ALL_COURSES_DATA = [
                     "text": "I（Invalid，无效）"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "MESI 协议为每个缓存行定义四种状态：\n> - **M（Modified）**：已被当前核心修改，与主存不一致，只有当前核心持有。替换时必须写回主存。\n> - **E（Exclusive）**：只被当前核心持有，数据与主存一致。可无需总线事务直接升级为 M。\n> - **S（Shared）**：多个核心持有相同副本，数据与主存一致。修改前需发送 BusUpgr 获取独占权。\n> - **I（Invalid）**：该行无效，不可使用，需重新加载。"
               },
               {
@@ -4429,7 +5728,7 @@ const ALL_COURSES_DATA = [
                     "text": "消除访存延迟"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "\n> - **A 正确**：虚拟内存让每个进程拥有独立的虚拟地址空间（如 32 位系统 4 GB），可以远超实际物理内存大小。\n> - **B 正确**：每个进程的虚拟地址映射到不同的物理地址，天然实现了进程间的内存隔离，防止越界访问。\n> - **C 正确**：通过页面换入换出，物理内存可以在多个进程之间分时复用，支持运行总内存需求超过物理内存的程序组合。\n> - **D 错误**：虚拟内存不但不消除访存延迟，反而增加了延迟——每次访存都需要经过页表进行地址转换。如果 TLB 未命中，还需要额外访问主存中的页表。"
               },
               {
@@ -4452,31 +5751,31 @@ const ALL_COURSES_DATA = [
                     "text": "现代 CPU 的 L1 Cache 通常采用直接映射方式"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "\n> - **A 正确**：直接映射每个主存块只能放在一个固定位置，只需 1 个比较器，硬件最简单，查找最快。\n> - **B 正确**：全相联映射可以放在任意位置，冲突最少、命中率最高，但需要与所有 Cache 行并行比较 Tag，硬件极其复杂。\n> - **C 正确**：组相联在组间使用直接映射（快速定位组），组内使用全相联（灵活放置），是两者的折中。\n> - **D 错误**：现代 CPU 的 L1 Cache 通常采用 **组相联映射**（如 8 路组相联），而非直接映射。直接映射冲突缺失太多，不适合 L1 这种对命中率要求极高的层级。"
               },
               {
-                "question": "当多核处理器中核心 A 将某个 S 状态的缓存行修改为 M 状态时，以下哪些操作会发生？（  ）",
+                "question": "标记 Tag 位数：**",
                 "options": [
                   {
                     "key": "A",
-                    "text": "核心 A 向总线发送 BusUpgr（升级请求）消息"
+                    "text": "- \\text{Index} - \\text{Offset} ="
+                  },
+                  {
+                    "key": "A",
+                    "text": "- \\log_2 \\frac{C}{B \\times N} - \\log_2"
                   },
                   {
                     "key": "B",
-                    "text": "其他持有该缓存行 S 状态副本的核心将其置为 I（无效）状态"
+                    "text": "\\text{ 位}$$"
                   },
                   {
-                    "key": "C",
-                    "text": "核心 A 立即将修改后的数据写回主存"
-                  },
-                  {
-                    "key": "D",
-                    "text": "核心 A 获得该缓存行的独占写权限"
+                    "key": "A",
+                    "text": "- \\log_2 \\frac{C}{N} \\text{ 位}$$"
                   }
                 ],
                 "answer": "A",
-                "analysis": "\n> - **A 正确**：核心 A 在修改 S 状态的缓存行之前，必须通过 BusUpgr 消息通知其他核心，请求升级为独占写权限。\n> - **B 正确**：其他核心嗅探到 BusUpgr 后，将自己持有的 S 状态副本置为 I（无效），保证只有一个核心可以写入。\n> - **C 错误**：M 状态的核心不会立即写回主存，而是在该行被替换出 Cache 或被其他核心请求时才写回（Write-Back 策略）。\n> - **D 正确**：发送 BusUpgr 并获得其他核心的确认后，核心 A 获得独占写权限，将状态从 S 升级为 M。"
+                "analysis": "暂无详细解析"
               }
             ],
             "mindmapHtml": ""
@@ -4604,7 +5903,7 @@ const ALL_COURSES_DATA = [
                     "text": "消息队列（Message Queue）"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABD",
                 "analysis": "\n- **A 正确**：管道是半双工的通信方式，数据只能单向流动，适用于具有亲缘关系的进程间通信（父子进程）。命名管道（FIFO）可以在无亲缘关系的进程间使用。\n- **B 正确**：共享内存是最快的 IPC 方式，多个进程映射同一块物理内存到自己的地址空间，直接读写共享数据，但需要配合同步机制防止竞争条件。\n- **C 错误**：信号量是一种**同步机制**，用于控制对共享资源的访问，它本身不传递数据内容，因此严格来说不是\"通信\"方式，而是\"同步\"方式。注意：部分教材在广义上将信号量也归入 IPC 范畴，但狭义 IPC 特指数据交换机制。\n- **D 正确**：消息队列允许进程通过发送和接收消息来通信，消息带有类型标识，支持非亲缘进程间通信。"
               }
             ],
@@ -4705,7 +6004,7 @@ const ALL_COURSES_DATA = [
                     "text": "引用位（Referenced/Accessed Bit）"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "\n- **A 正确**：有效位标识该页是否在物理内存中。有效位=0 时访问该页触发缺页中断，这是需求分页的基础。\n- **B 正确**：保护位定义该页的访问权限，通常包括读（R）、写（W）、执行（X）三种。违反保护规则会触发段错误（Segmentation Fault）。\n- **C 正确**：修改位/脏位标识该页自从被加载到内存后是否被写入过。页面置换时，如果脏位=1，需要将页面写回磁盘；如果脏位=0，直接丢弃即可（因为磁盘上有原始副本），节省 I/O 开销。\n- **D 正确**：引用位标识该页是否被访问过（读或写），由硬件自动设置。页面置换算法（如 CLOCK）利用引用位来判断页面的活跃程度，近似实现 LRU。"
               },
               {
@@ -4728,7 +6027,7 @@ const ALL_COURSES_DATA = [
                     "text": "频繁的页面换入换出导致 CPU 大部分时间在等待 I/O"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABD",
                 "analysis": "\n- **A 正确**：多道程序度过高时，物理内存被过多的进程瓜分，每个进程分到的帧太少，无法容纳其活跃页面集合（工作集），导致频繁缺页。\n- **B 正确**：这是抖动的直接原因。当进程的工作集（Working Set）大于分配给它的物理帧数时，进程会不断地缺页→置换→再缺页，陷入恶性循环。\n- **D 正确**：频繁换页导致磁盘 I/O 激增，进程大部分时间花在等待页面从磁盘读入，而不是执行有效计算。CPU 利用率急剧下降，OS 可能误判为\"CPU 空闲\"而调入更多进程，进一步加剧抖动。\n- **C 错误**：CPU 性能不足不是抖动的原因。抖动的瓶颈在于**内存不足**和**磁盘 I/O 过慢**，而非 CPU 计算能力。即使 CPU 非常快，如果物理内存不够、缺页频繁，同样会抖动。"
               }
             ],
@@ -4771,10 +6070,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "词法分析 → 语义分析 → 语法分析"
+                  },
+                  {
+                    "key": "B",
+                    "text": "C、D 的顺序都是错误的——跳过词法分析就无法获得 Token，跳过语法分析就无法获得语法树，语义分析必须在最后。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "编译器前端严格按照\"词法分析 → 语法分析 → 语义分析\"的顺序处理源代码。\n> - **词法分析**首先将字符流切分为 Token 序列——这是最基础的单元，后续阶段都依赖它。\n> - **语法分析**接收 Token 序列，检查语法结构并构建语法树/AST——没有 Token 就无法进行语法分析。\n> - **语义分析**在语法正确的基础上检查类型、作用域等语义问题——必须先确定语法结构正确，才能分析语义。\n>\n> B、C、D 的顺序都是错误的——跳过词法分析就无法获得 Token，跳过语法分析就无法获得语法树，语义分析必须在最后。"
+                "analysis": "编译器前端严格按照\"词法分析 → 语法分析 → 语义分析\"的顺序处理源代码。\n> - **词法分析**首先将字符流切分为 Token 序列——这是最基础的单元，后续阶段都依赖它。\n> - **语法分析**接收 Token 序列，检查语法结构并构建语法树/AST——没有 Token 就无法进行语法分析。\n> - **语义分析**在语法正确的基础上检查类型、作用域等语义问题——必须先确定语法结构正确，才能分析语义。\n>"
               },
               {
                 "question": "词法分析器的输出单元是（  ）",
@@ -4817,10 +6120,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "代码生成（Code Generation）"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：词法分析使用正则表达式（Regular Expression）和有限自动机（DFA/NFA）来描述和识别 Token 模式，而非 CFG。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：类型检查属于语义分析阶段，使用类型规则和属性文法，不直接使用 CFG。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：代码生成在后端完成，使用指令选择规则和寄存器分配算法。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "上下文无关文法（CFG）用于精确描述编程语言的**语法结构**——定义哪些 Token 序列是合法的程序。语法分析器根据 CFG 的规则来检查输入的 Token 序列是否符合语法，并构建语法树。\n> - B 错误：词法分析使用正则表达式（Regular Expression）和有限自动机（DFA/NFA）来描述和识别 Token 模式，而非 CFG。\n> - C 错误：类型检查属于语义分析阶段，使用类型规则和属性文法，不直接使用 CFG。\n> - D 错误：代码生成在后端完成，使用指令选择规则和寄存器分配算法。"
+                "analysis": "上下文无关文法（CFG）用于精确描述编程语言的**语法结构**——定义哪些 Token 序列是合法的程序。语法分析器根据 CFG 的规则来检查输入的 Token 序列是否符合语法，并构建语法树。"
               },
               {
                 "question": "以下哪个是经典的词法分析器自动生成工具？（  ）",
@@ -4840,10 +6155,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "GCC"
+                  },
+                  {
+                    "key": "C",
+                    "text": "语言实现的词法分析器。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "\n> - **A 正确**：Lex（及其开源版本 Flex）是最经典的词法分析器生成器。开发者用正则表达式编写词法规则，Lex 自动生成 C 语言实现的词法分析器。\n> - **B 错误**：Yacc（Yet Another Compiler-Compiler）和 Bison 是**语法分析器**生成器，用于根据 CFG 规则生成 Parser，通常与 Lex/Flex 配合使用。\n> - **C 错误**：LLVM 是一个完整的编译器基础设施框架，包含前端、中端优化器和后端，不是单一的词法分析工具。\n> - **D 错误**：GCC（GNU Compiler Collection）是一个完整的编译器套件，支持多种语言的编译，不是专门的词法分析工具。"
+                "analysis": "\n> - **B 错误**：Yacc（Yet Another Compiler-Compiler）和 Bison 是**语法分析器**生成器，用于根据 CFG 规则生成 Parser，通常与 Lex/Flex 配合使用。\n> - **C 错误**：LLVM 是一个完整的编译器基础设施框架，包含前端、中端优化器和后端，不是单一的词法分析工具。\n> - **D 错误**：GCC（GNU Compiler Collection）是一个完整的编译器套件，支持多种语言的编译，不是专门的词法分析工具。"
               },
               {
                 "question": "Java 语言采用的翻译方式是（  ）",
@@ -4863,10 +6182,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "仅做词法分析，不进行语法分析"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：直接编译为本地机器码是 C/C++ 的方式。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：纯解释执行是 Python、早期 JavaScript 的方式。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：任何完整的编译前端都必须包含语法分析。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "Java 采用编译+解释的混合方式。`javac` 编译器将 `.java` 源文件编译为 `.class` 字节码文件（一种中间代码），然后由 Java 虚拟机（JVM）执行。JVM 最初以解释方式逐条执行字节码，对于频繁执行的\"热点代码\"，JIT（Just-In-Time）编译器会将其动态编译为本地机器码以提高性能。\n> - B 错误：直接编译为本地机器码是 C/C++ 的方式。\n> - C 错误：纯解释执行是 Python、早期 JavaScript 的方式。\n> - D 错误：任何完整的编译前端都必须包含语法分析。"
+                "analysis": "Java 采用编译+解释的混合方式。`javac` 编译器将 `.java` 源文件编译为 `.class` 字节码文件（一种中间代码），然后由 Java 虚拟机（JVM）执行。JVM 最初以解释方式逐条执行字节码，对于频繁执行的\"热点代码\"，JIT（Just-In-Time）编译器会将其动态编译为本地机器码以提高性能。"
               },
               {
                 "question": "在正则表达式中，`[a-zA-Z_][a-zA-Z0-9_]*` 描述的是（  ）",
@@ -4886,10 +6217,18 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "运算符"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：整数常量的正则通常是 `[0-9]+`。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：字符串字面量的正则通常是 `\"[^\"]*\"`。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "这个正则表达式的含义是：以字母或下划线开头，后面可以跟任意多个字母、数字或下划线。这正是大多数编程语言（如 C、Java、Python）中**标识符**的命名规则。\n> - `[a-zA-Z_]`：第一个字符必须是字母或下划线\n> - `[a-zA-Z0-9_]*`：后续字符可以是字母、数字或下划线，出现 0 次或多次\n>\n> 例如：`count`、`_temp`、`getValue2` 都匹配；`2name`（数字开头）不匹配。\n> - B 错误：整数常量的正则通常是 `[0-9]+`。\n> - C 错误：字符串字面量的正则通常是 `\"[^\"]*\"`。"
+                "analysis": "这个正则表达式的含义是：以字母或下划线开头，后面可以跟任意多个字母、数字或下划线。这正是大多数编程语言（如 C、Java、Python）中**标识符**的命名规则。\n> - `[a-zA-Z_]`：第一个字符必须是字母或下划线\n> - `[a-zA-Z0-9_]*`：后续字符可以是字母、数字或下划线，出现 0 次或多次\n>\n> 例如：`count`、`_temp`、`getValue2` 都匹配；`2name`（数字开头）不匹配。"
               },
               {
                 "question": "以下关于文法歧义（Ambiguity）的描述，正确的是（  ）",
@@ -4909,10 +6248,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "同一个变量在不同作用域中有不同类型"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：词法切分问题属于词法分析范畴，不是文法歧义。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：跨平台运行是翻译系统的特性，与文法歧义无关。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：变量在不同作用域中有不同类型是作用域规则（名称遮蔽），是语义分析处理的正常现象。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "文法歧义是指存在某个合法的句子（Token 序列），可以根据文法规则推导出**两棵不同的语法树**（即两种不同的结构解释）。这意味着该句子的含义不确定，编译器无法判断应该采用哪种解释。\n> - B 错误：词法切分问题属于词法分析范畴，不是文法歧义。\n> - C 错误：跨平台运行是翻译系统的特性，与文法歧义无关。\n> - D 错误：变量在不同作用域中有不同类型是作用域规则（名称遮蔽），是语义分析处理的正常现象。\n>\n> 经典歧义示例：表达式 `1 + 2 * 3` 如果没有优先级规则，可以生成 `(1+2)*3=9` 和 `1+(2*3)=7` 两棵树。通常通过引入运算符优先级来消除歧义。"
+                "analysis": "文法歧义是指存在某个合法的句子（Token 序列），可以根据文法规则推导出**两棵不同的语法树**（即两种不同的结构解释）。这意味着该句子的含义不确定，编译器无法判断应该采用哪种解释。\n>\n> 经典歧义示例：表达式 `1 + 2 * 3` 如果没有优先级规则，可以生成 `(1+2)*3=9` 和 `1+(2*3)=7` 两棵树。通常通过引入运算符优先级来消除歧义。"
               },
               {
                 "question": "编译器三段式架构中，中端（优化器）处理的数据结构是（  ）",
@@ -4932,10 +6283,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "Token 序列"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：源代码字符流是前端的输入。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：目标机器码是后端的输出。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：Token 序列是词法分析的输出、语法分析的输入，在前端内部流转。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "三段式架构中，前端将源代码转换为**中间表示（IR）**，中端在 IR 上进行机器无关的优化（如常量折叠、死代码消除、循环优化等），后端将优化后的 IR 转换为目标机器码。\n> - B 错误：源代码字符流是前端的输入。\n> - C 错误：目标机器码是后端的输出。\n> - D 错误：Token 序列是词法分析的输出、语法分析的输入，在前端内部流转。\n>\n> IR 的关键价值在于它是\"通用语言\"——使得 M 种源语言的前端和 N 种目标架构的后端可以通过 IR 连接，只需要 M+N 个组件而非 M×N 个编译器。"
+                "analysis": "三段式架构中，前端将源代码转换为**中间表示（IR）**，中端在 IR 上进行机器无关的优化（如常量折叠、死代码消除、循环优化等），后端将优化后的 IR 转换为目标机器码。\n>\n> IR 的关键价值在于它是\"通用语言\"——使得 M 种源语言的前端和 N 种目标架构的后端可以通过 IR 连接，只需要 M+N 个组件而非 M×N 个编译器。"
               },
               {
                 "question": "一个完整的编译器通常包含以下哪些阶段？（  ）",
@@ -4957,7 +6320,7 @@ const ALL_COURSES_DATA = [
                     "text": "链接与加载"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "\n> - **A 正确**：前端负责理解源代码，包括词法分析（字符流→Token）、语法分析（Token→AST）、语义分析（类型检查、符号表）。\n> - **B 正确**：中端在 IR 上进行机器无关优化，如常量折叠、内联展开、死代码消除等。\n> - **C 正确**：后端将优化后的 IR 转换为目标平台的机器码，包括指令选择、寄存器分配、指令调度。\n> - **D 正确**：编译器生成的是目标文件（.o），还需要链接器将多个目标文件和库链接成可执行文件，再由加载器将其加载到内存中执行。虽然链接和加载严格来说不属于编译器本身，但它们是完整的从源代码到可执行程序的必经步骤。"
               },
               {
@@ -4972,15 +6335,15 @@ const ALL_COURSES_DATA = [
                     "text": "符号表构建（Symbol Table）"
                   },
                   {
-                    "key": "C",
-                    "text": "作用域解析（Scope Resolution）"
+                    "key": "D",
+                    "text": "关键字识别（Keyword Recognition）"
                   },
                   {
                     "key": "D",
-                    "text": "关键字识别（Keyword Recognition）"
+                    "text": "选项D"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "\n> - **A 正确**：类型检查确保运算符与操作数类型匹配（如整数+整数合法，整数+字符串非法），函数调用参数类型和数量正确。\n> - **B 正确**：符号表记录程序中所有标识符（变量、函数、类等）的属性信息（类型、作用域、地址等），供后续阶段查询。\n> - **C 正确**：作用域分析检查变量是否在使用前已声明，是否在有效的作用域范围内。\n> - **D 错误**：关键字识别是**词法分析**阶段的工作——词法分析器通过 DFA 识别出 `int`、`if`、`while` 等关键字类型的 Token。语义分析接收的已经是识别好的 Token，不需要再做关键字识别。"
               },
               {
@@ -5003,7 +6366,7 @@ const ALL_COURSES_DATA = [
                     "text": "DFA 的识别能力比 NFA 更强"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "\n> - **A 正确**：通过子集构造法（Subset Construction），任何 NFA 都可以转换为接受相同语言的 DFA。这是词法分析器自动生成的理论基础。\n> - **B 正确**：DFA 的\"确定性\"意味着对于每个状态和每个输入字符，转移函数给出唯一确定的下一状态。这使得 DFA 的实现非常高效（简单的 switch-case 或跳转表）。\n> - **C 正确**：NFA 可以包含 ε-转移，即不消耗任何输入字符就能从一个状态转移到另一个状态。这是 NFA 与 DFA 的重要区别之一。\n> - **D 错误**：DFA 和 NFA 的识别能力**完全相同**——它们都能且仅能识别正则语言（Regular Languages）。区别在于 DFA 状态数可能指数级大于 NFA，但识别的语言集合一样。"
               },
               {
@@ -5026,7 +6389,7 @@ const ALL_COURSES_DATA = [
                     "text": "寄存器分配（Register Allocation）"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "\n> - **A 正确**：常量折叠在编译期计算常量表达式的值，如将 `x = 3 + 5` 优化为 `x = 8`，减少运行时计算。\n> - **B 正确**：死代码消除删除永远不会执行或结果从不被使用的代码，减少程序体积和运行时间。\n> - **C 正确**：循环不变量外提将循环体内不随循环变量变化的计算移到循环外，避免重复计算。\n> - **D 错误**：寄存器分配属于**编译器后端**的工作——将虚拟寄存器映射到目标 CPU 的物理寄存器。这是与目标机器相关的操作，不属于机器无关的中端优化。"
               }
             ],
@@ -5038,29 +6401,6 @@ const ALL_COURSES_DATA = [
             "intro": "学习关于 内存分配模型与垃圾回收（GC）机制 的核心专业理论与应用。",
             "content": "\n## 2.1 为什么内存管理如此重要？\n\n程序运行时，所有的变量、对象、数据结构都需要占用内存空间。内存管理要解决的核心问题是：\n\n1. **何时分配**：在什么时候为数据申请内存？\n2. **如何分配**：从哪里获取内存？用哪种方式分配？\n3. **何时释放**：数据不再需要时，如何回收内存？\n\n内存管理不当会导致严重问题：\n\n- **内存泄漏（Memory Leak）**：已分配的内存从未被释放，程序占用的内存持续增长，最终耗尽系统资源。\n- **悬空指针（Dangling Pointer）**：内存已被释放但指针仍然指向它，访问该指针会导致未定义行为甚至程序崩溃。\n- **野指针（Wild Pointer）**：指针未初始化就使用，指向随机的内存地址。\n\n不同的编程语言采用了不同的内存管理策略来应对这些挑战。\n\n---\n\n## 2.2 三种内存分配模型\n\n编程语言的内存分配可以分为三种基本模型：**静态分配**、**栈分配**和**堆分配**。\n\n### 2.2.1 静态分配（Static Allocation）\n\n**特点：** 在**编译时**就确定内存的大小和位置，程序运行期间固定不变。\n\n```\n编译时确定的内存布局：\n\n┌──────────────────────┐\n│  全局变量 x (4 字节)   │  ← 地址在编译时就确定\n├──────────────────────┤\n│  全局变量 s (100 字节)  │  ← 地址在编译时就确定\n├──────────────────────┤\n│  静态变量 count (4 字节)│  ← 地址在编译时就确定\n└──────────────────────┘\n```\n\n**适用场景：** 全局变量、静态变量、常量字符串。\n\n**优点：**\n- 分配速度极快（无需运行时操作，地址已嵌入机器码）\n- 无碎片问题\n- 生命周期贯穿整个程序运行期\n\n**缺点：**\n- 大小在编译时固定，无法适应运行时才知道大小的数据\n- 内存利用率低（即使变量不再需要，空间也不能被其他变量复用）\n\n**典型语言：** C/C++ 的全局变量和 `static` 变量；Fortran 的早期版本几乎完全使用静态分配。\n\n### 2.2.2 栈分配（Stack Allocation）\n\n**特点：** 在**函数调用时**自动分配，**函数返回时**自动释放，遵循**后进先出（LIFO）**原则。\n\n```\n函数调用时的栈帧变化：\n\n调用 main()：\n┌──────────────────┐\n│ main 的局部变量    │  ← 栈帧\n└──────────────────┘\n\n调用 main() → foo()：\n┌──────────────────┐\n│ foo 的局部变量     │  ← 新栈帧（在顶部）\n├──────────────────┤\n│ main 的局部变量    │\n└──────────────────┘\n\nfoo() 返回后：\n┌──────────────────┐\n│ main 的局部变量    │  ← foo 的栈帧自动弹出\n└──────────────────┘\n```\n\n**适用场景：** 函数的局部变量、函数参数、返回地址。\n\n```c\nint add(int a, int b) {\n    int result = a + b;    // a, b, result 都在栈上分配\n    return result;         // 函数返回时，整个栈帧自动释放\n}\n```\n\n**优点：**\n- 分配和释放极快（只需移动栈顶指针，一条 CPU 指令，纳秒级）\n- 自动管理，无需程序员手动释放\n- 无碎片问题（连续的 LIFO 操作）\n- 对 CPU 缓存友好（连续内存，局部性好）\n\n**缺点：**\n- 大小在编译时确定（局部变量的大小必须已知）\n- 空间有限（Windows 默认线程栈 1 MB，Linux 默认 8 MB）\n- 函数返回后数据自动销毁，不能跨函数生存\n\n### 2.2.3 堆分配（Heap Allocation）\n\n**特点：** 在**运行时**由程序员（或运行时系统）动态申请和释放，大小可以在运行时确定。\n\n```\n堆内存的动态分配：\n\n程序运行时：\nx = new Object()    → 在堆上申请一块内存，返回地址存入 x\ny = new int[1000]   → 在堆上申请 1000 个整数的空间\n\n堆的状态：\n┌──────────────────────────────────┐\n│ [已用] [空闲] [已用] [空闲] [已用] │  ← 大小不一，可能碎片化\n└──────────────────────────────────┘\n```\n\n**适用场景：** 运行时才知道大小的数据（动态数组、链表、树等）、需要跨函数生存的对象。\n\n```java\n// Java 示例\nclass Main {\n    static int[] createArray(int size) {\n        int[] arr = new int[size];  // size 在运行时才确定，在堆上分配\n        return arr;                 // 返回后 arr 仍然有效（在堆上）\n    }\n}\n```\n\n```c\n// C 示例\nint* createArray(int size) {\n    int* arr = (int*)malloc(size * sizeof(int));  // 手动在堆上分配\n    return arr;\n    // 调用者需要负责 free(arr)！\n}\n```\n\n**优点：**\n- 大小可以在运行时动态确定\n- 空间大（仅受进程地址空间限制，可达数 GB）\n- 数据可以跨函数生存（不会在函数返回时自动销毁）\n\n**缺点：**\n- 分配和释放较慢（涉及堆管理器、可能的系统调用，微秒级）\n- 可能产生内存碎片\n- 需要手动管理（C/C++）或依赖垃圾回收（Java/Python）\n\n---\n\n## 2.3 栈与堆的核心对比\n\n| 对比维度 | 栈（Stack） | 堆（Heap） |\n|---------|------------|-----------|\n| 分配时机 | 编译时/函数调用时 | 运行时动态 |\n| 分配方式 | 自动（CPU 移动栈顶指针） | 手动申请（`new`/`malloc`）或 GC 管理 |\n| 释放方式 | 自动（函数返回时弹出） | 手动释放（`free`/`delete`）或 GC 回收 |\n| 速度 | 极快（纳秒级，1 条指令） | 较慢（微秒级，百条指令+锁） |\n| 大小限制 | 小（通常 1~8 MB/线程） | 大（可达数 GB） |\n| 碎片问题 | 无（LIFO 操作） | 有（频繁分配释放导致空洞） |\n| 缓存友好 | 极好（连续内存） | 较差（分散分布） |\n| 生命周期 | 随函数调用生灭 | 由程序员或 GC 控制 |\n| 并发安全 | 天然安全（每线程独立栈） | 需要同步（堆锁或线程局部分配） |\n\n**编程语言中的典型映射：**\n\n```\nC/C++：\n  int x = 10;              ← 值类型，栈上分配\n  int* p = new int(10);    ← 指针指向堆上分配的对象\n\nJava/C#：\n  int x = 10;              ← 基本类型，栈上分配\n  Object obj = new Object(); ← 引用类型，对象实体在堆上，引用在栈上\n\nPython：\n  x = 10                   ← 一切皆对象，整数对象在堆上\n  name = \"hello\"           ← 字符串对象在堆上\n```\n\n---\n\n## 2.4 手动内存管理 vs 自动内存管理\n\n### 2.4.1 手动内存管理\n\n程序员需要**显式地**申请和释放内存。\n\n**代表语言：** C、C++、Rust（所有权系统）\n\n```c\n// C 语言：手动管理堆内存\nint* arr = (int*)malloc(10 * sizeof(int));  // 手动申请\n// ... 使用 arr ...\nfree(arr);                                   // 手动释放\narr = NULL;                                  // 避免悬空指针\n```\n\n**优点：**\n- 程序员对内存有完全的控制权\n- 无 GC 暂停，适合实时系统\n- 内存使用效率高（没有 GC 的额外开销）\n\n**缺点：**\n- 容易出错（忘记释放→内存泄漏，重复释放→double free，释放后使用→悬空指针）\n- 增加程序员的认知负担\n- 据统计，C/C++ 程序中约 50% 的安全漏洞与内存错误有关\n\n### 2.4.2 自动内存管理（垃圾回收）\n\n由**运行时系统**自动追踪哪些内存不再需要，并自动回收。\n\n**代表语言：** Java、Python、JavaScript、Go、C#\n\n```java\n// Java：自动垃圾回收\nvoid process() {\n    List<String> list = new ArrayList<>();  // 在堆上分配\n    list.add(\"hello\");\n    // ... 使用 list ...\n}   // 函数结束后，list 对象不再被引用\n    // GC 会在某个时刻自动回收它，程序员无需操心\n```\n\n**优点：**\n- 杜绝了内存泄漏（正确实现的情况下）\n- 消除了悬空指针和 double free\n- 减轻程序员负担，提高开发效率\n\n**缺点：**\n- GC 运行时会暂停程序（Stop-The-World），影响实时性\n- 额外的内存和 CPU 开销\n- 程序员无法精确控制释放时机\n\n---\n\n## 2.5 判断对象是否存活\n\n垃圾回收的第一步是确定哪些对象是\"垃圾\"——不再被程序使用的对象。有两种主要方法：\n\n### 2.5.1 引用计数（Reference Counting）\n\n**原理：** 为每个对象维护一个**引用计数器**，记录有多少个引用指向该对象。当计数器变为 0 时，说明没有任何引用指向它，可以立即回收。\n\n```\n示例：\n\na = new Object()    → Object 的引用计数 = 1（a 引用它）\nb = a               → Object 的引用计数 = 2（a 和 b 都引用它）\na = null            → Object 的引用计数 = 1（只剩 b 引用）\nb = null            → Object 的引用计数 = 0 → 立即回收！\n```\n\n**优点：**\n- 实时性好：对象不再被引用时立即回收，无需等待 GC 周期\n- 实现简单：每次赋值操作只需增减计数\n- 回收速度快：时间复杂度 O(1)\n\n**缺点：**\n- **无法处理循环引用**（致命缺陷）：\n\n```\n// 循环引用示例\na = new Object()\nb = new Object()\na.ref = b           → b 的计数 = 2\nb.ref = a           → a 的计数 = 2\n\na = null            → a 指向的对象的计数 = 1（b.ref 仍指向它）\nb = null            → b 指向的对象的计数 = 1（a.ref 仍指向它）\n\n// 两个对象的计数都不为 0，但实际已经无法从外部访问！\n// 它们永远不会被回收 → 内存泄漏！\n```\n\n- 每次赋值操作都需要更新计数器，有一定性能开销\n- 计数器本身需要额外的存储空间\n\n**采用引用计数的语言：** Python（配合循环引用检测器）、Objective-C（ARC）、PHP、Swift\n\n### 2.5.2 可达性分析（Reachability Analysis）\n\n**原理：** 从一组**根对象（GC Roots）**出发，沿着引用链向下遍历。所有能被遍历到的对象都是\"存活的\"，遍历不到的对象就是\"不可达的\"，可以被回收。\n\n```\n可达性分析示意图：\n\nGC Roots（根对象）：\n  ├── 栈上的局部变量\n  ├── 全局/静态变量\n  ├── 常量引用\n  └── 活跃线程\n\n遍历过程：\n\n[GC Root] ──引用──→ [对象 A] ──引用──→ [对象 B]\n                       │\n                       └──引用──→ [对象 C]\n\n[对象 D]  ← 没有任何引用链从 GC Root 到达它\n[对象 E] ←─引用── [对象 D]\n\n结果：\n  ✓ 存活：A、B、C（从 GC Root 可达）\n  ✗ 可回收：D、E（从 GC Root 不可达，即使 D 和 E 互相引用）\n```\n\n**GC Roots 通常包括：**\n- 虚拟机栈中所有栈帧的局部变量（方法参数和局部变量）\n- 方法区中的静态变量和常量引用\n- 本地方法（JNI）中的引用\n- 活跃的线程对象\n\n**优点：**\n- 能正确处理循环引用（上例中 D 和 E 虽然互相引用，但从 Root 不可达，所以会被回收）\n- 不需要为每个对象维护计数器\n\n**缺点：**\n- 需要遍历整个引用图，有一定的时间开销\n- 不能立即回收，需要等待 GC 触发\n\n**采用可达性分析的语言：** Java、C#、Go、JavaScript、Ruby\n\n---\n\n## 2.6 垃圾回收算法\n\n确定了哪些对象是垃圾之后，接下来就是如何回收它们。主要有以下几种算法：\n\n### 2.6.1 标记-清除（Mark-Sweep）\n\n**过程分为两个阶段：**\n\n```\n阶段 1：标记（Mark）\n从 GC Roots 出发，遍历所有可达对象，给它们打上\"存活\"标记。\n\n阶段 2：清除（Sweep）\n遍历整个堆，释放所有未标记的对象。\n\n标记前：\n┌──────────────────────────────┐\n│ [A] [B] [C] [D] [E] [F] [G] │\n└──────────────────────────────┘\n\n标记后（✓=存活，✗=垃圾）：\n┌──────────────────────────────┐\n│ [A✓] [B✗] [C✓] [D✗] [E✓] [F✗] [G✓] │\n└──────────────────────────────┘\n\n清除后：\n┌──────────────────────────────┐\n│ [A] [空] [C] [空] [E] [空] [G] │   ← 产生内存碎片！\n└──────────────────────────────┘\n```\n\n**优点：**\n- 实现简单\n- 不需要移动对象（引用地址不变）\n- 能正确处理循环引用\n\n**缺点：**\n- **产生内存碎片**：清除后留下许多不连续的空洞，可能导致有大块连续内存需求时无法满足\n- **全堆扫描效率低**：标记和清除都需要遍历整个堆，堆越大越慢\n- **Stop-The-World**：标记阶段通常需要暂停所有应用线程\n\n### 2.6.2 复制算法（Copying / Cheney's Algorithm）\n\n**将堆分为两半**，每次只使用其中一半。当当前区域满时，将所有存活对象复制到另一半，然后清空当前区域。\n\n```\n复制前（使用 From 区）：\n┌─────────────────┐  ┌─────────────────┐\n│ [A] [B✗] [C] [D✗]│  │      （空闲）     │\n│      From 区      │  │      To 区       │\n└─────────────────┘  └─────────────────┘\n\n复制后（切换到 To 区）：\n┌─────────────────┐  ┌─────────────────┐\n│    （全部清空）    │  │ [A] [C]          │\n│      From 区      │  │      To 区       │\n└─────────────────┘  └─────────────────┘\n                       ↑ 存活对象紧凑排列，无碎片\n```\n\n**优点：**\n- **无内存碎片**：存活对象被紧凑地复制到新区域\n- **分配速度快**：只需移动指针即可分配新对象\n- **存活对象少时效率高**：只需复制少量存活对象\n\n**缺点：**\n- **浪费一半内存**：始终有一半是空闲的\n- **存活对象多时效率低**：需要复制大量对象\n- 需要更新所有指向被复制对象的引用\n\n### 2.6.3 标记-整理（Mark-Compact）\n\n结合了标记-清除和复制算法的优点。标记完成后，将所有存活对象**向一端移动**（紧凑），然后清理边界以外的空间。\n\n```\n标记后：\n┌──────────────────────────────┐\n│ [A✓] [B✗] [C✓] [D✗] [E✓] [F✗] [G✓] │\n└──────────────────────────────┘\n\n整理后（存活对象向一端紧凑）：\n┌──────────────────────────────┐\n│ [A] [C] [E] [G] │     空闲    │\n└──────────────────────────────┘\n                    ↑ 清理边界以后的空间\n```\n\n**优点：**\n- **无内存碎片**：存活对象紧凑排列\n- **不浪费内存**：不需要像复制算法那样保留一半空间\n\n**缺点：**\n- **移动对象开销大**：需要更新所有指向被移动对象的引用\n- 整理过程需要暂停应用线程\n\n### 2.6.4 三种算法的对比\n\n| 对比维度 | 标记-清除 | 复制算法 | 标记-整理 |\n|---------|----------|---------|----------|\n| 内存碎片 | 有 | 无 | 无 |\n| 内存浪费 | 无 | 一半 | 无 |\n| 移动对象 | 不移动 | 复制存活对象 | 移动存活对象 |\n| 分配速度 | 较慢（需搜索空闲块） | 极快（移动指针） | 较快 |\n| 适用场景 | 对象多且存活率高 | 存活对象少 | 对象多且存活率高 |\n\n---\n\n## 2.7 分代收集（Generational Collection）\n\n### 2.7.1 弱分代假说\n\n分代收集的理论基础是一条经验规律：\n\n> **绝大多数对象都是\"朝生夕灭\"的**——它们在创建后很快就会变成垃圾，只有少数对象能存活较长时间。\n\n这意味着：\n- **新创建的对象**大多数很快就会死掉（存活率低）\n- **存活了很久的对象**很可能继续存活（存活率高）\n\n### 2.7.2 分代策略\n\n根据弱分代假说，将堆内存划分为不同的\"代\"，对不同的代采用不同的回收算法：\n\n```\n堆内存的分代结构：\n\n┌────────────────────────────────────────────────┐\n│                    堆（Heap）                    │\n│                                                 │\n│  ┌────────────────────┐  ┌──────────────────┐  │\n│  │    新生代（Young）    │  │  老年代（Old）    │  │\n│  │                    │  │                  │  │\n│  │ ┌────┐ ┌────────┐ │  │  长期存活的对象   │  │\n│  │ │Eden│ │Survivor│ │  │                  │  │\n│  │ │80% │ │  20%   │ │  │                  │  │\n│  │ └────┘ └────────┘ │  │                  │  │\n│  │                    │  │                  │  │\n│  │ 复制算法           │  │ 标记-清除/整理    │  │\n│  │（新对象多，存活少） │  │（老对象多，存活多）│  │\n│  └────────────────────┘  └──────────────────┘  │\n└────────────────────────────────────────────────┘\n```\n\n**新生代（Young Generation）：**\n- 新创建的对象首先分配在 Eden 区\n- 大多数对象在第一次 GC 时就被回收（存活率约 2%~10%）\n- 采用**复制算法**：将 Eden 和一个 Survivor 中的存活对象复制到另一个 Survivor\n- Minor GC 频率高但速度快\n\n**老年代（Old Generation）：**\n- 在新生代经过多次 GC 仍存活的对象会被\"晋升\"到老年代\n- 对象存活率高，不适合复制算法\n- 采用**标记-清除**或**标记-整理**算法\n- Major GC / Full GC 频率低但耗时长\n\n### 2.7.3 对象晋升\n\n对象从新生代晋升到老年代的条件：\n- 在 Survivor 区中的年龄达到阈值（如 15 次 Minor GC 后仍存活）\n- Survivor 区空间不足以容纳所有存活对象\n- 大对象直接在老年代分配（避免在新生代和老年代之间大量复制）\n\n---\n\n## 2.8 各语言的内存管理实践\n\n| 语言 | 内存管理方式 | GC 算法 |\n|------|------------|---------|\n| C | 手动管理（malloc/free） | 无 GC |\n| C++ | 手动管理 + RAII + 智能指针 | 无内置 GC（可选第三方） |\n| Rust | 所有权系统 + 借用检查器 | 无 GC，编译时确定生命周期 |\n| Java | 自动 GC | 分代收集（G1/ZGC/Shenandoah） |\n| Python | 引用计数 + 循环引用检测器 | 引用计数为主，分代 GC 为辅 |\n| JavaScript | 自动 GC | 标记-清除（V8 引擎使用分代+并发） |\n| Go | 自动 GC | 三色标记 + 写屏障 |\n| C# | 自动 GC | 分代收集（类似 Java） |\n\n---\n\n## 2.9 本章小结\n\n| 知识点 | 要点 |\n|--------|------|\n| 三种分配模型 | 静态分配（编译时确定）、栈分配（函数调用自动管理）、堆分配（运行时动态） |\n| 栈 vs 堆 | 栈：快、小、自动、无碎片；堆：慢、大、灵活、有碎片 |\n| 手动 vs 自动 | 手动（C/C++）：高效但易错；自动（GC）：安全但有开销 |\n| 引用计数 | 实时回收、实现简单，但无法处理循环引用 |\n| 可达性分析 | 从 GC Roots 遍历，可达=存活，能正确处理循环引用 |\n| 标记-清除 | 简单，但产生内存碎片 |\n| 复制算法 | 无碎片、分配快，但浪费一半内存 |\n| 标记-整理 | 无碎片、不浪费空间，但移动对象开销大 |\n| 分代收集 | 新生代用复制（存活少），老年代用标记-整理（存活多） |\n| 弱分代假说 | 绝大多数对象朝生夕灭，少数对象长期存活 |\n\n---\n\n## 参考资料\n\n- [GC 算法（基础篇）— GC 参考手册](https://blog.csdn.net/renfufei/article/details/54407417)\n- [JVM 中垃圾回收的算法有哪些？](https://baijiahao.baidu.com/s?id=1796548215597458256)\n- [Java 垃圾回收（GC）算法详解](https://www.cnblogs.com/gccbuaa/p/19483979)\n- [内存的堆、内存的栈有什么区别](https://www.cnblogs.com/Dongmy/p/19142638)\n- [垃圾回收机制 — 简书](https://www.jianshu.com/p/631596687a4b)\n- [常见垃圾收集算法](https://blog.csdn.net/qq_30757161/article/details/99762463)\n\n",
             "quizzes": [
-              {
-                "question": "C 语言中 `malloc()` 分配的内存位于（  ）",
-                "options": [
-                  {
-                    "key": "A",
-                    "text": "堆（Heap）"
-                  },
-                  {
-                    "key": "B",
-                    "text": "栈（Stack）"
-                  },
-                  {
-                    "key": "C",
-                    "text": "全局数据段"
-                  },
-                  {
-                    "key": "D",
-                    "text": "代码段"
-                  }
-                ],
-                "answer": "A",
-                "analysis": "`malloc()` 是 C 语言标准库函数，用于在**堆**上动态分配指定大小的内存块，返回一个指向该内存的指针。堆内存的特点是大小在运行时确定，需要程序员手动调用 `free()` 释放。\n> - B（栈）：栈上的局部变量由编译器自动分配和释放，无需调用 `malloc`。\n> - C（全局数据段）：全局变量和 `static` 变量存放在这里，编译时确定地址。\n> - D（代码段）：存放编译后的机器指令，只读不可写。"
-              },
               {
                 "question": "Java 的标记-清除 GC 算法能有效解决以下哪个问题？（  ）",
                 "options": [
@@ -5079,10 +6419,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "空指针异常"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：栈溢出是递归过深或局部变量过大导致的，与 GC 无关。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：数组越界是运行时错误，Java 通过边界检查抛出 ArrayIndexOutOfBoundsException。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：空指针是访问 null 引用的错误，与 GC 无关。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "标记-清除算法从 GC Roots 出发进行可达性分析，只要对象从任何 GC Root 不可达，即使对象之间存在循环引用，也会被标记为垃圾并回收。这是它相比引用计数法的核心优势——引用计数法无法处理循环引用（两个对象互相引用，计数都不为 0，永远不会被回收）。\n> - B 错误：栈溢出是递归过深或局部变量过大导致的，与 GC 无关。\n> - C 错误：数组越界是运行时错误，Java 通过边界检查抛出 ArrayIndexOutOfBoundsException。\n> - D 错误：空指针是访问 null 引用的错误，与 GC 无关。"
+                "analysis": "标记-清除算法从 GC Roots 出发进行可达性分析，只要对象从任何 GC Root 不可达，即使对象之间存在循环引用，也会被标记为垃圾并回收。这是它相比引用计数法的核心优势——引用计数法无法处理循环引用（两个对象互相引用，计数都不为 0，永远不会被回收）。"
               },
               {
                 "question": "栈内存的分配和释放时机是（  ）",
@@ -5102,10 +6454,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "在程序结束时统一释放"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：`free()` 用于释放堆内存，栈内存不能也不需手动释放。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：GC 回收的是堆内存，栈内存由硬件自动管理。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：全局/静态变量才在程序结束时释放，栈变量随函数生灭。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "栈内存遵循后进先出（LIFO）原则。每次函数调用时，CPU 自动在栈顶压入一个新的栈帧（包含局部变量、参数、返回地址等）；函数返回时，栈帧自动弹出，所有局部变量随之销毁。整个过程由 CPU 硬件和编译器协作完成，无需程序员干预。\n> - B 错误：`free()` 用于释放堆内存，栈内存不能也不需手动释放。\n> - C 错误：GC 回收的是堆内存，栈内存由硬件自动管理。\n> - D 错误：全局/静态变量才在程序结束时释放，栈变量随函数生灭。"
+                "analysis": "栈内存遵循后进先出（LIFO）原则。每次函数调用时，CPU 自动在栈顶压入一个新的栈帧（包含局部变量、参数、返回地址等）；函数返回时，栈帧自动弹出，所有局部变量随之销毁。整个过程由 CPU 硬件和编译器协作完成，无需程序员干预。"
               },
               {
                 "question": "分代回收策略中，新生代（Young Generation）通常采用哪种 GC 算法？（  ）",
@@ -5131,29 +6495,6 @@ const ALL_COURSES_DATA = [
                 "analysis": "根据弱分代假说，新生代中的对象\"朝生夕灭\"，存活率很低（通常 2%~10%）。复制算法在存活对象少时效率极高——只需复制少量存活对象到另一个 Survivor 区，然后清空整个 Eden 区。同时复制算法天然无碎片，分配速度极快（只需移动指针）。\n> - B（标记-清除）：会产生内存碎片，不适合频繁分配释放的新生代。\n> - C（标记-整理）：移动所有存活对象的开销太大，不适合频繁触发的 Minor GC。\n> - D（引用计数）：无法处理循环引用，且维护计数的开销在频繁分配的新生代中不可接受。"
               },
               {
-                "question": "以下哪种内存错误在 C 语言中**不会**导致程序崩溃，但会造成内存泄漏？（  ）",
-                "options": [
-                  {
-                    "key": "A",
-                    "text": "忘记调用 `free()` 释放已分配的堆内存"
-                  },
-                  {
-                    "key": "B",
-                    "text": "访问数组越界"
-                  },
-                  {
-                    "key": "C",
-                    "text": "对空指针解引用"
-                  },
-                  {
-                    "key": "D",
-                    "text": "访问未初始化的指针"
-                  }
-                ],
-                "answer": "A",
-                "analysis": "忘记 `free()` 不会导致程序立即崩溃——程序会继续运行，但已分配的内存永远无法被回收。随着时间推移，泄漏的内存越来越多，最终可能耗尽系统内存。这是一种\"慢性\"错误，难以发现。\n> - B 错误：数组越界可能读写非法内存，导致段错误（Segmentation Fault）崩溃。\n> - C 错误：空指针解引用会立即导致程序崩溃（段错误）。\n> - D 错误：未初始化的指针指向随机地址，访问它可能导致崩溃或数据损坏。"
-              },
-              {
                 "question": "在可达性分析算法中，以下哪个**不是** GC Roots？（  ）",
                 "options": [
                   {
@@ -5171,10 +6512,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "活跃线程对象的引用"
+                  },
+                  {
+                    "key": "B",
+                    "text": "正确：栈帧中的局部变量是正在使用的数据，必须作为 GC Root。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "正确：静态变量在整个程序运行期间都存在，其引用的对象必须保留。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "正确：活跃线程持有的引用不能被回收。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "GC Roots 是可达性分析的起点，必须是**从程序运行环境可以直接访问到的引用**。堆上对象之间的互相引用不是 GC Roots——如果从外部（栈、静态变量等）无法到达这些对象，即使它们互相引用，也应该被回收（这正是可达性分析优于引用计数的地方）。\n> - B 正确：栈帧中的局部变量是正在使用的数据，必须作为 GC Root。\n> - C 正确：静态变量在整个程序运行期间都存在，其引用的对象必须保留。\n> - D 正确：活跃线程持有的引用不能被回收。"
+                "analysis": "GC Roots 是可达性分析的起点，必须是**从程序运行环境可以直接访问到的引用**。堆上对象之间的互相引用不是 GC Roots——如果从外部（栈、静态变量等）无法到达这些对象，即使它们互相引用，也应该被回收（这正是可达性分析优于引用计数的地方）。"
               },
               {
                 "question": "以下关于引用计数 GC 的描述，正确的是（  ）",
@@ -5194,10 +6547,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "只在程序结束时才触发回收"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：引用计数法**无法**处理循环引用，这是它的致命缺陷。两个对象互相引用时，各自的计数都不为 0，永远不会被回收。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：引用计数不需要 Stop-The-World，每次赋值操作时即时更新计数即可。Stop-The-World 是标记-清除等追踪式 GC 的特征。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：引用计数是实时回收的，不会等到程序结束。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "引用计数法的核心优势是**实时性**——当某个对象的引用计数降为 0 时，可以立即回收其内存，无需等待 GC 周期触发。这使得内存可以尽快被复用。\n> - B 错误：引用计数法**无法**处理循环引用，这是它的致命缺陷。两个对象互相引用时，各自的计数都不为 0，永远不会被回收。\n> - C 错误：引用计数不需要 Stop-The-World，每次赋值操作时即时更新计数即可。Stop-The-World 是标记-清除等追踪式 GC 的特征。\n> - D 错误：引用计数是实时回收的，不会等到程序结束。"
+                "analysis": "引用计数法的核心优势是**实时性**——当某个对象的引用计数降为 0 时，可以立即回收其内存，无需等待 GC 周期触发。这使得内存可以尽快被复用。"
               },
               {
                 "question": "在 Java 的分代 GC 中，对象从新生代晋升到老年代的条件不包括（  ）",
@@ -5217,10 +6582,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "Survivor 区空间不足，存活对象溢出到老年代"
+                  },
+                  {
+                    "key": "A",
+                    "text": "正确：对象每经过一次 Minor GC 且存活，年龄 +1。当年龄达到阈值（默认 15），对象被晋升到老年代。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "正确：大对象（如大型数组）直接在老年代分配，避免在新生代和老年代之间大量复制。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "正确：Survivor 区放不下所有存活对象时，多余的对象直接进入老年代。"
                   }
                 ],
                 "answer": "C",
-                "analysis": "`final` 关键字在 Java 中表示变量不可重新赋值（对于引用类型，表示引用不可变），与对象的生命周期和 GC 行为完全无关。\n> - A 正确：对象每经过一次 Minor GC 且存活，年龄 +1。当年龄达到阈值（默认 15），对象被晋升到老年代。\n> - B 正确：大对象（如大型数组）直接在老年代分配，避免在新生代和老年代之间大量复制。\n> - D 正确：Survivor 区放不下所有存活对象时，多余的对象直接进入老年代。"
+                "analysis": "`final` 关键字在 Java 中表示变量不可重新赋值（对于引用类型，表示引用不可变），与对象的生命周期和 GC 行为完全无关。"
               },
               {
                 "question": "程序运行时的四大内存分区包括（  ）",
@@ -5242,7 +6619,7 @@ const ALL_COURSES_DATA = [
                     "text": "堆（Heap）"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "程序的虚拟地址空间通常划分为四个区域：\n> - **A（代码段）**：存放编译后的机器指令，只读。\n> - **B（全局/静态数据区）**：存放全局变量和 `static` 变量，编译时确定大小，程序结束时释放。\n> - **C（栈）**：存放函数局部变量和调用信息，自动分配释放，从高地址向低地址增长。\n> - **D（堆）**：存放动态分配的对象/数据块，由程序员或 GC 管理，从低地址向高地址增长。"
               },
               {
@@ -5265,7 +6642,7 @@ const ALL_COURSES_DATA = [
                     "text": "手动 `free()`"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "\n> - **A（引用计数）**：为每个对象维护引用计数，计数为 0 时立即回收。是一种自动内存管理算法。\n> - **B（标记-清除）**：从 GC Roots 标记可达对象，清除未标记对象。追踪式 GC 的基础算法。\n> - **C（复制算法）**：将存活对象复制到新区域，清空旧区域。无碎片的追踪式 GC 算法。\n> - **D（手动 free）**：这是**手动内存管理**，不属于 GC 算法。GC 的定义是\"自动\"回收无用内存，手动 `free()` 恰恰是 GC 的反面。"
               },
               {
@@ -5288,7 +6665,7 @@ const ALL_COURSES_DATA = [
                     "text": "栈内存由硬件/编译器自动管理，堆内存需要手动释放或 GC 回收"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABD",
                 "analysis": "\n> - **A 正确**：栈分配只需移动栈顶指针（1 条 CPU 指令，纳秒级）；堆分配涉及堆管理器搜索空闲块、可能的系统调用（百条指令，微秒级）。\n> - **B 正确**：线程栈通常只有 1~8 MB（Windows 默认 1 MB，Linux 默认 8 MB）；堆空间可达进程地址空间上限（32 位系统 4 GB，64 位系统更大）。\n> - **C 错误**：说反了。**栈不会产生碎片**（LIFO 操作，分配和释放总是连续的），而**堆容易产生碎片**（不同大小的块频繁分配释放，留下不连续的空洞）。\n> - **D 正确**：栈由 CPU 硬件和编译器协作自动管理；堆需要程序员手动 `free()`（C/C++）或由 GC 自动回收（Java/Python）。"
               },
               {
@@ -5309,10 +6686,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "Go"
+                  },
+                  {
+                    "key": "C",
+                    "text": "语言高效但容易出内存错误的原因。"
                   }
                 ],
-                "answer": "A",
-                "analysis": "\n> - **A（Java）**：采用分代 GC，新生代用复制算法，老年代用标记-清除/标记-整理。现代 JVM 还提供 G1、ZGC、Shenandoah 等高级收集器。\n> - **B（Python）**：以引用计数为主，辅以分代 GC 来处理循环引用。\n> - **C（C）**：**无自动 GC**。程序员必须手动调用 `malloc()` 分配和 `free()` 释放。这也是 C 语言高效但容易出内存错误的原因。\n> - **D（Go）**：采用三色标记法 + 写屏障的并发 GC，尽量减少 Stop-The-World 的暂停时间。"
+                "answer": "ABD",
+                "analysis": "\n> - **A（Java）**：采用分代 GC，新生代用复制算法，老年代用标记-清除/标记-整理。现代 JVM 还提供 G1、ZGC、Shenandoah 等高级收集器。\n> - **B（Python）**：以引用计数为主，辅以分代 GC 来处理循环引用。\n> - **D（Go）**：采用三色标记法 + 写屏障的并发 GC，尽量减少 Stop-The-World 的暂停时间。"
               }
             ],
             "mindmapHtml": ""
@@ -5323,29 +6704,6 @@ const ALL_COURSES_DATA = [
             "intro": "学习关于 编程范式与类型系统 的核心专业理论与应用。",
             "content": "\n\n## 3.1 什么是编程范式？\n\n**编程范式（Programming Paradigm）** 是程序设计的基本风格和方法论。它不是某种具体的语言或工具，而是一种\"思考问题的方式\"——决定了你如何组织代码、如何表达逻辑、如何管理数据。\n\n同一问题可以用不同范式来解决，就像同一道菜谱可以用不同的烹饪方法来做。\n\n```\n编程范式的层次结构：\n\n              编程范式\n             /        \\\n        命令式          声明式\n       /    \\            \\\n   过程式   面向对象     函数式 / 逻辑式\n  (C)     (Java)     (Haskell) (Prolog)\n```\n\n现代大多数编程语言是**多范式**的——它们支持多种范式，程序员可以根据需要灵活选择。例如 Python 同时支持过程式、面向对象和函数式编程。\n\n---\n\n## 3.2 命令式编程（Imperative Programming）\n\n### 3.2.1 核心思想\n\n命令式编程通过**一系列显式的指令**来告诉计算机\"怎么做\"（How），逐步改变程序的状态，最终得到期望的结果。\n\n**类比：** 像给出一套详细的菜谱步骤——\"第一步切菜，第二步加热油，第三步放入食材...\"。\n\n### 3.2.2 过程式编程（Procedural Programming）\n\n过程式是命令式编程的最基本形式，将代码组织成**过程（函数/子程序）**，通过过程之间的调用来完成计算。\n\n```c\n// C 语言：过程式编程示例——计算数组元素之和\nint sum(int arr[], int n) {\n    int total = 0;           // 初始化状态\n    for (int i = 0; i < n; i++) {\n        total = total + arr[i];  // 逐步修改状态\n    }\n    return total;\n}\n\nint main() {\n    int data[] = {1, 2, 3, 4, 5};\n    int result = sum(data, 5);   // 调用过程\n    printf(\"Sum = %d\\n\", result);\n    return 0;\n}\n```\n\n**特点：**\n- 代码由一系列函数/过程组成\n- 数据和操作数据的函数是分离的\n- 通过变量赋值和循环来改变程序状态\n- 关注执行步骤（How）\n\n**代表语言：** C、Pascal、BASIC\n\n---\n\n## 3.3 面向对象编程（Object-Oriented Programming, OOP）\n\n### 3.3.1 核心思想\n\nOOP 将程序组织为一系列**对象（Object）**，每个对象包含数据（属性）和操作数据的行为（方法）。程序通过对象之间的消息传递（方法调用）来完成计算。\n\n**类比：** 不像过程式那样\"按步骤做菜\"，而是\"请厨师做饭\"——你告诉厨师要什么菜，厨师用自己的技能（内部方法）来完成。\n\n### 3.3.2 三大核心特性\n\n#### 1. 封装（Encapsulation）\n\n将数据和操作数据的方法**打包在一起**，对外隐藏内部实现细节，只暴露必要的接口。\n\n```java\n// Java：封装示例\nclass BankAccount {\n    private double balance;  // 私有数据，外部不能直接访问\n    \n    public BankAccount(double initial) {\n        balance = initial;\n    }\n    \n    public void deposit(double amount) {     // 公开的接口\n        if (amount > 0) balance += amount;   // 内部实现对外隐藏\n    }\n    \n    public double getBalance() {             // 只读访问\n        return balance;\n    }\n}\n\n// 使用：\nBankAccount acc = new BankAccount(1000);\nacc.deposit(500);                  // 通过接口操作\n// acc.balance = 999999;           // 编译错误！不能直接修改私有数据\nSystem.out.println(acc.getBalance());  // 1500.0\n```\n\n**封装的好处：**\n- 保护数据完整性（防止外部非法修改）\n- 降低耦合（内部实现可以随意修改，不影响外部使用）\n- 提高可维护性\n\n#### 2. 继承（Inheritance）\n\n子类可以**继承**父类的属性和方法，并在此基础上进行扩展或重写，实现代码复用。\n\n```java\n// 父类\nclass Animal {\n    String name;\n    void eat() { System.out.println(name + \" is eating\"); }\n}\n\n// 子类继承父类\nclass Dog extends Animal {\n    void bark() { System.out.println(name + \" says Woof!\"); }\n}\n\n// 使用：\nDog d = new Dog();\nd.name = \"Rex\";\nd.eat();   // 继承自 Animal\nd.bark();  // Dog 自己的方法\n```\n\n**继承的好处：**\n- 代码复用（子类无需重新编写父类已有的功能）\n- 建立类型层次（is-a 关系）\n- 支持多态\n\n#### 3. 多态（Polymorphism）\n\n同一个接口或方法调用，可以因为**对象的实际类型不同**而表现出不同的行为。\n\n```java\nclass Animal {\n    void speak() { System.out.println(\"...\"); }\n}\nclass Dog extends Animal {\n    void speak() { System.out.println(\"Woof!\"); }  // 重写\n}\nclass Cat extends Animal {\n    void speak() { System.out.println(\"Meow!\"); }  // 重写\n}\n\n// 多态：同一个方法调用，不同行为\nAnimal[] animals = { new Dog(), new Cat(), new Dog() };\nfor (Animal a : animals) {\n    a.speak();  // 运行时根据实际类型调用对应的 speak()\n}\n// 输出：Woof! Meow! Woof!\n```\n\n**多态的好处：**\n- 代码灵活（不需要知道具体类型，只需要知道接口）\n- 易于扩展（新增子类不需要修改使用父类接口的代码）\n- 开闭原则（对扩展开放，对修改关闭）\n\n### 3.3.3 OOP 的优缺点\n\n**优点：**\n- 符合人类认知（用\"对象\"来模拟现实世界）\n- 代码复用性好（继承 + 多态）\n- 适合大型团队协作（模块化、封装）\n\n**缺点：**\n- 过度设计（简单问题用 OOP 可能过于复杂）\n- 状态管理困难（多个对象的状态互相影响，难以调试）\n- 继承层次过深会导致\"脆弱基类\"问题\n\n**代表语言：** Java、C++、C#、Python（支持多范式）\n\n---\n\n## 3.4 函数式编程（Functional Programming, FP）\n\n### 3.4.1 核心思想\n\n函数式编程将计算视为**数学函数的求值**——输入确定则输出确定，没有副作用（Side Effects），不修改任何外部状态。\n\n**类比：** 像数学中的函数 f(x) = x² ——给定输入 x，永远得到相同的输出，不会改变任何东西。\n\n### 3.4.2 核心概念\n\n#### 1. 纯函数（Pure Function）\n\n纯函数满足两个条件：\n- **相同的输入永远产生相同的输出**（确定性）\n- **没有副作用**（不修改外部变量、不做 I/O、不抛异常）\n\n```python\n# 纯函数 ✓\ndef add(a, b):\n    return a + b        # 不修改任何外部状态\n\n# 非纯函数 ✗\ntotal = 0\ndef add_to_total(x):\n    global total\n    total += x           # 修改了外部变量 → 副作用\n    return total\n```\n\n#### 2. 不可变性（Immutability）\n\n数据一旦创建就**不能被修改**。如果需要\"修改\"，就创建一个新的数据副本。\n\n```python\n# 不可变数据（函数式风格）\noriginal_list = [1, 2, 3]\nnew_list = original_list + [4]   # 创建新列表，不修改原列表\n# original_list 仍然是 [1, 2, 3]\n\n# 可变数据（命令式风格）\nmutable_list = [1, 2, 3]\nmutable_list.append(4)           # 直接修改了原列表\n# mutable_list 变成了 [1, 2, 3, 4]\n```\n\n#### 3. 函数是一等公民（First-Class Functions）\n\n函数可以像普通值一样被**传递、赋值、作为参数、作为返回值**。\n\n```python\n# 函数作为参数（高阶函数）\ndef apply(func, x):\n    return func(x)\n\nresult = apply(lambda x: x * 2, 5)   # 10\n\n# 函数作为返回值\ndef make_multiplier(n):\n    def multiplier(x):\n        return x * n\n    return multiplier\n\ndouble = make_multiplier(2)\nprint(double(5))   # 10\n```\n\n#### 4. 高阶函数（Higher-Order Functions）\n\n接受函数作为参数或返回函数的函数。常见的有 `map`、`filter`、`reduce`。\n\n```python\nnumbers = [1, 2, 3, 4, 5]\n\n# map：对每个元素应用函数\nsquares = list(map(lambda x: x**2, numbers))\n# [1, 4, 9, 16, 25]\n\n# filter：保留满足条件的元素\nevens = list(filter(lambda x: x % 2 == 0, numbers))\n# [2, 4]\n\n# reduce：将序列归约为单个值\nfrom functools import reduce\ntotal = reduce(lambda a, b: a + b, numbers)\n# 15\n```\n\n### 3.4.3 FP vs OOP 思维对比\n\n**同一个问题：计算列表中所有偶数的平方和**\n\n```python\n# OOP 风格（命令式）\nclass Calculator:\n    def __init__(self, data):\n        self.data = data\n    \n    def sum_of_even_squares(self):\n        total = 0\n        for x in self.data:\n            if x % 2 == 0:\n                total += x ** 2    # 修改状态\n        return total\n\ncalc = Calculator([1, 2, 3, 4, 5])\nprint(calc.sum_of_even_squares())  # 20\n\n# FP 风格（声明式）\nfrom functools import reduce\n\nresult = reduce(\n    lambda acc, x: acc + x,\n    map(lambda x: x**2,\n        filter(lambda x: x % 2 == 0, [1, 2, 3, 4, 5])),\n    0\n)\nprint(result)  # 20\n```\n\n### 3.4.4 FP 的优缺点\n\n**优点：**\n- 无副作用 → 容易推理和测试\n- 天然支持并发（不可变数据无线程安全问题）\n- 代码简洁（高阶函数组合表达力强）\n\n**缺点：**\n- 学习曲线陡峭（对习惯命令式的程序员不直观）\n- 不可变性可能导致大量数据复制，影响性能\n- 处理 I/O 等有副作用的操作比较别扭\n\n**代表语言：** Haskell（纯函数式）、Lisp/Scheme、Erlang、Scala（多范式）、F#\n\n---\n\n## 3.5 声明式编程（Declarative Programming）\n\n### 3.5.1 核心思想\n\n声明式编程描述的是**\"要什么\"（What）**，而不是\"怎么做\"（How）。程序员声明期望的结果或约束条件，由系统自行决定如何计算。\n\n**类比：** 不像命令式那样给出详细步骤，而是像点餐一样说\"我要一份宫保鸡丁\"——厨房自己决定怎么做。\n\n```sql\n-- SQL：声明式编程的经典例子\nSELECT name, age FROM users WHERE age > 18 ORDER BY name;\n\n-- 你只声明了\"我要什么\"：\n-- - 从 users 表中\n-- - 选出 age > 18 的\n-- - 只要 name 和 age 字段\n-- - 按 name 排序\n-- 数据库引擎自己决定如何执行（用什么索引、什么算法）\n```\n\n### 3.5.2 声明式的子类型\n\n- **函数式编程**：通过函数组合声明计算过程\n- **逻辑编程**：声明事实和规则，由推理引擎推导结果（如 Prolog）\n- **数据流编程**：声明数据的流动和变换（如 SQL、Excel 公式）\n\n### 3.5.3 命令式 vs 声明式 对比\n\n```python\n# 命令式：告诉计算机每一步怎么做\ndoubled = []\nfor x in [1, 2, 3, 4, 5]:\n    doubled.append(x * 2)\n# doubled = [2, 4, 6, 8, 10]\n\n# 声明式：告诉计算机要什么结果\ndoubled = [x * 2 for x in [1, 2, 3, 4, 5]]\n# doubled = [2, 4, 6, 8, 10]\n```\n\n现代前端框架（如 React、Vue）大量使用声明式范式——开发者声明 UI 应该是什么样子，框架负责如何高效地更新 DOM。\n\n---\n\n## 3.6 类型系统概述\n\n**类型系统（Type System）** 是编程语言中用于定义和管理数据类型的规则集合。它决定了：\n\n- 变量可以持有什么类型的数据\n- 不同类型之间如何交互（运算、赋值）\n- 类型错误在何时被检测\n\n类型系统可以从两个独立的维度来分类：\n\n```\n                类型检查时机                类型转换严格度\n              /            \\              /            \\\n         静态类型        动态类型      强类型        弱类型\n       (编译时检查)     (运行时检查)   (严格限制转换)  (自动隐式转换)\n```\n\n> **重要区分：** \"静态/动态\"和\"强/弱\"是**两个独立的维度**，不要混淆。一种语言可以是\"静态+强类型\"（如 Java），也可以是\"动态+强类型\"（如 Python）。\n\n---\n\n## 3.7 静态类型 vs 动态类型\n\n这个维度关注的是**类型在什么时候被确定和检查**。\n\n### 3.7.1 静态类型（Static Typing）\n\n变量的类型在**编译时**就确定，编译器在编译阶段进行类型检查。\n\n```java\n// Java：静态类型\nint x = 10;          // 编译时确定 x 是 int 类型\nString s = \"hello\";  // 编译时确定 s 是 String 类型\n\nx = \"world\";         // 编译错误！int 类型不能赋 String 值\n                     // 程序还没运行就报错了\n```\n\n**代表语言：** Java、C、C++、Go、Rust、TypeScript\n\n### 3.7.2 动态类型（Dynamic Typing）\n\n变量的类型在**运行时**才确定，同一变量可以在不同时刻持有不同类型的值。\n\n```python\n# Python：动态类型\nx = 10          # 运行时 x 是 int\nx = \"hello\"     # 运行时 x 变成了 str，完全合法\n\n# 类型错误只在运行时才暴露\ndef add(a, b):\n    return a + b\n\nadd(1, \"2\")     # 运行到这里才报 TypeError\n```\n\n**代表语言：** Python、JavaScript、Ruby、PHP、Lua\n\n### 3.7.3 对比\n\n| 对比维度 | 静态类型 | 动态类型 |\n|---------|---------|---------|\n| 类型确定时机 | 编译时 | 运行时 |\n| 错误发现时机 | 编译时（提前发现） | 运行时（可能遗漏） |\n| 代码冗长程度 | 较冗长（需要声明类型） | 简洁（无需声明） |\n| 运行性能 | 较快（编译器可优化） | 较慢（运行时类型检查） |\n| IDE 支持 | 好（自动补全、重构） | 较差 |\n| 灵活性 | 较低 | 较高 |\n| 适合场景 | 大型项目、安全关键系统 | 快速原型、脚本、Web |\n\n---\n\n## 3.8 强类型 vs 弱类型\n\n这个维度关注的是**类型转换的严格程度**。\n\n### 3.8.1 强类型（Strong Typing）\n\n严格限制不同类型之间的操作，**不允许隐式类型转换**，需要显式转换。\n\n```python\n# Python：强类型\n\"1\" + 2      # TypeError! 不能隐式将 int 转为 str\n\"1\" + str(2) # \"12\"  ← 必须显式转换\n```\n\n```java\n// Java：强类型\nint x = 10;\nString s = \"value: \" + x;  // 合法（Java 对字符串拼接有特殊规则）\n// 但一般情况下不允许隐式转换\n```\n\n### 3.8.2 弱类型（Weak Typing）\n\n允许**自动隐式类型转换**，不同类型的值可以自由混合运算。\n\n```javascript\n// JavaScript：弱类型\n\"1\" + 2      // \"12\"  ← 自动将 2 转为字符串\n\"1\" - 2      // -1    ← 自动将 \"1\" 转为数字\n\"5\" == 5     // true  ← 宽松相等，自动转换\ntrue + 1     // 2     ← true 被转为 1\n[] + {}      // \"[object Object]\" ← 奇怪的隐式转换\n```\n\n### 3.8.3 四象限分类\n\n将两个维度交叉，可以得到四种组合：\n\n| | 强类型 | 弱类型 |\n|---|--------|--------|\n| **静态类型** | Java、C#、Rust、Go | C、C++（允许隐式指针转换） |\n| **动态类型** | Python、Ruby、Erlang | JavaScript、PHP、Perl |\n\n**注意：** Python 是**动态类型 + 强类型**——变量类型在运行时确定（动态），但不允许不同类型之间的隐式操作（强类型）。这是很多初学者的常见误解。\n\n---\n\n## 3.9 类型系统的进阶概念\n\n### 3.9.1 类型推断（Type Inference）\n\n编译器能够根据上下文**自动推导**变量的类型，无需程序员显式声明。\n\n```rust\n// Rust：强大的类型推断\nlet x = 10;          // 编译器推断 x: i32\nlet y = 3.14;        // 编译器推断 y: f64\nlet z = x + 1;       // 编译器推断 z: i32\n\n// TypeScript：类型推断\nlet name = \"Alice\";  // 推断为 string\nlet count = 42;      // 推断为 number\n```\n\n### 3.9.2 多态（Polymorphism in Type Systems）\n\n类型系统中的多态是指同一段代码可以处理**多种类型**的数据。\n\n**参数多态（泛型）：**\n\n```java\n// Java 泛型：一个函数处理多种类型\nclass Box<T> {\n    private T value;\n    public Box(T v) { value = v; }\n    public T get() { return value; }\n}\n\nBox<Integer> intBox = new Box<>(42);\nBox<String> strBox = new Box<>(\"hello\");\n```\n\n**子类型多态（继承多态）：**\n\n```java\n// 通过继承实现的多态\nAnimal a = new Dog();   // 父类引用指向子类对象\na.speak();              // 运行时调用 Dog 的 speak()\n```\n\n### 3.9.3 类型安全（Type Safety）\n\n类型安全的语言保证程序**不会因为类型错误而产生未定义行为**。\n\n- **Java**：类型安全——编译器阻止大部分类型错误，运行时还有类型检查\n- **C**：类型不安全——允许强制类型转换（`void*`、指针运算），可能导致类型混淆\n- **Rust**：极度类型安全——编译器在编译时就能捕获内存安全和类型安全问题\n\n---\n\n## 3.10 各语言的范式与类型系统对比\n\n| 语言 | 支持的范式 | 类型检查 | 类型严格度 |\n|------|-----------|---------|-----------|\n| C | 过程式（命令式） | 静态 | 弱类型 |\n| C++ | 过程式 + OOP + 泛型 | 静态 | 弱类型 |\n| Java | OOP 为主 | 静态 | 强类型 |\n| Python | 过程式 + OOP + FP | 动态 | 强类型 |\n| JavaScript | 过程式 + OOP + FP | 动态 | 弱类型 |\n| Haskell | 纯函数式 | 静态 | 强类型 |\n| Rust | 过程式 + FP + 泛型 | 静态 | 强类型 |\n| Go | 过程式 + 接口多态 | 静态 | 强类型 |\n| TypeScript | OOP + FP | 静态(编译时) | 强类型 |\n\n---\n\n## 3.11 本章小结\n\n| 知识点 | 要点 |\n|--------|------|\n| 编程范式 | 程序设计的基本风格和方法论 |\n| 命令式编程 | 告诉计算机\"怎么做\"，通过显式指令改变状态 |\n| 面向对象 | 封装（隐藏细节）、继承（代码复用）、多态（灵活接口） |\n| 函数式编程 | 纯函数、不可变性、一等公民函数、高阶函数 |\n| 声明式编程 | 告诉计算机\"要什么\"，隐藏实现细节 |\n| 静态 vs 动态 | 类型在编译时 vs 运行时确定 |\n| 强类型 vs 弱类型 | 严格限制 vs 允许隐式类型转换 |\n| 类型推断 | 编译器自动推导变量类型 |\n| 泛型/参数多态 | 一段代码适用于多种类型 |\n\n---\n\n## 参考资料\n\n- [编程范式 — CSDN](https://blog.csdn.net/weixin_51550287/article/details/143668224)\n- [三种编程范式的概念和区别](https://blog.csdn.net/weixin_39278265/article/details/125313719)\n- [静态类型和动态类型、强类型和弱类型的区别](https://www.cnblogs.com/hmy-666/p/18742621.html)\n- [程序员需要掌握的 5 种编程范式](https://developer.aliyun.com/article/1619545)\n- [强类型、弱类型、静态类型、动态类型语言](https://developer.baidu.com/article/details/3086166)\n- [编程范式融合之道：面向对象与函数式编程](https://wenku.csdn.net/column/3a1s38tu45)\n\n",
             "quizzes": [
-              {
-                "question": "C 语言主要属于以下哪种编程范式？（  ）",
-                "options": [
-                  {
-                    "key": "A",
-                    "text": "命令式过程式（Procedural / Imperative）"
-                  },
-                  {
-                    "key": "B",
-                    "text": "纯函数式（Pure Functional）"
-                  },
-                  {
-                    "key": "C",
-                    "text": "面向对象（Object-Oriented）"
-                  },
-                  {
-                    "key": "D",
-                    "text": "逻辑式（Logic Programming）"
-                  }
-                ],
-                "answer": "A",
-                "analysis": "C 语言是经典的**过程式（命令式）编程语言**，通过函数（过程）组织代码，使用变量赋值、条件判断和循环来逐步改变程序状态。C 语言本身不支持类、对象、继承等 OOP 特性，也不支持纯函数式编程（虽然有函数指针，但不具备一等公民函数的完整特性）。\n> - B 错误：纯函数式语言的代表是 Haskell，强调无副作用和不可变性。\n> - C 错误：面向对象语言的代表是 Java、C++（C++ 在 C 基础上增加了 OOP）。\n> - D 错误：逻辑式语言的代表是 Prolog，基于事实和规则进行推理。"
-              },
               {
                 "question": "Java 是静态类型语言，\"静态类型\"的含义是（  ）",
                 "options": [
@@ -5364,10 +6722,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "只有 `static` 关键字声明的变量才有类型"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：运行时推导类型是**动态类型**（如 Python）或**类型推断**的特征。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：Java 中变量的类型在声明后不能改变，但这是静态类型的结果而非定义。动态类型语言中变量也可以不改变类型。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：`static` 是 Java 中的关键字，表示\"类级别的成员\"（不属于任何实例），与\"静态类型\"的概念完全不同。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "静态类型（Static Typing）是指变量的类型在**编译阶段**就被确定和检查。Java 要求在使用变量前显式声明其类型（如 `int x = 10`），编译器会在编译时验证所有类型操作是否合法，不合法则编译失败。\n> - B 错误：运行时推导类型是**动态类型**（如 Python）或**类型推断**的特征。\n> - C 错误：Java 中变量的类型在声明后不能改变，但这是静态类型的结果而非定义。动态类型语言中变量也可以不改变类型。\n> - D 错误：`static` 是 Java 中的关键字，表示\"类级别的成员\"（不属于任何实例），与\"静态类型\"的概念完全不同。"
+                "analysis": "静态类型（Static Typing）是指变量的类型在**编译阶段**就被确定和检查。Java 要求在使用变量前显式声明其类型（如 `int x = 10`），编译器会在编译时验证所有类型操作是否合法，不合法则编译失败。"
               },
               {
                 "question": "面向对象编程中，多态（Polymorphism）的核心基础机制是（  ）",
@@ -5387,10 +6757,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "全局函数"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：静态绑定在编译时就确定了调用哪个方法，无法实现运行时多态。方法重载（Overloading）就是静态绑定的例子。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：方法重载是编译时多态（静态多态），不是面向对象多态的核心。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：全局函数与多态无关。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "多态的核心是**动态绑定**——在运行时根据对象的实际类型来决定调用哪个方法，而不是在编译时就确定。这使得同一个方法调用（如 `animal.speak()`）可以因对象类型不同（Dog、Cat）而表现出不同的行为。\n> - B 错误：静态绑定在编译时就确定了调用哪个方法，无法实现运行时多态。方法重载（Overloading）就是静态绑定的例子。\n> - C 错误：方法重载是编译时多态（静态多态），不是面向对象多态的核心。\n> - D 错误：全局函数与多态无关。"
+                "analysis": "多态的核心是**动态绑定**——在运行时根据对象的实际类型来决定调用哪个方法，而不是在编译时就确定。这使得同一个方法调用（如 `animal.speak()`）可以因对象类型不同（Dog、Cat）而表现出不同的行为。"
               },
               {
                 "question": "Haskell 语言最典型的编程范式是（  ）",
@@ -5410,10 +6792,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "脚本式编程（Scripting）"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：Haskell 没有类、对象、继承等 OOP 概念。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：过程式编程依赖变量赋值和循环改变状态，这与 Haskell 的纯函数式理念矛盾。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：脚本式语言（如 Python、Bash）通常是动态类型的命令式语言。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "Haskell 是最知名的**纯函数式编程语言**。它强制所有函数都是纯函数（无副作用），所有数据都是不可变的，使用惰性求值（Lazy Evaluation），并且通过 Monad 来处理 I/O 等有副作用的操作。Haskell 没有传统意义上的变量赋值和循环，完全依赖函数组合和递归来完成计算。\n> - B 错误：Haskell 没有类、对象、继承等 OOP 概念。\n> - C 错误：过程式编程依赖变量赋值和循环改变状态，这与 Haskell 的纯函数式理念矛盾。\n> - D 错误：脚本式语言（如 Python、Bash）通常是动态类型的命令式语言。"
+                "analysis": "Haskell 是最知名的**纯函数式编程语言**。它强制所有函数都是纯函数（无副作用），所有数据都是不可变的，使用惰性求值（Lazy Evaluation），并且通过 Monad 来处理 I/O 等有副作用的操作。Haskell 没有传统意义上的变量赋值和循环，完全依赖函数组合和递归来完成计算。"
               },
               {
                 "question": "以下关于纯函数（Pure Function）的描述，正确的是（  ）",
@@ -5433,10 +6827,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "只能接受一个参数"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：修改全局变量是典型的副作用，违反纯函数的定义。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：纯函数可以使用递归，也可以使用循环（虽然纯函数式语言通常偏好递归）。实现方式不影响\"纯\"的定义。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：纯函数可以接受任意数量的参数。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "纯函数必须满足两个条件：(1) **确定性**——给定相同的输入，永远返回相同的输出；(2) **无副作用**——不修改函数外部的任何状态（全局变量、传入的引用参数、文件系统等）。\n> - B 错误：修改全局变量是典型的副作用，违反纯函数的定义。\n> - C 错误：纯函数可以使用递归，也可以使用循环（虽然纯函数式语言通常偏好递归）。实现方式不影响\"纯\"的定义。\n> - D 错误：纯函数可以接受任意数量的参数。"
+                "analysis": "纯函数必须满足两个条件：(1) **确定性**——给定相同的输入，永远返回相同的输出；(2) **无副作用**——不修改函数外部的任何状态（全局变量、传入的引用参数、文件系统等）。"
               },
               {
                 "question": "Python 的类型系统属于（  ）",
@@ -5456,10 +6862,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "静态类型 + 弱类型"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：Python 不是静态类型（不需要编译时声明类型）。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：Python 不是弱类型（不允许 `\"1\" + 2` 这样的隐式转换）。JavaScript 才是动态+弱类型。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：Python 既不是静态也不是弱类型。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "Python 是**动态类型**——变量类型在运行时确定，同一变量可以先后持有不同类型的值（如 `x = 10; x = \"hello\"` 合法）。Python 同时也是**强类型**——不允许不同类型之间的隐式转换（如 `\"1\" + 2` 会抛出 `TypeError`，必须显式写 `\"1\" + str(2)`）。\n> - B 错误：Python 不是静态类型（不需要编译时声明类型）。\n> - C 错误：Python 不是弱类型（不允许 `\"1\" + 2` 这样的隐式转换）。JavaScript 才是动态+弱类型。\n> - D 错误：Python 既不是静态也不是弱类型。"
+                "analysis": "Python 是**动态类型**——变量类型在运行时确定，同一变量可以先后持有不同类型的值（如 `x = 10; x = \"hello\"` 合法）。Python 同时也是**强类型**——不允许不同类型之间的隐式转换（如 `\"1\" + 2` 会抛出 `TypeError`，必须显式写 `\"1\" + str(2)`）。"
               },
               {
                 "question": "在面向对象编程中，以下代码展示了什么特性？（  ）\n```java\nAnimal a = new Dog();\na.speak();  // 输出 \"Woof!\"（Dog 的方法）\n```",
@@ -5479,10 +6897,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "组合（Composition）"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：封装是隐藏内部实现细节，与这段代码无关。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：抽象是提取共性、隐藏细节（如抽象类和接口），虽然 `Animal` 可能是抽象类，但这段代码的核心展示是多态行为。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：组合是\"has-a\"关系（一个对象包含另一个对象），这里是\"is-a\"关系（继承+多态）。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "这是多态的经典表现——父类类型的引用（`Animal a`）指向子类对象（`new Dog()`），调用 `a.speak()` 时，运行时根据对象的实际类型（Dog）来决定调用哪个版本的 `speak()` 方法。这就是动态绑定实现的多态。\n> - B 错误：封装是隐藏内部实现细节，与这段代码无关。\n> - C 错误：抽象是提取共性、隐藏细节（如抽象类和接口），虽然 `Animal` 可能是抽象类，但这段代码的核心展示是多态行为。\n> - D 错误：组合是\"has-a\"关系（一个对象包含另一个对象），这里是\"is-a\"关系（继承+多态）。"
+                "analysis": "这是多态的经典表现——父类类型的引用（`Animal a`）指向子类对象（`new Dog()`），调用 `a.speak()` 时，运行时根据对象的实际类型（Dog）来决定调用哪个版本的 `speak()` 方法。这就是动态绑定实现的多态。"
               },
               {
                 "question": "JavaScript 中 `\"5\" == 5` 返回 `true`，而 `\"5\" === 5` 返回 `false`。这说明 JavaScript 的类型系统是（  ）",
@@ -5502,10 +6932,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "无类型系统"
+                  },
+                  {
+                    "key": "B",
+                    "text": "错误：强类型语言（如 Python）中 `\"5\" == 5` 会报类型错误或返回 `false`，不会自动转换。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "错误：JavaScript 是动态类型语言，不在编译时检查类型。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "错误：JavaScript 有类型系统，只是类型检查在运行时进行且允许隐式转换。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "`==`（宽松相等）在比较时会自动进行隐式类型转换——将字符串 `\"5\"` 转换为数字 `5`，然后比较值，所以返回 `true`。这种允许自动隐式类型转换的行为是**弱类型**语言的典型特征。`===`（严格相等）不进行类型转换，类型不同直接返回 `false`。\n> - B 错误：强类型语言（如 Python）中 `\"5\" == 5` 会报类型错误或返回 `false`，不会自动转换。\n> - C 错误：JavaScript 是动态类型语言，不在编译时检查类型。\n> - D 错误：JavaScript 有类型系统，只是类型检查在运行时进行且允许隐式转换。"
+                "analysis": "`==`（宽松相等）在比较时会自动进行隐式类型转换——将字符串 `\"5\"` 转换为数字 `5`，然后比较值，所以返回 `true`。这种允许自动隐式类型转换的行为是**弱类型**语言的典型特征。`===`（严格相等）不进行类型转换，类型不同直接返回 `false`。"
               },
               {
                 "question": "以下哪些属于主流的编程范式？（  ）",
@@ -5527,7 +6969,7 @@ const ALL_COURSES_DATA = [
                     "text": "逻辑式（Logic Programming）"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "\n> - **A（过程式/命令式）**：通过一系列显式指令改变程序状态。代表语言：C、Pascal。\n> - **B（面向对象）**：将程序组织为相互作用的对象。代表语言：Java、C++、C#。\n> - **C（函数式）**：将计算视为函数求值，避免状态和副作用。代表语言：Haskell、Lisp、Erlang。\n> - **D（逻辑式）**：声明事实和规则，由推理引擎推导结果。代表语言：Prolog、Datalog。\n>\n> 现代大多数语言是多范式的（如 Python 支持过程式+OOP+FP）。"
               },
               {
@@ -5548,10 +6990,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "安全类型 vs 不安全类型（是否保证类型安全）"
+                  },
+                  {
+                    "key": "C",
+                    "text": "的 `void*` 和指针运算）。"
                   }
                 ],
-                "answer": "A",
-                "analysis": "类型系统的分类维度是多元的：\n> - **A 正确**：静态类型在编译时检查，动态类型在运行时检查。这是最常用的分类维度。\n> - **B 正确**：强类型严格限制隐式转换，弱类型允许自动转换。与静态/动态是独立维度。\n> - **C 正确**：显式类型需要程序员声明（如 Java `int x`），隐式类型由编译器推断（如 Rust `let x = 10`）或运行时确定（如 Python `x = 10`）。\n> - **D 正确**：类型安全的语言保证程序不会因类型错误产生未定义行为（如 Java），类型不安全的语言允许类型混淆（如 C 的 `void*` 和指针运算）。"
+                "answer": "ABCD",
+                "analysis": "类型系统的分类维度是多元的：\n> - **A 正确**：静态类型在编译时检查，动态类型在运行时检查。这是最常用的分类维度。\n> - **B 正确**：强类型严格限制隐式转换，弱类型允许自动转换。与静态/动态是独立维度。\n> - **C 正确**：显式类型需要程序员声明（如 Java `int x`），隐式类型由编译器推断（如 Rust `let x = 10`）或运行时确定（如 Python `x = 10`）。"
               },
               {
                 "question": "以下关于函数式编程核心概念的描述，正确的有（  ）",
@@ -5573,7 +7019,7 @@ const ALL_COURSES_DATA = [
                     "text": "函数式编程不允许使用任何循环结构"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "\n> - **A 正确**：纯函数的两个条件——确定性和无副作用——是函数式编程的基石。\n> - **B 正确**：不可变性是 FP 的核心原则。如果需要\"修改\"数据，就创建新的副本。这消除了共享可变状态带来的并发问题。\n> - **C 正确**：一等公民函数（First-Class Functions）使得函数可以像普通值一样被传递、赋值、组合，是高阶函数（map/filter/reduce）的基础。\n> - **D 错误**：函数式编程不是\"不允许循环\"，而是通常**用递归和高阶函数替代命令式循环**。纯函数式语言（如 Haskell）确实没有 `for`/`while` 循环，但这是语言设计选择，不是函数式编程的定义要求。多范式函数式语言（如 Scala、F#）仍然可以使用循环。"
               },
               {
@@ -5596,7 +7042,7 @@ const ALL_COURSES_DATA = [
                     "text": "Ruby"
                   }
                 ],
-                "answer": "A",
+                "answer": "ACD",
                 "analysis": "\n> - **A（Python）**：动态类型——变量类型在运行时确定，`x = 10; x = \"hello\"` 合法。\n> - **B（Java）**：**静态类型**——变量类型必须在编译时声明，`int x = 10; x = \"hello\"` 编译错误。\n> - **C（JavaScript）**：动态类型——变量类型在运行时确定，`let x = 10; x = \"hello\"` 合法。\n> - **D（Ruby）**：动态类型——与 Python 类似，变量类型在运行时确定。"
               }
             ],
@@ -5705,10 +7151,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "2 4 4"
+                  },
+                  {
+                    "key": "A",
+                    "text": "的错误，`a + b` 结果为 `int`（4字节），不是 2。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "**【解析】**\n- **选项A（错误）**：`a + b` 中，`char` 和 `short` 都会发生整型提升为 `int`，所以 `sizeof(a+b) = sizeof(int) = 4`，不是 2。\n- **选项B（正确）**：\n- `sizeof(a + b)`：`char` 提升为 `int`，`short` 提升为 `int`，`int + int = int`，结果为 4。\n- `sizeof(a + 1.0)`：`1.0` 是 `double`，`char` 先提升为 `int`，再转换为 `double`，`double + double = double`，结果为 8。\n- `sizeof(b + 1.0f)`：`1.0f` 是 `float`，`short` 先提升为 `int`，再转换为 `float`，`float + float = float`，结果为 4。\n- **选项C（错误）**：`a + 1.0` 中 `1.0` 是 `double` 类型（注意没有 `f` 后缀），运算结果也是 `double`，大小为 8。\n- **选项D（错误）**：同选项 A 的错误，`a + b` 结果为 `int`（4字节），不是 2。"
+                "analysis": "**【解析】**\n- **选项A（错误）**：`a + b` 中，`char` 和 `short` 都会发生整型提升为 `int`，所以 `sizeof(a+b) = sizeof(int) = 4`，不是 2。\n- **选项B（正确）**：\n- `sizeof(a + b)`：`char` 提升为 `int`，`short` 提升为 `int`，`int + int = int`，结果为 4。\n- `sizeof(a + 1.0)`：`1.0` 是 `double`，`char` 先提升为 `int`，再转换为 `double`，`double + double = double`，结果为 8。\n- `sizeof(b + 1.0f)`：`1.0f` 是 `float`，`short` 先提升为 `int`，再转换为 `float`，`float + float = float`，结果为 4。\n- **选项C（错误）**：`a + 1.0` 中 `1.0` 是 `double` 类型（注意没有 `f` 后缀），运算结果也是 `double`，大小为 8。"
               },
               {
                 "question": "```c\nint sum = 0;\nfor (int i = 1; i <= 10; i++) {\nif (i % 2 == 0) continue;\nif (i > 7) break;\nsum += i;\n}\n```",
@@ -6189,8 +7639,20 @@ const ALL_COURSES_DATA = [
                 "analysis": "\n- 代码中 `arr = (int *)realloc(arr, ...)` 直接将realloc的结果赋给了arr。\n- 如果realloc失败返回NULL，arr就变成了NULL，原来malloc分配的5个int的内存地址丢失了。\n- 这块内存既无法访问也无法释放，造成**内存泄漏**。\n**正确写法应该是：**\n```c\nint *temp = (int *)realloc(arr, 10 * sizeof(int));\nif (temp == NULL) {\nfree(arr);   // 释放原来的内存\nreturn -1;\n}\narr = temp;      // 成功后才更新指针\n```\n**错误选项分析：**\n- A：realloc完全可以用于扩大内存，这是它的主要用途之一。\n- C：绝对不能对同一块内存调用两次free（除非中间没有重新分配），这会造成double free错误。\n- D：代码存在realloc的常见错误用法。\n</details>"
               },
               {
-                "question": "在64位系统上，以下嵌套结构体的 `sizeof` 是多少？\n```c\nstruct A {\nchar x;     // 1字节\nint y;      // 4字节\n};\nstruct B {\nshort s;           // 2字节\nstruct A a;        // 嵌套\ndouble d;          // 8字节\n};\n```",
+                "question": "在64位系统上，以下嵌套结构体的 `sizeof` 是多少？\n```c",
                 "options": [
+                  {
+                    "key": "A",
+                    "text": "{"
+                  },
+                  {
+                    "key": "B",
+                    "text": "{"
+                  },
+                  {
+                    "key": "A",
+                    "text": "a;        // 嵌套"
+                  },
                   {
                     "key": "A",
                     "text": "14"
@@ -6206,10 +7668,26 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "32"
+                  },
+                  {
+                    "key": "A",
+                    "text": "的大小**"
+                  },
+                  {
+                    "key": "A",
+                    "text": ""
+                  },
+                  {
+                    "key": "B",
+                    "text": "的大小**"
+                  },
+                  {
+                    "key": "B",
+                    "text": ""
                   }
                 ],
                 "answer": "C",
-                "analysis": "\n**第一步：计算 struct A 的大小**\n```\nstruct A:\n偏移: 0  1  2  3  4  5  6  7\n+--+--+--+--+--+--+--+--+\n|x |填|填|填|     y    |\n+--+--+--+--+--+--+--+--+\nsizeof(struct A) = 8，最大对齐系数 = 4（int）\n```\n**第二步：计算 struct B 的大小**\n```\nstruct B:\n偏移: 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23\n+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+\n| s |填|  a.x|填|填|填|     a.y    |                d                     |\n+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+"
+                "analysis": "\n```\n偏移: 0  1  2  3  4  5  6  7\n+--+--+--+--+--+--+--+--+\n|x |填|填|填|     y    |\n+--+--+--+--+--+--+--+--+\nsizeof(struct A) = 8，最大对齐系数 = 4（int）\n```\n```\n偏移: 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23\n+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+\n| s |填|  a.x|填|填|填|     a.y    |                d                     |\n+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+"
               },
               {
                 "question": "以下哪些操作会导致内存问题？（多选）",
@@ -6643,21 +8121,33 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "Built-in → Global → Enclosing → Local"
+                  },
+                  {
+                    "key": "B",
+                    "text": "的顺序逐层查找，找到即停止。"
                   }
                 ],
                 "answer": "B",
-                "analysis": "LEGB 是 Python 变量名解析的标准顺序：\n> - **L（Local）**：当前函数内部定义的变量。\n> - **E（Enclosing）**：外层嵌套函数的作用域（闭包场景）。\n> - **G（Global）**：模块顶层定义的变量。\n> - **B（Built-in）**：Python 内置名称（如 `len`、`print`、`Exception`）。\n>\n> 解释器按 L → E → G → B 的顺序逐层查找，找到即停止。\n> - **选项 A**：Built-in 是最后查找的，不是第三步。\n> - **选项 C**：Global 在 Enclosing 之后查找，不能跳过 Enclosing 层。\n> - **选项 D**：这是完全相反的顺序。"
+                "analysis": "LEGB 是 Python 变量名解析的标准顺序：\n> - **L（Local）**：当前函数内部定义的变量。\n> - **E（Enclosing）**：外层嵌套函数的作用域（闭包场景）。\n> - **G（Global）**：模块顶层定义的变量。\n> - **B（Built-in）**：Python 内置名称（如 `len`、`print`、`Exception`）。\n>\n> - **选项 A**：Built-in 是最后查找的，不是第三步。\n> - **选项 C**：Global 在 Enclosing 之后查找，不能跳过 Enclosing 层。\n> - **选项 D**：这是完全相反的顺序。"
               },
               {
                 "question": "以下代码的输出是什么？（  ）\n```python\ndef deco_a(func):\ndef wrapper():\nprint(\"A\", end=\" \")\nfunc()\nreturn wrapper\ndef deco_b(func):\ndef wrapper():\nprint(\"B\", end=\" \")\nfunc()\nreturn wrapper\n@deco_a\n@deco_b\ndef greet():\nprint(\"Hello\")\ngreet()\n```",
                 "options": [
                   {
                     "key": "A",
-                    "text": "`A B Hello`"
+                    "text": "`A"
                   },
                   {
                     "key": "B",
-                    "text": "`B A Hello`"
+                    "text": "Hello`"
+                  },
+                  {
+                    "key": "B",
+                    "text": "`B"
+                  },
+                  {
+                    "key": "A",
+                    "text": "Hello`"
                   },
                   {
                     "key": "C",
@@ -6666,10 +8156,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "`B Hello`"
+                  },
+                  {
+                    "key": "B",
+                    "text": "Hello`。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "装饰器叠加遵循\"**从下到上装饰，从上到下执行**\"的规则。`@deco_a` 在上，`@deco_b` 在下，等价于 `greet = deco_a(deco_b(greet))`。\n>\n> **装饰过程**：\n> 1. 先应用 `@deco_b`：`greet = deco_b(greet)`，此时 `greet` 是 `deco_b` 的 `wrapper`。\n> 2. 再应用 `@deco_a`：`greet = deco_a(deco_b 的 wrapper)`，此时 `greet` 是 `deco_a` 的 `wrapper`。\n>\n> **调用过程**：调用 `greet()` → `deco_a.wrapper()` 先打印 `\"A \"` → 调用 `func()`（即 `deco_b.wrapper()`）→ 打印 `\"B \"` → 调用 `func()`（即原始 `greet`）→ 打印 `\"Hello\"`。输出为 `A B Hello`。\n> - **选项 B**：顺序颠倒了。装饰器从下往上包装，但从外到内执行。\n> - **选项 C**：缺少 `deco_b` 的输出，`deco_b` 虽然在内层但确实被执行了。\n> - **选项 D**：缺少 `deco_a` 的输出，`deco_a` 是最外层装饰器，必然执行。"
+                "analysis": "装饰器叠加遵循\"**从下到上装饰，从上到下执行**\"的规则。`@deco_a` 在上，`@deco_b` 在下，等价于 `greet = deco_a(deco_b(greet))`。\n>\n> **装饰过程**：\n> 1. 先应用 `@deco_b`：`greet = deco_b(greet)`，此时 `greet` 是 `deco_b` 的 `wrapper`。\n> 2. 再应用 `@deco_a`：`greet = deco_a(deco_b 的 wrapper)`，此时 `greet` 是 `deco_a` 的 `wrapper`。\n>\n> - **选项 B**：顺序颠倒了。装饰器从下往上包装，但从外到内执行。\n> - **选项 C**：缺少 `deco_b` 的输出，`deco_b` 虽然在内层但确实被执行了。\n> - **选项 D**：缺少 `deco_a` 的输出，`deco_a` 是最外层装饰器，必然执行。"
               },
               {
                 "question": "以下关于迭代器与生成器的关系，说法正确的是（  ）",
@@ -6806,7 +8300,7 @@ const ALL_COURSES_DATA = [
                     "text": "闭包中的自由变量是对外层变量的引用，而非值的拷贝"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABD",
                 "analysis": "\n> - **A 正确**：闭包的构成条件有三：(1) 存在嵌套函数；(2) 内部函数引用了外部函数的变量（自由变量）；(3) 外部函数返回了内部函数的引用。\n> - **B 正确**：这是闭包的核心特性。外层函数返回后，其局部变量本应销毁，但因为被闭包中的内部函数引用，这些变量会被\"延长生命周期\"，保存在闭包中。\n> - **C 错误**：读取自由变量不需要 `nonlocal`。只有在需要**重新赋值**（如 `count += 1`）时才需要 `nonlocal` 声明。仅读取（如 `print(count)`）可以直接访问外层变量。\n> - **D 正确**：闭包捕获的是变量的引用（名称绑定），而非值的快照。这就是 late binding 陷阱的根源——如果变量在闭包创建后又被修改，闭包内看到的是修改后的值。"
               },
               {
@@ -6829,7 +8323,7 @@ const ALL_COURSES_DATA = [
                     "text": "类装饰器（用 `__call__` 实现）不能用于装饰函数"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "\n> - **A 正确**：装饰器 `@deco` 的等价写法是 `func = deco(func)`。`deco` 必须接收一个函数作为参数，并返回一个可调用对象（通常是 wrapper 函数）。这就是高阶函数的定义。\n> - **B 正确**：`@decorator` 在函数定义时（模块导入时）就会执行，而不是在函数调用时。即 `def` 语句执行完毕后，装饰器就已经被应用了。\n> - **C 正确**：带参数装饰器如 `@deco(arg)` 等价于 `func = deco(arg)(func)`。因此需要三层嵌套：`deco(arg)` 返回真正的装饰器函数，该装饰器函数接收 `func` 并返回 `wrapper`。\n> - **D 错误**：类装饰器完全可以装饰函数。只要类实现了 `__init__`（接收被装饰函数）和 `__call__`（执行包装逻辑），就可以作为装饰器使用。例如：\n>   ```python\n>   class MyDeco:\n>       def __init__(self, func):\n>           self.func = func\n>       def __call__(self, *args, **kwargs):\n>           return self.func(*args, **kwargs)\n>   ```"
               },
               {
@@ -6852,7 +8346,7 @@ const ALL_COURSES_DATA = [
                     "text": "迭代器可以多次调用 `__iter__()` 来重置遍历位置"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "\n> - **A 正确**：迭代器的 `__iter__()` 方法必须返回 `self`（迭代器自身）。这使得迭代器可以直接用在 `for` 循环中（`for` 首先调用 `iter()`，而 `iter()` 调用 `__iter__()`）。\n> - **B 正确**：`__next__()` 负责每次产出一个值。当没有更多值时，必须抛出 `StopIteration` 异常，`for` 循环会捕获该异常并终止。\n> - **C 正确**：`for item in iterable:` 的底层机制是：先调用 `iter(iterable)` 获取迭代器，然后反复调用 `next(iterator)` 直到 `StopIteration`。\n> - **D 错误**：迭代器的 `__iter__()` 只是返回 `self`，并不会重置状态。迭代器是一次性的——耗尽后不能\"重新开始\"。如果需要重新遍历，必须创建一个新的迭代器对象。（可迭代对象可以多次调用 `iter()` 获得新的迭代器，但迭代器本身不行。）"
               },
               {
@@ -6875,7 +8369,7 @@ const ALL_COURSES_DATA = [
                     "text": "第一次调用生成器时可以使用 `send(value)` 发送非 `None` 值来启动生成器"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "\n> - **A 正确**：`send(value)` 恢复生成器执行，同时将 `value` 传递给 `yield` 表达式左侧的变量。例如 `x = yield` 中的 `x` 将获得 `send()` 传入的值。这使得生成器可以作为协程使用（双向通信）。\n> - **B 正确**：`throw(exc)` 在生成器暂停的 `yield` 位置抛出指定异常，允许外部代码向生成器内部注入异常。生成器内部可以用 `try/except` 捕获该异常。\n> - **C 正确**：`close()` 在 `yield` 处抛出 `GeneratorExit`，通知生成器进行清理并退出。如果生成器不捕获该异常或捕获后又 `yield` 了新值，Python 会强制关闭。\n> - **D 错误**：第一次启动生成器时，必须使用 `next()` 或 `send(None)`。如果第一次就 `send(非None值)`，会抛出 `TypeError`，因为生成器尚未运行到第一个 `yield`，没有地方接收这个值。"
               }
             ],
@@ -6951,10 +8445,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "使用 `ThreadPoolExecutor` 线程池，设置 `max_workers=1000`"
+                  },
+                  {
+                    "key": "A",
+                    "text": "同理，线程池中的线程同样受 GIL 限制，对 CPU 密集型任务无法并行。且 `max_workers=1000` 会造成严重的上下文切换开销。"
                   }
                 ],
                 "answer": "C",
-                "analysis": "\n> - **选项 A**：错误。图片滤镜处理属于 CPU 密集型任务（大量像素矩阵运算），受 GIL 限制，多线程无法实现真正的并行计算，且创建 1000 个线程的开销过大。\n> - **选项 B**：错误。asyncio 是单线程的协程模型，适合 I/O 密集型任务。CPU 密集型任务中使用 asyncio 不会获得并行能力，反而因为事件循环调度增加开销。\n> - **选项 C**：正确。图片滤镜处理是典型的 CPU 密集型任务，多进程可以绕过 GIL，利用多核 CPU 实现真正的并行计算。进程数设置为与 CPU 核心数相当可以最大化资源利用率。\n> - **选项 D**：错误。与选项 A 同理，线程池中的线程同样受 GIL 限制，对 CPU 密集型任务无法并行。且 `max_workers=1000` 会造成严重的上下文切换开销。"
+                "analysis": "\n> - **选项 A**：错误。图片滤镜处理属于 CPU 密集型任务（大量像素矩阵运算），受 GIL 限制，多线程无法实现真正的并行计算，且创建 1000 个线程的开销过大。\n> - **选项 B**：错误。asyncio 是单线程的协程模型，适合 I/O 密集型任务。CPU 密集型任务中使用 asyncio 不会获得并行能力，反而因为事件循环调度增加开销。\n> - **选项 C**：正确。图片滤镜处理是典型的 CPU 密集型任务，多进程可以绕过 GIL，利用多核 CPU 实现真正的并行计算。进程数设置为与 CPU 核心数相当可以最大化资源利用率。"
               },
               {
                 "question": "阅读以下代码，预测其输出结果（  ）\n```python\nimport threading\nimport time\ncounter = 0\ndef increment():\nglobal counter\nfor _ in range(100000):\ncounter += 1\nthreads = [threading.Thread(target=increment) for _ in range(5)]\nfor t in threads:\nt.start()\nfor t in threads:\nt.join()\nprint(counter == 500000)\n```",
@@ -6996,11 +8494,19 @@ const ALL_COURSES_DATA = [
                   },
                   {
                     "key": "D",
-                    "text": "free-threaded 模式完全向后兼容，所有现有的 C 扩展无需任何修改即可使用"
+                    "text": "free-threaded 模式完全向后兼容，所有现有的"
+                  },
+                  {
+                    "key": "C",
+                    "text": "扩展无需任何修改即可使用"
+                  },
+                  {
+                    "key": "C",
+                    "text": "扩展依赖 GIL 提供的线程安全保证，在 free-threaded 模式下需要适配新的线程安全 API，并非完全向后兼容。"
                   }
                 ],
                 "answer": "C",
-                "analysis": "\n> - **选项 A**：错误。free-threaded 模式在 Python 3.13 中仍然是实验性功能，需要通过特殊的安装方式（如 `python3.13t`）启用，并非默认行为。\n> - **选项 B**：错误。free-threaded 模式引入了偏向引用计数等机制，会导致单线程性能下降约 3-10%，这是移除 GIL 的代价之一。\n> - **选项 C**：正确。free-threaded 模式（PEP 703）的核心目标就是移除 GIL，使多个线程可以在不同 CPU 核心上同时执行 Python 字节码，实现真正的多线程并行。\n> - **选项 D**：错误。部分 C 扩展依赖 GIL 提供的线程安全保证，在 free-threaded 模式下需要适配新的线程安全 API，并非完全向后兼容。"
+                "analysis": "\n> - **选项 A**：错误。free-threaded 模式在 Python 3.13 中仍然是实验性功能，需要通过特殊的安装方式（如 `python3.13t`）启用，并非默认行为。\n> - **选项 B**：错误。free-threaded 模式引入了偏向引用计数等机制，会导致单线程性能下降约 3-10%，这是移除 GIL 的代价之一。\n> - **选项 C**：正确。free-threaded 模式（PEP 703）的核心目标就是移除 GIL，使多个线程可以在不同 CPU 核心上同时执行 Python 字节码，实现真正的多线程并行。"
               },
               {
                 "question": "阅读以下 asyncio 代码，其输出结果是（  ）\n```python\nimport asyncio\nimport time\nasync def task(name, delay):\nprint(f\"{name} 开始\")\nawait asyncio.sleep(delay)\nprint(f\"{name} 结束\")\nreturn name\nasync def main():\nstart = time.time()\nresults = await asyncio.gather(\ntask(\"A\", 2),\ntask(\"B\", 1),\ntask(\"C\", 3),\n)\nelapsed = time.time() - start\nprint(f\"耗时: {elapsed:.1f}秒, 结果: {results}\")\nasyncio.run(main())\n```",
@@ -7020,10 +8526,30 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "耗时约 2.0 秒，结果: `['A', 'B', 'C']`"
+                  },
+                  {
+                    "key": "C",
+                    "text": "需要 3 秒，因此总耗时约 3 秒。`gather` 按传入顺序返回结果，所以结果是 `['A', 'B', 'C']`。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "最先完成（1 秒），任务"
+                  },
+                  {
+                    "key": "A",
+                    "text": "其次（2 秒），任务"
+                  },
+                  {
+                    "key": "C",
+                    "text": "最后（3 秒），但 `gather` 返回结果的顺序与传入协程的顺序一致，而非完成顺序。因此结果仍然是 `['A', 'B', 'C']`。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "需要 3 秒，`gather` 必须等所有协程都完成后才返回，所以耗时不可能短于最慢任务的执行时间。"
                   }
                 ],
                 "answer": "B",
-                "analysis": "\n> - **选项 A**：错误。6.0 秒是三个任务串行执行的总耗时（2+1+3），但 `asyncio.gather` 会并发执行所有协程，总耗时取决于最慢的任务（3 秒），而非各任务耗时之和。\n> - **选项 B**：正确。`asyncio.gather` 并发启动三个协程，它们几乎同时开始执行。最慢的任务 C 需要 3 秒，因此总耗时约 3 秒。`gather` 按传入顺序返回结果，所以结果是 `['A', 'B', 'C']`。\n> - **选项 C**：错误。虽然任务 B 最先完成（1 秒），任务 A 其次（2 秒），任务 C 最后（3 秒），但 `gather` 返回结果的顺序与传入协程的顺序一致，而非完成顺序。因此结果仍然是 `['A', 'B', 'C']`。\n> - **选项 D**：错误。2.0 秒不足以等待所有任务完成。任务 C 需要 3 秒，`gather` 必须等所有协程都完成后才返回，所以耗时不可能短于最慢任务的执行时间。"
+                "analysis": "\n> - **选项 A**：错误。6.0 秒是三个任务串行执行的总耗时（2+1+3），但 `asyncio.gather` 会并发执行所有协程，总耗时取决于最慢的任务（3 秒），而非各任务耗时之和。"
               },
               {
                 "question": "阅读以下代码，该程序最可能出现的问题是（  ）\n```python\nimport threading\nimport time\nlock_a = threading.Lock()\nlock_b = threading.Lock()\ndef worker_1():\nwith lock_a:\ntime.sleep(0.1)\nwith lock_b:\nprint(\"worker_1 完成\")\ndef worker_2():\nwith lock_b:\ntime.sleep(0.1)\nwith lock_a:\nprint(\"worker_2 完成\")\nt1 = threading.Thread(target=worker_1)\nt2 = threading.Thread(target=worker_2)\nt1.start()\nt2.start()\n```",
@@ -7066,10 +8592,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "使用 `ProcessPoolExecutor` 进程池，设置 `max_workers=5000`"
+                  },
+                  {
+                    "key": "A",
+                    "text": "同理，`max_workers=5000` 的进程池完全不合理。`ProcessPoolExecutor` 适合 CPU 密集型任务的并行化，不适合处理大量 I/O 连接。"
                   }
                 ],
                 "answer": "C",
-                "analysis": "\n> - **选项 A**：错误。每个进程的内存开销很高（通常几十 MB），创建 5000 个进程需要消耗大量内存和系统资源，远远超出实际需要。\n> - **选项 B**：错误。虽然线程比进程轻量，但 5000 个线程仍然会带来较高的内存开销和 OS 级上下文切换成本。此外，线程数量过多时 OS 调度效率也会下降。\n> - **选项 C**：正确。asyncio 的协程是用户态的轻量级并发单元，可以轻松创建数千甚至数万个协程。WebSocket 长连接是典型的 I/O 密集型场景（大部分时间在等待消息），协程模型非常适合，内存和切换开销极低。\n> - **选项 D**：错误。与选项 A 同理，`max_workers=5000` 的进程池完全不合理。`ProcessPoolExecutor` 适合 CPU 密集型任务的并行化，不适合处理大量 I/O 连接。"
+                "analysis": "\n> - **选项 A**：错误。每个进程的内存开销很高（通常几十 MB），创建 5000 个进程需要消耗大量内存和系统资源，远远超出实际需要。\n> - **选项 B**：错误。虽然线程比进程轻量，但 5000 个线程仍然会带来较高的内存开销和 OS 级上下文切换成本。此外，线程数量过多时 OS 调度效率也会下降。\n> - **选项 C**：正确。asyncio 的协程是用户态的轻量级并发单元，可以轻松创建数千甚至数万个协程。WebSocket 长连接是典型的 I/O 密集型场景（大部分时间在等待消息），协程模型非常适合，内存和切换开销极低。"
               },
               {
                 "question": "在 CPython 中，以下哪些情况会使当前线程**释放 GIL**？（  ）",
@@ -7091,7 +8621,7 @@ const ALL_COURSES_DATA = [
                     "text": "使用 `requests.get(\"https://example.com\")` 发起网络请求"
                   }
                 ],
-                "answer": "A",
+                "answer": "ACD",
                 "analysis": "\n> - **选项 A**：正确。`time.sleep()` 是阻塞操作，线程在睡眠期间会主动释放 GIL，让其他线程有机会执行。\n> - **选项 B**：错误。纯 Python 的数值循环是 CPU 密集型操作，不涉及 I/O 阻塞。虽然 Python 3 中每隔约 5 毫秒会强制切换一次（时间片到期释放 GIL），但这属于\"被强制切换\"而非题目所问的\"释放 GIL 的操作\"——线程本身并不主动释放，而是被调度器强制剥夺。从语义上看，循环本身不会触发 GIL 的主动释放。\n> - **选项 C**：正确。文件读取是 I/O 操作，CPython 在执行底层 I/O 系统调用时会释放 GIL，允许其他线程在等待磁盘响应时继续执行。\n> - **选项 D**：正确。网络请求涉及 socket 通信，属于 I/O 阻塞操作。`requests` 库底层的网络 I/O 操作会释放 GIL，因此多线程使用 `requests` 可以并发发起多个请求。"
               },
               {
@@ -7114,7 +8644,7 @@ const ALL_COURSES_DATA = [
                     "text": "`async def` 定义的函数调用后返回一个协程对象，不会立即执行函数体"
                   }
                 ],
-                "answer": "A",
+                "answer": "ACD",
                 "analysis": "\n> - **选项 A**：正确。asyncio 运行在单线程中，由事件循环（Event Loop）调度各个协程。协程在 `await` 处主动让出控制权，事件循环切换到其他就绪的协程，从而实现并发。\n> - **选项 B**：错误。`time.sleep()` 是同步阻塞函数，会阻塞整个线程（也就是阻塞事件循环），导致所有协程都无法执行。在 async 函数中必须使用 `await asyncio.sleep()` 来非阻塞地等待。\n> - **选项 C**：正确。`asyncio.gather()` 同时启动多个协程，等待所有协程完成，并按照传入参数的顺序（而非完成顺序）返回结果列表。\n> - **选项 D**：正确。`async def` 定义的函数是协程函数，调用它（如 `coro = my_func()`）只创建一个协程对象，函数体不会执行。必须通过 `await`、`asyncio.run()` 或 `create_task()` 等方式驱动执行。"
               },
               {
@@ -7137,7 +8667,7 @@ const ALL_COURSES_DATA = [
                     "text": "`threading.Semaphore(3)` 最多允许 3 个线程同时进入临界区"
                   }
                 ],
-                "answer": "B",
+                "answer": "BCD",
                 "analysis": "\n> - **选项 A**：错误。`threading.Lock` 是不可重入的互斥锁。如果同一个线程在已持有 Lock 的情况下再次调用 `acquire()`，会导致死锁。需要可重入特性时应使用 `RLock`。\n> - **选项 B**：正确。`RLock`（可重入锁）内部记录了持有线程和获取次数，同一线程可以多次 `acquire` 而不会阻塞，但必须调用相同次数的 `release` 来完全释放锁。\n> - **选项 C**：正确。`Event` 是线程间通信的简单机制，内部维护一个布尔标志。`set()` 将标志置为 True 并唤醒所有等待线程，`wait()` 在标志为 False 时阻塞。\n> - **选项 D**：正确。`Semaphore(n)` 维护一个计数器，初始值为 n。每次 `acquire` 减 1，`release` 加 1。当计数器为 0 时，后续 `acquire` 会阻塞，因此最多允许 n 个线程同时进入临界区。"
               },
               {
@@ -7160,8 +8690,35 @@ const ALL_COURSES_DATA = [
                     "text": "使用 `multiprocessing.Manager` 创建跨进程共享的字典或列表"
                   }
                 ],
-                "answer": "A",
+                "answer": "ACD",
                 "analysis": "\n> - **选项 A**：正确。`multiprocessing.Queue` 是进程安全的队列，内部使用管道和锁机制实现跨进程的数据传递，是多进程编程中最常用的 IPC 方式之一。\n> - **选项 B**：错误。由于每个进程拥有独立的内存空间，全局变量在不同进程中是各自独立的副本。在一个进程中修改全局变量，其他进程看不到该变化。需要使用 Queue、Pipe、Manager 或共享内存等专门的 IPC 机制。\n> - **选项 C**：正确。`multiprocessing.Pipe` 返回一对连接对象（`parent_conn, child_conn`），支持双向通信。通过 `send()` 和 `recv()` 可以在两个进程间传递数据。\n> - **选项 D**：正确。`multiprocessing.Manager` 通过代理模式提供跨进程共享的对象（如 `manager.dict()`、`manager.list()`），多个进程可以通过代理安全地读写共享数据。"
+              },
+              {
+                "question": "什么是竞态条件（Race Condition）？什么是死锁（Deadlock）？请各举一个例子，并说明如何避免死锁。\n**参考答案：**\n**竞态条件（Race Condition）：**\n竞态条件是指多个线程在没有适当同步的情况下并发访问共享资源，且最终结果依赖于线程执行的时序，导致不可预测的行为。",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "读取到 `counter=5`，在写回之前被切换，线程"
+                  },
+                  {
+                    "key": "B",
+                    "text": "也读取到 `counter=5` 并写回 `6`，然后线程"
+                  },
+                  {
+                    "key": "A",
+                    "text": "也写回 `6`。两次加 1 操作只让 counter 增加了 1，而非预期的 2。"
+                  },
+                  {
+                    "key": "A",
+                    "text": "并等待锁 B，线程 2 持有锁"
+                  },
+                  {
+                    "key": "B",
+                    "text": "并等待锁 A。两个线程都不肯先释放自己持有的锁，形成循环等待，程序永久卡死。"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
               }
             ],
             "mindmapHtml": ""
@@ -7385,8 +8942,20 @@ const ALL_COURSES_DATA = [
                 "analysis": "\n- **A 正确**：方法重写的核心要求就是方法签名（方法名 + 参数列表）必须与父类被重写的方法**完全一致**。\n- **B 错误**：说法不够准确。子类重写方法的返回类型必须与父类**相同**或是其**子类型**（协变返回类型）。选项说\"必须是子类型\"排除了返回类型完全相同的情况，这不正确。\n- **C 错误**：子类重写方法抛出的受检异常**不能比父类更多**。这是为了确保通过父类引用调用该方法时，调用者的异常处理代码仍然有效。\n- **D 正确**：子类重写方法抛出的受检异常**不能比父类更多或更宽泛**。具体来说，子类方法可以抛出父类方法声明异常的子类型，或者不抛出异常，但不能抛出父类未声明的新受检异常，也不能抛出更上层的异常类型。\n- **E 错误**：`private` 方法对子类**不可见**，子类根本无法感知父类 `private` 方法的存在，因此不存在\"重写\"。如果子类定义了同名方法，那是一个全新的方法，与父类方法无关。"
               },
               {
-                "question": "**题目**：分析以下代码的输出结果，并逐步推导每一步的执行过程。\n```java\nclass A {\npublic A() {\nSystem.out.println(\"A()\");\nshow();\n}\npublic void show() {\nSystem.out.println(\"A.show()\");\n}\n}\nclass B extends A {\nprivate int value = 20;\npublic B() {\nSystem.out.println(\"B(), value=\" + value);\n}\n@Override\npublic void show() {\nSystem.out.println(\"B.show(), value=\" + value);\n}\n}\npublic class Test {\npublic static void main(String[] args) {",
+                "question": "**题目**：分析以下代码的输出结果，并逐步推导每一步的执行过程。\n```java",
                 "options": [
+                  {
+                    "key": "A",
+                    "text": "{"
+                  },
+                  {
+                    "key": "B",
+                    "text": "extends"
+                  },
+                  {
+                    "key": "A",
+                    "text": "{"
+                  },
                   {
                     "key": "B",
                     "text": "b = new B();"
@@ -7394,14 +8963,6 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "B",
                     "text": "show(), value=0"
-                  },
-                  {
-                    "key": "C",
-                    "text": "选项C"
-                  },
-                  {
-                    "key": "D",
-                    "text": "选项D"
                   }
                 ],
                 "answer": "A",
@@ -7991,10 +9552,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "操作系统中的作业调度（先来先服务）"
+                  },
+                  {
+                    "key": "C",
+                    "text": "选项典型和直接。"
                   }
                 ],
                 "answer": "C",
-                "analysis": "\n> - **选项 A**：错误。打印任务按提交顺序处理是典型的 FIFO 场景，应使用队列。\n> - **选项 B**：错误。浏览器前进/后退需要两个栈配合使用（历史栈和前进栈），单独一个栈无法同时支持前进和后退。虽然涉及栈，但不如 C 选项典型和直接。\n> - **选项 C**：正确。表达式求值（如中缀转后缀、后缀表达式计算）是栈的经典应用。操作数和运算符的嵌套结构天然符合 LIFO 特性。\n> - **选项 D**：错误。先来先服务（FCFS）调度按到达顺序处理，是 FIFO 场景，应使用队列。"
+                "analysis": "\n> - **选项 A**：错误。打印任务按提交顺序处理是典型的 FIFO 场景，应使用队列。\n> - **选项 C**：正确。表达式求值（如中缀转后缀、后缀表达式计算）是栈的经典应用。操作数和运算符的嵌套结构天然符合 LIFO 特性。\n> - **选项 D**：错误。先来先服务（FCFS）调度按到达顺序处理，是 FIFO 场景，应使用队列。"
               },
               {
                 "question": "对于采用线性探测法的哈希表，当装填因子 $\\alpha$ 趋近于 1 时，查找操作的平均探测次数会？（  ）",
@@ -8060,10 +9625,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "按索引查找元素"
+                  },
+                  {
+                    "key": "A",
+                    "text": "类似，按索引（下标）查找是数组的优势操作，$O(1)$ 即可完成；链表不支持随机访问，需 $O(n)$ 遍历。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "\n> - **选项 A**：正确。数组支持通过下标直接访问，时间复杂度为 $O(1)$；单链表必须从头遍历到第 $i$ 个节点，时间复杂度为 $O(n)$。\n> - **选项 B**：错误。在数组头部插入需要将所有元素后移，时间复杂度为 $O(n)$；在单链表头部插入只需修改头指针和新节点的 `next`，时间复杂度为 $O(1)$。因此链表在此操作上更高效。\n> - **选项 C**：正确。数组在内存中连续存储，具有良好的空间局部性，CPU 缓存命中率较高；链表节点分散在内存中，缓存不友好，遍历时缓存缺失较多。\n> - **选项 D**：正确。与选项 A 类似，按索引（下标）查找是数组的优势操作，$O(1)$ 即可完成；链表不支持随机访问，需 $O(n)$ 遍历。"
+                "analysis": "\n> - **选项 A**：正确。数组支持通过下标直接访问，时间复杂度为 $O(1)$；单链表必须从头遍历到第 $i$ 个节点，时间复杂度为 $O(n)$。\n> - **选项 B**：错误。在数组头部插入需要将所有元素后移，时间复杂度为 $O(n)$；在单链表头部插入只需修改头指针和新节点的 `next`，时间复杂度为 $O(1)$。因此链表在此操作上更高效。\n> - **选项 C**：正确。数组在内存中连续存储，具有良好的空间局部性，CPU 缓存命中率较高；链表节点分散在内存中，缓存不友好，遍历时缓存缺失较多。"
               },
               {
                 "question": "关于哈希表冲突解决方法，以下说法**正确**的有？（  ）",
@@ -8133,6 +9702,53 @@ const ALL_COURSES_DATA = [
                 ],
                 "answer": "A",
                 "analysis": "\n> - **选项 A**：正确。在装填因子合理（通常 $\\alpha < 0.75$）且哈希函数分布均匀的前提下，哈希表的平均查找、插入、删除时间复杂度均为 $O(1)$。\n> - **选项 B**：正确。装填因子 $\\alpha = n / m$（$n$ 为元素数，$m$ 为表大小），$\\alpha$ 越大说明表越满，不同关键字映射到同一位置的概率越高。\n> - **选项 C**：错误。哈希表是无序的散列结构，关键字之间没有大小顺序关系。范围查询需要逐个检查所有元素，最坏情况为 $O(n)$。如果需要高效范围查询，应使用有序结构（如平衡二叉搜索树、B+ 树等）。\n> - **选项 D**：正确。rehashing 时表大小改变，哈希函数 $H(key) = key \\bmod m$ 中的 $m$ 也随之改变，因此每个已有元素的哈希地址都可能变化，需要重新计算并插入新表。扩容的时间复杂度为 $O(n)$。"
+              },
+              {
+                "question": "请解释在程序执行过程中，系统如何利用**栈**来管理函数调用（即\"调用栈\"），并说明如何将一个递归算法改写为等价的非递归算法。\n**答案：**",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "调用另一个函数"
+                  },
+                  {
+                    "key": "B",
+                    "text": "时，系统会在调用栈（call stack）上执行以下操作："
+                  },
+                  {
+                    "key": "B",
+                    "text": "之前，系统将"
+                  },
+                  {
+                    "key": "A",
+                    "text": "的**栈帧**（stack frame）压入调用栈。栈帧中保存："
+                  },
+                  {
+                    "key": "A",
+                    "text": "的哪一行继续执行）"
+                  },
+                  {
+                    "key": "B",
+                    "text": "又调用 C，则"
+                  },
+                  {
+                    "key": "C",
+                    "text": "的栈帧被压在"
+                  },
+                  {
+                    "key": "B",
+                    "text": "之上。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "的栈帧，根据保存的返回地址回到"
+                  },
+                  {
+                    "key": "A",
+                    "text": "中继续执行。A 的栈帧重新成为栈顶。"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "\n>\n> **一、调用栈的工作原理**\n>\n>\n>    - 函数的局部变量\n>    - 传入参数\n>    - 调用者的栈帧指针（用于恢复现场）\n>\n>\n>\n> 这一过程完全符合 LIFO（后进先出）原则：最后被调用的函数最先返回。递归调用时，每一层递归调用都会产生一个新的栈帧被压入，直到达到递归终止条件后逐层弹出返回。\n>\n> **二、递归转非递归的方法**\n>\n> 将递归改写为非递归的核心思想是：**用显式的栈来模拟系统的调用栈**。\n>\n> 一般步骤：\n> 1. 分析递归函数中每层调用需要保存的信息（参数、局部变量、返回后需要执行的逻辑阶段）。\n> 2. 定义一个结构体或类来模拟\"栈帧\"，包含上述信息。\n> 3. 创建一个显式栈，将初始调用的参数作为第一个栈帧压入。\n> 4. 用一个循环代替递归：每次循环取出栈顶栈帧处理，若需要\"递归调用\"则将新栈帧压栈。\n> 5. 当栈为空时循环结束，等价于递归完全返回。\n>\n> **示例**：将递归计算阶乘 `fact(n) = n * fact(n-1)` 改写为非递归：\n> ```\n> // 递归版\n> int fact(int n) {\n>     if (n <= 1) return 1;\n>     return n * fact(n - 1);\n> }\n>\n> // 非递归版（用显式栈模拟）\n> int fact_iterative(int n) {\n>     Stack<int> s;\n>     s.push(n);\n>     int result = 1;\n>     while (!s.isEmpty()) {\n>         int curr = s.pop();\n>         if (curr <= 1) break;       // 递归终止条件\n>         result *= curr;\n>         s.push(curr - 1);           // 模拟递归调用 fact(curr-1)\n>     }\n>     return result;\n> }\n> ```\n> 对于像阶乘这样的尾递归，实际上可以用循环直接简化而无需显式栈；但对于涉及多分支递归（如树的遍历、图的 DFS），显式栈是必要的。"
               }
             ],
             "mindmapHtml": ""
@@ -8213,52 +9829,6 @@ const ALL_COURSES_DATA = [
                 "analysis": "暂无详细解析"
               },
               {
-                "question": "在一棵 5 阶 B 树中，每个非根内部节点最少包含多少个关键字？",
-                "options": [
-                  {
-                    "key": "A",
-                    "text": "1"
-                  },
-                  {
-                    "key": "B",
-                    "text": "2"
-                  },
-                  {
-                    "key": "C",
-                    "text": "3"
-                  },
-                  {
-                    "key": "D",
-                    "text": "4"
-                  }
-                ],
-                "answer": "B",
-                "analysis": "暂无详细解析"
-              },
-              {
-                "question": "B+树与 B 树的关键区别之一是：",
-                "options": [
-                  {
-                    "key": "A",
-                    "text": "B+树的内部节点存储完整数据记录，B 树的内部节点仅存储索引"
-                  },
-                  {
-                    "key": "B",
-                    "text": "B+树的所有数据记录都存储在叶子节点，且叶子节点通过指针串成有序链表"
-                  },
-                  {
-                    "key": "C",
-                    "text": "B+树不支持范围查询，而 B 树支持"
-                  },
-                  {
-                    "key": "D",
-                    "text": "B+树的高度比 B 树更高，因此查找更慢"
-                  }
-                ],
-                "answer": "B",
-                "analysis": "暂无详细解析"
-              },
-              {
                 "question": "将关键字序列 $\\{50, 30, 70, 20, 40\\}$ 依次插入一棵初始为空的 AVL 树，最终树根节点的值为：",
                 "options": [
                   {
@@ -8305,29 +9875,6 @@ const ALL_COURSES_DATA = [
                 "analysis": "暂无详细解析"
               },
               {
-                "question": "假设一棵 3 阶 B 树（即 2-3 树）中，当前某个叶子节点已经包含 2 个关键字 $\\{10, 20\\}$，此时需要向该节点插入关键字 **15**。插入操作完成后，该节点原来的父节点中会新增哪个关键字？",
-                "options": [
-                  {
-                    "key": "A",
-                    "text": "10"
-                  },
-                  {
-                    "key": "B",
-                    "text": "15"
-                  },
-                  {
-                    "key": "C",
-                    "text": "20"
-                  },
-                  {
-                    "key": "D",
-                    "text": "不会有任何关键字上移，因为节点未满"
-                  }
-                ],
-                "answer": "B",
-                "analysis": "暂无详细解析"
-              },
-              {
                 "question": "以下关于 AVL 树和红黑树的比较，正确的有：",
                 "options": [
                   {
@@ -8351,29 +9898,6 @@ const ALL_COURSES_DATA = [
                 "analysis": "暂无详细解析"
               },
               {
-                "question": "以下关于 B 树的描述，正确的有：",
-                "options": [
-                  {
-                    "key": "A",
-                    "text": "B 树的所有叶子节点都在同一层"
-                  },
-                  {
-                    "key": "B",
-                    "text": "B 树的查找效率只取决于树高，而树高与阶数 $m$ 和数据量 $n$ 有关"
-                  },
-                  {
-                    "key": "C",
-                    "text": "在 $m$ 阶 B 树中，根节点至少有 2 个子节点（除非根是叶子）"
-                  },
-                  {
-                    "key": "D",
-                    "text": "B 树节点内的关键字可以无序存储"
-                  }
-                ],
-                "answer": "A",
-                "analysis": "暂无详细解析"
-              },
-              {
                 "question": "关于 B+树的特点，以下描述正确的有：",
                 "options": [
                   {
@@ -8390,7 +9914,19 @@ const ALL_COURSES_DATA = [
                   },
                   {
                     "key": "D",
-                    "text": "B+树的查找路径长度比等阶 B 树更长，因此性能更差"
+                    "text": "B+树的查找路径长度比等阶"
+                  },
+                  {
+                    "key": "B",
+                    "text": "树更长，因此性能更差"
+                  },
+                  {
+                    "key": "B",
+                    "text": "树更低。即使树高相同，查找性能也并无劣势。B+树在磁盘I/O场景下通常优于"
+                  },
+                  {
+                    "key": "B",
+                    "text": "树。"
                   }
                 ],
                 "answer": "A",
@@ -8418,6 +9954,29 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "选项声称\"BF 从 +1 变为 0 不需要继续向上检查\"是错误的，因为子树高度降低了，必须向上回溯。"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "> 40，进入最右子节点 $[50, 60]$。插入后：$[50, 60, 70]$，恰好满但未超出。\n```\n[20, 40]\n/   |    \\\n[10] [30]  [50, 60, 70]\n```",
+                "options": [
+                  {
+                    "key": "B",
+                    "text": "树：**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "树的结构约束。验证各节点关键字数的合法性："
+                  },
+                  {
+                    "key": "C",
+                    "text": "选项C"
+                  },
+                  {
+                    "key": "D",
+                    "text": "选项D"
                   }
                 ],
                 "answer": "A",
@@ -9631,6 +11190,112 @@ const ALL_COURSES_DATA = [
                 ],
                 "answer": "A",
                 "analysis": "\n> - **选项 A**：正确。这是最大流最小割定理（Max-Flow Min-Cut Theorem）的直接表述。最大流的值等于网络中最小割的容量，这是网络流理论中最基本的定理之一。\n> - **选项 B**：正确。这是最大流的充要条件。当残余网络中不存在从 $s$ 到 $t$ 的增广路径时，根据最大流最小割定理，当前流等于某个 $s$-$t$ 割的容量，因此是最大流。\n> - **选项 C**：正确。Ford-Fulkerson 是一个方法框架，具体的时间复杂度取决于增广路径的选择方式：用 DFS 任意选择时为 $O(E \\cdot f^*)$（$f^*$ 为最大流值，可能很慢）；用 BFS 选择最短路径（Edmonds-Karp）时为 $O(VE^2)$；用容量缩放时为 $O(E^2 \\log U)$。\n> - **选项 D**：正确。最大流的值是唯一确定的（等于最小割的容量），但达到最大流的流分配方案可能不唯一，最小割也可能不唯一（可能存在多个容量相同的 $s$-$t$ 割）。"
+              },
+              {
+                "question": "【难度：中等】给定有向无环图如下，各边权值标注在边上：\n```\n边集：(A->B, 3), (A->C, 2), (B->D, 4), (C->D, 1), (C->E, 5), (D->F, 2), (E->F, 3)\n```\n从顶点 $A$ 到顶点 $F$ 的最短路径长度为 \\_\\_\\_\\_\\_\\_，该路径经过的顶点序列为 \\_\\_\\_\\_\\_\\_。\n**答案：** $5$；$A \\to C \\to D \\to F$",
+                "options": [
+                  {
+                    "key": "B",
+                    "text": "\\to"
+                  },
+                  {
+                    "key": "D",
+                    "text": "\\to F$：$3 + 4 + 2 = 9$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "\\to"
+                  },
+                  {
+                    "key": "D",
+                    "text": "\\to F$：$2 + 1 + 2 = 5$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "\\to E \\to F$：$2 + 5 + 3 = 10$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "\\to"
+                  },
+                  {
+                    "key": "D",
+                    "text": "\\to F$，路径长度为 $2 + 1 + 2 = 5$。"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "\n> - 从 $A$ 到 $F$ 的所有可能路径及其长度："
+              },
+              {
+                "question": "给出从 $A$ 到每个顶点的最终最短路径及其长度\n**参考答案：**\n**初始化：**\n- $dist[A] = 0$，$dist[B] = dist[C] = dist[D] = dist[E] = dist[F] = \\infty$\n- 已确定集合 $S = \\emptyset$\n**执行过程：**\n| 步骤 | 选中顶点 | $dist[A]$ | $dist[B]$ | $dist[C]$ | $dist[D]$ | $dist[E]$ | $dist[F]$ | 松弛操作 |\n|------|---------|-----------|-----------|-----------|-----------|-----------|-----------|---------|\n| 初始 | — | 0 | $\\infty$ | $\\infty$ | $\\infty$ | $\\infty$ | $\\infty$ | — |\n| 1 | $A$ | **0** | 2 | 5 | $\\infty$ | $\\infty$ | $\\infty$ | 松弛 $A \\to B$：$dist[B]=2$；松弛 $A \\to C$：$dist[C]=5$ |\n| 2 | $B$ | 0 | **2** | 3 | 8 | $\\infty$ | $\\infty$ | 松弛 $B \\to C$：$\\min(5, 2+1)=3$，更新 $dist[C]=3$；松弛 $B \\to D$：$dist[D]=2+6=8$ |\n| 3 | $C$ | 0 | 2 | **3** | 6 | 7 | $\\infty$ | 松弛 $C \\to D$：$\\min(8, 3+3)=6$，更新 $dist[D]=6$；松弛 $C \\to E$：$dist[E]=3+4=7$ |\n| 4 | $D$ | 0 | 2 | 3 | **6** | 7 | 7 | 松弛 $D \\to F$：$dist[F]=6+1=7$ |\n| 5 | $E$ | 0 | 2 | 3 | 6 | **7** | 7 | 松弛 $E \\to D$：$\\min(6, 7+2)=6$，无更新；松弛 $E \\to F$：$\\min(7, 7+7)=7$，无更新 |\n| 6 | $F$ | 0 | 2 | 3 | 6 | 7 | **7** | 无出边可松弛 |\n**最终结果：**\n| 目标顶点 | 最短路径 | 路径长度 |\n|---------|---------|---------|\n| $A$ | $A$ | $0$ |\n| $B$ | $A \\to B$ | $2$ |",
+                "options": [
+                  {
+                    "key": "B",
+                    "text": "\\to C$ | $3$ |"
+                  },
+                  {
+                    "key": "B",
+                    "text": "\\to"
+                  },
+                  {
+                    "key": "C",
+                    "text": "\\to D$ | $6$ |"
+                  },
+                  {
+                    "key": "B",
+                    "text": "\\to"
+                  },
+                  {
+                    "key": "C",
+                    "text": "\\to E$ | $7$ |"
+                  },
+                  {
+                    "key": "B",
+                    "text": "\\to"
+                  },
+                  {
+                    "key": "C",
+                    "text": "\\to"
+                  },
+                  {
+                    "key": "D",
+                    "text": "\\to F$ | $7$ |"
+                  },
+                  {
+                    "key": "C",
+                    "text": "\\to E \\to F$：$5 + 4 + 7 = 16$（更长）"
+                  },
+                  {
+                    "key": "B",
+                    "text": "\\to"
+                  },
+                  {
+                    "key": "D",
+                    "text": "\\to F$：$2 + 6 + 1 = 9$（更长）"
+                  },
+                  {
+                    "key": "C",
+                    "text": "\\to"
+                  },
+                  {
+                    "key": "D",
+                    "text": "\\to F$：$5 + 3 + 1 = 9$（更长）"
+                  },
+                  {
+                    "key": "B",
+                    "text": "\\to"
+                  },
+                  {
+                    "key": "C",
+                    "text": "\\to"
+                  },
+                  {
+                    "key": "D",
+                    "text": "\\to F$：$2 + 1 + 3 + 1 = 7$ ✓"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
               }
             ],
             "mindmapHtml": ""
@@ -9836,27 +11501,102 @@ const ALL_COURSES_DATA = [
                 "analysis": "\n- **A 正确**：Redo Log 由 InnoDB 引擎层产生和管理（存储在 `ib_logfile0`、`ib_logfile1` 等文件中），而 Binlog 由 MySQL Server 层产生（存储在 `binlog.000001` 等文件中），所有存储引擎共享。\n- **B 错误**：Redo Log 采用**循环写入**方式（由多个固定大小的日志文件组成环形缓冲区），而不是追加写入。Undo Log 也不是简单的追加写入，其存储结构较为复杂，存储在 Undo 表空间中。Binlog 才是典型的追加写入方式。\n- **C 正确**：Redo Log 记录的是物理级别的页面修改（哪个表空间的哪个页的哪个偏移处做了什么修改）。Binlog 有三种格式：STATEMENT（记录逻辑 SQL）、ROW（记录行变更）、MIXED（混合模式），可根据需要配置。\n- **D 错误**：Redo Log 在对应的脏页刷盘后可以被覆盖（循环写入），但不是在事务提交后立即删除。Undo Log 需要保留到 MVCC 不再需要时才清理。Binlog 根据 `expire_logs_days` 或 `binlog_expire_logs_seconds` 参数控制过期时间，不会在事务提交后立即删除。\n- **E 正确**：Redo Log 和 Undo Log 都是 InnoDB 引擎层的日志，由 InnoDB 引擎内部管理。Binlog 是 Server 层日志，独立于具体存储引擎。"
               },
               {
-                "question": "在一个转账场景中，事务 T1 执行\"从账户 A 向账户 B 转账 500 元\"的操作。以下哪些情况体现了 ACID 特性的必要性？",
+                "question": "以下是一段在 MySQL 中执行的操作序列。请分析其中存在的问题，并说明在 `REPEATABLE READ` 隔离级别下可能出现的并发异常。\n```sql\n-- 会话 A（管理员）                  -- 会话 B（用户）\nBEGIN;                              BEGIN;\nSELECT balance FROM accounts\nWHERE id = 1;\n-- 结果：1000\nUPDATE accounts\nSET balance = balance - 200\nWHERE id = 1;\n-- balance 变为 800\nUPDATE accounts\nSET balance = balance - 300\nWHERE id = 1;\n-- 被阻塞等待...\nCOMMIT;",
                 "options": [
                   {
                     "key": "A",
-                    "text": "转账过程中服务器断电，需要保证 A 的扣款和 B 的入账要么都完成，要么都不完成"
+                    "text": "提交后，会话"
                   },
                   {
                     "key": "B",
-                    "text": "在 T1 转账未完成时，事务 T2 读取到 A 已扣款但 B 未入账的中间状态"
+                    "text": "继续执行"
                   },
                   {
                     "key": "C",
-                    "text": "T1 和 T2 同时对账户 A 执行扣款操作，最终余额正确反映了两次扣款"
+                    "text": "选项C"
                   },
                   {
                     "key": "D",
-                    "text": "转账成功提交后，即使磁盘发生故障，账户余额的变化也不会丢失"
+                    "text": "选项D"
                   }
                 ],
                 "answer": "A",
-                "analysis": "\n- **A 正确**：这体现了**原子性**（Atomicity）的必要性。转账是一个不可分割的逻辑单元，如果中途断电，需要通过 Undo Log 回滚已执行的部分操作，保证不会出现\"钱扣了但没到账\"的情况。\n- **B 正确**：这体现了**隔离性**（Isolation）的必要性。如果隔离级别不足（如 READ UNCOMMITTED），T2 可能读到 T1 的中间状态（脏读），得到错误的账户余额信息。通过提升隔离级别（如 READ COMMITTED 或 REPEATABLE READ）可以避免此问题。\n- **C 错误**：这描述的是并发控制问题，更偏向于**一致性**在应用层面的保障。但题目描述\"最终余额正确反映了两次扣款\"实际上是并发控制的正常结果（通过行锁串行化），并不是 ACID 特性中某个特性\"必要性\"的典型体现。此选项描述的场景更适合作为隔离性的正面案例，而非\"问题\"场景。选项表述的是正确结果而非异常场景，因此不选。\n- **D 正确**：这体现了**持久性**（Durability）的必要性。一旦事务提交成功，其修改必须永久保存，即使发生磁盘故障也要能通过 Redo Log 恢复。"
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "如何避免此类问题？\n**逐步分析：**",
+                "options": [
+                  {
+                    "key": "B",
+                    "text": "的 UPDATE 执行结果**"
+                  },
+                  {
+                    "key": "A",
+                    "text": "开启事务并执行 `UPDATE balance = balance - 200`，此时 balance 在会话"
+                  },
+                  {
+                    "key": "A",
+                    "text": "的视图中变为 800，行锁被会话"
+                  },
+                  {
+                    "key": "A",
+                    "text": "持有。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "在 `REPEATABLE READ` 隔离级别下先执行 SELECT，读到 balance = 1000（MVCC 快照读）。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "执行 `UPDATE balance = balance - 300`：由于行锁被会话"
+                  },
+                  {
+                    "key": "A",
+                    "text": "持有，该 UPDATE 被阻塞。"
+                  },
+                  {
+                    "key": "A",
+                    "text": "执行 COMMIT，释放行锁。此时 balance = 800 已经持久化。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "的 UPDATE 获得行锁继续执行。**关键点**：UPDATE 是当前读（Current Read），它读取的是磁盘上的最新值（而非 MVCC 快照），即 balance = 800。然后执行 `balance - 300 = 500`。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "的 UPDATE 执行后，**balance = 500**。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "的 SELECT 查询结果**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "在 `REPEATABLE READ` 隔离级别下，SELECT 使用的是 MVCC 快照读。会话"
+                  },
+                  {
+                    "key": "B",
+                    "text": "的快照是在第一次 SELECT 时建立的，当时 balance = 1000。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "自身执行了 UPDATE 操作（当前读），UPDATE 修改了 balance 为 500。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "基于旧的快照值（1000）做出了减 300 的决策，但实际上 balance 已被会话"
+                  },
+                  {
+                    "key": "A",
+                    "text": "改为 800。最终结果 500 相当于两个事务的扣款都生效了（1000 - 200 - 300 = 500），从数值上看似乎正确，但如果会话"
+                  },
+                  {
+                    "key": "B",
+                    "text": "的业务逻辑是\"余额必须大于 300 才能执行\"，那它基于快照值 1000 判断可以执行，而实际上执行时余额只有 800，扣减后只剩 500——这可能导致业务逻辑错误。"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
               }
             ],
             "mindmapHtml": ""
@@ -9977,10 +11717,34 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "`creator_trx_id` 记录的是当前正在创建该 Read View 的事务 ID；如果该事务是只读事务，则该值为 0"
+                  },
+                  {
+                    "key": "B",
+                    "text": "的描述虽大致方向正确，却不如"
+                  },
+                  {
+                    "key": "C",
+                    "text": "精确。实际上"
+                  },
+                  {
+                    "key": "B",
+                    "text": "在语义上可视为正确，但"
+                  },
+                  {
+                    "key": "C",
+                    "text": "是更完整准确的表述，且"
+                  },
+                  {
+                    "key": "B",
+                    "text": "的\"所有活跃事务\"可能引起歧义（因为 m_ids 就是活跃事务列表）。严格来说"
+                  },
+                  {
+                    "key": "B",
+                    "text": "也是对的，但本题选最准确的——C 选项的定义更关键且无歧义。"
                   }
                 ],
                 "answer": "C",
-                "analysis": "\n- **A 错误**：`m_ids` 记录的是生成 Read View 时系统中所有**尚未提交（活跃中）** 的事务 ID 列表，不是已完成的事务 ID。\n- **B 错误**：`min_trx_id` 是 `m_ids` 列表中的**最小值**，即活跃事务中 ID 最小的那个。注意它并非\"所有活跃事务里最小的\"这种含糊表述，而是 `m_ids` 中的确切最小值。但选项 B 的描述虽大致方向正确，却不如 C 精确。实际上 B 在语义上可视为正确，但 C 是更完整准确的表述，且 B 的\"所有活跃事务\"可能引起歧义（因为 m_ids 就是活跃事务列表）。严格来说 B 也是对的，但本题选最准确的——C 选项的定义更关键且无歧义。\n**更正**：重新审视，B 的描述本质正确。但在本题语境下，C 的表述更加严谨且是 Read View 中最容易混淆的字段。`max_trx_id` 确实是系统即将分配的下一个事务 ID（当前最大 ID + 1），这是 InnoDB 源码中的实现方式。本题最佳答案为 C。\n- **C 正确**：`max_trx_id` 的值等于系统当前已分配的最大事务 ID 加 1。它是一个\"上界\"——凡是事务 ID ≥ `max_trx_id` 的事务，都是在当前 Read View 创建之后才开始的，其修改对当前事务不可见。\n- **D 错误**：`creator_trx_id` 确实记录创建该 Read View 的事务 ID，但无论是否为只读事务，该值都是当前事务的真实 ID，不会因为是只读事务就设为 0。"
+                "analysis": "\n- **A 错误**：`m_ids` 记录的是生成 Read View 时系统中所有**尚未提交（活跃中）** 的事务 ID 列表，不是已完成的事务 ID。\n**更正**：重新审视，B 的描述本质正确。但在本题语境下，C 的表述更加严谨且是 Read View 中最容易混淆的字段。`max_trx_id` 确实是系统即将分配的下一个事务 ID（当前最大 ID + 1），这是 InnoDB 源码中的实现方式。本题最佳答案为 C。\n- **C 正确**：`max_trx_id` 的值等于系统当前已分配的最大事务 ID 加 1。它是一个\"上界\"——凡是事务 ID ≥ `max_trx_id` 的事务，都是在当前 Read View 创建之后才开始的，其修改对当前事务不可见。\n- **D 错误**：`creator_trx_id` 确实记录创建该 Read View 的事务 ID，但无论是否为只读事务，该值都是当前事务的真实 ID，不会因为是只读事务就设为 0。"
               },
               {
                 "question": "在 READ COMMITTED（RC）和 REPEATABLE READ（RR）两种隔离级别下，InnoDB 的 MVCC 机制有一个关键区别，该区别直接影响了事务内多次读取的一致性。以下描述**正确**的是：",
@@ -10073,6 +11837,143 @@ const ALL_COURSES_DATA = [
                 ],
                 "answer": "A",
                 "analysis": "\n- **A 正确**：每次 UPDATE/DELETE 都会将旧版本信息记录到 Undo Log 中，通过 `DB_ROLL_PTR` 将多个版本串成链。链头是最新版本（在聚簇索引中），沿着 `DB_ROLL_PTR` 可以逐层回溯到更早的版本。\n- **B 正确**：聚簇索引叶子节点存放当前最新版本。历史版本存储在 Undo Log 段（Rollback Segment）中，通过 `DB_ROLL_PTR` 链接。\n- **C 正确**：InnoDB 的 Purge 线程会定期检查版本链中的历史版本。如果某个版本的事务 ID 小于系统中所有活跃事务的最小 ID（即不再有任何事务需要该版本），则可以被安全清理。\n- **D 错误**：InnoDB 支持部分更新（Partial Update）。对于 UPDATE 操作，Undo Log 并不总是保存完整的行副本。如果只修改了部分列，Undo Log 可以只记录被修改列的旧值，以减少日志量。\n- **E 正确**：这描述的正是部分更新机制。对于 UPDATE 操作，Undo Log 中仅保存被修改列的旧值（以及必要的主键信息用于定位），而非整行完整副本。这与 DELETE 不同——DELETE 的 Undo Log 需要保存完整行以支持回滚恢复。"
+              },
+              {
+                "question": "以下 SQL 框架演示了在 RR 隔离级别下，快照读和当前读对同一数据的不同行为。请补全 `-- TODO` 标记处的代码。\n```sql\n-- 初始化\nCREATE TABLE products (\nid INT PRIMARY KEY,\nname VARCHAR(100),\nstock INT\n) ENGINE=InnoDB;\nINSERT INTO products VALUES (1, 'Widget', 100);\n-- ========================\n-- 连接 A：事务 A\n-- ========================\nSET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ;\nSTART TRANSACTION;\n-- TODO 1: 快照读查询 Widget 的库存（预期：100）",
+                "options": [
+                  {
+                    "key": "B",
+                    "text": "执行 UPDATE 并提交，将 stock 改为 80 <<<"
+                  },
+                  {
+                    "key": "A",
+                    "text": "的 TODO 1 和 TODO 2 之间执行）"
+                  },
+                  {
+                    "key": "B",
+                    "text": "执行 UPDATE + COMMIT <<<"
+                  },
+                  {
+                    "key": "B",
+                    "text": "的修改）"
+                  },
+                  {
+                    "key": "B",
+                    "text": "将 stock 改为 `80` 并提交。"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "从 MVCC 的 Read View 角度详细分析原因。\n**答案（逐步推导）：**",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "开启**"
+                  },
+                  {
+                    "key": "A",
+                    "text": "启动，被分配一个事务 ID（假设为 `trx_A`）。此时尚未生成 Read View。"
+                  },
+                  {
+                    "key": "A",
+                    "text": "执行第一次 SELECT（快照读）。在 RC 隔离级别下，此时**创建一个 Read View（RV1）**："
+                  },
+                  {
+                    "key": "B",
+                    "text": "已启动）或 []（如果事务"
+                  },
+                  {
+                    "key": "B",
+                    "text": "尚未启动）"
+                  },
+                  {
+                    "key": "B",
+                    "text": "在 T2 时尚未启动。所以："
+                  },
+                  {
+                    "key": "B",
+                    "text": "修改并提交**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "开启，修改 salary 为 6000，并提交。物理行的 `DB_TRX_ID` 被更新为 `trx_B`，旧版本（salary=5000）通过 `DB_ROLL_PTR` 链接到 Undo Log 中。"
+                  },
+                  {
+                    "key": "A",
+                    "text": "执行第二次 SELECT（快照读）。在 **RC** 隔离级别下，**每次 SELECT 都创建新的 Read View**，因此此时创建一个**新的 Read View（RV2）**："
+                  },
+                  {
+                    "key": "B",
+                    "text": "已经提交，不在活跃列表中）"
+                  },
+                  {
+                    "key": "B",
+                    "text": "在 RV2 创建时已提交）"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "查询③是否出现幻读？InnoDB 如何解决这个问题？\n**答案（逐步推导）：**",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "开启**"
+                  },
+                  {
+                    "key": "A",
+                    "text": "启动，获得事务 ID `trx_A`。"
+                  },
+                  {
+                    "key": "A",
+                    "text": "执行第一次 SELECT。在 RR 隔离级别下，此时**创建 Read View 并在整个事务期间复用**。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "尚未启动）"
+                  },
+                  {
+                    "key": "B",
+                    "text": "插入并提交**"
+                  },
+                  {
+                    "key": "B",
+                    "text": "插入新行 `(3, 'Alice', 300)` 并提交。该行的 `DB_TRX_ID` = `trx_B`。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "是在 Read View 创建之后才启动的）。"
+                  },
+                  {
+                    "key": "A",
+                    "text": "执行第二次 SELECT。在 RR 隔离级别下，**复用 T2 时创建的同一个 Read View（RV）**。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "是在 RV 创建之后才开始的"
+                  },
+                  {
+                    "key": "B",
+                    "text": "插入的新行因为事务 ID 大于 `max_trx_id` 而不可见。"
+                  },
+                  {
+                    "key": "A",
+                    "text": "执行 `SELECT ... FOR UPDATE`，这是**当前读**，不使用 MVCC 快照，而是直接读取物理行的最新已提交数据。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "已提交的新行，当前读可以看到"
+                  },
+                  {
+                    "key": "B",
+                    "text": "**已经提交**了插入操作，当前读确实能看到这行数据。"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
               }
             ],
             "mindmapHtml": ""
@@ -10920,6 +12821,30 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "一致性（Consistency）与分区容错性（Partition Tolerance）"
+                  },
+                  {
+                    "key": "C",
+                    "text": "和"
+                  },
+                  {
+                    "key": "A",
+                    "text": "之间做出取舍。选择"
+                  },
+                  {
+                    "key": "C",
+                    "text": "则牺牲 A（如 ZooKeeper），选择"
+                  },
+                  {
+                    "key": "A",
+                    "text": "则牺牲 C（如 Cassandra、DynamoDB）。"
+                  },
+                  {
+                    "key": "A",
+                    "text": "不可兼得。该选项将选择对象描述为"
+                  },
+                  {
+                    "key": "C",
+                    "text": "和 P，但 P 不是可放弃的选项——在分布式系统中分区容错性是必须保证的。"
                   }
                 ],
                 "answer": "B",
@@ -10943,6 +12868,10 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "Basically Available（基本可用）+ Soft State（软状态）+ Eventually Consistent（最终一致性）"
+                  },
+                  {
+                    "key": "A",
+                    "text": "类似，强一致性不符合题意；且缺少\"基本可用\"这一关键原则。"
                   }
                 ],
                 "answer": "D",
@@ -11058,6 +12987,10 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "`C(a) ≤ C(b)`"
+                  },
+                  {
+                    "key": "D",
+                    "text": "不是\"必然成立\"的最精确表述。"
                   }
                 ],
                 "answer": "B",
@@ -11080,7 +13013,15 @@ const ALL_COURSES_DATA = [
                   },
                   {
                     "key": "D",
-                    "text": "一个系统可以在不发生网络分区时同时满足 C、A、P 三个特性"
+                    "text": "一个系统可以在不发生网络分区时同时满足"
+                  },
+                  {
+                    "key": "C",
+                    "text": "A、P 三个特性"
+                  },
+                  {
+                    "key": "A",
+                    "text": "不可兼得\"，而非任何时候都不能三者兼得。"
                   }
                 ],
                 "answer": "A",
@@ -11177,6 +13118,92 @@ const ALL_COURSES_DATA = [
                 ],
                 "answer": "A",
                 "analysis": "暂无详细解析"
+              },
+              {
+                "question": "系统必须在数秒内将不一致的数据自动修正\n请根据 CAP 定理和 BASE 理论，分析该系统应选择的架构类型（CP / AP / CA），并详细阐述理由。\n**参考答案：**\n**选择 AP 架构（可用性 + 分区容错性）。**\n**分析过程：**\n**(1) 需求到 CAP 特性的映射：**\n| 需求 | CAP 特性 | 分析 |\n|------|----------|------|\n| 高可用，不因故障拒绝服务 | Availability（可用性） | 系统必须随时响应请求 |\n| 允许短暂数据不一致 | 可牺牲强 Consistency | 不需要实时一致 |\n| 网络波动下仍工作 | Partition Tolerance | P 是必须的 |\n**(2) 为何选择 AP 而非 CP 或 CA：**\n- **不能选 CP**：CP 系统（如 ZooKeeper、HBase）在网络分区或节点故障时会拒绝服务以保证一致性。对于大促场景，拒绝服务意味着订单丢失、用户体验极差，直接导致收入损失。\n- **不能选 CA**：CA 系统假设网络不会分区，这在大规模分布式电商环境中不现实。\n- **应选 AP**：AP 系统（如 Cassandra、DynamoDB）在分区发生时仍接受请求，通过最终一致性保证数据最终收敛。\n**(3) BASE 理论的具体应用：**\n- **Basically Available（基本可用）**：大促期间即使部分节点故障，系统仍接受所有订单和库存请求。通过多副本和负载均衡保证响应时间。",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "认为库存为 100，节点"
+                  },
+                  {
+                    "key": "B",
+                    "text": "认为库存为 98，这种差异在大促高峰期是可接受的。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "选项C"
+                  },
+                  {
+                    "key": "D",
+                    "text": "选项D"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
+              },
+              {
+                "question": "**响应客户端**：A 向客户端返回成功响应。\n**(2) 网络分区场景分析：**\n- 分区情况：{A, B, C} | {D, E}\n- **该日志条目可以被提交**。",
+                "options": [
+                  {
+                    "key": "A",
+                    "text": "所在分区包含 3 个节点（A、B、C），满足多数派要求（≥ 3）。A 可以向"
+                  },
+                  {
+                    "key": "B",
+                    "text": "和"
+                  },
+                  {
+                    "key": "C",
+                    "text": "发送 `AppendEntries` 请求并获得确认。加上"
+                  },
+                  {
+                    "key": "A",
+                    "text": "自身，共有 3 票，达到多数派阈值。因此日志条目可以正常提交和应用。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "和 E 由于无法收到 Leader 的消息，其日志会暂时落后。在网络分区恢复后，新的 Leader（或恢复后的 A）会通过 `AppendEntries` 将缺失的日志条目同步给"
+                  },
+                  {
+                    "key": "D",
+                    "text": "和 E。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "C、D、E 在选举超时后检测到 Leader"
+                  },
+                  {
+                    "key": "A",
+                    "text": "无响应，各自转变为 Candidate 并发起新一轮选举（Term 4）。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "最先超时并发送 `RequestVote` 给其他节点。"
+                  },
+                  {
+                    "key": "A",
+                    "text": "B、C 的日志中。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "拥有最新的日志，因此可以当选。"
+                  },
+                  {
+                    "key": "A",
+                    "text": "的成功响应（因为"
+                  },
+                  {
+                    "key": "A",
+                    "text": "在发送响应前故障了）。客户端会因为超时而重试请求。新的 Leader"
+                  },
+                  {
+                    "key": "B",
+                    "text": "会处理该重试请求。由于 `x = 42` 已经被提交并应用，状态机已经反映了该变更。如果客户端的请求带有唯一标识符（幂等性机制），新 Leader 可以识别出这是重复请求并直接返回成功。"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
               }
             ],
             "mindmapHtml": ""
@@ -11205,10 +13232,22 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "先删除缓存，再更新数据库"
+                  },
+                  {
+                    "key": "A",
+                    "text": "写值 1，线程"
+                  },
+                  {
+                    "key": "B",
+                    "text": "写值 2，由于执行速度差异，可能"
+                  },
+                  {
+                    "key": "A",
+                    "text": "先更新 DB 但后更新缓存，导致缓存保留了旧值 1 而 DB 已是 2。此外，\"更新缓存\"不是幂等操作，多次并发更新可能产生不一致。"
                   }
                 ],
                 "answer": "C",
-                "analysis": "> **逐选项解析：**\n> - **A 错误**：先更新缓存再更新数据库存在严重的一致性问题。如果更新数据库失败，缓存中就是脏数据；且在并发写场景下，两个写线程可能以不同顺序更新缓存和数据库，导致缓存与数据库不一致。\n> - **B 错误**：先更新数据库再\"更新\"缓存，在并发写场景下会出现脏数据。例如线程 A 写值 1，线程 B 写值 2，由于执行速度差异，可能 A 先更新 DB 但后更新缓存，导致缓存保留了旧值 1 而 DB 已是 2。此外，\"更新缓存\"不是幂等操作，多次并发更新可能产生不一致。\n> - **C 正确**：Cache Aside 写流程的标准做法——先更新数据库，再删除缓存。删除操作是幂等的（多次删除效果一样），比更新缓存更安全。即使删除缓存失败，下次读请求发现缓存未命中也会从 DB 重新加载，最终一致。\n> - **D 错误**：这是\"延迟双删\"方案的第一步，不是标准 Cache Aside 的流程。虽然先删缓存再更新 DB 在某些场景可用，但单独使用会导致并发读请求在 DB 更新完成前从 DB 读到旧值并回填缓存，造成不一致。"
+                "analysis": "> **逐选项解析：**\n> - **A 错误**：先更新缓存再更新数据库存在严重的一致性问题。如果更新数据库失败，缓存中就是脏数据；且在并发写场景下，两个写线程可能以不同顺序更新缓存和数据库，导致缓存与数据库不一致。\n> - **C 正确**：Cache Aside 写流程的标准做法——先更新数据库，再删除缓存。删除操作是幂等的（多次删除效果一样），比更新缓存更安全。即使删除缓存失败，下次读请求发现缓存未命中也会从 DB 重新加载，最终一致。\n> - **D 错误**：这是\"延迟双删\"方案的第一步，不是标准 Cache Aside 的流程。虽然先删缓存再更新 DB 在某些场景可用，但单独使用会导致并发读请求在 DB 更新完成前从 DB 读到旧值并回填缓存，造成不一致。"
               },
               {
                 "question": "某电商平台的商品详情页接口遭受大量 `productId = -1` 的恶意请求，这些请求在缓存和数据库中均不存在对应数据，每次都直接打到数据库。这属于哪种缓存问题？（  ）",
@@ -11391,7 +13430,7 @@ const ALL_COURSES_DATA = [
                     "text": "互斥锁：对穿透请求加分布式锁，保证只有一个线程查询数据库"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "> **逐选项解析：**\n> - **A 正确**：缓存空值是应对穿透的经典方案。当查询 DB 发现数据不存在时，在 Redis 中写入一个空值标记（如 `nil` 或特殊标记值），并设置较短的 TTL（如 60 秒）。后续相同 key 的请求会命中缓存（虽然是空值），不再穿透到 DB。缺点是占用少量内存且在 TTL 内数据不一致（如果数据被插入）。\n> - **B 正确**：布隆过滤器利用多个哈希函数将元素映射到位数组，能以极小的内存空间快速判断 key 是否\"可能存在\"。判断为\"不存在\"则一定准确，可直接拦截；判断为\"存在\"则放行继续查缓存。适合 key 空间极大但实际数据量有限的场景。\n> - **C 正确**：参数校验是零成本的第一道防线。在网关层或接口入口校验参数合法性（如 `id > 0`、`id 长度合理`、格式校验等），可以拦截明显的非法请求，避免它们到达缓存和数据库层。虽然只能拦截\"明显非法\"的请求，但实现简单且无性能开销。\n> - **D 错误**：互斥锁是解决**缓存击穿**的方案，不是穿透的方案。穿透的 key 在数据库中根本不存在，即使加锁让一个线程去查 DB，查完还是找不到，下次还是穿透。互斥锁无法解决\"查不到数据\"这个根本问题。"
               },
               {
@@ -11414,7 +13453,7 @@ const ALL_COURSES_DATA = [
                     "text": "从节点的数据是主节点数据的完整副本"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABD",
                 "analysis": "> **逐选项解析：**\n> - **A 正确**：主从复制的核心设计——主节点（Master）接收所有写操作（SET / DEL / EXPIRE 等），从节点（Slave）通过复制获得数据副本，可以提供读服务。通过读写分离，可以提升系统整体的读吞吐量。\n> - **B 正确**：主从复制分两个阶段。首次连接时，主节点执行 BGSAVE 生成 RDB 快照发送给从节点（全量同步）；之后主节点的每个写命令通过 repl_backlog 缓冲区传播给从节点（增量同步）。如果从节点断线重连，根据 offset 判断是否可以增量续传。\n> - **C 错误**：主从复制的故障转移需要**人工干预**——管理员手动将从节点提升为新的主节点。这正是哨兵模式（Sentinel）存在的原因：哨兵可以自动完成故障检测和主从切换，弥补主从复制的这一不足。\n> - **D 正确**：每个从节点保存主节点数据的**完整副本**（全量复制），而非部分数据。这意味着主从架构不能扩展存储容量——系统的存储上限仍然是单个节点的内存大小。这也是集群模式（Cluster）引入数据分片的原因。"
               },
               {
@@ -11437,7 +13476,7 @@ const ALL_COURSES_DATA = [
                     "text": "多级缓存必然导致数据库写入性能下降"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "> **逐选项解析：**\n> - **A 正确**：多级缓存中，各应用服务器都有独立的本地缓存（如 Caffeine）。当数据更新时，Redis 中的缓存可以被删除/更新，但其他节点的本地缓存仍持有旧数据，导致不一致。解决方案包括通过 Redis Pub/Sub 或消息队列广播失效通知，让各节点主动清除本地旧数据。\n> - **B 正确**：如果某次请求穿透了所有缓存层级（本地缓存 miss + Redis miss），最终打到数据库，其开销比单级穿透更大（经过了多层查找的额外开销）。因此需要在每一级都做防护（如本地缓存也缓存空值、Redis 前加布隆过滤器），避免多级穿透。\n> - **C 正确**：本地缓存（如 Caffeine）运行在应用 JVM 进程内，容量受限于堆内存大小（通常几百 MB）。不能将所有数据都放入本地缓存，需要根据访问热度只缓存热点数据，并配合合理的淘汰策略（如 Caffeine 的 W-TinyLFU）。\n> - **D 错误**：多级缓存影响的是**读路径**，与数据库的写入性能无直接关系。数据库写入性能取决于数据库自身的 IO 能力、索引设计、事务隔离级别等因素。缓存系统通过拦截读请求来减轻数据库压力，反而间接提升了数据库的整体性能（因为减少了读负载）。"
               },
               {
@@ -11460,8 +13499,39 @@ const ALL_COURSES_DATA = [
                     "text": "存在秒级延迟，不适合强一致性场景"
                   }
                 ],
-                "answer": "A",
+                "answer": "ACD",
                 "analysis": "> - **D 正确**：Canal 方案的链路是：MySQL 写入 → Binlog 产生 → Canal 订阅解析 → 发送到 MQ → 消费者消费 → 更新 Redis。整个链路存在秒级延迟，属于**最终一致性**方案。对于需要强一致性的场景（如金融交易），不适合使用此方案。"
+              },
+              {
+                "question": "【并发时序分析】分析延迟双删（Delayed Double Delete）方案在并发场景下的时序，说明为什么需要第二次删除，以及 sleep 时间应该如何确定。\n**分析：**\n**延迟双删的执行步骤：**\n```\n线程A（写操作）：\n① redis.del(key)         -- 先删缓存\n② db.update(key, newVal) -- 更新数据库\n③ sleep(N ms)            -- 等待一段时间\n④ redis.del(key)         -- 再次删除缓存\n```\n**为什么需要第二次删除？—— 并发时序推导：**\n假设只有\"先删缓存 + 更新数据库\"（没有延迟双删），考虑以下并发时序：\n```\n时间线 ──────────────────────────────────────────────────────▶\n线程A（写操作）:  ① del(key) ──────▶ ② update DB (慢，耗时较长)\n│\n线程B（读操作）:                    ③ 读缓存 → miss\n│\n④ 读 DB → 旧值 oldVal\n│\n⑤ 写入缓存: set(key, oldVal)\n│\n线程A（写操作）:                          ⑥ update DB 完成\n│\n结果: DB = newVal，缓存 = oldVal  ← 不一致！\n```",
+                "options": [
+                  {
+                    "key": "B",
+                    "text": "在线程"
+                  },
+                  {
+                    "key": "A",
+                    "text": "删除缓存后、更新 DB 完成前执行了读操作，从 DB 读到了旧值并写入了缓存，导致缓存与 DB 不一致。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "在时间窗口内写入的脏数据。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "完成\"读缓存 miss → 读 DB → 写缓存\"的总耗时**。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "的脏数据可能还没写入缓存，第二次删除就执行了，之后线程"
+                  },
+                  {
+                    "key": "B",
+                    "text": "才写入脏数据，仍然不一致。"
+                  }
+                ],
+                "answer": "A",
+                "analysis": "暂无详细解析"
               }
             ],
             "mindmapHtml": ""
@@ -11536,10 +13606,106 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "C, B, A, C, B, A, C, B, A, A"
+                  },
+                  {
+                    "key": "A",
+                    "text": "|"
+                  },
+                  {
+                    "key": "A",
+                    "text": "5-10=-5 |"
+                  },
+                  {
+                    "key": "B",
+                    "text": "|"
+                  },
+                  {
+                    "key": "B",
+                    "text": "3-10=-7 |"
+                  },
+                  {
+                    "key": "A",
+                    "text": "|"
+                  },
+                  {
+                    "key": "A",
+                    "text": "0-10=-10 |"
+                  },
+                  {
+                    "key": "C",
+                    "text": "|"
+                  },
+                  {
+                    "key": "C",
+                    "text": "2-10=-8 |"
+                  },
+                  {
+                    "key": "A",
+                    "text": "|"
+                  },
+                  {
+                    "key": "A",
+                    "text": "-5-10=-15 |"
+                  },
+                  {
+                    "key": "B",
+                    "text": "|"
+                  },
+                  {
+                    "key": "B",
+                    "text": "-4-10=-14 |"
+                  },
+                  {
+                    "key": "A",
+                    "text": "|"
+                  },
+                  {
+                    "key": "A",
+                    "text": "-10-10=-20 |"
+                  },
+                  {
+                    "key": "A",
+                    "text": "|"
+                  },
+                  {
+                    "key": "A",
+                    "text": "-15-10=-25 |"
+                  },
+                  {
+                    "key": "B",
+                    "text": "|"
+                  },
+                  {
+                    "key": "B",
+                    "text": "-11-10=-21 |"
+                  },
+                  {
+                    "key": "C",
+                    "text": "|"
+                  },
+                  {
+                    "key": "C",
+                    "text": "-6-10=-16 |"
+                  },
+                  {
+                    "key": "A",
+                    "text": "出现 5 次、B 出现 3 次、C 出现 2 次，比例恰好为 5:3:2，且"
+                  },
+                  {
+                    "key": "A",
+                    "text": "的请求被打散分布。"
+                  },
+                  {
+                    "key": "A",
+                    "text": "连续排列，这不是\"平滑\"的效果。"
+                  },
+                  {
+                    "key": "A",
+                    "text": "出现 5 次，但序列不符合平滑加权轮询的标准推演结果。"
                   }
                 ],
                 "answer": "B",
-                "analysis": "\n>\n> 平滑加权轮询的核心思想是将高权重服务器的请求打散分布，避免连续分配给同一台服务器。其算法每轮执行以下步骤：\n> 1. 每台服务器的 `current_weight += effective_weight`\n> 2. 选出 `current_weight` 最大的服务器处理当前请求\n> 3. 被选中的服务器 `current_weight -= total_weight`（此处 total_weight = 10）\n>\n> **逐步推演：**\n>\n> | 请求 | A(初始cw) | B(初始cw) | C(初始cw) | A(+5后) | B(+3后) | C(+2后) | 选中 | 选中后cw |\n> |------|----------|----------|----------|--------|--------|--------|------|---------|\n> | 1 | 0 | 0 | 0 | **5** | 3 | 2 | A | A:5-10=-5 |\n> | 2 | -5 | 0 | 0 | **0** | 3 | 2 | B | B:3-10=-7 |\n> | 3 | -5 | -7 | 0 | **0** | -4 | 2 | A | A:0-10=-10 |\n> | 4 | -10 | -7 | 0 | -5 | -4 | **2** | C | C:2-10=-8 |\n> | 5 | -10 | -7 | -8 | **-5** | -4 | -6 | A | A:-5-10=-15 |\n> | 6 | -15 | -7 | -8 | -10 | **-4** | -6 | B | B:-4-10=-14 |\n> | 7 | -15 | -14 | -8 | **-10** | -11 | -6 | A | A:-10-10=-20 |\n> | 8 | -20 | -14 | -8 | **-15** | -11 | -6 | A | A:-15-10=-25 |\n> | 9 | -25 | -14 | -8 | -20 | **-11** | -6 | B | B:-11-10=-21 |\n> | 10 | -25 | -21 | -8 | -20 | -18 | **-6** | C | C:-6-10=-16 |\n>\n> 分配序列：**A, B, A, C, A, B, A, A, B, C**，其中 A 出现 5 次、B 出现 3 次、C 出现 2 次，比例恰好为 5:3:2，且 A 的请求被打散分布。\n> - **A 错误：** 5 个 A 连续排列，这不是\"平滑\"的效果。\n> - **C 错误：** 虽然 A 出现 5 次，但序列不符合平滑加权轮询的标准推演结果。\n> - **D 错误：** 从最低权重开始分配，完全不符合算法逻辑。"
+                "analysis": "\n>\n> 平滑加权轮询的核心思想是将高权重服务器的请求打散分布，避免连续分配给同一台服务器。其算法每轮执行以下步骤：\n> 1. 每台服务器的 `current_weight += effective_weight`\n> 2. 选出 `current_weight` 最大的服务器处理当前请求\n> 3. 被选中的服务器 `current_weight -= total_weight`（此处 total_weight = 10）\n>\n> **逐步推演：**\n>\n> | 请求 | A(初始cw) | B(初始cw) | C(初始cw) | A(+5后) | B(+3后) | C(+2后) | 选中 | 选中后cw |\n> |------|----------|----------|----------|--------|--------|--------|------|---------|\n>\n> - **D 错误：** 从最低权重开始分配，完全不符合算法逻辑。"
               },
               {
                 "question": "某分布式缓存系统使用传统哈希取模方式分配数据：`server_index = hash(key) % N`。当服务器数量从 $N$ 台增加到 $N+1$ 台时，大约有多少比例的数据需要重新映射到不同的服务器？（  ）",
@@ -11582,10 +13748,50 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "节点 D"
+                  },
+                  {
+                    "key": "A",
+                    "text": "= $0$"
+                  },
+                  {
+                    "key": "B",
+                    "text": "= $2^{30} = 2 \\times 2^{29}$"
+                  },
+                  {
+                    "key": "C",
+                    "text": "= $2^{31} = 4 \\times 2^{29}$"
+                  },
+                  {
+                    "key": "D",
+                    "text": "= $3 \\times 2^{30} = 6 \\times 2^{29}$"
+                  },
+                  {
+                    "key": "A",
+                    "text": "在 hash=0 处，从 key 顺时针走需经过"
+                  },
+                  {
+                    "key": "D",
+                    "text": "再绕回"
+                  },
+                  {
+                    "key": "A",
+                    "text": "才能到达，不是最近节点。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "在 hash=$2 \\times 2^{29}$ 处，位于 key 的逆时针方向（已经经过的位置），不是顺时针方向的下一个节点。"
+                  },
+                  {
+                    "key": "C",
+                    "text": "在 hash=$4 \\times 2^{29}$ 处，同样位于 key 的逆时针方向。"
+                  },
+                  {
+                    "key": "D",
+                    "text": "在 hash=$6 \\times 2^{29}$ 处，是从 key 位置顺时针方向遇到的第一个节点，因此该数据路由到 D。"
                   }
                 ],
                 "answer": "D",
-                "analysis": "\n>\n> 首先将所有值换算为统一基准以便比较（以 $2^{29}$ 为单位）：\n> - A = $0$\n> - B = $2^{30} = 2 \\times 2^{29}$\n> - key = $5 \\times 2^{29}$\n> - C = $2^{31} = 4 \\times 2^{29}$\n> - D = $3 \\times 2^{30} = 6 \\times 2^{29}$\n> - 环最大值 $2^{32} = 8 \\times 2^{29}$\n>\n> 在哈希环上的顺时针顺序为：\n> ```\n> 0(A) → 2×2²⁹(B) → 4×2²⁹(C) → 5×2²⁹(key) → 6×2²⁹(D) → 8×2²⁹(回到A)\n> ```\n>\n> 从 key（$5 \\times 2^{29}$）位置沿顺时针方向走，遇到的第一个节点是 D（$6 \\times 2^{29}$）。\n>\n> - **A 错误：** A 在 hash=0 处，从 key 顺时针走需经过 D、再绕回 A 才能到达，不是最近节点。\n> - **B 错误：** B 在 hash=$2 \\times 2^{29}$ 处，位于 key 的逆时针方向（已经经过的位置），不是顺时针方向的下一个节点。\n> - **C 错误：** C 在 hash=$4 \\times 2^{29}$ 处，同样位于 key 的逆时针方向。\n> - **D 正确：** D 在 hash=$6 \\times 2^{29}$ 处，是从 key 位置顺时针方向遇到的第一个节点，因此该数据路由到 D。"
+                "analysis": "\n>\n> 首先将所有值换算为统一基准以便比较（以 $2^{29}$ 为单位）：\n> - key = $5 \\times 2^{29}$\n> - 环最大值 $2^{32} = 8 \\times 2^{29}$\n>\n> 在哈希环上的顺时针顺序为：\n> ```\n> 0(A) → 2×2²⁹(B) → 4×2²⁹(C) → 5×2²⁹(key) → 6×2²⁹(D) → 8×2²⁹(回到A)\n> ```\n>\n> 从 key（$5 \\times 2^{29}$）位置沿顺时针方向走，遇到的第一个节点是 D（$6 \\times 2^{29}$）。\n>"
               },
               {
                 "question": "关于一致性哈希中的**虚拟节点**，以下描述**错误**的是（  ）",
@@ -11676,7 +13882,7 @@ const ALL_COURSES_DATA = [
                     "text": "最短响应时间（Least Response Time）"
                   }
                 ],
-                "answer": "B",
+                "answer": "BD",
                 "analysis": "\n>\n> 动态负载均衡算法的特征是**实时采集服务器的运行状态**（如连接数、响应时间、CPU 使用率等）来做出分配决策。\n>\n> - **A 错误：** 轮询按固定顺序分配请求，不考虑任何服务器实时状态，属于**静态**算法。\n> - **B 正确：** 最少连接实时追踪每台服务器的当前活跃连接数，将请求分配给连接数最少的服务器，是典型的动态算法。\n> - **C 错误：** IP 哈希根据客户端 IP 计算固定映射，不感知服务器负载，属于**静态**算法。\n> - **D 正确：** 最短响应时间实时监测各服务器对请求的平均响应时间，将新请求分配给响应最快的服务器，属于动态算法。"
               },
               {
@@ -11699,7 +13905,7 @@ const ALL_COURSES_DATA = [
                     "text": "支持节点的动态扩缩容，无需全量数据重分布"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABCD",
                 "analysis": "\n> - **A 正确：** 一致性哈希的核心优势在于节点增减时，只影响哈希环上该节点顺时针前驱节点（或其自身）的数据。新增节点只接管前驱节点的一部分数据；删除节点时其数据只移交给顺时针下一个节点。影响范围约为 $1/N$。\n> - **B 正确：** 传统取模扩缩容时约 $N/(N+1)$ 的缓存同时失效，大量请求穿透到数据库，造成雪崩。一致性哈希仅约 $1/N$ 的缓存失效，远不足以引发雪崩。\n> - **C 正确：** 虚拟节点将每个物理节点在环上映射为多个点，使各物理节点\"管辖\"的环上区间更加分散均匀，从根本上解决了物理节点数少时的数据倾斜问题。\n> - **D 正确：** 一致性哈希天然支持动态扩缩容——新增节点在环上找到自己的位置并只接管相邻区间的数据，无需其他节点参与全量重分布。"
               },
               {
@@ -11720,10 +13926,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "三者都同时满足 CAP 定理中的一致性（C）、可用性（A）和分区容错性（P）"
+                  },
+                  {
+                    "key": "C",
+                    "text": "A、P。"
                   }
                 ],
-                "answer": "A",
-                "analysis": "\n> - **A 正确：** Zookeeper 使用 Zab（Zookeeper Atomic Broadcast）协议，属于 CP 模型。在 Leader 选举期间服务暂时不可用，但一旦可用，保证返回的数据是强一致的。Zookeeper 的 ZAB 协议确保所有写操作按全局顺序执行，读操作可以从 Leader 获取最新数据。\n> - **B 正确：** Consul 功能丰富，内置了多种健康检查方式（HTTP/TCP/Script/TTL）、KV 存储（可用于配置中心）、服务发现、以及多数据中心原生支持。Consul 基于 Raft 协议，属于 CP 模型。\n> - **C 正确：** Eureka 是 Netflix 开源的服务注册中心，采用 AP 模型（可用性 + 分区容错）。各 Eureka 节点之间通过 P2P 复制同步数据，在网络分区时可能出现短暂的数据不一致（不同节点返回不同的服务列表），但始终保持可用。\n> - **D 错误：** 根据 CAP 定理，在网络分区（P）不可避免的前提下，系统只能在一致性（C）和可用性（A）之间二选一。Zookeeper 和 Consul 选择 CP（牺牲可用性保证一致性），Eureka 选择 AP（牺牲强一致性保证可用性）。三者都不可能同时满足 C、A、P。"
+                "answer": "ABC",
+                "analysis": "\n> - **A 正确：** Zookeeper 使用 Zab（Zookeeper Atomic Broadcast）协议，属于 CP 模型。在 Leader 选举期间服务暂时不可用，但一旦可用，保证返回的数据是强一致的。Zookeeper 的 ZAB 协议确保所有写操作按全局顺序执行，读操作可以从 Leader 获取最新数据。\n> - **B 正确：** Consul 功能丰富，内置了多种健康检查方式（HTTP/TCP/Script/TTL）、KV 存储（可用于配置中心）、服务发现、以及多数据中心原生支持。Consul 基于 Raft 协议，属于 CP 模型。\n> - **C 正确：** Eureka 是 Netflix 开源的服务注册中心，采用 AP 模型（可用性 + 分区容错）。各 Eureka 节点之间通过 P2P 复制同步数据，在网络分区时可能出现短暂的数据不一致（不同节点返回不同的服务列表），但始终保持可用。"
               },
               {
                 "question": "在负载均衡器选型中，关于 LVS、Nginx 和 HAProxy 的适用场景，以下描述**正确**的有（  ）",
@@ -11745,15 +13955,43 @@ const ALL_COURSES_DATA = [
                     "text": "Nginx 完全可以替代 LVS 做内核级的四层数据包转发"
                   }
                 ],
-                "answer": "A",
+                "answer": "ABC",
                 "analysis": "> - **B 正确：** Nginx 作为七层负载均衡器，能够解析 HTTP 协议的各种字段，支持基于 URI、HTTP 方法、请求头、Cookie 等条件的灵活路由，广泛用于 Web 应用网关和反向代理。\n> - **C 正确：** HAProxy 在四层（TCP）代理场景下表现优异，其 TCP 吞吐量比 Nginx 高约 15%~20%，且提供更丰富的健康检查机制（TCP/HTTP/自定义脚本/外部代理检查等），常用于数据库代理和消息队列代理。\n> - **D 错误：** Nginx 虽然也支持四层代理（通过 `stream` 模块），但其工作于用户态，数据包需要经过完整的用户态协议栈处理，在内核级转发性能上远不及 LVS。在超大流量入口场景，仍然需要 LVS 作为第一层负载均衡，Nginx 作为第二层做七层路由。"
               },
               {
-                "question": "某分布式缓存集群有 4 台物理服务器，其在一致性哈希环上的哈希值如下：\n| 节点 | 哈希值 |\n|------|--------|\n| A | 5000 |\n| B | 12000 |\n| C | 22000 |\n| D | 30000 |\n（哈希环范围为 $0 \\sim 2^{32}-1$，即 $0 \\sim 4294967295$，首尾相连。）\n**(1)** 分别确定以下 4 个数据 key 应路由到哪个节点（沿顺时针方向找到最近的节点）：\n| Key | 哈希值 |\n|-----|--------|\n| k1 | 3000 |\n| k2 | 8000 |\n| k3 | 25000 |\n| k4 | 35000 |\n**(2)** 现在新增一台物理节点 E（哈希值为 18000），请确定上述 4 个 key 中哪些需要迁移，迁移到哪个节点。\n**(3)** 如果节点 B 发生故障下线，请确定原本路由到 B 的数据会迁移到哪个节点，影响的数据哈希范围是什么。\n**分析：**\n**(1) 原始路由计算：**\n哈希环上节点按顺时针排列为：A(5000) → B(12000) → C(22000) → D(30000) → (回到A)\n各节点的\"管辖范围\"（顺时针方向，从上一个节点之后到本节点）：",
+                "question": "某分布式缓存集群有 4 台物理服务器，其在一致性哈希环上的哈希值如下：\n| 节点 | 哈希值 |\n|------|--------|",
                 "options": [
                   {
                     "key": "A",
-                    "text": "管辖：$(30000, 4294967295] \\cup [0, 5000]$（即 D 之后绕回到 A）"
+                    "text": "| 5000 |"
+                  },
+                  {
+                    "key": "B",
+                    "text": "| 12000 |"
+                  },
+                  {
+                    "key": "C",
+                    "text": "| 22000 |"
+                  },
+                  {
+                    "key": "D",
+                    "text": "| 30000 |"
+                  },
+                  {
+                    "key": "B",
+                    "text": "发生故障下线，请确定原本路由到"
+                  },
+                  {
+                    "key": "B",
+                    "text": "的数据会迁移到哪个节点，影响的数据哈希范围是什么。"
+                  },
+                  {
+                    "key": "A",
+                    "text": "管辖：$(30000, 4294967295] \\cup [0, 5000]$（即"
+                  },
+                  {
+                    "key": "D",
+                    "text": "之后绕回到 A）"
                   },
                   {
                     "key": "B",
@@ -11768,6 +14006,22 @@ const ALL_COURSES_DATA = [
                     "text": "管辖：$(22000, 30000]$"
                   },
                   {
+                    "key": "A",
+                    "text": "的管辖范围内 | **A** |"
+                  },
+                  {
+                    "key": "B",
+                    "text": "的管辖范围内 | **B** |"
+                  },
+                  {
+                    "key": "D",
+                    "text": "的管辖范围内 | **D** |"
+                  },
+                  {
+                    "key": "A",
+                    "text": "的管辖范围 | **A** |"
+                  },
+                  {
                     "key": "B",
                     "text": "管辖：$(5000, 12000]$（**不变**）"
                   },
@@ -11780,12 +14034,28 @@ const ALL_COURSES_DATA = [
                     "text": "D 管辖：**不变**"
                   },
                   {
+                    "key": "C",
+                    "text": "迁移到 E——这些数据原来由"
+                  },
+                  {
+                    "key": "C",
+                    "text": "管辖，现在由新增的 E 管辖。迁移的数据量约占全部数据的 $(18000-12000)/2^{32} \\approx 0.14\\%$（在本例中哈希值范围很小，实际生产中哈希环范围更大，影响比例约为 $1/N = 1/5 = 20\\%$）。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "下线后的影响：**"
+                  },
+                  {
                     "key": "B",
                     "text": "下线后，环上顺时针排列变为：A(5000) → C(22000) → D(30000) → A（E 暂不考虑）"
                   },
                   {
                     "key": "B",
                     "text": "的原始管辖范围为 $(5000, 12000]$。B 下线后，该范围的数据沿顺时针方向找到的下一个节点是 **C(22000)**。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "的数据迁移到 C**"
                   }
                 ],
                 "answer": "A",
@@ -11807,8 +14077,20 @@ const ALL_COURSES_DATA = [
                     "text": "管辖：$20000 - 2000 = 18000$"
                   },
                   {
-                    "key": "D",
-                    "text": "选项D"
+                    "key": "A",
+                    "text": "承载了超过 99.95% 的数据，而"
+                  },
+                  {
+                    "key": "B",
+                    "text": "和"
+                  },
+                  {
+                    "key": "C",
+                    "text": "几乎空闲。这是因为"
+                  },
+                  {
+                    "key": "A",
+                    "text": "B、C 三个节点在 $2^{32}$ 的环上全部聚集在 $[1000, 20000]$ 这个极小的区间内，导致从 C(20000) 顺时针到 A(1000) 的巨大空白区域（约 $2^{32} - 19000$）全部归属 A。"
                   }
                 ],
                 "answer": "A",
@@ -12385,23 +14667,59 @@ const ALL_COURSES_DATA = [
                 "options": [
                   {
                     "key": "A",
-                    "text": "当 $K=1$ 时，该样本被分为 B 类"
+                    "text": "当 $K=1$ 时，该样本被分为"
                   },
                   {
                     "key": "B",
-                    "text": "当 $K=3$ 时，该样本被分为 A 类"
+                    "text": "类"
+                  },
+                  {
+                    "key": "B",
+                    "text": "当 $K=3$ 时，该样本被分为"
+                  },
+                  {
+                    "key": "A",
+                    "text": "类"
                   },
                   {
                     "key": "C",
-                    "text": "当 $K=5$ 时，该样本被分为 B 类，因为 B 类有 3 票、A 类有 2 票"
+                    "text": "当 $K=5$ 时，该样本被分为"
+                  },
+                  {
+                    "key": "B",
+                    "text": "类，因为"
+                  },
+                  {
+                    "key": "B",
+                    "text": "类有 3 票、A 类有 2 票"
                   },
                   {
                     "key": "D",
                     "text": "KNN 中的 $K$ 值越大，模型越容易过拟合"
+                  },
+                  {
+                    "key": "A",
+                    "text": "类而非"
+                  },
+                  {
+                    "key": "B",
+                    "text": "类。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "类而非"
+                  },
+                  {
+                    "key": "A",
+                    "text": "类。"
+                  },
+                  {
+                    "key": "B",
+                    "text": "类。"
                   }
                 ],
                 "answer": "C",
-                "analysis": "\n- **A错误**：$K=1$ 时只看最近的 1 个邻居，类别为 A，因此样本被分为 A 类而非 B 类。\n- **B错误**：$K=3$ 时看最近的 3 个邻居 $\\{A, B, B\\}$，B 类 2 票、A 类 1 票，样本被分为 B 类而非 A 类。\n- **C正确**：$K=5$ 时看全部 5 个邻居 $\\{A, B, B, A, B\\}$，B 类有 3 票、A 类有 2 票，多数投票结果为 B 类。\n- **D错误**：$K$ 值越**小**，模型越复杂、决策边界越不规则，越容易**过拟合**。$K$ 值越大，决策边界越平滑，越容易**欠拟合**。"
+                "analysis": "\n- **D错误**：$K$ 值越**小**，模型越复杂、决策边界越不规则，越容易**过拟合**。$K$ 值越大，决策边界越平滑，越容易**欠拟合**。"
               },
               {
                 "question": "朴素贝叶斯分类器基于\"条件独立性假设\"。给定一个二分类问题（$y \\in \\{0, 1\\}$），特征向量 $x = (x_1, x_2, x_3)$，以下说法**正确**的是：",
@@ -12535,7 +14853,7 @@ const ALL_COURSES_DATA = [
                   },
                   {
                     "key": "D",
-                    "text": "对于逻辑回归，同样可以使用正规方程直接求得解析解"
+                    "text": "选项D"
                   }
                 ],
                 "answer": "A",
@@ -12642,10 +14960,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "$\\frac{\\partial \\mathcal{L}}{\\partial W^{[1]}} = \\frac{\\partial \\mathcal{L}}{\\partial W^{[3]}} \\cdot \\frac{\\partial W^{[3]}}{\\partial W^{[1]}}$"
+                  },
+                  {
+                    "key": "A",
+                    "text": "虽然路径正确但展开方式不够精确（混淆了标量与矩阵求导的维度），且不是标准的反向传播表述。"
                   }
                 ],
                 "answer": "C",
-                "analysis": "\n- **A 错误**：虽然该选项列出了完整的链式传播链条，但形式上不规范。实际反向传播中，通常将 $\\delta^{[l]} = \\frac{\\partial \\mathcal{L}}{\\partial z^{[l]}}$ 定义为误差信号，然后利用递推关系 $\\delta^{[l]} = (W^{[l+1]})^T \\delta^{[l+1]} \\odot g'(z^{[l]})$ 逐层回传。选项 A 虽然路径正确但展开方式不够精确（混淆了标量与矩阵求导的维度），且不是标准的反向传播表述。\n- **B 错误**：$\\frac{\\partial \\mathcal{L}}{\\partial a^{[1]}}$ 本身就需要从后续层回传得到，不能直接计算。且 $\\frac{\\partial a^{[1]}}{\\partial W^{[1]}}$ 忽略了激活函数对 $z^{[1]}$ 的依赖关系。\n- **C 正确**：这是标准的反向传播公式。$\\frac{\\partial \\mathcal{L}}{\\partial W^{[1]}} = \\delta^{[1]} \\cdot (a^{[0]})^T$，其中误差信号 $\\delta^{[1]} = \\frac{\\partial \\mathcal{L}}{\\partial z^{[1]}}$ 需要从输出层的 $\\delta^{[3]}$ 开始，经过 $\\delta^{[3]} \\to \\delta^{[2]} \\to \\delta^{[1]}$ 逐层回传。$\\frac{\\partial z^{[1]}}{\\partial W^{[1]}}$ 则等于前一层的激活值 $a^{[0]}$（即输入 $x$）。\n- **D 错误**：各层权重之间不存在直接的偏导关系。$W^{[3]}$ 和 $W^{[1]}$ 是独立的参数矩阵，$\\frac{\\partial W^{[3]}}{\\partial W^{[1]}} = 0$。链式法则的传播路径是通过激活值和中间变量传递的，而非直接在权重间传播。"
+                "analysis": "\n- **B 错误**：$\\frac{\\partial \\mathcal{L}}{\\partial a^{[1]}}$ 本身就需要从后续层回传得到，不能直接计算。且 $\\frac{\\partial a^{[1]}}{\\partial W^{[1]}}$ 忽略了激活函数对 $z^{[1]}$ 的依赖关系。\n- **C 正确**：这是标准的反向传播公式。$\\frac{\\partial \\mathcal{L}}{\\partial W^{[1]}} = \\delta^{[1]} \\cdot (a^{[0]})^T$，其中误差信号 $\\delta^{[1]} = \\frac{\\partial \\mathcal{L}}{\\partial z^{[1]}}$ 需要从输出层的 $\\delta^{[3]}$ 开始，经过 $\\delta^{[3]} \\to \\delta^{[2]} \\to \\delta^{[1]}$ 逐层回传。$\\frac{\\partial z^{[1]}}{\\partial W^{[1]}}$ 则等于前一层的激活值 $a^{[0]}$（即输入 $x$）。\n- **D 错误**：各层权重之间不存在直接的偏导关系。$W^{[3]}$ 和 $W^{[1]}$ 是独立的参数矩阵，$\\frac{\\partial W^{[3]}}{\\partial W^{[1]}} = 0$。链式法则的传播路径是通过激活值和中间变量传递的，而非直接在权重间传播。"
               },
               {
                 "question": "关于 Adam 优化器，以下说法**正确**的是：",
@@ -12927,10 +15249,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "残差连接会增加网络的参数量，因为跳跃连接本身引入了额外的权重矩阵"
+                  },
+                  {
+                    "key": "A",
+                    "text": "B、C 三个选项更加明确正确，故不选 E。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "\n- **A 正确**：残差块的核心公式为 $y = F(x, \\{W_i\\}) + x$，其中 $F(x)$ 是残差映射（通常包含两层或三层卷积），$x$ 是跳跃连接传递的输入，二者逐元素相加。\n- **B 正确**：在反向传播时，由于 $y = F(x) + x$，梯度 $\\frac{\\partial L}{\\partial x} = \\frac{\\partial L}{\\partial y} \\cdot (\\frac{\\partial F}{\\partial x} + 1)$，其中 $+1$ 项保证了即使 $\\frac{\\partial F}{\\partial x}$ 很小，梯度也不会消失，从而缓解梯度消失问题。\n- **C 正确**：当 $F(x)$ 和 $x$ 的通道数或空间尺寸不一致时（如经过 stride=2 的卷积后），需要使用 $1 \\times 1$ 卷积（投影矩阵 $W_s$）对 $x$ 进行维度调整，即 $y = F(x) + W_s x$。\n- **D 错误**：跳跃连接本身是恒等映射（identity mapping），**不引入任何额外参数**。只有在维度不匹配时才在跳跃路径上使用 $1 \\times 1$ 卷积，但这是为了维度对齐而非残差连接本身的必要组成。\n- **E 错误（表述不精确）**：虽然残差连接确实让网络学习残差映射 $F(x) = H(x) - x$，其中 $H(x)$ 是期望的底层映射，但选项的表述\"输入与输出之间的残差映射\"容易与\"输出减去输入\"混淆。更准确的说法是网络学习的是\"目标映射与恒等映射之间的残差\"。由于 A、B、C 三个选项更加明确正确，故不选 E。"
+                "analysis": "\n- **A 正确**：残差块的核心公式为 $y = F(x, \\{W_i\\}) + x$，其中 $F(x)$ 是残差映射（通常包含两层或三层卷积），$x$ 是跳跃连接传递的输入，二者逐元素相加。\n- **B 正确**：在反向传播时，由于 $y = F(x) + x$，梯度 $\\frac{\\partial L}{\\partial x} = \\frac{\\partial L}{\\partial y} \\cdot (\\frac{\\partial F}{\\partial x} + 1)$，其中 $+1$ 项保证了即使 $\\frac{\\partial F}{\\partial x}$ 很小，梯度也不会消失，从而缓解梯度消失问题。\n- **C 正确**：当 $F(x)$ 和 $x$ 的通道数或空间尺寸不一致时（如经过 stride=2 的卷积后），需要使用 $1 \\times 1$ 卷积（投影矩阵 $W_s$）对 $x$ 进行维度调整，即 $y = F(x) + W_s x$。\n- **D 错误**：跳跃连接本身是恒等映射（identity mapping），**不引入任何额外参数**。只有在维度不匹配时才在跳跃路径上使用 $1 \\times 1$ 卷积，但这是为了维度对齐而非残差连接本身的必要组成。"
               },
               {
                 "question": "RNN与BPTT\n关于 RNN 及其训练算法 BPTT（Back-Propagation Through Time），以下说法**正确**的有（选2个）：",
@@ -13097,10 +15423,14 @@ const ALL_COURSES_DATA = [
                   {
                     "key": "D",
                     "text": "残差连接要求子层输出的维度可以与输入不同"
+                  },
+                  {
+                    "key": "B",
+                    "text": "描述的顺序不正确。"
                   }
                 ],
                 "answer": "A",
-                "analysis": "\n- **A 正确**：Pre-LN 结构为 $\\text{output} = x + \\text{SubLayer}(\\text{LayerNorm}(x))$，即先对输入做归一化，再送入子层计算，最后与原始输入做残差连接。Pre-LN 结构训练更加稳定，是目前大多数 Transformer 模型（如 GPT 系列）采用的方案。\n- **B 错误**：正确的 Post-LN 结构为 $\\text{output} = \\text{LayerNorm}(x + \\text{SubLayer}(x))$，即先做子层计算，再做残差连接，最后做 Layer Normalization。选项 B 描述的顺序不正确。\n- **C 错误**：原始 Transformer 论文 \"Attention Is All You Need\" 使用的是 Post-LN 结构，即 $\\text{output} = \\text{LayerNorm}(x + \\text{SubLayer}(x))$，而非 Pre-LN。Pre-LN 是后续研究中提出的改进方案。\n- **D 错误**：残差连接要求子层输出的维度必须与输入完全相同，因为残差连接是做逐元素相加操作 $x + \\text{SubLayer}(x)$，维度不一致无法相加。"
+                "analysis": "\n- **A 正确**：Pre-LN 结构为 $\\text{output} = x + \\text{SubLayer}(\\text{LayerNorm}(x))$，即先对输入做归一化，再送入子层计算，最后与原始输入做残差连接。Pre-LN 结构训练更加稳定，是目前大多数 Transformer 模型（如 GPT 系列）采用的方案。\n- **C 错误**：原始 Transformer 论文 \"Attention Is All You Need\" 使用的是 Post-LN 结构，即 $\\text{output} = \\text{LayerNorm}(x + \\text{SubLayer}(x))$，而非 Pre-LN。Pre-LN 是后续研究中提出的改进方案。\n- **D 错误**：残差连接要求子层输出的维度必须与输入完全相同，因为残差连接是做逐元素相加操作 $x + \\text{SubLayer}(x)$，维度不一致无法相加。"
               },
               {
                 "question": "关于 BERT 和 GPT 的架构区别，以下说法**正确**的是：",
@@ -13522,50 +15852,27 @@ const ALL_COURSES_DATA = [
                 "analysis": "- **解析**：使用预编译参数化查询能确保 SQL 引擎将用户输入的数据严格视为“字面参数值”，而永远不会将其解释为 SQL 语句命令执行，从而彻底杜绝了 SQL 注入攻击。"
               },
               {
-                "question": "如果 A 想要在信件中附带自己的数字签名，以向 B 证明“这封信确实是由 A 发送的，没有被冒充”，A 应该使用什么密钥生成签名：",
+                "question": "防火墙（Firewall）工作在 OSI 七层模型中的底层，其主要的核心防御功能是：",
                 "options": [
                   {
                     "key": "A",
-                    "text": "A 的私钥"
+                    "text": "查杀进入本地电脑的病毒木马文件"
                   },
                   {
                     "key": "B",
-                    "text": "A 的公钥"
+                    "text": "基于特定的安全规则对进出网络的数据包进行过滤和流量管控"
                   },
                   {
                     "key": "C",
-                    "text": "B 的私钥"
+                    "text": "解密所有的 HTTPS 密文流量"
                   },
                   {
                     "key": "D",
-                    "text": "B 的公钥"
+                    "text": "修复操作系统的安全漏洞"
                   }
                 ],
                 "answer": "A",
-                "analysis": "- **解析**：数字签名用于身份防抵赖与防篡改。A 用自己的私钥对数据的哈希值进行加密生成数字签名。B 收到后用 A 的公钥解密，若能成功解开并与数据哈希吻合，便能确凿证实信件出自 A 且未被篡改。"
-              },
-              {
-                "question": "在 DDoS（分布式拒绝服务）攻击中，攻击者利用 TCP 握手协议漏洞向服务器发送海量 SYN 包却不做出最后确认，导致服务器连接池耗尽。这一攻击方式称为：",
-                "options": [
-                  {
-                    "key": "A",
-                    "text": "SQL Flood"
-                  },
-                  {
-                    "key": "B",
-                    "text": "SYN Flood 攻击"
-                  },
-                  {
-                    "key": "C",
-                    "text": "UDP 反弹攻击"
-                  },
-                  {
-                    "key": "D",
-                    "text": "重放攻击"
-                  }
-                ],
-                "answer": "A",
-                "analysis": "- **解析**：SYN Flood 攻击利用了 TCP 建立连接时第二次握手后服务端分配资源并进入半连接（SYN_RCVD）状态的特征。如果大量发送 SYN 且不对 SYN-ACK 回复 ACK，会强行占满服务器的半连接队列资源，导致合法请求无法接入。"
+                "analysis": "- **解析**：防火墙工作在网络边界，根据网络管理员制定的安全访问策略（如阻断特定 IP、端口号、协议），对进出网卡的数据包进行安全审查和状态过滤。防火墙不负责查杀病毒（这是杀毒软件的功能）。"
               }
             ],
             "mindmapHtml": ""
@@ -13623,27 +15930,27 @@ const ALL_COURSES_DATA = [
                 "analysis": "- **解析**：XSS 是跨站脚本攻击，攻击的核心是利用浏览器对信任网站的自动脚本执行。防御的核心是对输入和显示内容进行实体过滤/转义，并为敏感 Cookie 加上 HttpOnly 属性以防被 JavaScript 脚本窃取。"
               },
               {
-                "question": "在密码学上，目前公认已被攻破、不再具备抗碰撞安全性、被禁止在机密系统里使用的 Hash 算法是：",
+                "question": "在 DDoS（分布式拒绝服务）攻击中，攻击者利用 TCP 握手协议漏洞向服务器发送海量 SYN 包却不做出最后确认，导致服务器连接池耗尽。这一攻击方式称为：",
                 "options": [
                   {
                     "key": "A",
-                    "text": "SHA-256"
+                    "text": "SQL Flood"
                   },
                   {
                     "key": "B",
-                    "text": "MD5 与 SHA-1"
+                    "text": "SYN Flood 攻击"
                   },
                   {
                     "key": "C",
-                    "text": "SHA-512"
+                    "text": "UDP 反弹攻击"
                   },
                   {
                     "key": "D",
-                    "text": "SM3"
+                    "text": "重放攻击"
                   }
                 ],
                 "answer": "A",
-                "analysis": "- **解析**：MD5 和 SHA-1 由于算法设计缺陷，可以通过密码学碰撞技术在大规模算力下快速构造出具有相同哈希的不同文件，因此目前已被国际安全规范禁止使用，改由 SHA-2 家族代替。"
+                "analysis": "- **解析**：SYN Flood 攻击利用了 TCP 建立连接时第二次握手后服务端分配资源并进入半连接（SYN_RCVD）状态的特征。如果大量发送 SYN 且不对 SYN-ACK 回复 ACK，会强行占满服务器的半连接队列资源，导致合法请求无法接入。"
               }
             ],
             "mindmapHtml": ""
@@ -13678,50 +15985,27 @@ const ALL_COURSES_DATA = [
                 "analysis": "- **解析**：哈希函数是单向不可逆的，并且输出是固定长度的。尽管理论上存在不同输入产生相同哈希的“碰撞”，但在密码学安全的哈希算法（如 SHA-256）中，人工寻找到碰撞在计算上是不可行的。"
               },
               {
-                "question": "在非对称加密中，如果 A 要给 B 发送一封机密信件，为了防止信件内容在传输中被他人窃听，A 应该使用什么密钥对信件加密：",
+                "question": "在密码学上，目前公认已被攻破、不再具备抗碰撞安全性、被禁止在机密系统里使用的 Hash 算法是：",
                 "options": [
                   {
                     "key": "A",
-                    "text": "A 的私钥"
+                    "text": "SHA-256"
                   },
                   {
                     "key": "B",
-                    "text": "A 的公钥"
+                    "text": "MD5 与 SHA-1"
                   },
                   {
                     "key": "C",
-                    "text": "B 的私钥"
+                    "text": "SHA-512"
                   },
                   {
                     "key": "D",
-                    "text": "B 的公钥"
+                    "text": "SM3"
                   }
                 ],
                 "answer": "A",
-                "analysis": "- **解析**：为了保证机密性（Confidentiality），数据必须用接收方 B 的公钥进行加密。这样，只有拥有对应私钥的 B 才能对其解密。若用 A 的私钥加密，则全网可用 A 的公钥解密，无法保密。"
-              },
-              {
-                "question": "防火墙（Firewall）工作在 OSI 七层模型中的底层，其主要的核心防御功能是：",
-                "options": [
-                  {
-                    "key": "A",
-                    "text": "查杀进入本地电脑的病毒木马文件"
-                  },
-                  {
-                    "key": "B",
-                    "text": "基于特定的安全规则对进出网络的数据包进行过滤和流量管控"
-                  },
-                  {
-                    "key": "C",
-                    "text": "解密所有的 HTTPS 密文流量"
-                  },
-                  {
-                    "key": "D",
-                    "text": "修复操作系统的安全漏洞"
-                  }
-                ],
-                "answer": "A",
-                "analysis": "- **解析**：防火墙工作在网络边界，根据网络管理员制定的安全访问策略（如阻断特定 IP、端口号、协议），对进出网卡的数据包进行安全审查和状态过滤。防火墙不负责查杀病毒（这是杀毒软件的功能）。"
+                "analysis": "- **解析**：MD5 和 SHA-1 由于算法设计缺陷，可以通过密码学碰撞技术在大规模算力下快速构造出具有相同哈希的不同文件，因此目前已被国际安全规范禁止使用，改由 SHA-2 家族代替。"
               }
             ],
             "mindmapHtml": ""
