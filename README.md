@@ -168,3 +168,39 @@ lingxi/
 
 3. 上传代码并点击在线运行，控制台报错或无输出？
    * 请检查 app.py 顶部的 JDOODLE_CLIENT_ID 和 JDOODLE_CLIENT_SECRET 是否已配置。如果配置正确，请登录 JDoodle 查看您的每日编译调用额度是否已经用尽。
+
+---
+
+## 开源项目声明
+
+本项目使用了以下开源软件和第三方服务：
+
+**后端依赖：**
+* Flask (BSD-3-Clause) — Web应用框架
+* flask-cors (MIT) — 跨域资源共享
+* websocket-client (Apache-2.0) — WebSocket客户端
+* spark-ai-python (Apache-2.0) — 科大讯飞星火大模型SDK
+* pydantic (MIT) — 数据验证
+* pypdf (BSD-3-Clause) — PDF文本提取
+* python-docx (MIT) — Word文档提取
+
+**前端依赖（CDN加载）：**
+* MathJax 3.2.2 (Apache-2.0) — LaTeX数学公式渲染
+* marked.js 4.3.0 (MIT) — Markdown解析渲染
+* Google Fonts Inter / Source Serif 4 (SIL OFL 1.1) — 字体资源
+
+**第三方AI服务：**
+* 科大讯飞星火大模型 4.0 Ultra — 核心对话AI引擎
+* 科大讯飞星火图像理解 — 多模态图片识别
+* 科大讯飞MaaS Hy-MT2 — AI解题群智能体
+* 科大讯飞MaaS Qwen3 — AI解题群智能体
+* JDoodle — 代码在线编译沙箱
+
+完整许可证文本详见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
+
+---
+
+## AI辅助编程工具说明
+
+本项目开发过程中使用的AI辅助工具均选用科大讯飞相关产品：
+* **科大讯飞星火大模型** — 代码生成辅助、文档编写辅助、代码审查

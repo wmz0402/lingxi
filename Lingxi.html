@@ -2137,6 +2137,15 @@
       animation-delay: 0.45s;
     }
 
+    .typing-dot {
+      animation: typingDotBlink 1.4s infinite;
+      opacity: 0.2;
+    }
+    @keyframes typingDotBlink {
+      0%, 80%, 100% { opacity: 0.2; }
+      40% { opacity: 1; }
+    }
+
     /* Border Beam for AI thinking bubbles */
     #thinking .msg-bubble,
     #t1 .msg-bubble,
@@ -6995,114 +7004,41 @@
 
   <!-- ==================== PAGE 3: 个人信息配置 ==================== -->
   <div id="profileSetupPage" class="page hidden">
-    <div
-      style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: linear-gradient(135deg, #e0e7ff, #ede9fe); padding: 20px;">
-      <div
-        style="background: rgba(255,255,255,0.9); backdrop-filter: blur(20px); border-radius: 24px; padding: 40px 36px; max-width: 480px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.5);">
-        <div style="text-align: center; margin-bottom: 28px;">
-          <div style="font-size: 32px; font-weight: 700; color: #1e1b4b;">🎉 欢迎加入灵析</div>
-          <div style="font-size: 14px; color: #64748b; margin-top: 6px;">请完善个人信息，让智能体更好地了解你</div>
+    <div style="display:flex; align-items:center; justify-content:center; width:100%; height:100%; background:linear-gradient(135deg,#e0e7ff,#ede9fe); padding:20px;">
+      <div style="background:rgba(255,255,255,0.95); backdrop-filter:blur(20px); border-radius:24px; max-width:560px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.08); border:1px solid rgba(255,255,255,0.5); display:flex; flex-direction:column; height:80vh; max-height:700px;">
+        <!-- Header -->
+        <div style="padding:20px 24px; border-bottom:1px solid #f1f5f9; text-align:center;">
+          <div style="font-size:22px; font-weight:700; color:#1e1b4b;">&#x1F916; AI画像构建</div>
+          <div style="font-size:13px; color:#64748b; margin-top:4px;">和AI聊聊天，让我更好地了解你</div>
         </div>
-        <form id="profileSetupForm" onsubmit="submitProfileSetup(event)">
-          <div style="margin-bottom: 20px;">
-            <label
-              style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">你的年级</label>
-            <select id="setupGrade"
-              style="width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; background: #fff; outline: none; transition: border-color 0.2s;">
-              <option value="">请选择年级（可选）</option>
-              <option value="大一">大一</option>
-              <option value="大二">大二</option>
-              <option value="大三">大三</option>
-              <option value="大四">大四</option>
-              <option value="研究生">研究生</option>
-              <option value="其他">其他</option>
-            </select>
-          </div>
-          <div style="margin-bottom: 20px;">
-            <label
-              style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">你的专业</label>
-            <input type="text" id="setupMajor" placeholder="例如：计算机科学与技术（可选）"
-              style="width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; background: #fff; outline: none; transition: border-color 0.2s;">
-          </div>
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 20px;">
-            <div>
-              <label
-                style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">QQ号</label>
-              <input type="text" id="setupQQ" placeholder="可选填"
-                style="width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; background: #fff; outline: none;">
-            </div>
-            <div>
-              <label
-                style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">生日</label>
-              <input type="date" id="setupBirthday"
-                style="width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; background: #fff; outline: none;">
-            </div>
-          </div>
-          <div style="margin-bottom: 20px;">
-            <label
-              style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">个性签名（可留空，后期可自行修改）</label>
-            <input type="text" id="setupSignature" placeholder="写一句炫酷的个性签名，展示独特的自己..."
-              style="width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; background: #fff; outline: none;">
-          </div>
-          <div style="margin-bottom: 20px;">
-            <label
-              style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">个人介绍（系统根据注册信息自动生成，可自行修改）</label>
-            <textarea id="setupIntro" placeholder="说说您的专业背景、学习兴趣等..."
-              style="width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; background: #fff; outline: none; resize: none; height: 60px;"></textarea>
-          </div>
-          <div style="margin-bottom: 24px;">
-            <label
-              style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;">兴趣爱好（可多选）</label>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              <label
-                style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: all 0.2s;"
-                onclick="this.style.background=this.querySelector('input').checked?'#c7d2fe':'#f1f5f9'">
-                <input type="checkbox" value="编程" style="accent-color: #7c3aed;"> 编程
-              </label>
-              <label
-                style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: all 0.2s;"
-                onclick="this.style.background=this.querySelector('input').checked?'#c7d2fe':'#f1f5f9'">
-                <input type="checkbox" value="数学" style="accent-color: #7c3aed;"> 数学
-              </label>
-              <label
-                style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: all 0.2s;"
-                onclick="this.style.background=this.querySelector('input').checked?'#c7d2fe':'#f1f5f9'">
-                <input type="checkbox" value="英语" style="accent-color: #7c3aed;"> 英语
-              </label>
-              <label
-                style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: all 0.2s;"
-                onclick="this.style.background=this.querySelector('input').checked?'#c7d2fe':'#f1f5f9'">
-                <input type="checkbox" value="物理" style="accent-color: #7c3aed;"> 物理
-              </label>
-              <label
-                style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: all 0.2s;"
-                onclick="this.style.background=this.querySelector('input').checked?'#c7d2fe':'#f1f5f9'">
-                <input type="checkbox" value="文学" style="accent-color: #7c3aed;"> 文学
-              </label>
-              <label
-                style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: all 0.2s;"
-                onclick="this.style.background=this.querySelector('input').checked?'#c7d2fe':'#f1f5f9'">
-                <input type="checkbox" value="设计" style="accent-color: #7c3aed;"> 设计
-              </label>
-              <label
-                style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: all 0.2s;"
-                onclick="this.style.background=this.querySelector('input').checked?'#c7d2fe':'#f1f5f9'">
-                <input type="checkbox" value="音乐" style="accent-color: #7c3aed;"> 音乐
-              </label>
-              <label
-                style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; transition: all 0.2s;"
-                onclick="this.style.background=this.querySelector('input').checked?'#c7d2fe':'#f1f5f9'">
-                <input type="checkbox" value="运动" style="accent-color: #7c3aed;"> 运动
-              </label>
-            </div>
-          </div>
-          <button type="submit"
-            style="width: 100%; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 600; color: #fff; background: linear-gradient(135deg, #7c3aed, #8b5cf6); border: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
-            onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(124,58,237,0.2)'"
+
+        <!-- Chat area -->
+        <div id="profileChatArea" style="flex:1; overflow-y:auto; padding:20px 24px; display:flex; flex-direction:column; gap:12px;">
+          <!-- Messages will be added here dynamically -->
+        </div>
+
+        <!-- Input area -->
+        <div style="padding:16px 24px; border-top:1px solid #f1f5f9; display:flex; gap:10px;">
+          <input type="text" id="profileChatInput" placeholder="在这里回复..."
+            style="flex:1; padding:10px 16px; border:1.5px solid #e2e8f0; border-radius:12px; font-size:14px; outline:none; transition:border-color 0.2s;"
+            onkeypress="if(event.key==='Enter')sendProfileChat()"
+            onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">
+          <button onclick="sendProfileChat()"
+            style="padding:10px 20px; border-radius:12px; border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s;"
+            onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(99,102,241,0.3)'"
             onmouseout="this.style.transform=''; this.style.boxShadow='none'">
-            开始学习 🚀
+            发送
           </button>
-        </form>
+        </div>
+
+        <!-- Skip button -->
+        <div style="padding:0 24px 16px; text-align:center;">
+          <button onclick="skipProfileDialog()"
+            style="background:none; border:none; color:#94a3b8; font-size:13px; cursor:pointer; text-decoration:underline;"
+            onmouseover="this.style.color='#6366f1'" onmouseout="this.style.color='#94a3b8'">
+            跳过，稍后再完善
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -8830,82 +8766,253 @@ function showProfileSetup() {
     document.getElementById('authPage').classList.add('hidden');
     document.getElementById('loadingPage').classList.add('hidden');
     document.getElementById('mainPage').classList.add('hidden');
-    
-    document.getElementById('setupSignature').value = '';
-    document.getElementById('setupIntro').value = '';
-    
+
     document.getElementById('profileSetupPage').classList.remove('hidden');
+    initProfileDialog();
 }
 
-// 提交配置表单
-function submitProfileSetup(e) {
-    e.preventDefault();
+// Profile dialog state
+let _profileDialogState = {
+  step: 0,
+  conversation: [],
+  collected: {}
+};
 
-    const grade = document.getElementById('setupGrade').value;
-    const major = document.getElementById('setupMajor').value.trim();
-    const qq = document.getElementById('setupQQ').value.trim();
-    const birthday = document.getElementById('setupBirthday').value;
-    const signature = document.getElementById('setupSignature').value.trim();
-    
-    let autoIntro = document.getElementById('setupIntro').value.trim();
-    if (!autoIntro && (grade || major)) {
-        autoIntro = (grade ? grade : '') + (grade && major ? ' · ' : '') + (major ? major : '');
+// Profile dialog conversation flow
+const PROFILE_QUESTIONS = [
+  {
+    question: "你好呀！欢迎来到灵析 \uD83C\uDF89\n\n为了给你提供更好的学习体验，我想先了解一下你。\n\n你现在是大几呢？（大一/大二/大三/大四/研究生）",
+    extract: function(text) {
+      const grades = ['大一', '大二', '大三', '大四', '研一', '研二', '研三', '研究生'];
+      for (const g of grades) {
+        if (text.includes(g)) {
+          return { grade: g.includes('研') ? '研究生' : g };
+        }
+      }
+      const numMatch = text.match(/(\d)\s*[年级]/);
+      if (numMatch) return { grade: '大' + numMatch[1] };
+      if (text.match(/研[一二三究]/)) return { grade: '研究生' };
+      return null;
+    },
+    field: 'grade'
+  },
+  {
+    question: "好的！你是学什么专业的呢？",
+    extract: function(text) {
+      let major = text.replace(/[我学的专业是我是]/g, '').replace(/[。，,.]/g, '').trim();
+      if (major.length > 0 && major.length <= 30) {
+        return { major: major };
+      }
+      if (major.length > 30) {
+        return { major: major.substring(0, 30) };
+      }
+      return null;
+    },
+    field: 'major'
+  },
+  {
+    question: "了解！那你平时对哪些方面比较感兴趣呢？比如编程、数学、英语、物理、文学、设计、音乐、运动等等，可以多选哦～",
+    extract: function(text) {
+      const interestMap = ['编程', '数学', '英语', '物理', '文学', '设计', '音乐', '运动', '历史', '经济', '化学', '生物', '哲学', '心理'];
+      const found = interestMap.filter(i => text.includes(i));
+      if (text.match(/代码|程序|开发|编程/)) found.push('编程');
+      if (text.match(/高数|微积分|线性代数|数学/)) found.push('数学');
+      if (text.match(/英语|外语|英文/)) found.push('英语');
+      if (text.match(/画画|绘画|设计|UI/)) found.push('设计');
+      if (text.match(/跑步|篮球|足球|游泳|健身|运动|体育/)) found.push('运动');
+      const unique = [...new Set(found)];
+      if (unique.length > 0) return { interests: unique };
+      return { interests: [text.substring(0, 20)] };
+    },
+    field: 'interests'
+  },
+  {
+    question: "很棒！那你目前最想学什么，或者有什么学习目标吗？",
+    extract: function(text) {
+      return { learning_goal: text.trim() || '暂未设定' };
+    },
+    field: 'learning_goal'
+  },
+  {
+    question: "最后一个问题！你一般什么时间段学习比较多呢？（早上/下午/晚上/随时都可以）",
+    extract: function(text) {
+      if (text.match(/早上|早晨|上午|早/)) return { study_time: '早上' };
+      if (text.match(/下午|午后/)) return { study_time: '下午' };
+      if (text.match(/晚上|晚上|深夜|夜间/)) return { study_time: '晚上' };
+      return { study_time: '随时' };
+    },
+    field: 'study_time'
+  }
+];
+
+function addProfileMessage(text, isUser) {
+  const chatArea = document.getElementById('profileChatArea');
+  if (!chatArea) return;
+
+  const msgDiv = document.createElement('div');
+  msgDiv.style.cssText = 'display:flex; ' + (isUser ? 'justify-content:flex-end' : 'justify-content:flex-start') + '; animation:fadeInUp 0.3s ease-out;';
+
+  const bubble = document.createElement('div');
+  bubble.style.cssText = isUser
+    ? 'max-width:80%; padding:10px 16px; border-radius:16px 16px 4px 16px; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:14px; line-height:1.6; white-space:pre-wrap;'
+    : 'max-width:80%; padding:10px 16px; border-radius:16px 16px 16px 4px; background:#f1f5f9; color:#1e1b4b; font-size:14px; line-height:1.6; white-space:pre-wrap;';
+  bubble.textContent = text;
+
+  msgDiv.appendChild(bubble);
+  chatArea.appendChild(msgDiv);
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function showProfileTyping() {
+  const chatArea = document.getElementById('profileChatArea');
+  if (!chatArea) return;
+
+  const typingDiv = document.createElement('div');
+  typingDiv.id = 'profileTyping';
+  typingDiv.style.cssText = 'display:flex; justify-content:flex-start;';
+  typingDiv.innerHTML = '<div style=”padding:10px 16px; border-radius:16px 16px 16px 4px; background:#f1f5f9; color:#94a3b8; font-size:14px;”><span class=”typing-dot”>●</span><span class=”typing-dot” style=”animation-delay:0.2s”>●</span><span class=”typing-dot” style=”animation-delay:0.4s”>●</span></div>';
+  chatArea.appendChild(typingDiv);
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function removeProfileTyping() {
+  const typing = document.getElementById('profileTyping');
+  if (typing) typing.remove();
+}
+
+function sendProfileChat() {
+  const input = document.getElementById('profileChatInput');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  addProfileMessage(text, true);
+
+  const state = _profileDialogState;
+  const currentQ = PROFILE_QUESTIONS[state.step];
+
+  if (currentQ) {
+    const extracted = currentQ.extract(text);
+    if (extracted) {
+      Object.assign(state.collected, extracted);
+    }
+    state.conversation.push({ role: 'user', content: text });
+  }
+
+  state.step++;
+
+  if (state.step < PROFILE_QUESTIONS.length) {
+    showProfileTyping();
+    setTimeout(function() {
+      removeProfileTyping();
+      var nextQ = PROFILE_QUESTIONS[state.step];
+      addProfileMessage(nextQ.question, false);
+      state.conversation.push({ role: 'assistant', content: nextQ.question });
+    }, 600 + Math.random() * 400);
+  } else {
+    showProfileTyping();
+    setTimeout(function() {
+      removeProfileTyping();
+      finishProfileDialog();
+    }, 800);
+  }
+}
+
+function finishProfileDialog() {
+  const collected = _profileDialogState.collected;
+
+  let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+  if (users[currentUserEmail]) {
+    const grade = collected.grade || '';
+    const major = collected.major || '';
+    const interests = collected.interests || [];
+    const learningGoal = collected.learning_goal || '';
+    const studyTime = collected.study_time || '随时';
+
+    const autoIntro = (grade || '') + (grade && major ? ' · ' : '') + (major || '');
+
+    users[currentUserEmail].profile = {
+      grade: grade,
+      major: major,
+      qq: '',
+      birthday: '',
+      signature: '',
+      intro: autoIntro,
+      hobbies: interests,
+      learning_goal: learningGoal,
+      study_time: studyTime
+    };
+
+    if (users[currentUserEmail].userProfileDimensions) {
+      if (!users[currentUserEmail].userProfileDimensions.interest) {
+        users[currentUserEmail].userProfileDimensions.interest = { score: 0, tags: [], seedTags: [], trend: [] };
+      }
+      users[currentUserEmail].userProfileDimensions.interest.seedTags = interests;
+      users[currentUserEmail].userProfileDimensions.interest.tags = interests.slice();
+      if (userProfileDimensions && userProfileDimensions.interest) {
+        userProfileDimensions.interest.seedTags = interests;
+        userProfileDimensions.interest.tags = interests.slice();
+      }
     }
 
-    const hobbyCheckboxes = document.querySelectorAll('#profileSetupPage input[type="checkbox"]:checked');
-    const hobbies = Array.from(hobbyCheckboxes).map(cb => cb.value);
+    localStorage.setItem('lingxi_users', JSON.stringify(users));
 
-    let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
-    if (users[currentUserEmail]) {
-        users[currentUserEmail].profile = {
-            grade: grade,
-            major: major,
-            qq: qq,
-            birthday: birthday,
-            signature: signature,
-            intro: autoIntro,
-            hobbies: hobbies
-        };
-        // 兴趣种子写入画像
-        if (users[currentUserEmail].userProfileDimensions) {
-            if (!users[currentUserEmail].userProfileDimensions.interest) {
-                users[currentUserEmail].userProfileDimensions.interest = { score: 0, tags: [], seedTags: [], trend: [] };
-            }
-            users[currentUserEmail].userProfileDimensions.interest.seedTags = hobbies;
-            users[currentUserEmail].userProfileDimensions.interest.tags = hobbies.slice();
-            // 同步更新内存中的 userProfileDimensions
-            if (userProfileDimensions && userProfileDimensions.interest) {
-                userProfileDimensions.interest.seedTags = hobbies;
-                userProfileDimensions.interest.tags = hobbies.slice();
-            }
+    // Also call the backend to extract profile via AI (async, non-blocking)
+    const conversationText = _profileDialogState.conversation.map(function(m) { return m.role + ': ' + m.content; }).join('\n');
+    fetch('/api/extract_profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ conversation: conversationText })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data.success && data.profile) {
+        var users2 = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+        if (users2[currentUserEmail] && users2[currentUserEmail].profile) {
+          var p = users2[currentUserEmail].profile;
+          if (data.profile.grade && !p.grade) p.grade = data.profile.grade;
+          if (data.profile.major && !p.major) p.major = data.profile.major;
+          if (data.profile.interests && p.hobbies.length === 0) p.hobbies = data.profile.interests;
+          if (data.profile.learning_goal && !p.learning_goal) p.learning_goal = data.profile.learning_goal;
+          if (data.profile.study_time_preference && !p.study_time) p.study_time = data.profile.study_time_preference;
+          localStorage.setItem('lingxi_users', JSON.stringify(users2));
         }
-        localStorage.setItem('lingxi_users', JSON.stringify(users));
-        console.log('✅ 配置已保存:', users[currentUserEmail].profile);
+      }
+    }).catch(function() {});
+  }
 
-        const profileRole = document.querySelector('.profile-role');
-        if (profileRole) {
-            profileRole.textContent = autoIntro || '暂无介绍';
-        }
+  addProfileMessage("太好了！我已经了解了你的基本情况 ✨\n\n接下来让我为你推荐一些合适的课程吧！", false);
 
-        const profileSig = document.getElementById('profileSignature');
-        if (profileSig) {
-            profileSig.textContent = signature ? `“${signature}”` : '暂无签名';
-        }
+  setTimeout(function() {
+    document.getElementById('profileSetupPage').classList.add('hidden');
+    showCourseRecommendations(collected.interests || []);
+  }, 1500);
+}
 
-        const qqField = document.getElementById('settingQQ');
-        if (qqField) {
-            qqField.value = qq;
-        }
-        const bdayField = document.getElementById('settingBirthday');
-        if (bdayField) {
-            bdayField.value = birthday;
-        }
-    } else {
-        alert('用户数据异常，请重新登录！');
-        return;
+function skipProfileDialog() {
+  let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+  if (users[currentUserEmail]) {
+    if (!users[currentUserEmail].profile) {
+      users[currentUserEmail].profile = {
+        grade: '', major: '', qq: '', birthday: '', signature: '', intro: '', hobbies: [],
+        learning_goal: '', study_time: '随时'
+      };
     }
+    localStorage.setItem('lingxi_users', JSON.stringify(users));
+  }
+  document.getElementById('profileSetupPage').classList.add('hidden');
+  startTransition();
+}
 
-    showCourseRecommendations(hobbies);
+function initProfileDialog() {
+  _profileDialogState = { step: 0, conversation: [], collected: {} };
+  const chatArea = document.getElementById('profileChatArea');
+  if (chatArea) {
+    chatArea.innerHTML = '';
+  }
+  setTimeout(function() {
+    addProfileMessage(PROFILE_QUESTIONS[0].question, false);
+    _profileDialogState.conversation.push({ role: 'assistant', content: PROFILE_QUESTIONS[0].question });
+  }, 500);
 }
 
 function quickStartChapter(categoryName, courseTitle, chapterIndex) {
@@ -15780,6 +15887,59 @@ function enterCourseStudySearch(courseTitle, chapterTitle, tab, autoQuiz = false
     }
 }
 
+// Streaming chat support
+async function sendStreamingChat(message, history, callback, doneCallback) {
+  const response = await fetch('/api/chat/stream', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: message,
+      history: history,
+      user_id: currentUserEmail || 'default',
+      agent: ''
+    })
+  });
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let fullText = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop(); // Keep incomplete line in buffer
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') {
+          if (doneCallback) doneCallback(fullText);
+          return fullText;
+        }
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.text) {
+            fullText += parsed.text;
+            if (callback) callback(fullText, parsed.text);
+          }
+          if (parsed.error) {
+            console.error('Stream error:', parsed.error);
+          }
+        } catch (e) {
+          // Ignore parse errors for incomplete data
+        }
+      }
+    }
+  }
+
+  if (doneCallback) doneCallback(fullText);
+  return fullText;
+}
+
 async function sendMessage() {
     const inp = document.getElementById('chatInput');
     const text = inp.value.trim();
@@ -15943,35 +16103,94 @@ async function sendMessage() {
             promptMessage = `【角色：资源生成师】用户的问题是："${text}"。请为用户生成或推荐针对性的学习资源，包括具体的学习材料、练习题或项目建议。`;
         }
 
+        // Try streaming first, fall back to non-streaming if it fails
+        let streamingSucceeded = false;
         try {
-            const chatResp = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: promptMessage,
-                    user_id: currentUserEmail,
-                    image_path: currentImagePath || '',
-                    doc_context: docContext,
-                    history: history,
-                    agent: currentAgent
-                }),
-                signal: signal
-            });
-            if (chatResp.ok) {
-                const chatData = await chatResp.json();
-                advice = chatData.advice;
-                if (chatData.intent) {
-                    topic = chatData.intent.topic || topic;
-                    difficulty = chatData.intent.difficulty || difficulty;
-                    keywords = chatData.intent.keywords || keywords;
+            const streamMsgId = 'streaming_' + Date.now();
+            let streamStarted = false;
+            let renderTimeout = null;
+
+            await sendStreamingChat(promptMessage, history,
+                // On each chunk
+                function(fullText, chunk) {
+                    if (signal.aborted) return;
+                    if (!streamStarted) {
+                        streamStarted = true;
+                        const thinking = document.getElementById('thinking');
+                        if (thinking) thinking.remove();
+
+                        let streamAgentAvatar = '灵';
+                        let streamAgentName = '灵析助手';
+                        let streamAgentBg = 'linear-gradient(135deg,#6366f1,#8b5cf6)';
+                        if (currentAgent === 'analyst') { streamAgentAvatar = '析'; streamAgentName = '学习分析师'; streamAgentBg = 'linear-gradient(135deg,#3b82f6,#06b6d4)'; }
+                        else if (currentAgent === 'generator') { streamAgentAvatar = '源'; streamAgentName = '资源生成师'; streamAgentBg = 'linear-gradient(135deg,#10b981,#34d399)'; }
+                        else if (currentAgent === 'planner') { streamAgentAvatar = '规'; streamAgentName = '路径规划师'; streamAgentBg = 'linear-gradient(135deg,#f59e0b,#fbbf24)'; }
+
+                        chat.insertAdjacentHTML('beforeend', '<div class="msg assistant" id="' + streamMsgId + '"><div class="msg-avatar" style="background:' + streamAgentBg + '">' + streamAgentAvatar + '</div><div><div class="msg-sender">' + streamAgentName + '</div><div class="msg-bubble"><div class="msg-content markdown-body" style="min-height:20px;line-height:1.6;color:#1e293b;font-size:13.5px;"><span class="streaming-cursor" style="display:inline-block;width:2px;height:1em;background:#6366f1;animation:blink 1s infinite;vertical-align:text-bottom;margin-left:2px;"></span></div></div></div></div>');
+                        chat.scrollTop = chat.scrollHeight;
+                    }
+
+                    const el = document.getElementById(streamMsgId);
+                    if (!el) return;
+                    const contentEl = el.querySelector('.msg-content');
+                    if (!contentEl) return;
+
+                    if (renderTimeout) clearTimeout(renderTimeout);
+                    renderTimeout = setTimeout(function() {
+                        contentEl.innerHTML = safeMarkdownParse(fullText) + '<span class="streaming-cursor" style="display:inline-block;width:2px;height:1em;background:#6366f1;animation:blink 1s infinite;vertical-align:text-bottom;margin-left:2px;"></span>';
+                        window.typesetMathJax();
+                        chat.scrollTop = chat.scrollHeight;
+                    }, 150);
+                },
+                // On done
+                function(fullText) {
+                    if (renderTimeout) clearTimeout(renderTimeout);
+                    advice = fullText;
+                    // Remove the streaming message - we'll rebuild the full content below
+                    const el = document.getElementById(streamMsgId);
+                    if (el) el.remove();
                 }
-                hideResources = chatData.hide_resources || false;
+            );
+
+            if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+            streamingSucceeded = true;
+
+        } catch (streamErr) {
+            if (streamErr.name === 'AbortError' || signal.aborted) {
+                throw streamErr;
             }
-        } catch (err) {
-            if (err.name === 'AbortError' || signal.aborted) {
-                throw err;
+            // Streaming failed, fall back to non-streaming /api/chat
+            console.warn('Streaming chat failed, falling back to non-streaming:', streamErr);
+            try {
+                const chatResp = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: promptMessage,
+                        user_id: currentUserEmail,
+                        image_path: currentImagePath || '',
+                        doc_context: docContext,
+                        history: history,
+                        agent: currentAgent
+                    }),
+                    signal: signal
+                });
+                if (chatResp.ok) {
+                    const chatData = await chatResp.json();
+                    advice = chatData.advice;
+                    if (chatData.intent) {
+                        topic = chatData.intent.topic || topic;
+                        difficulty = chatData.intent.difficulty || difficulty;
+                        keywords = chatData.intent.keywords || keywords;
+                    }
+                    hideResources = chatData.hide_resources || false;
+                }
+            } catch (err) {
+                if (err.name === 'AbortError' || signal.aborted) {
+                    throw err;
+                }
+                console.error('无法连接到后端 /api/chat 服务，将使用前端 Mock 代替。', err);
             }
-            console.error('无法连接到后端 /api/chat 服务，将使用前端 Mock 代替。', err);
         }
 
         if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
