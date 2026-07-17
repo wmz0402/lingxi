@@ -5899,6 +5899,11 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
                 <span>消息通知</span>
               </button>
+              <!-- 3. 联系管理员（意见箱） -->
+              <button type="button" class="dropdown-item" onclick="const d=document.getElementById('settingsDropdown');if(d)d.style.display='none';showContactAdmin()" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: none; border-radius: 8px; background: transparent; color: #334155; font-size: 13.5px; font-weight: 500; text-align: left; cursor: pointer; transition: all 0.2s; box-sizing: border-box;" onmouseover="this.style.background='rgba(99, 102, 241, 0.06)';this.style.color='#6366f1';" onmouseout="this.style.background='transparent';this.style.color='#334155';">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                <span>联系管理员</span>
+              </button>
               <div style="height: 1px; background: rgba(0, 0, 0, 0.06); margin: 6px 8px;"></div>
               <!-- 10. 退出登录 -->
               <button type="button" class="dropdown-item" onclick="logout()" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: none; border-radius: 8px; background: transparent; color: #ef4444; font-size: 13.5px; font-weight: 500; text-align: left; cursor: pointer; transition: all 0.2s; box-sizing: border-box;" onmouseover="this.style.background='rgba(239, 68, 68, 0.06)'" onmouseout="this.style.background='transparent'">
@@ -6695,10 +6700,6 @@
               </h2>
               <p style="margin:4px 0 0; font-size:13px; color:#64748b;">用户管理与消息收件箱</p>
             </div>
-            <button class="back-to-chat-btn" onclick="switchMainPage('chat')" style="padding:6px 12px;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6" /></svg>
-              返回
-            </button>
           </div>
           <!-- Stats Cards -->
           <div id="adminStatsBar" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px;"></div>
@@ -6716,6 +6717,10 @@
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:3px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               收件箱
               <span id="adminInboxBadge" style="display:none; position:absolute; top:6px; right:calc(50% - 48px); width:18px; height:18px; border-radius:50%; background:#ef4444; color:#fff; font-size:10px; line-height:18px; text-align:center; font-weight:700;"></span>
+            </button>
+            <button id="adminTabRanking" onclick="switchAdminTab('ranking')" style="flex:1; padding:10px 0; border-radius:10px; border:none; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; background:transparent; color:#94a3b8;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:3px;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+              排名
             </button>
             <button id="adminTabLogs" onclick="switchAdminTab('logs')" style="flex:1; padding:10px 0; border-radius:10px; border:none; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; background:transparent; color:#94a3b8;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:3px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -6787,22 +6792,20 @@
               <span style="font-size:13px; color:#64748b;" id="adminMsgCount">加载中...</span>
               <div style="display:flex; gap:6px;">
                 <button onclick="adminMarkAllRead()" style="padding:6px 12px; border-radius:8px; border:1.5px solid rgba(34,197,94,0.2); background:rgba(34,197,94,0.06); color:#16a34a; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(34,197,94,0.15)'" onmouseout="this.style.background='rgba(34,197,94,0.06)'">一键已读</button>
-                <button onclick="adminClearAllTags()" style="padding:6px 12px; border-radius:8px; border:1.5px solid rgba(234,179,8,0.2); background:rgba(234,179,8,0.06); color:#ca8a04; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(234,179,8,0.15)'" onmouseout="this.style.background='rgba(234,179,8,0.06)'">清空标签</button>
                 <button onclick="loadAdminInbox()" style="padding:6px 14px; border-radius:8px; border:1.5px solid rgba(139,92,246,0.15); background:rgba(139,92,246,0.04); color:#7c3aed; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.1)'" onmouseout="this.style.background='rgba(139,92,246,0.04)'">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px; margin-right:3px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
                   刷新
                 </button>
               </div>
             </div>
-            <div id="adminInboxTagFilters" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
-              <button class="inbox-tag-filter active" data-tag="" onclick="filterInboxByTag('')" style="padding:4px 12px; border-radius:16px; border:1.5px solid #6366f1; background:#6366f1; color:#fff; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;">全部</button>
-              <button class="inbox-tag-filter" data-tag="反馈问题" onclick="filterInboxByTag('反馈问题')" style="padding:4px 12px; border-radius:16px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;">反馈问题</button>
-              <button class="inbox-tag-filter" data-tag="功能建议" onclick="filterInboxByTag('功能建议')" style="padding:4px 12px; border-radius:16px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;">功能建议</button>
-              <button class="inbox-tag-filter" data-tag="账号问题" onclick="filterInboxByTag('账号问题')" style="padding:4px 12px; border-radius:16px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;">账号问题</button>
-              <button class="inbox-tag-filter" data-tag="学习资料" onclick="filterInboxByTag('学习资料')" style="padding:4px 12px; border-radius:16px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;">学习资料</button>
-              <button class="inbox-tag-filter" data-tag="其他" onclick="filterInboxByTag('其他')" style="padding:4px 12px; border-radius:16px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s;">其他</button>
-            </div>
             <div id="adminInboxList" class="noti-list"></div>
+          </div>
+          <!-- Logs Tab -->
+          <!-- Ranking Tab -->
+          <div id="adminRankingTab" style="display:none;">
+            <div id="adminRankingContent" style="padding:10px 0;">
+              <div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">加载排名数据中...</div>
+            </div>
           </div>
           <!-- Logs Tab -->
           <div id="adminLogsTab" style="display:none;">
@@ -10054,12 +10057,12 @@ function switchMainPage(pageId) {
   const mainSidebar = document.getElementById('sidebar');
   const mainRightPanel = document.getElementById('rightPanelMain');
 
-  // 管理员模式下，始终保持侧边栏和右面板隐藏
+  // 管理员模式下，保持侧边栏可见（含控制台按钮），隐藏右面板
   const isAdminMode = !!adminToken;
 
   if (pageId === 'courseStudy' || pageId === 'questionBank') {
       if (mainSidebar) {
-          mainSidebar.style.display = isAdminMode ? "none" : "";
+          mainSidebar.style.display = "";
           if (!isAdminMode) {
               mainSidebar.classList.add('collapsed');
               document.body.classList.add('sidebar-collapsed');
@@ -10073,7 +10076,7 @@ function switchMainPage(pageId) {
       }
   } else {
       if (mainSidebar) {
-          mainSidebar.style.display = isAdminMode ? "none" : "";
+          mainSidebar.style.display = "";
           if (!isAdminMode) {
               const isCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
               mainSidebar.classList.toggle('collapsed', isCollapsed);
@@ -11664,14 +11667,15 @@ function selectChapterQuizOption(el, opt) {
 
 function startChapterQuiz() {
   activeChapterQuizState = 'quiz';
-  activeChapterQuizIndex = 0;
   activeChapterQuizSelectedEl = null;
+  const saved = getQuizProgress(activeCourseIndex, activeChapterIndex);
+  activeChapterQuizIndex = (saved && typeof saved.quizIndex === 'number') ? saved.quizIndex : 0;
   renderChapterContent();
 }
 
 function cancelChapterQuiz() {
+  saveQuizProgress();
   activeChapterQuizState = 'unsubmitted';
-  clearQuizProgress();
   renderChapterContent();
 }
 
@@ -18009,16 +18013,8 @@ function loadLeaderboard() {
           ? Math.round(data.rankings.reduce((sum, r) => sum + (r.accuracy || 0), 0) / data.rankings.length)
           : 0;
         if (aa) aa.textContent = avgAcc + '%';
-        // 从 localStorage 获取成就总数
-        let totalAchv = 0;
-        try {
-          const users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
-          totalAchv = data.rankings.reduce((sum, r) => {
-            const uEmail = Object.keys(users).find(e => users[e].username === r.username);
-            return sum + ((uEmail && users[uEmail].achievements) ? users[uEmail].achievements.length : 0);
-          }, 0);
-        } catch(e) {}
-        if (ta) ta.textContent = totalAchv || '-';
+        // 直接显示当前用户的成就数
+        if (ta) ta.textContent = userAchievements || 0;
 
         // 显示匿名开关（仅登录用户可见）
         if (toggleEl && email) {
@@ -18628,22 +18624,56 @@ function enterAdminMode() {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
-  // 隐藏左侧聊天侧边栏
-  const sidebar = document.getElementById('sidebar');
-  if (sidebar) sidebar.style.display = 'none';
   // 隐藏右侧面板
   const rightPanel = document.getElementById('rightPanelMain');
   if (rightPanel) rightPanel.style.display = 'none';
-  // 更新榜单返回按钮文字
-  const backLabel = document.querySelector('.back-to-chat-btn .back-btn-label');
-  if (backLabel) backLabel.textContent = '返回控制台';
-  // 隐藏管理员不需要的榜单元素（做题统计、匿名设置）
+  // 隐藏管理员不需要的榜单元素
   const lbStats = document.getElementById('leaderboardStats');
   if (lbStats) lbStats.style.display = 'none';
   const lbAnon = document.getElementById('lbAnonymousToggle');
   if (lbAnon) lbAnon.style.display = 'none';
   const lbMyPerf = document.getElementById('lbMyPerformance');
   if (lbMyPerf) lbMyPerf.style.display = 'none';
+
+  // ===== 管理员专属侧边栏 =====
+  const sidebarEl = document.getElementById('sidebar');
+  if (!sidebarEl) return;
+  // 隐藏所有用户内容（新会话、快捷功能、搜索、AI群、历史、footer）
+  sidebarEl.querySelectorAll('.new-chat-btn, .sidebar-search-btn, .sidebar-section, .agent-card, [data-admin-hide]').forEach(el => {
+    el.style.display = 'none'; el.setAttribute('data-admin-hidden', 'true');
+  });
+  const quickFuncs = sidebarEl.querySelectorAll(':scope > div:not(.sidebar-header)');
+  quickFuncs.forEach(el => {
+    if (!el.id && !el.classList.contains('sidebar-footer')) {
+      el.style.display = 'none'; el.setAttribute('data-admin-hidden', 'true');
+    }
+  });
+  const footer = sidebarEl.querySelector('.sidebar-footer');
+  if (footer) { footer.style.display = 'none'; footer.setAttribute('data-admin-hidden', 'true'); }
+  // 隐藏聊天历史面板
+  const histPanel = document.getElementById('sidebarHistoryPanel');
+  if (histPanel) { histPanel.style.display = 'none'; histPanel.setAttribute('data-admin-hidden', 'true'); }
+
+  // 创建管理员侧边栏内容
+  if (!document.getElementById('sidebarAdminNav')) {
+    const nav = document.createElement('div');
+    nav.id = 'sidebarAdminNav';
+    nav.style.cssText = 'display:flex;flex-direction:column;padding:12px 8px;gap:4px;';
+    nav.innerHTML =
+      '<button onclick="loadAdminPanel()" style="display:block;width:100%;padding:16px 12px;margin-bottom:8px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;cursor:pointer;text-align:left;transition:all 0.2s;box-shadow:0 2px 8px rgba(99,102,241,0.25);" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(99,102,241,0.4)\'" onmouseout="this.style.boxShadow=\'0 2px 8px rgba(99,102,241,0.25)\'">' +
+        '<div style="font-size:14px;font-weight:700;margin-bottom:4px;">管理员控制台</div>' +
+        '<div style="font-size:11px;opacity:0.8;">用户管理 · 消息收件箱 · 学习排名</div>' +
+      '</button>' +
+      '<button onclick="switchMainPage(\'chat\')" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border-radius:12px;border:none;background:rgba(139,92,246,0.08);color:#e2e8f0;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;box-sizing:border-box;" onmouseover="this.style.background=\'rgba(139,92,246,0.15)\'" onmouseout="this.style.background=\'rgba(139,92,246,0.08)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>AI会话</button>' +
+      '<div style="flex:1;"></div>' +
+      '<div style="height:1px;background:rgba(255,255,255,0.06);margin:12px 4px;"></div>' +
+      '<button onclick="if(!confirm(\'确定退出管理员模式？\'))return;exitAdminMode();adminToken=null;sessionStorage.removeItem(\'lingxi_admin_token\');sessionStorage.removeItem(\'lingxi_admin_info\');document.getElementById(\'mainPage\').classList.add(\'hidden\');document.getElementById(\'authPage\').classList.remove(\'hidden\')" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border-radius:12px;border:none;background:rgba(239,68,68,0.08);color:#fca5a5;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;box-sizing:border-box;" onmouseover="this.style.background=\'rgba(239,68,68,0.15)\'" onmouseout="this.style.background=\'rgba(239,68,68,0.08)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>退出管理</button>';
+    // 插入到 sidebar 底部
+    sidebarEl.appendChild(nav);
+    // 让侧边栏成为 flex column 以便底部按钮贴底
+    sidebarEl.style.display = 'flex';
+    sidebarEl.style.flexDirection = 'column';
+  }
 }
 
 function exitAdminMode() {
@@ -18654,13 +18684,25 @@ function exitAdminMode() {
   });
   // 恢复左侧聊天侧边栏
   const sidebar = document.getElementById('sidebar');
-  if (sidebar) sidebar.style.display = '';
+  if (sidebar) {
+    sidebar.style.display = '';
+    sidebar.style.flexDirection = '';
+    // 恢复被管理员模式隐藏的侧边栏元素
+    sidebar.querySelectorAll('[data-admin-hidden]').forEach(el => {
+      el.style.display = '';
+      el.removeAttribute('data-admin-hidden');
+    });
+  }
   // 恢复右侧面板
   const rightPanel = document.getElementById('rightPanelMain');
   if (rightPanel) rightPanel.style.display = '';
-  // 移除管理员面板按钮
+  // 移除管理员导航面板和按钮
+  const adminNav = document.getElementById('sidebarAdminNav');
+  if (adminNav) adminNav.remove();
   const adminBtn = document.getElementById('adminPanelNavBtn');
   if (adminBtn) adminBtn.remove();
+  const sidebarAdminBtn = document.getElementById('sidebarAdminBtn');
+  if (sidebarAdminBtn) sidebarAdminBtn.remove();
   // 恢复榜单返回按钮文字
   const backLabel = document.querySelector('.back-to-chat-btn .back-btn-label');
   if (backLabel) backLabel.textContent = '返回对话';
@@ -18717,8 +18759,8 @@ function handleAdminLogin(e) {
 
 function switchAdminTab(tab) {
   adminCurrentTab = tab;
-  const tabs = {overview:'adminTabOverview',users:'adminTabUsers',inbox:'adminTabInbox',logs:'adminTabLogs'};
-  const panels = {overview:'adminOverviewTab',users:'adminUsersTab',inbox:'adminInboxTab',logs:'adminLogsTab'};
+  const tabs = {overview:'adminTabOverview',users:'adminTabUsers',inbox:'adminTabInbox',ranking:'adminTabRanking',logs:'adminTabLogs'};
+  const panels = {overview:'adminOverviewTab',users:'adminUsersTab',inbox:'adminInboxTab',ranking:'adminRankingTab',logs:'adminLogsTab'};
   // Reset all tab buttons
   Object.values(tabs).forEach(id => {
     const el = document.getElementById(id);
@@ -18738,6 +18780,7 @@ function switchAdminTab(tab) {
   if (tab === 'overview') loadAdminDashboard();
   else if (tab === 'users') loadAdminUsers();
   else if (tab === 'inbox') loadAdminInbox();
+  else if (tab === 'ranking') loadAdminRanking();
   else if (tab === 'logs') loadAdminLogs();
 }
 
@@ -18983,6 +19026,33 @@ function loadAdminDashboard() {
   });
 }
 
+function loadAdminRanking() {
+  const container = document.getElementById('adminRankingContent');
+  if (!container) return;
+  fetch('/api/leaderboard?period=all').then(r => r.json()).then(data => {
+    if (!data.success || !data.rankings || data.rankings.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">暂无排名数据</div>';
+      return;
+    }
+    const medals = ['🥇','🥈','🥉'];
+    let html = '<div style="font-size:13px;color:#64748b;margin-bottom:12px;">共 ' + data.total_users + ' 位用户参与学习，累计答题 ' + data.total_questions + ' 题</div>';
+    html += '<div style="border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">';
+    html += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+    html += '<thead><tr style="background:#f8fafc;"><th style="padding:10px 14px;text-align:left;font-weight:600;color:#475569;border-bottom:1px solid #e2e8f0;">排名</th><th style="padding:10px 14px;text-align:left;font-weight:600;color:#475569;border-bottom:1px solid #e2e8f0;">用户</th><th style="padding:10px 14px;text-align:center;font-weight:600;color:#475569;border-bottom:1px solid #e2e8f0;">答题数</th><th style="padding:10px 14px;text-align:center;font-weight:600;color:#475569;border-bottom:1px solid #e2e8f0;">正确数</th><th style="padding:10px 14px;text-align:center;font-weight:600;color:#475569;border-bottom:1px solid #e2e8f0;">正确率</th><th style="padding:10px 14px;text-align:center;font-weight:600;color:#475569;border-bottom:1px solid #e2e8f0;">最近活跃</th></tr></thead><tbody>';
+    data.rankings.forEach((r, i) => {
+      const rank = i < 3 ? medals[i] : (i + 1);
+      const anonBadge = r.is_anonymous ? ' <span style="display:inline-block;padding:1px 6px;border-radius:8px;background:#f1f5f9;color:#94a3b8;font-size:10px;vertical-align:middle;">匿名</span>' : '';
+      const nameHtml = '<button onclick="showAdminUserDetail(' + r.user_id + ')" style="background:none;border:none;cursor:pointer;color:#6366f1;font-size:13px;font-weight:500;padding:0;text-decoration:none;" onmouseover="this.style.textDecoration=\'underline\'" onmouseout="this.style.textDecoration=\'none\'">' + r.username + '</button>' + anonBadge;
+      const bg = i % 2 === 0 ? '#fff' : '#f8fafc';
+      html += '<tr style="background:' + bg + ';"><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;font-weight:600;">' + rank + '</td><td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#1e293b;">' + nameHtml + '</td><td style="padding:10px 14px;text-align:center;border-bottom:1px solid #f1f5f9;">' + r.total_completed + '</td><td style="padding:10px 14px;text-align:center;border-bottom:1px solid #f1f5f9;">' + r.correct_count + '</td><td style="padding:10px 14px;text-align:center;border-bottom:1px solid #f1f5f9;color:' + (r.accuracy >= 70 ? '#16a34a' : r.accuracy >= 40 ? '#ca8a04' : '#ef4444') + ';font-weight:600;">' + r.accuracy + '%</td><td style="padding:10px 14px;text-align:center;border-bottom:1px solid #f1f5f9;color:#94a3b8;font-size:12px;">' + (r.last_active || '-') + '</td></tr>';
+    });
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+  }).catch(() => {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444;font-size:13px;">加载失败</div>';
+  });
+}
+
 function loadAdminLogs() {
   const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
   fetch('/api/admin/logs', { headers: { 'X-Admin-Token': token } }).then(r => r.json()).then(data => {
@@ -19031,8 +19101,25 @@ function showAdminUserDetail(userId) {
 
       const statCard = (label, value, clr) => `<div style="flex:1;text-align:center;padding:10px 6px;background:${clr}10;border-radius:8px;"><div style="font-size:18px;font-weight:700;color:${clr};">${value}</div><div style="font-size:10px;color:#94a3b8;margin-top:2px;">${label}</div></div>`;
 
+      // 最近答题记录
+      let quizRecordsHtml = '';
+      if (u.recent_quizzes && u.recent_quizzes.length > 0) {
+        quizRecordsHtml = u.recent_quizzes.map(q => {
+          const icon = q.is_correct ? '<span style="color:#16a34a;">&#10003;</span>' : '<span style="color:#ef4444;">&#10007;</span>';
+          const qText = (q.question_text || '').length > 30 ? (q.question_text || '').substring(0, 30) + '...' : (q.question_text || '');
+          return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:11px;">' +
+            '<span>' + icon + '</span>' +
+            '<span style="flex:1;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (q.question_text || '').replace(/"/g, '&quot;') + '">' + qText + '</span>' +
+            '<span style="color:#94a3b8;white-space:nowrap;font-size:10px;">' + (q.course_title || '') + '</span>' +
+            '<span style="color:#cbd5e1;white-space:nowrap;font-size:10px;">' + (q.completed_at || '').substring(5, 16) + '</span>' +
+            '</div>';
+        }).join('');
+      } else {
+        quizRecordsHtml = '<div style="text-align:center;padding:12px;color:#cbd5e1;font-size:11px;">暂无答题记录</div>';
+      }
+
       overlay.innerHTML = `
-        <div style="background:#fff;border-radius:16px;width:420px;max-width:92vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.15);animation:slideUp 0.25s ease;">
+        <div style="background:#fff;border-radius:16px;width:480px;max-width:92vw;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.15);animation:slideUp 0.25s ease;">
           <div style="background:linear-gradient(135deg,${color},${color}cc);padding:24px 20px 16px;border-radius:16px 16px 0 0;text-align:center;position:relative;">
             <button onclick="this.closest('#adminUserDetailOverlay').remove()" style="position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.25);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.4)'" onmouseout="this.style.background='rgba(255,255,255,0.25)'">✕</button>
             <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.25);display:inline-flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;">${initial}</div>
@@ -19040,10 +19127,17 @@ function showAdminUserDetail(userId) {
             <div style="color:rgba(255,255,255,0.8);font-size:11px;margin-top:2px;">${u.email || '-'}</div>
           </div>
           <div style="padding:16px 20px 8px;">
-            <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:8px;">消息统计</div>
+            <div style="display:flex;gap:8px;margin-bottom:12px;">
               ${statCard('发送消息', u.message_count || 0, '#6366f1')}
               ${statCard('已获回复', u.replied_count || 0, '#10b981')}
               ${statCard('未读消息', u.unread_count || 0, '#ef4444')}
+            </div>
+            <div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:8px;">做题统计</div>
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+              ${statCard('答题数', u.quiz_total || 0, '#0ea5e9')}
+              ${statCard('正确数', u.quiz_correct || 0, '#10b981')}
+              ${statCard('正确率', (u.quiz_accuracy || 0) + '%', (u.quiz_accuracy >= 70 ? '#16a34a' : u.quiz_accuracy >= 40 ? '#ca8a04' : '#ef4444'))}
             </div>
             <div style="background:#f8fafc;border-radius:10px;padding:12px 16px;">
               <div style="font-size:11px;color:#8b5cf6;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">基本信息</div>
@@ -19063,6 +19157,10 @@ function showAdminUserDetail(userId) {
               <div style="font-size:11px;color:#f59e0b;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">个人资料</div>
               ${infoRow('个性签名', u.signature)}
               ${infoRow('个人介绍', u.intro)}
+            </div>
+            <div style="background:#f8fafc;border-radius:10px;padding:12px 16px;margin-top:10px;">
+              <div style="font-size:11px;color:#6366f1;font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">最近答题记录</div>
+              ${quizRecordsHtml}
             </div>
             <div style="text-align:center;padding:10px 0 4px;font-size:11px;color:#94a3b8;">注册于 ${u.created_at || '-'}</div>
           </div>
@@ -19194,12 +19292,6 @@ function renderAdminInbox(messages) {
     const at = m.admin_tag || '';
     const utc = _tagColors[ut] || _tagColors['其他'];
     const userTagHtml = ut ? `<span style="display:inline-block;padding:1px 8px;border-radius:10px;background:${utc.bg};color:${utc.color};border:1px solid ${utc.border};font-size:10px;font-weight:600;">${ut}</span>` : '';
-    const atc = _tagColors[at] || { bg: '#f8fafc', color: '#64748b', border: '#e2e8f0' };
-    const tagOptions = _adminTagOptions.map(t => {
-      const tc = _tagColors[t] || _tagColors['其他'];
-      return `<div onclick="adminTagMessage(${m.id}, '${t}'); event.stopPropagation();" style="display:inline-block;padding:2px 10px;border-radius:10px;background:${tc.bg};color:${tc.color};border:1px solid ${tc.border};font-size:10px;font-weight:600;cursor:pointer;transition:all 0.15s;${at === t ? 'box-shadow:0 0 0 2px ' + tc.color + '33;' : ''}" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">${t}</div>`;
-    }).join('');
-    const clearTagBtn = at ? `<div onclick="adminTagMessage(${m.id}, ''); event.stopPropagation();" style="display:inline-block;padding:2px 10px;border-radius:10px;background:#fff;color:#94a3b8;border:1px dashed #d1d5db;font-size:10px;cursor:pointer;" onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'" onmouseout="this.style.borderColor='#d1d5db';this.style.color='#94a3b8'">清除</div>` : '';
     const replyHtml = m.reply ? `<div style="margin-top:10px; padding:10px 14px; background:rgba(99,102,241,0.06); border-radius:10px; border-left:3px solid #8b5cf6;"><div style="font-size:11px; color:#8b5cf6; font-weight:600; margin-bottom:3px;">管理员回复</div><div style="font-size:12.5px; color:#475569; line-height:1.5;">${m.reply}</div></div>` : '';
     return `
     <div class="noti-item${unread}" id="msgItem_${m.id}" style="flex-direction:column;">
@@ -19207,27 +19299,13 @@ function renderAdminInbox(messages) {
         <div class="noti-item-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6); font-size:15px; font-weight:700;">${initial}</div>
         <div class="noti-item-content" style="flex:1; min-width:0;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div class="noti-item-title" style="margin:0;">${m.sender_name}</div>
+            <div class="noti-item-title" style="margin:0;"><button onclick="showAdminUserDetail(${m.sender_id})" style="background:none;border:none;cursor:pointer;color:#6366f1;font-size:14px;font-weight:600;padding:0;text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${m.sender_name}</button></div>
             <div style="display:flex; gap:6px;">
               <button onclick="showReplyForm(${m.id})" style="padding:3px 10px; border-radius:6px; border:1px solid #e2e8f0; background:#fff; color:#6366f1; font-size:11px; cursor:pointer;" onmouseover="this.style.background='#6366f1';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#6366f1'">回复</button>
               <button onclick="adminDeleteMsg(${m.id})" style="padding:3px 10px; border-radius:6px; border:1px solid #fecaca; background:#fff; color:#ef4444; font-size:11px; cursor:pointer;" onmouseover="this.style.background='#ef4444';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#ef4444'">删除</button>
             </div>
           </div>
-          <div style="display:flex; gap:6px; align-items:center; margin-top:4px; flex-wrap:wrap;">
-            ${userTagHtml}
-            <div style="position:relative; display:inline-block;">
-              <div onclick="toggleAdminTagPop(${m.id}, event)" style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:10px;background:${atc.bg};color:${atc.color};border:1px solid ${atc.border};font-size:10px;font-weight:600;cursor:pointer;transition:all 0.15s;user-select:none;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-                ${at ? '<span style="font-size:9px;opacity:0.7;">管</span> ' + at : '打标签'}
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg>
-              </div>
-              <div id="tagPop_${m.id}" class="admin-tag-pop" style="display:none;position:fixed;z-index:9999;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.06);padding:10px;min-width:240px;max-width:320px;border:1px solid #f1f5f9;">
-                <div style="display:flex;flex-wrap:wrap;gap:6px;">
-                  ${tagOptions}
-                  ${clearTagBtn}
-                </div>
-              </div>
-            </div>
-          </div>
+          ${userTagHtml ? '<div style="margin-top:4px;">' + userTagHtml + '</div>' : ''}
           <div class="noti-item-desc" style="margin-top:4px; line-height:1.6; white-space:pre-wrap;">${m.content}</div>
           <div class="noti-item-time">${m.created_at}</div>
           ${replyHtml}

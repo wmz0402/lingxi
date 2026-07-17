@@ -2539,6 +2539,29 @@ def admin_get_user_detail(user_id):
     c.execute('SELECT COUNT(*) FROM message WHERE sender_id = ? AND is_read = 0', (user_id,))
     user_data['unread_count'] = c.fetchone()[0]
 
+    # 做题统计
+    _ensure_question_completion_table()
+    c.execute(
+        'SELECT COUNT(DISTINCT question_text || \'|\' || course_title || \'|\' || chapter_title) FROM question_completion WHERE user_id = ?',
+        (user_id,)
+    )
+    user_data['quiz_total'] = c.fetchone()[0] or 0
+    c.execute(
+        'SELECT COUNT(DISTINCT CASE WHEN is_correct = 1 THEN question_text || \'|\' || course_title || \'|\' || chapter_title END) FROM question_completion WHERE user_id = ?',
+        (user_id,)
+    )
+    user_data['quiz_correct'] = c.fetchone()[0] or 0
+    total = user_data['quiz_total']
+    correct = user_data['quiz_correct']
+    user_data['quiz_accuracy'] = round(100.0 * correct / total, 1) if total > 0 else 0
+
+    # 最近10条答题记录
+    c.execute(
+        'SELECT question_text, course_title, chapter_title, is_correct, completed_at FROM question_completion WHERE user_id = ? ORDER BY completed_at DESC LIMIT 10',
+        (user_id,)
+    )
+    user_data['recent_quizzes'] = [dict(row) for row in c.fetchall()]
+
     conn.close()
     return jsonify({"success": True, "user": user_data})
 
@@ -3200,15 +3223,15 @@ def get_leaderboard():
         elif period == 'month':
             where_clause = "AND qc.completed_at >= date('now', '-30 days', 'localtime')"
 
-        # 查询排行榜：做题数 + 正确率
+        # 查询排行榜：做题数 + 正确率（去重：同一题多次作答只算一次）
         query = f'''
         SELECT
             u.id as user_id,
             u.username,
             u.is_anonymous,
-            COUNT(qc.id) as total_completed,
-            SUM(CASE WHEN qc.is_correct = 1 THEN 1 ELSE 0 END) as correct_count,
-            ROUND(100.0 * SUM(CASE WHEN qc.is_correct = 1 THEN 1 ELSE 0 END) / COUNT(qc.id), 1) as accuracy,
+            COUNT(DISTINCT qc.question_text || '|' || qc.course_title || '|' || qc.chapter_title) as total_completed,
+            COUNT(DISTINCT CASE WHEN qc.is_correct = 1 THEN qc.question_text || '|' || qc.course_title || '|' || qc.chapter_title END) as correct_count,
+            ROUND(100.0 * COUNT(DISTINCT CASE WHEN qc.is_correct = 1 THEN qc.question_text || '|' || qc.course_title || '|' || qc.chapter_title END) / COUNT(DISTINCT qc.question_text || '|' || qc.course_title || '|' || qc.chapter_title), 1) as accuracy,
             MAX(qc.completed_at) as last_active
         FROM question_completion qc
         JOIN user u ON qc.user_id = u.id
@@ -3255,7 +3278,7 @@ def get_leaderboard():
         ''')
         total_users = c.fetchone()[0]
         c.execute('''
-            SELECT COUNT(*)
+            SELECT COUNT(DISTINCT qc.user_id || '|' || qc.question_text || '|' || qc.course_title || '|' || qc.chapter_title)
             FROM question_completion qc
             JOIN user u ON qc.user_id = u.id
             WHERE u.is_admin = 0 AND u.is_active = 1
