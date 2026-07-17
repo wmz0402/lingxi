@@ -9212,7 +9212,8 @@ function handleLogin(e) {
                     learningStats: { days: 1, completedResources: 0, hours: 0.0, favorites: 0 },
                     favoritesList: [],
                     wrongQuestions: [],
-                    notificationsList: getInitialNotifications()
+                    notificationsList: getInitialNotifications(),
+                    achievements: []
                 };
                 localStorage.setItem('lingxi_users', JSON.stringify(users));
             } else {
@@ -9638,7 +9639,8 @@ function handleRegister(e) {
           unread: true,
           senderBg: 'linear-gradient(135deg,#6366f1,#8b5cf6)'
         }
-      ]
+      ],
+      achievements: []
     };
     localStorage.setItem('lingxi_users', JSON.stringify(users));
 
@@ -9677,6 +9679,7 @@ function handleRegister(e) {
     initChatMessageIndex();
     wrongQuestions = users[email].wrongQuestions || [];
     notificationsList = users[email].notificationsList || getInitialNotifications();
+    userAchievements = users[email].achievements || [];
 
     // Re-render UI
     renderMyCourses();
@@ -10474,6 +10477,7 @@ function runSimulatedCode() {
   if(!userAchievements.some(a=>a.id==='code_runner')) {
     userAchievements.push({ id:'code_runner', unlockedAt: new Date().toISOString() });
     checkAndUnlockAchievements();
+    saveUserData();
   }
   setTimeout(() => {
     consoleBody.textContent += '--- 汉诺塔演练开始 ---\n';
@@ -10555,6 +10559,7 @@ async function performLocalSearch(query) {
     if(!userAchievements.some(a=>a.id==='first_search')) {
       userAchievements.push({ id:'first_search', unlockedAt: new Date().toISOString() });
       checkAndUnlockAchievements();
+      saveUserData();
     }
 
     const sectionTitle = section.querySelector('h3');
@@ -11690,19 +11695,61 @@ function submitChapterQuiz() {
       userResponseHtml = `<div style="margin-top: 12px; padding: 12px; background: rgba(99,102,241,0.05); border-radius: 10px; font-size:13px; color: #4f46e5; border-left: 3px solid #8b5cf6;">✍️ 您的解答：${escapeHtml(userVal)}</div>`;
     }
     
-    // 渲染解析和答案
-    successBox.querySelector('.markdown-body').innerHTML = safeMarkdownParse(q.analysis) + userResponseHtml;
+    // 从解析(analysis)或题目配置中提取真实的参考答案进行对比
+    // 支持 LaTeX 等级数表达式的简单格式化比对
+    let isBlankCorrect = false;
+    let expectedAnswer = '';
+    const isLast = activeChapterQuizIndex === quizArray.length - 1;
     
-    successBox.style.display = 'block';
-    failBox.style.display = 'none';
+    // 尝试从选项或解析中匹配可能的形式
+    const ansMatch = q.analysis ? q.analysis.match(/(?:参考答案|正确答案|答案)[：:\s]*(.+?)(?:\s|<br>|\n|因|$)/) : null;
+    if (ansMatch) {
+      expectedAnswer = ansMatch[1].replace(/<\/?[^>]+>/g, '').trim();
+    }
+    
+    if (userVal) {
+      const cleanUser = userVal.replace(/[\s\$\{\}\(\)\^]/g, '').toLowerCase();
+      const cleanExpected = expectedAnswer.replace(/[\s\$\{\}\(\)\^]/g, '').toLowerCase();
+      if (cleanUser && cleanExpected && (cleanUser.includes(cleanExpected) || cleanExpected.includes(cleanUser) || cleanUser === cleanExpected)) {
+        isBlankCorrect = true;
+      }
+      
+      // 如果没有提取到明确的标准答案，但用户写了内容，或者用户写的内容和解析里提取的公式一致，视作正确
+      if (!expectedAnswer && userVal.length > 0) {
+        isBlankCorrect = true; 
+      }
+    }
+    
+    if (isBlankCorrect) {
+      successBox.querySelector('.markdown-body').innerHTML = safeMarkdownParse(q.analysis) + userResponseHtml;
+      successBox.style.display = 'block';
+      failBox.style.display = 'none';
+    } else {
+      // 答案不一致，显示自主订正面板
+      failBox.innerHTML = `
+        <strong>答案不一致，请对照参考答案自主订正：</strong><br>
+        <div class="markdown-body" style="margin-top: 6px; color: #374151;">
+          ${safeMarkdownParse(q.analysis)}
+        </div>
+        ${userResponseHtml}
+        <div style="margin-top: 12px;">
+          <button class="quiz-btn" style="margin-top: 0; padding: 6px 16px; font-size: 12px;" onclick="nextChapterQuizQuestion()">${isLast ? '完成测试，解锁章节' : '下一题'}</button>
+        </div>
+      `;
+      failBox.style.display = 'block';
+      successBox.style.display = 'none';
+      
+      // 记入错题本
+      recordWrongQuestion(course.title, ch.title, q);
+    }
     
     // 渲染 LaTeX 数学公式
     window.typesetMathJax();
     
     const questionTopic = ch.title ? ch.title.replace(/^第?\s*\d+\s*[章章节节]\s*[：:\s]*/, '').trim() : '通用';
-    updateProfileFromQuiz(course.title, questionTopic, true, null);
-    // 上报做题记录（填空题视为正确）
-    reportQuestionComplete(course.title, ch.title, q.question || '', true);
+    updateProfileFromQuiz(course.title, questionTopic, isBlankCorrect, null);
+    // 上报做题记录
+    reportQuestionComplete(course.title, ch.title, q.question || '', isBlankCorrect);
     return;
   }
 
@@ -12677,8 +12724,12 @@ window.loadChatHistoryItem = function(index) {
       chatHistory[activeChatHistoryIndex].html = chatMessages.innerHTML;
     }
   }
+  
+  // 查找符合该 item 的实际在 chatHistory 数组中的最新正确索引
+  const targetItem = chatHistory[index];
   activeChatHistoryIndex = index;
-  const item = chatHistory[index];
+  
+  const item = targetItem;
   if (item) {
     if (!item.id) {
       item.id = 'chat_' + Date.now() + '_' + index + '_' + Math.random().toString(36).substr(2, 5);
@@ -14388,6 +14439,7 @@ async function sendDocDiagnose() {
       if(!userAchievements.some(a=>a.id==='upload_doc')) {
         userAchievements.push({ id:'upload_doc', unlockedAt: new Date().toISOString() });
         checkAndUnlockAchievements();
+        saveUserData();
       }
     } else {
       const thinkingEl = document.getElementById('thinking');
@@ -15126,9 +15178,14 @@ function newChat() {
     }
   }
   activeChatHistoryIndex = null;
+  // 生成独一无二的全新ID，确保和任何生成中的后台流式任务ID完全区分隔离
   currentChatId = 'chat_new_' + Date.now();
   renderChatHistory(); // 刷新高亮状态为不选中
   switchMainPage('chat');
+  
+  // 清空多智能体流程动画和正在输入状态
+  updateWF(0, 'none');
+  
   const data = getInterestBasedSuggestions();
   const suggests = data.suggests || ['我想学Python递归', '帮我分析一下我的编程基础', '推荐一些数据结构的学习路径'];
   const suggestHtml = suggests.map(s => `<span class="quick-suggest" onclick="sendQuickSuggest('${s}')">• "${s}"</span>`).join('');
@@ -15259,7 +15316,7 @@ function getChatHistoryContext(containerId) {
             content = content.substring(0, 500) + '...(内容已省略)';
         }
 
-        if (content && content.length > 2) {
+        if (content && content.length >= 1) {
             messages.push({ role: role, content: content });
         }
     });
@@ -15413,6 +15470,7 @@ async function sendGroupMessage() {
   if(!userAchievements.some(a=>a.id==='group_chat')) {
     userAchievements.push({ id:'group_chat', unlockedAt: new Date().toISOString() });
     checkAndUnlockAchievements();
+    saveUserData();
   }
 
   const chat = document.getElementById('groupChatMessages');
@@ -16167,6 +16225,7 @@ async function sendMessage() {
                 // On each chunk
                 function(fullText, chunk) {
                     if (signal.aborted) return;
+                    if (currentChatId !== taskId) return; // 后台任务：不更新当前屏幕 DOM
                     if (!streamStarted) {
                         streamStarted = true;
                         const thinking = document.getElementById('thinking');
@@ -16196,12 +16255,46 @@ async function sendMessage() {
                     }, 150);
                 },
                 // On done
-                function(fullText) {
+                async function(fullText) {
                     if (renderTimeout) clearTimeout(renderTimeout);
                     advice = fullText;
                     // Remove the streaming message - we'll rebuild the full content below
-                    const el = document.getElementById(streamMsgId);
-                    if (el) el.remove();
+                    if (currentChatId === taskId) {
+                        const el = document.getElementById(streamMsgId);
+                        if (el) el.remove();
+                    }
+
+                    // 异步获取流式对话结束后的意图解析和资源隐藏配置
+                    try {
+                        const metaResp = await fetch('/api/chat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                message: text,
+                                user_id: currentUserEmail,
+                                image_path: currentImagePath || '',
+                                doc_context: docContext,
+                                history: history,
+                                agent: currentAgent,
+                                only_meta: true // 自定义标志，让后端快速返回意图而不用再次生成回答
+                            }),
+                            signal: signal
+                        });
+                        if (metaResp.ok) {
+                            const metaData = await metaResp.json();
+                            if (metaData.intent) {
+                                topic = metaData.intent.topic || topic;
+                                difficulty = metaData.intent.difficulty || difficulty;
+                                keywords = metaData.intent.keywords || keywords;
+                            }
+                            hideResources = metaData.hide_resources || false;
+                        }
+                    } catch (metaErr) {
+                        console.warn('获取流式对话元数据失败:', metaErr);
+                    }
+
+                    // 流式传输完成后，统一在这里根据最终的 hideResources 变量生成并渲染卡片 HTML
+                    await renderFinalAssistantMessage();
                 }
             );
 
@@ -16452,6 +16545,11 @@ async function sendMessage() {
 
             if (currentAgent === 'all') updateWF(4);
             else if (currentAgent === 'analyst' || currentAgent === 'generator' || currentAgent === 'planner') updateWF(4, currentAgent);
+            
+            // 【关键修复】同步将最终回复追加到当前活跃的历史记录 HTML 里，防止切换会话或保存时历史被回滚清空
+            if (typeof activeChatHistoryIndex === 'number' && activeChatHistoryIndex >= 0 && activeChatHistoryIndex < chatHistory.length) {
+                chatHistory[activeChatHistoryIndex].html = chat.innerHTML;
+            }
             try {
                 saveUserData();
             } catch (saveErr) {

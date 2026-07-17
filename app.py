@@ -552,21 +552,24 @@ def parse_learning_intent(user_input: str) -> dict:
         # 如果讯飞调用失败，使用默认值
         return {"topic": user_input, "difficulty": "初级", "keywords": [], "intent_type": "study"}
 
-    # 尝试解析 JSON
+        # 尝试解析 JSON
     try:
         clean = result.strip('`').strip()
         if clean.startswith('json'):
             clean = clean[4:].strip()
         obj = json.loads(clean)
         intent_type = obj.get('intent_type', 'study')
+        
+        # 强制情感/问候类倾向为 social
+        lower_input = user_input.lower()
+        if any(w in lower_input for w in ["谢谢", "感谢", "喜欢", "你好", "哈喽", "hello", "hi", "真棒", "厉害"]):
+            obj['intent_type'] = 'social'
+            return obj
+
         if intent_type == 'study':
             study_keywords = ["学习", "学", "规划", "路线", "路径", "路线图", "体系", "系统", "视频", "课程", "掌握", "弱点", "薄弱", "画像", "推荐", "资料", "教程", "课"]
-            lower_input = user_input.lower()
             if not any(kw in lower_input for kw in study_keywords) and len(user_input) < 15:
-                if any(w in lower_input for w in ["谢谢", "感谢", "喜欢", "你好", "哈喽", "hello", "hi", "真棒", "厉害"]):
-                    obj['intent_type'] = 'social'
-                else:
-                    obj['intent_type'] = 'problem'
+                obj['intent_type'] = 'problem'
         return obj
     except Exception:
         # 解析失败则返回简单结构
@@ -1334,11 +1337,11 @@ def build_chat_messages(data):
     # 统一拼装大模型调用消息
     messages_list = [{"role": "system", "content": system_prompt + ANTI_LEAK}]
 
-    # 添加历史消息（只保留最近5条）
-    recent_history = history[-5:] if len(history) > 5 else history
+    # 添加历史消息（只保留最近8条）
+    recent_history = history[-8:] if len(history) > 8 else history
     for msg in recent_history:
-        content = msg.get("content", "")
-        if content and len(content) > 20 and "新的对话已开始" not in content and "请告诉我你想学什么" not in content:
+        content = msg.get("content", "").strip()
+        if content and "新的对话已开始" not in content and "请告诉我你想学什么" not in content:
             messages_list.append({
                 "role": msg.get("role", "user"),
                 "content": content
@@ -1388,6 +1391,15 @@ def chat():
             print(f"[DEBUG] msg[{i}] role={role}, content={safe_preview}")
     except Exception:
         pass
+
+    # 如果前端只是为了获取意图元数据，直接返回，不再二次生成大模型回答
+    if data.get('only_meta', False):
+        return jsonify({
+            "intent": intent,
+            "videos": videos,
+            "advice": "",
+            "hide_resources": hide_resources
+        })
 
     advice = call_xunfei_with_history(messages_list)
 

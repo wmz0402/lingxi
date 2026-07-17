@@ -1130,7 +1130,7 @@ const NEW_QUIZZES_DATA = {
             "correct": true
           }
         ],
-        "analysis": "参考答案："
+        "analysis": "参考答案：<br><br>证明：由题意知级数 $\\sum u_n$ 绝对收敛，即级数 $\\sum |u_n|$ 收敛。<br>根据级数收敛的 Cauchy 准则（柯西收敛准则），对于任意给定的 $\\epsilon > 0$，存在正整数 $N$，使得当 $n > N$ 且对任意正整数 $p$ 时，有：<br>$$\\sum_{k=n+1}^{n+p} |u_k| < \\epsilon$$<br>根据三角不等式，有：<br>$$\\left| \\sum_{k=n+1}^{n+p} u_k \\right| \\le \\sum_{k=n+1}^{n+p} |u_k|$$<br>因此：<br>$$\\left| \\sum_{k=n+1}^{n+p} u_k \\right| < \\epsilon$$<br>这表明级数 $\\sum u_n$ 的部分和序列满足 Cauchy 准则，故原级数 $\\sum u_n$ 一定收敛。"
       }
     ]
   },
