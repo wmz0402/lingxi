@@ -6763,25 +6763,6 @@
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
               <span style="font-size:13px; color:#64748b;" id="adminUserCount">加载中...</span>
-              <button onclick="showAddAccountForm()" style="padding:8px 18px; border-radius:10px; border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:12.5px; font-weight:600; cursor:pointer; transition:all 0.2s; box-shadow:0 2px 8px rgba(99,102,241,0.2);" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(99,102,241,0.3)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(99,102,241,0.2)'">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px; margin-right:3px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                添加账户
-              </button>
-            </div>
-            <!-- Add Account Form (hidden by default) -->
-            <div id="addAccountForm" style="display:none; background:rgba(255,255,255,0.8); backdrop-filter:blur(10px); border:1.5px solid rgba(139,92,246,0.1); border-radius:14px; padding:20px; margin-bottom:16px;">
-              <div style="font-size:14px; font-weight:600; color:#1e293b; margin-bottom:14px;">添加新账户</div>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                <div><label style="font-size:12px; color:#64748b; margin-bottom:4px; display:block;">用户名 *</label><input id="addAccUser" type="text" placeholder="请输入用户名" style="width:100%; padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'"></div>
-                <div><label style="font-size:12px; color:#64748b; margin-bottom:4px; display:block;">邮箱 *</label><input id="addAccEmail" type="email" placeholder="请输入邮箱" style="width:100%; padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'"></div>
-                <div><label style="font-size:12px; color:#64748b; margin-bottom:4px; display:block;">密码 *</label><input id="addAccPwd" type="password" placeholder="至少6位" style="width:100%; padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'"></div>
-                <div><label style="font-size:12px; color:#64748b; margin-bottom:4px; display:block;">年级</label><input id="addAccGrade" type="text" placeholder="如：大三" style="width:100%; padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'"></div>
-                <div style="grid-column:1/-1;"><label style="font-size:12px; color:#64748b; margin-bottom:4px; display:block;">专业</label><input id="addAccMajor" type="text" placeholder="如：计算机科学" style="width:100%; padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; outline:none; transition:border 0.2s;" onfocus="this.style.borderColor='#8b5cf6'" onblur="this.style.borderColor='#e2e8f0'"></div>
-              </div>
-              <div style="display:flex; gap:10px; margin-top:16px; justify-content:flex-end;">
-                <button onclick="hideAddAccountForm()" style="padding:8px 20px; border-radius:8px; border:1.5px solid #e2e8f0; background:#fff; color:#64748b; font-size:12.5px; font-weight:500; cursor:pointer;">取消</button>
-                <button onclick="submitAddAccount()" style="padding:8px 20px; border-radius:8px; border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:12.5px; font-weight:600; cursor:pointer;">确认添加</button>
-              </div>
             </div>
             <!-- User List -->
             <div id="adminUserList" class="noti-list"></div>
@@ -9198,6 +9179,7 @@ function handleLogin(e) {
             // 如果 localStorage 中没有该用户（管理员添加的账户），创建初始条目
             if (!users[userKey]) {
                 users[userKey] = {
+                    id: serverUser.id,
                     name: serverUser.username,
                     pwd: pwd,
                     profile: {
@@ -9220,8 +9202,9 @@ function handleLogin(e) {
                 };
                 localStorage.setItem('lingxi_users', JSON.stringify(users));
             } else {
-                // 已有本地数据，更新密码（兼容旧数据）
+                // 已有本地数据，更新密码和用户ID（兼容旧数据）
                 users[userKey].pwd = pwd;
+                if (serverUser.id) users[userKey].id = serverUser.id;
                 localStorage.setItem('lingxi_users', JSON.stringify(users));
             }
 
@@ -13130,6 +13113,7 @@ function saveProfileSettings(e) {
     const intro = document.getElementById('settingIntro') ? document.getElementById('settingIntro').value.trim() : '';
     const qq = document.getElementById('settingQQ') ? document.getElementById('settingQQ').value.trim() : '';
     const birthday = document.getElementById('settingBirthday') ? document.getElementById('settingBirthday').value : '';
+    const gender = document.getElementById('settingGender') ? document.getElementById('settingGender').value : '';
 
     if (!newName) {
         alert('昵称不能为空！');
@@ -13172,12 +13156,31 @@ function saveProfileSettings(e) {
         users[currentUserEmail].profile.intro = intro;
         users[currentUserEmail].profile.qq = qq;
         users[currentUserEmail].profile.birthday = birthday;
-        
+        users[currentUserEmail].profile.gender = gender;
+
         // 覆盖保存安全问题和答案
         users[currentUserEmail].securityQuestion = question;
         users[currentUserEmail].securityAnswer = answer;
-        
+
         localStorage.setItem('lingxi_users', JSON.stringify(users));
+
+        // 同步到服务端数据库，管理员可查看完整资料
+        const profile = users[currentUserEmail].profile || {};
+        fetch('/api/user/profile', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'X-User-Email': currentUserEmail },
+            body: JSON.stringify({
+                email: currentUserEmail,
+                username: newName,
+                gender: gender,
+                birthday: birthday,
+                qq: qq,
+                signature: signature,
+                intro: intro,
+                grade: profile.grade || '',
+                major: profile.major || ''
+            })
+        }).catch(() => {}); // 静默失败，不影响本地保存
     }
 
     // 应用头像
@@ -18667,7 +18670,6 @@ function enterAdminMode() {
         '<div style="font-size:14px;font-weight:700;margin-bottom:4px;">管理员控制台</div>' +
         '<div style="font-size:11px;opacity:0.8;">用户管理 · 消息收件箱 · 学习排名</div>' +
       '</button>' +
-      '<button onclick="switchMainPage(\'chat\')" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border-radius:12px;border:none;background:rgba(139,92,246,0.08);color:#e2e8f0;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;box-sizing:border-box;" onmouseover="this.style.background=\'rgba(139,92,246,0.15)\'" onmouseout="this.style.background=\'rgba(139,92,246,0.08)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>AI会话</button>' +
       '<div style="flex:1;"></div>' +
       '<div style="height:1px;background:rgba(255,255,255,0.06);margin:12px 4px;"></div>' +
       '<button onclick="if(!confirm(\'确定退出管理员模式？\'))return;exitAdminMode();adminToken=null;sessionStorage.removeItem(\'lingxi_admin_token\');sessionStorage.removeItem(\'lingxi_admin_info\');document.getElementById(\'mainPage\').classList.add(\'hidden\');document.getElementById(\'authPage\').classList.remove(\'hidden\')" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border-radius:12px;border:none;background:rgba(239,68,68,0.08);color:#fca5a5;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;box-sizing:border-box;" onmouseover="this.style.background=\'rgba(239,68,68,0.15)\'" onmouseout="this.style.background=\'rgba(239,68,68,0.08)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>退出管理</button>';
@@ -19083,6 +19085,23 @@ function loadAdminLogs() {
   });
 }
 
+function adminShowUserByMsg(senderId, senderName) {
+  if (senderId && senderId > 0) {
+    showAdminUserDetail(senderId);
+  } else {
+    // sender_id=0 的旧消息，通过用户名查找用户ID
+    const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
+    fetch('/api/admin/users?keyword=' + encodeURIComponent(senderName), { headers: { 'X-Admin-Token': token } })
+      .then(r => r.json()).then(data => {
+        if (data.success && data.users && data.users.length > 0) {
+          const u = data.users.find(u => u.username === senderName);
+          if (u) { showAdminUserDetail(u.id); return; }
+        }
+        alert('该用户不存在或已被删除');
+      });
+  }
+}
+
 function showAdminUserDetail(userId) {
   const token = adminToken || sessionStorage.getItem('lingxi_admin_token');
   fetch('/api/admin/user/' + userId, { headers: { 'X-Admin-Token': token } })
@@ -19094,11 +19113,19 @@ function showAdminUserDetail(userId) {
       const initial = (u.username || '?')[0].toUpperCase();
       const genderMap = {'male':'男','female':'女','other':'其他'};
       const gender = u.gender ? (genderMap[u.gender] || u.gender) : '-';
+      const statusLabel = u.is_active === 0 ? '<span style="color:#ef4444;font-weight:600;">已停用</span>' : '<span style="color:#16a34a;font-weight:600;">正常</span>';
+      const anonLabel = u.is_anonymous ? '<span style="color:#94a3b8;">匿名</span>' : '<span style="color:#16a34a;">公开</span>';
 
       const overlay = document.createElement('div');
       overlay.id = 'adminUserDetailOverlay';
       overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.2s ease';
       overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+      const escHtml = (s) => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      const cleanLatex = (s) => {
+        if (!s) return '';
+        return s.replace(/\$\$[^$]*\$\$/g, '[公式]').replace(/\$[^$]*\$/g, (m) => m.replace(/^\$|\$$/g, '')).replace(/\\[a-zA-Z]+\{[^}]*\}/g, '').replace(/\\[a-zA-Z]+/g, '').replace(/[{}\\]/g, '').replace(/\s+/g, ' ').trim();
+      };
 
       const infoRow = (label, value) => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;"><span style="color:#64748b;font-size:12px;min-width:70px;">${label}</span><span style="color:#1e293b;font-size:12px;font-weight:500;text-align:right;flex:1;margin-left:12px;word-break:break-all;">${value || '-'}</span></div>`;
 
@@ -19109,12 +19136,16 @@ function showAdminUserDetail(userId) {
       if (u.recent_quizzes && u.recent_quizzes.length > 0) {
         quizRecordsHtml = u.recent_quizzes.map(q => {
           const icon = q.is_correct ? '<span style="color:#16a34a;">&#10003;</span>' : '<span style="color:#ef4444;">&#10007;</span>';
-          const qText = (q.question_text || '').length > 30 ? (q.question_text || '').substring(0, 30) + '...' : (q.question_text || '');
+          const raw = cleanLatex(q.question_text || '');
+          const qText = raw.length > 28 ? raw.substring(0, 28) + '...' : raw;
+          const fullText = escHtml(q.question_text || '');
+          const course = escHtml(q.course_title || '');
+          const time = escHtml((q.completed_at || '').substring(5, 16));
           return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:11px;">' +
             '<span>' + icon + '</span>' +
-            '<span style="flex:1;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + (q.question_text || '').replace(/"/g, '&quot;') + '">' + qText + '</span>' +
-            '<span style="color:#94a3b8;white-space:nowrap;font-size:10px;">' + (q.course_title || '') + '</span>' +
-            '<span style="color:#cbd5e1;white-space:nowrap;font-size:10px;">' + (q.completed_at || '').substring(5, 16) + '</span>' +
+            '<span style="flex:1;color:#475569;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + fullText + '">' + escHtml(qText) + '</span>' +
+            '<span style="color:#94a3b8;white-space:nowrap;font-size:10px;">' + course + '</span>' +
+            '<span style="color:#cbd5e1;white-space:nowrap;font-size:10px;">' + time + '</span>' +
             '</div>';
         }).join('');
       } else {
@@ -19128,6 +19159,10 @@ function showAdminUserDetail(userId) {
             <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.25);display:inline-flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;">${initial}</div>
             <div style="color:#fff;font-size:16px;font-weight:600;">${u.username || '-'}</div>
             <div style="color:rgba(255,255,255,0.8);font-size:11px;margin-top:2px;">${u.email || '-'}</div>
+            <div style="margin-top:6px;display:flex;justify-content:center;gap:10px;font-size:11px;">
+              <span style="background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:10px;color:#fff;">账号：${statusLabel}</span>
+              <span style="background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:10px;color:#fff;">榜单：${anonLabel}</span>
+            </div>
           </div>
           <div style="padding:16px 20px 8px;">
             <div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:8px;">消息统计</div>
@@ -19302,7 +19337,7 @@ function renderAdminInbox(messages) {
         <div class="noti-item-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6); font-size:15px; font-weight:700;">${initial}</div>
         <div class="noti-item-content" style="flex:1; min-width:0;">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div class="noti-item-title" style="margin:0;"><button onclick="showAdminUserDetail(${m.sender_id})" style="background:none;border:none;cursor:pointer;color:#6366f1;font-size:14px;font-weight:600;padding:0;text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${m.sender_name}</button></div>
+            <div class="noti-item-title" style="margin:0;"><button onclick="adminShowUserByMsg(${m.sender_id},'${(m.sender_name||'').replace(/'/g,"\\'")}')" style="background:none;border:none;cursor:pointer;color:#6366f1;font-size:14px;font-weight:600;padding:0;text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${m.sender_name}</button></div>
             <div style="display:flex; gap:6px;">
               <button onclick="showReplyForm(${m.id})" style="padding:3px 10px; border-radius:6px; border:1px solid #e2e8f0; background:#fff; color:#6366f1; font-size:11px; cursor:pointer;" onmouseover="this.style.background='#6366f1';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#6366f1'">回复</button>
               <button onclick="adminDeleteMsg(${m.id})" style="padding:3px 10px; border-radius:6px; border:1px solid #fecaca; background:#fff; color:#ef4444; font-size:11px; cursor:pointer;" onmouseover="this.style.background='#ef4444';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#ef4444'">删除</button>
@@ -19485,9 +19520,17 @@ function sendContactAdmin() {
   if (!input || !input.value.trim()) return;
   const content = input.value.trim();
   input.value = '';
+  // 获取当前用户的真实 ID
+  let _senderId = 0;
+  try {
+    const _users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+    if (currentUserEmail && _users[currentUserEmail] && _users[currentUserEmail].id) {
+      _senderId = _users[currentUserEmail].id;
+    }
+  } catch(e) {}
   fetch('/api/message/send', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sender_id: 0, sender_name: userName || '匿名用户', content, tag: _contactSelectedTag })
+    body: JSON.stringify({ sender_id: _senderId, sender_name: userName || '匿名用户', content, tag: _contactSelectedTag })
   }).then(r => r.json()).then(data => {
     if (data.success) { loadContactAdminMessages(); }
     else { alert('发送失败：' + (data.error || '')); }

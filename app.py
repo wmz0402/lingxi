@@ -128,7 +128,14 @@ _verify_codes_lock = threading.Lock()
 # 2. Flask 应用初始化
 # ============================
 app = Flask(__name__)
+app.json.ensure_ascii = False
+app.json.compact = False
 CORS(app)  # 允许跨域
+
+def json_utf8(data, status=200):
+    """返回 UTF-8 编码的 JSON 响应，确保中文正常显示"""
+    body = json.dumps(data, ensure_ascii=False, separators=(',', ':'))
+    return Response(body + '\n', status=status, content_type='application/json; charset=utf-8')
 
 DB_PATH = os.path.join(BASE_DIR, 'lingxi.db')
 
@@ -2519,7 +2526,7 @@ def admin_get_user_detail(user_id):
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
     c.execute(
-        'SELECT id, username, email, grade, major, qq, birthday, signature, intro, gender, created_at FROM user WHERE id = ?',
+        'SELECT id, username, email, grade, major, qq, birthday, signature, intro, gender, is_active, is_anonymous, created_at FROM user WHERE id = ?',
         (user_id,)
     )
     user = c.fetchone()
@@ -2563,7 +2570,7 @@ def admin_get_user_detail(user_id):
     user_data['recent_quizzes'] = [dict(row) for row in c.fetchall()]
 
     conn.close()
-    return jsonify({"success": True, "user": user_data})
+    return json_utf8({"success": True, "user": user_data})
 
 
 @app.route('/api/admin/user/<int:user_id>', methods=['DELETE'])
@@ -3327,6 +3334,58 @@ def toggle_anonymous():
         c.execute('UPDATE user SET is_anonymous = ? WHERE id = ?', (new_val, user_id))
         conn.commit()
         return jsonify({"success": True, "is_anonymous": bool(new_val)})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        conn.close()
+
+
+@app.route('/api/user/profile', methods=['PUT'])
+def update_user_profile():
+    """用户更新个人资料（同步到服务端数据库）"""
+    _ensure_user_table()
+    data = request.get_json() or {}
+    email = data.get('email', '').strip()
+    if not email:
+        return jsonify({"success": False, "error": "缺少邮箱信息"}), 400
+    request_email = request.headers.get('X-User-Email', '').strip()
+    if not request_email:
+        request_email = email
+    if request_email != email:
+        return jsonify({"success": False, "error": "无权修改其他用户的资料"}), 403
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute('SELECT id FROM user WHERE email = ? AND is_admin = 0', (email,))
+        row = c.fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "用户不存在"}), 404
+        user_id = row[0]
+
+        # 更新字段
+        username = data.get('username', '').strip()
+        gender = data.get('gender', '').strip()
+        birthday = data.get('birthday', '').strip()
+        qq = data.get('qq', '').strip()
+        signature = data.get('signature', '').strip()
+        intro = data.get('intro', '').strip()
+        grade = data.get('grade', '').strip()
+        major = data.get('major', '').strip()
+
+        # 检查用户名是否被占用
+        if username:
+            c.execute('SELECT id FROM user WHERE username = ? AND id != ?', (username, user_id))
+            if c.fetchone():
+                return jsonify({"success": False, "error": "用户名已被占用"}), 409
+
+        c.execute(
+            'UPDATE user SET username=?, gender=?, birthday=?, qq=?, signature=?, intro=?, grade=?, major=? WHERE id=?',
+            (username, gender, birthday, qq, signature, intro, grade, major, user_id)
+        )
+        conn.commit()
+        return jsonify({"success": True})
     except Exception as e:
         conn.rollback()
         return jsonify({"success": False, "error": str(e)}), 500
