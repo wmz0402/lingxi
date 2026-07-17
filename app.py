@@ -154,6 +154,7 @@ def call_xunfei(prompt: str) -> str:
             spark_api_key=SPARK_API_KEY,
             spark_api_secret=SPARK_API_SECRET,
             spark_llm_domain="4.0Ultra",
+            request_timeout=120,
         )
         messages = [ChatMessage(role="user", content=prompt)]
         response = spark.generate([messages])
@@ -175,6 +176,7 @@ def call_xunfei_with_history(messages_list: list) -> str:
             spark_api_key=SPARK_API_KEY,
             spark_api_secret=SPARK_API_SECRET,
             spark_llm_domain="4.0Ultra",
+            request_timeout=120,
         )
         spark_messages = []
         for msg in messages_list:
@@ -716,14 +718,15 @@ def content_safety_filter(text):
     return filtered, is_safe
 
 
-def anti_hallucination_check(text, doc_context=None, has_course_content=False):
-    """对AI回复进行防幻觉处理
+def anti_hallucination_check(text, doc_context=None, has_course_content=False, topic_hint=''):
+    """对AI回复进行防幻觉处理（增强版：知识库锚定 + 出处标记 + 置信度标记）
     
     多层防护：
-    1. 文档来源标注：如果基于文档上下文，标注来源
-    2. 学术内容来源声明：涉及学术关键词时添加"基于课程内容"声明
-    3. 置信度标识：对不确定的表述添加验证提示
-    4. 通用免责声明：长篇学术回复添加免责声明
+    1. 知识库锚定：搜索课程内容数据库，为回复中的知识点找到出处
+    2. 文档来源标注：如果基于文档上下文，标注来源
+    3. 学术内容来源声明：涉及学术关键词时添加声明并标注具体课程来源
+    4. 置信度标识：对不确定的表述添加验证提示
+    5. 通用免责声明：长篇学术回复添加免责声明
     """
     if not text:
         return text
@@ -737,24 +740,71 @@ def anti_hallucination_check(text, doc_context=None, has_course_content=False):
         return text
     
     additions = []
+    sources_found = []
     
-    # 1. 如果有文档上下文，添加来源标注
+    # 1. 知识库锚定：从课程内容数据库中搜索相关来源
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        # 提取回复中的学术关键词作为搜索词
+        search_terms = [kw for kw in ACADEMIC_KEYWORDS if kw in text]
+        if topic_hint:
+            search_terms.extend([topic_hint])
+        search_terms = list(set(search_terms[:5]))  # 去重，最多5个
+        
+        for term in search_terms:
+            # 在章节内容中搜索
+            c.execute('''SELECT ch.title, co.name FROM chapter ch 
+                        JOIN course co ON ch.course_id = co.id 
+                        WHERE ch.content LIKE ? LIMIT 2''', (f'%{term}%',))
+            rows = c.fetchall()
+            for row in rows:
+                src = f"《{row[1]}》- {row[0]}"
+                if src not in sources_found:
+                    sources_found.append(src)
+            
+            # 在题库中搜索
+            c.execute('''SELECT subject, chapter FROM question_bank 
+                        WHERE question LIKE ? OR analysis LIKE ? LIMIT 2''', 
+                     (f'%{term}%', f'%{term}%'))
+            q_rows = c.fetchall()
+            for row in q_rows:
+                src = f"题库-{row[0]}·{row[1]}"
+                if src not in sources_found:
+                    sources_found.append(src)
+        conn.close()
+    except Exception as e:
+        print(f"[防幻觉] 知识库锚定搜索失败: {e}")
+    
+    # 如果找到了来源，添加出处标注
+    if sources_found:
+        source_list = '、'.join(sources_found[:4])
+        additions.append(f"*📖 知识点来源参考：{source_list}*")
+    
+    # 2. 如果有文档上下文，添加来源标注
     if doc_context:
         additions.append("*以上内容基于您提供的文档资料生成，建议对照原文核实关键信息。*")
     
-    # 2. 学术内容来源声明
+    # 3. 学术内容来源声明
     has_academic = any(kw in text for kw in ACADEMIC_KEYWORDS)
     if has_academic or has_course_content:
-        additions.append("*以上知识点基于课程教学内容整理，如需深入了解请参考对应教材或权威学术资料。*")
+        if not sources_found:
+            additions.append("*以上知识点基于课程教学内容整理，如需深入了解请参考对应教材或权威学术资料。*")
     
-    # 3. 置信度标识：检测不确定表述
+    # 4. 置信度标识：检测不确定表述并计算置信度评分
     uncertain_count = sum(1 for p in UNCERTAIN_PATTERNS if p in text)
-    if uncertain_count >= 2:
-        additions.append("*注：以上回答中部分内容存在不确定性，建议查阅权威教材或咨询教师进行验证。*")
+    confidence = 'high'
+    if uncertain_count >= 3:
+        confidence = 'low'
+        additions.append("*⚠️ 置信度评估：低 — 以上回答中多处表述存在不确定性，强烈建议查阅权威教材或咨询教师进行验证。*")
+    elif uncertain_count >= 2:
+        confidence = 'medium'
+        additions.append("*⚠️ 置信度评估：中 — 部分内容存在不确定性，建议查阅权威教材进行验证。*")
     elif uncertain_count == 1 and has_academic:
+        confidence = 'medium'
         additions.append("*注：部分结论可能存在偏差，建议进一步验证。*")
     
-    # 4. 通用免责声明（学术/技术长回复）
+    # 5. 通用免责声明（学术/技术长回复）
     if len(text) > 200:
         additions.append("*AI生成内容仅供参考，请以教材和教师讲解为准。*")
     
@@ -3439,6 +3489,686 @@ def extract_profile():
         return jsonify({"success": True, "profile": profile})
     except json.JSONDecodeError:
         return jsonify({"success": False, "error": "无法解析画像信息"})
+
+
+def _extract_json_from_llm(raw):
+    """从LLM响应中鲁棒提取JSON（数组或对象）。
+    LLM经常返回多余的markdown标记、前后缀文字，本函数尝试多种策略提取有效JSON。
+    """
+    if not raw or not raw.strip():
+        return None
+    text = raw.strip()
+    
+    # 策略1：去除markdown代码块标记
+    if text.startswith('```'):
+        text = text.split('\n', 1)[1] if '\n' in text else text[3:]
+    if text.endswith('```'):
+        text = text[:-3]
+    if text.startswith('json'):
+        text = text[4:]
+    if text.startswith('JSON'):
+        text = text[4:]
+    text = text.strip()
+    
+    # 策略2：直接解析
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    
+    # 策略2.5：修复JSON字符串中未转义的换行符和制表符
+    # LLM常在JSON string value中输出字面换行（如mindmap_outline），JSON规范不允许
+    fixed = []
+    in_string = False
+    i = 0
+    while i < len(text):
+        ch = text[i]
+        if in_string:
+            if ch == '\\' and i + 1 < len(text):
+                fixed.append(ch)
+                fixed.append(text[i + 1])
+                i += 2
+                continue
+            elif ch == '"':
+                in_string = False
+                fixed.append(ch)
+            elif ch == '\n':
+                fixed.append('\\n')
+            elif ch == '\r':
+                fixed.append('\\r')
+            elif ch == '\t':
+                fixed.append('\\t')
+            else:
+                fixed.append(ch)
+        else:
+            if ch == '"':
+                in_string = True
+            fixed.append(ch)
+        i += 1
+    fixed_text = ''.join(fixed)
+    if fixed_text != text:
+        try:
+            return json.loads(fixed_text)
+        except json.JSONDecodeError:
+            pass
+    
+    # 策略3：找到最外层的 [ ... ] 或 { ... }
+    for start_char, end_char in [('[', ']'), ('{', '}')]:
+        start = text.find(start_char)
+        end = text.rfind(end_char)
+        if start != -1 and end != -1 and end > start:
+            candidate = text[start:end + 1]
+            # 同样修复字符串内未转义换行
+            fixed_cand = []
+            in_str = False
+            ci = 0
+            while ci < len(candidate):
+                c = candidate[ci]
+                if in_str:
+                    if c == '\\' and ci + 1 < len(candidate):
+                        fixed_cand.append(c)
+                        fixed_cand.append(candidate[ci + 1])
+                        ci += 2
+                        continue
+                    elif c == '"':
+                        in_str = False
+                        fixed_cand.append(c)
+                    elif c == '\n':
+                        fixed_cand.append('\\n')
+                    elif c == '\r':
+                        fixed_cand.append('\\r')
+                    elif c == '\t':
+                        fixed_cand.append('\\t')
+                    else:
+                        fixed_cand.append(c)
+                else:
+                    if c == '"':
+                        in_str = True
+                    fixed_cand.append(c)
+                ci += 1
+            try:
+                return json.loads(''.join(fixed_cand))
+            except json.JSONDecodeError:
+                continue
+    
+    # 策略4：正则提取（找第一个JSON数组或对象）
+    import re
+    for pattern in [r'\[[\s\S]*\]', r'\{[\s\S]*\}']:
+        match = re.search(pattern, text)
+        if match:
+            try:
+                return json.loads(match.group())
+            except json.JSONDecodeError:
+                continue
+    
+    print(f"[JSON提取] 所有策略均失败，原始响应前200字: {text[:200]}")
+    return None
+
+
+# ============================
+# 7.13 多智能体协同流水线接口（核心比赛功能）
+# ============================
+@app.route('/api/agent_collaborate', methods=['POST'])
+def agent_collaborate():
+    """多智能体协同框架：分析师→生成师→规划师 顺序协作，每个Agent接收前序Agent的输出作为上下文。
+    
+    返回结构化结果，包含三个Agent的输出和协同链路信息。
+    """
+    import time as _time
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "请求体必须为 JSON"}), 400
+
+    user_input = data.get('message', '').strip()
+    history = data.get('history', [])
+    user_id = data.get('user_id', '')
+    course_title = data.get('course_title', '')
+    chapter_title = data.get('chapter_title', '')
+
+    if not user_input:
+        return jsonify({"error": "消息不能为空"}), 400
+
+    print(f"[协同] 收到协同请求: {user_input[:50]}...")
+
+    # 搜索相关课程知识作为共享上下文
+    shared_knowledge = ""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        search_kw = user_input[:30]
+        c.execute('''SELECT co.name, ch.title, substr(ch.content, 1, 500) 
+                    FROM chapter ch JOIN course co ON ch.course_id = co.id 
+                    WHERE ch.content LIKE ? OR ch.title LIKE ? LIMIT 3''',
+                 (f'%{search_kw}%', f'%{search_kw}%'))
+        rows = c.fetchall()
+        if rows:
+            shared_knowledge = "\n".join([f"[课程:{r[0]}·{r[1]}] {r[2]}" for r in rows])
+        conn.close()
+    except Exception as e:
+        print(f"[协同] 知识搜索失败: {e}")
+
+    # 获取用户做题统计（供分析师使用）
+    quiz_stats = ""
+    if user_id:
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute('''SELECT COUNT(*) as total, SUM(CASE WHEN is_correct=1 THEN 1 ELSE 0 END) as correct
+                        FROM question_completion WHERE user_id=?''', (user_id,))
+            row = c.fetchone()
+            if row and row[0] > 0:
+                total, correct = row[0], row[1] or 0
+                accuracy = round(correct / total * 100, 1) if total > 0 else 0
+                quiz_stats = f"用户做题统计：共完成{total}题，正确{correct}题，正确率{accuracy}%。"
+                # 获取薄弱章节
+                c.execute('''SELECT chapter_title, COUNT(*) as total, 
+                            SUM(CASE WHEN is_correct=0 THEN 1 ELSE 0 END) as wrong
+                            FROM question_completion WHERE user_id=? 
+                            GROUP BY chapter_title ORDER BY wrong DESC LIMIT 3''', (user_id,))
+                weak_rows = c.fetchall()
+                if weak_rows:
+                    weak_info = "、".join([f"{r[0]}(错{r[2]}/{r[1]})" for r in weak_rows])
+                    quiz_stats += f" 薄弱章节：{weak_info}。"
+            conn.close()
+        except Exception as e:
+            print(f"[协同] 做题统计查询失败: {e}")
+
+    results = {}
+    total_start = _time.time()
+
+    # === Agent 1: 学习分析师 ===
+    analyst_start = _time.time()
+    analyst_system = """你是"学习分析师"智能体，在多智能体协同学习系统中负责第一步：诊断用户学习状态。
+
+你的职责：
+1. 分析用户的学习需求、知识薄弱点和学习风格
+2. 提取关键学习主题和难度级别
+3. 给出结构化的诊断报告
+
+请输出JSON格式的诊断结果：
+{
+  "analysis": "诊断分析报告（200字以内，包含学习状态评估和薄弱点分析）",
+  "topic": "核心学习主题",
+  "difficulty": "建议难度（入门/基础/中级/高级）",
+  "keywords": ["关键词1", "关键词2", "关键词3"],
+  "weak_points": ["薄弱点1", "薄弱点2"],
+  "learning_style_hint": "学习风格建议"
+}
+只输出JSON，不要有其他内容。"""
+
+    _knowledge_block = f'平台知识库参考：\n{shared_knowledge}' if shared_knowledge else ''
+    analyst_user = f"""用户问题：{user_input}
+{f'课程上下文：{course_title} - {chapter_title}' if course_title else ''}
+{quiz_stats}
+{_knowledge_block}"""
+
+    analyst_messages = [
+        {"role": "system", "content": analyst_system},
+        {"role": "user", "content": analyst_user}
+    ]
+
+    try:
+        analyst_raw = call_xunfei_with_history(analyst_messages)
+        analyst_result = _extract_json_from_llm(analyst_raw)
+        if analyst_result is None:
+            raise ValueError("LLM返回内容无法解析为JSON")
+    except Exception as e:
+        print(f"[协同] 分析师JSON解析失败，使用默认值: {e}")
+        analyst_result = {
+            "analysis": f"用户希望学习「{user_input[:30]}」相关内容，需要进一步分析学习状态。",
+            "topic": user_input[:20],
+            "difficulty": "中级",
+            "keywords": [user_input[:10]],
+            "weak_points": [],
+            "learning_style_hint": "综合型学习"
+        }
+
+    analyst_elapsed = round(_time.time() - analyst_start, 2)
+    results['analyst'] = {
+        "name": "学习分析师",
+        "avatar": "析",
+        "color": "#3b82f6",
+        "elapsed": analyst_elapsed,
+        "status": "done",
+        "output": analyst_result
+    }
+    print(f"[协同] 分析师完成 ({analyst_elapsed}s): {json.dumps(analyst_result, ensure_ascii=False)[:100]}")
+
+    # === Agent 2: 资源生成师（接收分析师输出） ===
+    generator_start = _time.time()
+    generator_system = """你是"资源生成师"智能体，在多智能体协同学习系统中负责第二步：根据学习分析师的诊断结果，生成个性化学习资源。
+
+你需要生成以下类型的资源（每种至少1个）：
+1. 知识卡片（Flashcard）：3-5张，每张包含正面（问题/概念）和背面（答案/解释）
+2. 代码示例：1-2个与主题相关的编程示例，含代码和注释
+3. 思维导图大纲：用Markdown层级结构表示核心知识框架
+4. 推荐视频关键词：用于搜索B站教学视频的关键词
+
+请输出JSON格式：
+{
+  "flashcards": [
+    {"front": "问题或概念", "back": "答案或解释", "difficulty": "基础/中级/高级"}
+  ],
+  "code_examples": [
+    {"title": "示例名称", "language": "python/java/c", "code": "代码内容", "explanation": "逐行解释"}
+  ],
+  "mindmap_outline": "# 主题\n## 分支1\n- 知识点\n## 分支2\n- 知识点",
+  "video_keywords": ["关键词1", "关键词2"],
+  "summary": "资源生成摘要（100字以内）"
+}
+只输出JSON，不要有其他内容。"""
+
+    generator_user = f"""学习分析师诊断结果：
+{json.dumps(analyst_result, ensure_ascii=False)}
+
+用户原始问题：{user_input}
+{_knowledge_block}
+
+请根据以上诊断结果，为用户生成个性化学习资源。"""
+
+    generator_messages = [
+        {"role": "system", "content": generator_system},
+        {"role": "user", "content": generator_user}
+    ]
+
+    try:
+        generator_raw = call_xunfei_with_history(generator_messages)
+        generator_result = _extract_json_from_llm(generator_raw)
+        if generator_result is None:
+            raise ValueError("LLM返回内容无法解析为JSON")
+    except Exception as e:
+        print(f"[协同] 生成师JSON解析失败: {e}")
+        generator_result = {
+            "flashcards": [],
+            "code_examples": [],
+            "mindmap_outline": f"# {analyst_result.get('topic', user_input[:20])}\n## 核心概念\n- 待生成",
+            "video_keywords": [analyst_result.get('topic', user_input[:20])],
+            "summary": "资源生成遇到问题，已使用降级方案。"
+        }
+
+    generator_elapsed = round(_time.time() - generator_start, 2)
+    results['generator'] = {
+        "name": "资源生成师",
+        "avatar": "源",
+        "color": "#10b981",
+        "elapsed": generator_elapsed,
+        "status": "done",
+        "output": generator_result
+    }
+    print(f"[协同] 生成师完成 ({generator_elapsed}s)")
+
+    # === Agent 3: 路径规划师（接收分析师+生成师输出） ===
+    planner_start = _time.time()
+    planner_system = """你是"路径规划师"智能体，在多智能体协同学习系统中负责第三步：综合学习分析师的诊断和资源生成师的资源，制定个性化学习路径。
+
+你需要输出：
+1. 分步骤的学习路径（4-6步），每步包含具体行动和预期效果
+2. 利用已生成的资源（知识卡片、代码示例等）安排到对应步骤
+3. 给出自适应建议（根据薄弱点调整重点）
+4. 推荐下一步行动
+
+请输出JSON格式：
+{
+  "path_title": "学习路径标题",
+  "steps": [
+    {
+      "order": 1,
+      "title": "步骤标题",
+      "action": "具体行动描述",
+      "resource_type": "video/flashcard/code/mindmap/quiz/reading",
+      "resource_hint": "对应资源或使用已生成的哪种资源",
+      "expected_outcome": "预期效果",
+      "estimated_minutes": 15
+    }
+  ],
+  "adaptive_advice": "根据薄弱点的自适应建议",
+  "next_action": "推荐的下一步行动",
+  "total_estimated_minutes": 60
+}
+只输出JSON，不要有其他内容。"""
+
+    planner_user = f"""学习分析师诊断：
+{json.dumps(analyst_result, ensure_ascii=False)}
+
+资源生成师生成的资源摘要：
+{json.dumps({
+    'flashcards_count': len(generator_result.get('flashcards', [])),
+    'code_examples_count': len(generator_result.get('code_examples', [])),
+    'mindmap_outline': generator_result.get('mindmap_outline', '')[:200],
+    'summary': generator_result.get('summary', '')
+}, ensure_ascii=False)}
+
+用户原始问题：{user_input}
+{quiz_stats}
+
+请综合以上信息，制定个性化学习路径。"""
+
+    planner_messages = [
+        {"role": "system", "content": planner_system},
+        {"role": "user", "content": planner_user}
+    ]
+
+    try:
+        planner_raw = call_xunfei_with_history(planner_messages)
+        planner_result = _extract_json_from_llm(planner_raw)
+        if planner_result is None:
+            raise ValueError("LLM返回内容无法解析为JSON")
+    except Exception as e:
+        print(f"[协同] 规划师JSON解析失败: {e}")
+        planner_result = {
+            "path_title": f"「{analyst_result.get('topic', user_input[:20])}」学习路径",
+            "steps": [
+                {"order": 1, "title": "基础概念", "action": "观看视频建立直观认识", "resource_type": "video", "resource_hint": "搜索入门视频", "expected_outcome": "理解核心概念", "estimated_minutes": 15},
+                {"order": 2, "title": "知识巩固", "action": "使用知识卡片复习", "resource_type": "flashcard", "resource_hint": "使用已生成的卡片", "expected_outcome": "掌握关键知识点", "estimated_minutes": 20},
+                {"order": 3, "title": "动手实践", "action": "运行代码示例并修改实验", "resource_type": "code", "resource_hint": "使用已生成代码", "expected_outcome": "具备实践能力", "estimated_minutes": 25},
+                {"order": 4, "title": "综合检测", "action": "完成相关测验题", "resource_type": "quiz", "resource_hint": "章节配套测验", "expected_outcome": "检验学习成果", "estimated_minutes": 15}
+            ],
+            "adaptive_advice": "建议重点关注基础概念的理解。",
+            "next_action": "从第一步开始：观看入门视频",
+            "total_estimated_minutes": 75
+        }
+
+    planner_elapsed = round(_time.time() - planner_start, 2)
+    results['planner'] = {
+        "name": "路径规划师",
+        "avatar": "规",
+        "color": "#f59e0b",
+        "elapsed": planner_elapsed,
+        "status": "done",
+        "output": planner_result
+    }
+    print(f"[协同] 规划师完成 ({planner_elapsed}s)")
+
+    total_elapsed = round(_time.time() - total_start, 2)
+
+    # 构建协同链路描述
+    collaboration_chain = {
+        "steps": [
+            {"from": "user", "to": "analyst", "data": "用户问题+做题历史"},
+            {"from": "analyst", "to": "generator", "data": "诊断报告+薄弱点+难度建议"},
+            {"from": "analyst", "to": "planner", "data": "诊断报告+学习风格"},
+            {"from": "generator", "to": "planner", "data": "资源摘要+知识卡片+代码示例"},
+            {"from": "planner", "to": "user", "data": "个性化学习路径+资源推荐"}
+        ],
+        "total_elapsed": total_elapsed,
+        "agents_count": 3
+    }
+
+    return json_utf8({
+        "success": True,
+        "results": results,
+        "collaboration_chain": collaboration_chain,
+        "user_input": user_input
+    })
+
+
+# ============================
+# 7.14 知识卡片(Flashcard)生成接口
+# ============================
+@app.route('/api/flashcards', methods=['POST'])
+def generate_flashcards():
+    """从主题或章节内容生成知识卡片（Flashcard），支持翻转复习。"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "请求体必须为 JSON"}), 400
+
+    topic = data.get('topic', '').strip()
+    chapter_content = data.get('chapter_content', '').strip()
+    count = min(int(data.get('count', 8)), 15)
+    difficulty = data.get('difficulty', '中级').strip()
+
+    source_text = chapter_content if chapter_content else topic
+    if not source_text:
+        return jsonify({"error": "主题或章节内容不能为空"}), 400
+
+    system_prompt = f"""你是一个专业的知识卡片(Flashcard)生成助手。请根据给定的学习内容，生成{count}张高质量的知识卡片。
+
+要求：
+1. 每张卡片包含正面（问题或核心概念）和背面（答案或详细解释）
+2. 难度级别：{difficulty}
+3. 卡片应覆盖不同的知识点，避免重复
+4. 正面应该是引导性问题或关键概念名词
+5. 背面应该是准确、清晰的解释或答案
+6. 适当加入记忆技巧或关联知识点
+
+请输出JSON数组格式：
+[
+  {{
+    "id": 1,
+    "front": "正面内容（问题或概念）",
+    "back": "背面内容（答案或解释）",
+    "difficulty": "基础/中级/高级",
+    "tags": ["标签1", "标签2"],
+    "memory_tip": "记忆技巧（可选）"
+  }}
+]
+只输出JSON数组，不要有任何其他文字。"""
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": f"请为以下内容生成{count}张知识卡片：\n\n{source_text[:3000]}"}
+    ]
+
+    try:
+        raw = call_xunfei_with_history(messages)
+        flashcards = _extract_json_from_llm(raw)
+        if flashcards is None:
+            raise ValueError("LLM返回内容无法解析为JSON")
+        if not isinstance(flashcards, list):
+            flashcards = [flashcards]
+        # 安全过滤
+        for card in flashcards:
+            card['front'], _ = content_safety_filter(card.get('front', ''))
+            card['back'], _ = content_safety_filter(card.get('back', ''))
+        return json_utf8({"success": True, "flashcards": flashcards, "count": len(flashcards)})
+    except Exception as e:
+        print(f"[Flashcard] 生成失败: {e}")
+        return jsonify({"success": False, "error": f"生成知识卡片失败: {str(e)}"}), 500
+
+
+# ============================
+# 7.15 代码实操案例生成接口
+# ============================
+@app.route('/api/code_examples', methods=['POST'])
+def generate_code_examples():
+    """根据主题生成可运行的代码实操案例，含逐行解释和预期输出。"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "请求体必须为 JSON"}), 400
+
+    topic = data.get('topic', '').strip()
+    language = data.get('language', 'python').strip()
+    count = min(int(data.get('count', 2)), 5)
+    difficulty = data.get('difficulty', '中级').strip()
+
+    if not topic:
+        return jsonify({"error": "主题不能为空"}), 400
+
+    system_prompt = f"""你是一个专业的编程教学案例生成助手。请为「{topic}」主题生成{count}个{language}语言的代码实操案例。
+
+要求：
+1. 难度级别：{difficulty}
+2. 每个案例包含完整可运行的代码
+3. 代码中有详细的中文注释（逐行解释关键逻辑）
+4. 给出预期输出
+5. 附带一个"试一试"的扩展练习建议
+6. 代码应该简洁、典型，能清晰展示核心概念
+
+请输出JSON数组格式：
+[
+  {{
+    "title": "案例标题",
+    "language": "{language}",
+    "code": "完整代码（含注释）",
+    "expected_output": "预期输出",
+    "explanation": "案例解析（200字以内）",
+    "try_it": "扩展练习建议",
+    "difficulty": "{difficulty}"
+  }}
+]
+只输出JSON数组，不要有任何其他文字。"""
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": f"请为「{topic}」生成{count}个{language}代码案例，难度{difficulty}。"}
+    ]
+
+    try:
+        raw = call_xunfei_with_history(messages)
+        examples = _extract_json_from_llm(raw)
+        if examples is None:
+            raise ValueError("LLM返回内容无法解析为JSON")
+        if not isinstance(examples, list):
+            examples = [examples]
+        for ex in examples:
+            ex['code'], _ = content_safety_filter(ex.get('code', ''))
+            ex['explanation'], _ = content_safety_filter(ex.get('explanation', ''))
+        return json_utf8({"success": True, "examples": examples, "count": len(examples)})
+    except Exception as e:
+        print(f"[代码案例] 生成失败: {e}")
+        return jsonify({"success": False, "error": f"生成代码案例失败: {str(e)}"}), 500
+
+
+# ============================
+# 7.16 自适应学习路径推荐接口
+# ============================
+@app.route('/api/learning_path', methods=['POST'])
+def learning_path():
+    """基于用户做题统计+画像数据+课程依赖关系，生成自适应学习路径推荐。"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "请求体必须为 JSON"}), 400
+
+    user_id = data.get('user_id', '')
+    course_title = data.get('course_title', '').strip()
+    current_chapter = data.get('current_chapter', '').strip()
+    profile = data.get('profile', {})  # 前端传来的画像数据
+
+    # 从数据库获取做题统计
+    quiz_data = []
+    weak_chapters = []
+    strong_chapters = []
+    if user_id:
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute('''SELECT course_title, chapter_title, COUNT(*) as total,
+                        SUM(CASE WHEN is_correct=1 THEN 1 ELSE 0 END) as correct
+                        FROM question_completion WHERE user_id=?
+                        GROUP BY course_title, chapter_title
+                        ORDER BY total DESC''', (user_id,))
+            quiz_data = c.fetchall()
+            for row in quiz_data:
+                accuracy = (row[3] or 0) / row[2] * 100 if row[2] > 0 else 0
+                if accuracy < 60:
+                    weak_chapters.append({"title": row[1], "course": row[0], "accuracy": round(accuracy, 1), "total": row[2]})
+                elif accuracy >= 80:
+                    strong_chapters.append({"title": row[1], "course": row[0], "accuracy": round(accuracy, 1), "total": row[2]})
+            conn.close()
+        except Exception as e:
+            print(f"[学习路径] 查询做题统计失败: {e}")
+
+    # 获取课程所有章节（用于推荐未学习的章节）
+    all_chapters = []
+    if course_title:
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute('''SELECT ch.title, ch.content FROM chapter ch 
+                        JOIN course co ON ch.course_id = co.id 
+                        WHERE co.name LIKE ? ORDER BY ch.id''', (f'%{course_title}%',))
+            all_chapters = [{"title": r[0], "has_content": bool(r[1])} for r in c.fetchall()]
+            conn.close()
+        except Exception as e:
+            print(f"[学习路径] 查询课程章节失败: {e}")
+
+    # 构建LLM提示
+    system_prompt = """你是一个智能学习路径规划引擎。你需要根据用户的学习数据（做题统计、薄弱点、画像数据），生成个性化的自适应学习路径推荐。
+
+要求：
+1. 优先推荐薄弱章节的复习和巩固
+2. 已掌握的章节可以跳过或安排进阶内容
+3. 考虑知识点的前置依赖关系（基础概念先于高级应用）
+4. 结合用户的学习风格和兴趣偏好
+5. 给出每步的具体行动建议和预估时间
+
+请输出JSON格式：
+{
+  "path_name": "学习路径名称",
+  "total_steps": 5,
+  "steps": [
+    {
+      "order": 1,
+      "chapter_title": "章节标题",
+      "action_type": "learn/review/practice/quiz/flashcard",
+      "reason": "推荐理由",
+      "priority": "high/medium/low",
+      "estimated_minutes": 20,
+      "prerequisite": "前置知识（如有）"
+    }
+  ],
+  "summary": "路径总结和建议",
+  "predicted_improvement": "预估提升效果"
+}
+只输出JSON。"""
+
+    user_msg = f"""用户信息：
+- 当前课程：{course_title or '未指定'}
+- 当前章节：{current_chapter or '未指定'}
+- 做题数据：共{len(quiz_data)}个章节有做题记录
+- 薄弱章节：{json.dumps(weak_chapters[:5], ensure_ascii=False) if weak_chapters else '暂无'}
+- 已掌握章节：{json.dumps(strong_chapters[:5], ensure_ascii=False) if strong_chapters else '暂无'}
+- 所有可用章节：{json.dumps([ch['title'] for ch in all_chapters[:15]], ensure_ascii=False) if all_chapters else '暂无数据'}
+- 学习画像：{json.dumps(profile, ensure_ascii=False) if profile else '暂无'}"""
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_msg}
+    ]
+
+    try:
+        raw = call_xunfei_with_history(messages)
+        path_result = _extract_json_from_llm(raw)
+        if path_result is None:
+            raise ValueError("LLM返回内容无法解析为JSON")
+    except Exception as e:
+        print(f"[学习路径] LLM解析失败: {e}")
+        path_result = {
+            "path_name": f"「{course_title}」自适应学习路径",
+            "total_steps": len(weak_chapters) + 2,
+            "steps": [],
+            "summary": "基于做题数据自动生成的学习建议。",
+            "predicted_improvement": "坚持学习预计可提升正确率15-20%"
+        }
+        # 降级方案：基于规则生成路径
+        order = 1
+        for wc in weak_chapters[:3]:
+            path_result["steps"].append({
+                "order": order, "chapter_title": wc["title"],
+                "action_type": "review", "reason": f"正确率仅{wc['accuracy']}%，需要重点复习",
+                "priority": "high", "estimated_minutes": 25, "prerequisite": ""
+            })
+            order += 1
+        for ch in all_chapters:
+            if ch["title"] not in [s["chapter_title"] for s in path_result["steps"]]:
+                path_result["steps"].append({
+                    "order": order, "chapter_title": ch["title"],
+                    "action_type": "learn", "reason": "尚未学习的章节",
+                    "priority": "medium", "estimated_minutes": 30, "prerequisite": ""
+                })
+                order += 1
+                if order > 6:
+                    break
+
+    return json_utf8({
+        "success": True,
+        "path": path_result,
+        "quiz_stats": {
+            "total_chapters": len(quiz_data),
+            "weak_chapters": weak_chapters,
+            "strong_chapters": strong_chapters
+        }
+    })
 
 
 # ============================
