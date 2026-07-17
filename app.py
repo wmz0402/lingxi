@@ -85,6 +85,74 @@ except ImportError:
     SPARKAI_AVAILABLE = False
 
 # ============================
+# 6.7 登录速率限制
+# ============================
+_login_attempts = {}  # {ip_or_email: {"count": int, "first_time": float}}
+MAX_LOGIN_ATTEMPTS = 5
+LOGIN_LOCKOUT_SECONDS = 300  # 5分钟锁定
+
+def _check_login_rate_limit(identifier):
+    """检查登录速率，返回 (allowed, remaining_seconds)"""
+    now = time.time()
+    record = _login_attempts.get(identifier)
+    if not record:
+        return True, 0
+    if now - record["first_time"] > LOGIN_LOCKOUT_SECONDS:
+        del _login_attempts[identifier]
+        return True, 0
+    if record["count"] >= MAX_LOGIN_ATTEMPTS:
+        remaining = int(LOGIN_LOCKOUT_SECONDS - (now - record["first_time"]))
+        return False, remaining
+    return True, 0
+
+def _record_login_failure(identifier):
+    now = time.time()
+    record = _login_attempts.get(identifier)
+    if not record:
+        _login_attempts[identifier] = {"count": 1, "first_time": now}
+    else:
+        record["count"] += 1
+
+def _clear_login_failures(identifier):
+    _login_attempts.pop(identifier, None)
+
+
+# ============================
+# 6.8 文件上传 MIME 校验
+# ============================
+ALLOWED_IMAGE_MIMES = {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}
+ALLOWED_DOC_MIMES = {
+    'text/plain', 'application/pdf',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/msword', 'text/markdown', 'text/csv',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+}
+ALLOWED_IMAGE_EXTS = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+ALLOWED_DOC_EXTS = {'.txt', '.pdf', '.docx', '.doc', '.md', '.csv'}
+
+def _validate_upload(file, allowed_exts, allowed_mimes):
+    """校验上传文件：扩展名 + MIME类型双重验证"""
+    if not file or not file.filename:
+        return False, "未选择文件"
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in allowed_exts:
+        return False, f"不支持的文件类型: {ext}"
+    mime = file.content_type or ''
+    if mime and mime not in allowed_mimes:
+        return False, f"文件MIME类型不匹配: {mime}"
+    return True, None
+
+
+# ============================
+# 6.9 安全错误响应
+# ============================
+def safe_error(msg="服务内部错误，请稍后重试", status=500):
+    """返回脱敏后的错误响应，不泄露内部实现细节"""
+    return jsonify({"error": msg}), status
+
+import time
+
+# ============================
 # 1. 配置区（请通过环境变量设置凭证，不要硬编码）
 # ============================
 # 讯飞星火配置（同时设置两套变量名以兼容不同版本 SDK）
@@ -130,7 +198,7 @@ _verify_codes_lock = threading.Lock()
 app = Flask(__name__)
 app.json.ensure_ascii = False
 app.json.compact = False
-CORS(app)  # 允许跨域
+CORS(app, resources={r"/api/*": {"origins": ["http://127.0.0.1:5000", "http://localhost:5000", "https://lingxi-jhyc.vercel.app"]}})
 
 def json_utf8(data, status=200):
     """返回 UTF-8 编码的 JSON 响应，确保中文正常显示"""
@@ -891,6 +959,9 @@ def upload_file():
     ext = os.path.splitext(file.filename)[1].lower()
     if ext not in allowed_extensions:
         return jsonify({"error": "不支持的图片格式，仅支持 JPG, JPEG, PNG, GIF, WEBP"}), 400
+    valid, err_msg = _validate_upload(file, ALLOWED_IMAGE_EXTS, ALLOWED_IMAGE_MIMES)
+    if not valid:
+        return jsonify({"error": err_msg}), 400
 
     # 文件大小限制：10MB
     MAX_FILE_SIZE = 10 * 1024 * 1024
@@ -951,6 +1022,10 @@ def upload_documents():
 
         if ext not in allowed_extensions:
             file_summaries.append(f"[{file.filename}] 格式不支持，已跳过")
+            continue
+        valid, err_msg = _validate_upload(file, ALLOWED_DOC_EXTS, ALLOWED_DOC_MIMES)
+        if not valid:
+            file_summaries.append(f"[{file.filename}] {err_msg}，已跳过")
             continue
 
         # 文件大小检查
@@ -2079,6 +2154,11 @@ def _ensure_user_table():
         c.execute('SELECT is_anonymous FROM user LIMIT 1')
     except sqlite3.OperationalError:
         c.execute('ALTER TABLE user ADD COLUMN is_anonymous INTEGER DEFAULT 0')
+    # 迁移：为已有表添加 profile_data 字段（学习画像JSON）
+    try:
+        c.execute('SELECT profile_data FROM user LIMIT 1')
+    except sqlite3.OperationalError:
+        c.execute('ALTER TABLE user ADD COLUMN profile_data TEXT DEFAULT ""')
     conn.commit()
     conn.close()
 
@@ -2169,7 +2249,11 @@ def _ensure_admin_account():
     _ensure_message_table()
     admin_username = os.getenv("ADMIN_USERNAME", "admin")
     admin_email = os.getenv("ADMIN_EMAIL", "admin@lingxi.com")
-    admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
+    admin_password = os.getenv("ADMIN_PASSWORD", "")
+    if not admin_password:
+        admin_password = secrets.token_hex(16)
+        print(f"[安全警告] 未设置 ADMIN_PASSWORD 环境变量，已自动生成随机密码: {admin_password}")
+        print(f"[安全警告] 请立即登录后在账号设置中修改密码，或通过 .env 文件配置固定密码")
     pwd_hash = _hash_password(admin_password)
 
     conn = sqlite3.connect(DB_PATH)
@@ -2243,7 +2327,14 @@ def send_verify_code():
 
     # 发送邮件
     try:
-        purpose_label = '找回密码' if purpose == 'reset' else '注册'
+        purpose_map = {'reset': '找回密码', 'change_pwd': '修改密码', 'change_email': '修改邮箱'}
+        purpose_label = purpose_map.get(purpose, '注册')
+
+        # 开发模式：SMTP 未配置时直接返回验证码（仅用于本地测试）
+        if not SMTP_USER or not SMTP_PASS:
+            print(f"[开发模式] 验证码 {code}（{purpose_label}）-> {email}")
+            return jsonify({"success": True, "message": "验证码已生成（开发模式）", "dev_code": code})
+
         msg = MIMEMultipart()
         msg['From'] = formataddr((str(Header(SMTP_SENDER_NAME, 'utf-8')), SMTP_USER))
         msg['To'] = email
@@ -2365,8 +2456,8 @@ def reset_password():
     if not email or not verify_code or not new_password:
         return jsonify({"success": False, "error": "邮箱、验证码和新密码均为必填"}), 400
 
-    if len(new_password) < 6:
-        return jsonify({"success": False, "error": "新密码长度不能少于6位"}), 400
+    if len(new_password) < 8:
+        return jsonify({"success": False, "error": "新密码长度不能少于8位"}), 400
 
     # 验证码校验
     code_key = f"reset:{email}"
@@ -2433,6 +2524,11 @@ def user_login():
     if not login_id or not password:
         return jsonify({"success": False, "error": "账号和密码不能为空"}), 400
 
+    # 暴力破解防护
+    allowed, remaining = _check_login_rate_limit(login_id)
+    if not allowed:
+        return jsonify({"success": False, "error": f"登录失败次数过多，请{remaining}秒后再试", "code": "LOCKED"}), 429
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
@@ -2445,11 +2541,14 @@ def user_login():
         )
         row = c.fetchone()
         if not row:
+            _record_login_failure(login_id)
             return jsonify({"success": False, "error": "账号不存在或已被注销", "code": "NOT_FOUND"}), 404
 
         if not _verify_password(password, row['password_hash']):
+            _record_login_failure(login_id)
             return jsonify({"success": False, "error": "密码错误", "code": "WRONG_PWD"}), 403
 
+        _clear_login_failures(login_id)
         user = dict(row)
         del user['password_hash']  # 不返回密码哈希到前端
         # 检查账号是否被停用
@@ -2474,6 +2573,12 @@ def admin_login():
     if not username or not password:
         return jsonify({"success": False, "error": "请输入用户名和密码"}), 400
 
+    # 暴力破解防护
+    admin_id_key = f"admin_{username}"
+    allowed, remaining = _check_login_rate_limit(admin_id_key)
+    if not allowed:
+        return jsonify({"success": False, "error": f"登录失败次数过多，请{remaining}秒后再试"}), 429
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
@@ -2485,10 +2590,13 @@ def admin_login():
     conn.close()
 
     if not admin:
+        _record_login_failure(admin_id_key)
         return jsonify({"success": False, "error": "管理员账号不存在"}), 401
-
     if not _verify_password(password, admin['password_hash']):
+        _record_login_failure(admin_id_key)
         return jsonify({"success": False, "error": "密码错误"}), 401
+
+    _clear_login_failures(admin_id_key)
 
     # 生成并存储 token
     token_str = f"{admin['username']}_{datetime.datetime.now().timestamp()}_{secrets.token_hex(8)}"
@@ -2670,8 +2778,8 @@ def admin_change_password(user_id):
 
     data = request.get_json() or {}
     new_password = data.get('password', '').strip()
-    if not new_password or len(new_password) < 4:
-        return jsonify({"success": False, "error": "新密码不能为空且不少于4位"}), 400
+    if not new_password or len(new_password) < 8:
+        return jsonify({"success": False, "error": "新密码不能为空且不少于8位"}), 400
 
     pwd_hash = _hash_password(new_password)
 
@@ -3444,7 +3552,163 @@ def update_user_profile():
 
 
 # ============================
-# 7.12 用户画像提取接口
+# 7.12 已登录用户修改密码（需验证码）
+# ============================
+@app.route('/api/user/change-password', methods=['POST'])
+def user_change_password():
+    """已登录用户修改密码，需邮箱验证码"""
+    _ensure_user_table()
+    data = request.get_json() or {}
+    email = data.get('email', '').strip()
+    old_password = data.get('old_password', '')
+    verify_code = data.get('verify_code', '').strip()
+    new_password = data.get('new_password', '')
+
+    if not email or not old_password or not verify_code or not new_password:
+        return jsonify({"success": False, "error": "所有字段均为必填"}), 400
+    if len(new_password) < 8:
+        return jsonify({"success": False, "error": "新密码长度不能少于8位"}), 400
+
+    # 验证码校验
+    code_key = f"change_pwd:{email}"
+    now_ts = datetime.datetime.now().timestamp()
+    with _verify_codes_lock:
+        stored = _verify_codes.get(code_key)
+        if not stored:
+            return jsonify({"success": False, "error": "请先获取邮箱验证码"}), 400
+        if now_ts > stored['expires_at']:
+            del _verify_codes[code_key]
+            return jsonify({"success": False, "error": "验证码已过期，请重新获取"}), 400
+        if stored['code'] != verify_code:
+            return jsonify({"success": False, "error": "验证码不正确"}), 400
+        del _verify_codes[code_key]
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute('SELECT id, password_hash FROM user WHERE email = ? AND is_admin = 0', (email,))
+        row = c.fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "用户不存在"}), 404
+        if not _verify_password(old_password, row[1]):
+            return jsonify({"success": False, "error": "旧密码不正确"}), 403
+
+        c.execute('UPDATE user SET password_hash = ? WHERE id = ?', (_hash_password(new_password), row[0]))
+        conn.commit()
+        return jsonify({"success": True, "message": "密码修改成功"})
+    except Exception:
+        conn.rollback()
+        return jsonify({"success": False, "error": "修改失败"}), 500
+    finally:
+        conn.close()
+
+
+# ============================
+# 7.13 已登录用户修改邮箱（需新邮箱验证码）
+# ============================
+@app.route('/api/user/change-email', methods=['POST'])
+def user_change_email():
+    """已登录用户修改邮箱，需新邮箱验证码"""
+    _ensure_user_table()
+    data = request.get_json() or {}
+    old_email = data.get('old_email', '').strip()
+    new_email = data.get('new_email', '').strip()
+    verify_code = data.get('verify_code', '').strip()
+
+    if not old_email or not new_email or not verify_code:
+        return jsonify({"success": False, "error": "所有字段均为必填"}), 400
+    if old_email == new_email:
+        return jsonify({"success": False, "error": "新邮箱不能与当前邮箱相同"}), 400
+    import re
+    if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', new_email):
+        return jsonify({"success": False, "error": "新邮箱格式不正确"}), 400
+
+    # 验证码校验（用新邮箱发送的验证码）
+    code_key = f"change_email:{new_email}"
+    now_ts = datetime.datetime.now().timestamp()
+    with _verify_codes_lock:
+        stored = _verify_codes.get(code_key)
+        if not stored:
+            return jsonify({"success": False, "error": "请先向新邮箱获取验证码"}), 400
+        if now_ts > stored['expires_at']:
+            del _verify_codes[code_key]
+            return jsonify({"success": False, "error": "验证码已过期，请重新获取"}), 400
+        if stored['code'] != verify_code:
+            return jsonify({"success": False, "error": "验证码不正确"}), 400
+        del _verify_codes[code_key]
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        # 检查旧邮箱用户存在
+        c.execute('SELECT id, username FROM user WHERE email = ? AND is_admin = 0', (old_email,))
+        row = c.fetchone()
+        if not row:
+            return jsonify({"success": False, "error": "当前用户不存在"}), 404
+        # 检查新邮箱未被占用
+        c.execute('SELECT id FROM user WHERE email = ?', (new_email,))
+        if c.fetchone():
+            return jsonify({"success": False, "error": "该邮箱已被其他账号使用"}), 409
+
+        c.execute('UPDATE user SET email = ? WHERE id = ?', (new_email, row[0]))
+        conn.commit()
+        return jsonify({"success": True, "message": "邮箱修改成功", "new_email": new_email, "username": row[1]})
+    except Exception:
+        conn.rollback()
+        return jsonify({"success": False, "error": "修改失败"}), 500
+    finally:
+        conn.close()
+
+
+# ============================
+# 7.14 用户画像持久化接口
+# ============================
+@app.route('/api/user/profile_data', methods=['GET'])
+def get_user_profile_data():
+    """读取用户学习画像数据"""
+    email = request.headers.get('X-User-Email', '').strip()
+    if not email:
+        return jsonify({"error": "未提供用户标识"}), 400
+    _ensure_user_table()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT profile_data FROM user WHERE email = ?', (email,))
+    row = c.fetchone()
+    conn.close()
+    if not row or not row[0]:
+        return jsonify({"profile_data": None})
+    try:
+        profile = json.loads(row[0])
+    except (json.JSONDecodeError, TypeError):
+        profile = None
+    return jsonify({"profile_data": profile})
+
+
+@app.route('/api/user/profile_data', methods=['PUT'])
+def save_user_profile_data():
+    """保存用户学习画像数据"""
+    email = request.headers.get('X-User-Email', '').strip()
+    if not email:
+        return jsonify({"error": "未提供用户标识"}), 400
+    data = request.get_json() or {}
+    profile_data = data.get('profile_data')
+    if profile_data is None:
+        return jsonify({"error": "缺少 profile_data"}), 400
+    _ensure_user_table()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    try:
+        c.execute('UPDATE user SET profile_data = ? WHERE email = ?', (json.dumps(profile_data, ensure_ascii=False), email))
+        conn.commit()
+        return jsonify({"success": True})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": "保存失败"}), 500
+    finally:
+        conn.close()
+
+
+# 7.13 用户画像提取接口
 # ============================
 @app.route('/api/extract_profile', methods=['POST'])
 def extract_profile():

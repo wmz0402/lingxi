@@ -6596,6 +6596,61 @@
               <button type="submit" class="setting-btn-save">保存更改</button>
             </div>
           </form>
+
+          <!-- 修改密码 -->
+          <div style="margin-top:28px; padding-top:20px; border-top:1px solid #e2e8f0;">
+            <div style="font-size:15px; font-weight:600; color:#1e293b; margin-bottom:16px;">修改密码</div>
+            <div style="display:flex; flex-direction:column; gap:12px; max-width:400px;">
+              <div class="setting-group" style="margin:0">
+                <label>当前邮箱</label>
+                <input type="text" id="changePwdEmail" readonly style="background:#f8fafc;color:#64748b;cursor:default;">
+              </div>
+              <div class="setting-group" style="margin:0">
+                <label>旧密码</label>
+                <input type="password" id="changePwdOld" placeholder="请输入当前密码">
+              </div>
+              <div class="setting-group" style="margin:0">
+                <label>邮箱验证码</label>
+                <div style="display:flex; gap:8px;">
+                  <input type="text" id="changePwdCode" placeholder="请输入验证码" style="flex:1">
+                  <button type="button" id="changePwdSendBtn" onclick="sendChangePwdCode()" style="flex-shrink:0; padding:8px 14px; border-radius:8px; border:1px solid #e2e8f0; background:#fff; color:#6366f1; font-size:12px; font-weight:500; cursor:pointer; white-space:nowrap; transition:all 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">发送验证码</button>
+                </div>
+              </div>
+              <div class="setting-group" style="margin:0">
+                <label>新密码（不少于8位）</label>
+                <input type="password" id="changePwdNew" placeholder="请输入新密码">
+              </div>
+              <div class="setting-group" style="margin:0">
+                <label>确认新密码</label>
+                <input type="password" id="changePwdNew2" placeholder="请再次输入新密码">
+              </div>
+              <button type="button" onclick="handleChangePassword()" style="align-self:flex-start; padding:9px 24px; border-radius:8px; border:none; background:#6366f1; color:#fff; font-size:13px; font-weight:500; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#4f46e5'" onmouseout="this.style.background='#6366f1'">确认修改</button>
+            </div>
+          </div>
+
+          <!-- 修改邮箱 -->
+          <div style="margin-top:28px; padding-top:20px; border-top:1px solid #e2e8f0;">
+            <div style="font-size:15px; font-weight:600; color:#1e293b; margin-bottom:16px;">修改邮箱</div>
+            <div style="display:flex; flex-direction:column; gap:12px; max-width:400px;">
+              <div class="setting-group" style="margin:0">
+                <label>当前邮箱</label>
+                <input type="text" id="changeEmailOld" readonly style="background:#f8fafc;color:#64748b;cursor:default;">
+              </div>
+              <div class="setting-group" style="margin:0">
+                <label>新邮箱</label>
+                <input type="email" id="changeEmailNew" placeholder="请输入新邮箱地址">
+              </div>
+              <div class="setting-group" style="margin:0">
+                <label>新邮箱验证码</label>
+                <div style="display:flex; gap:8px;">
+                  <input type="text" id="changeEmailCode" placeholder="请输入验证码" style="flex:1">
+                  <button type="button" id="changeEmailSendBtn" onclick="sendChangeEmailCode()" style="flex-shrink:0; padding:8px 14px; border-radius:8px; border:1px solid #e2e8f0; background:#fff; color:#6366f1; font-size:12px; font-weight:500; cursor:pointer; white-space:nowrap; transition:all 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">发送验证码</button>
+                </div>
+              </div>
+              <button type="button" onclick="handleChangeEmail()" style="align-self:flex-start; padding:9px 24px; border-radius:8px; border:none; background:#6366f1; color:#fff; font-size:13px; font-weight:500; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#4f46e5'" onmouseout="this.style.background='#6366f1'">确认修改</button>
+            </div>
+          </div>
+
           <!-- 注销账号 -->
           <div style="margin-top:32px; padding-top:20px; border-top:1px solid #e2e8f0;">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
@@ -9220,6 +9275,50 @@ function saveUserData() {
     } catch (e) {
         console.warn('saveUserData: localStorage 保存失败（可能容量不足）:', e);
     }
+    // 异步同步画像到后端（不阻塞主流程）
+    syncProfileToServer();
+}
+
+// 画像数据同步到后端（防抖，避免频繁请求）
+let _profileSyncTimer = null;
+function syncProfileToServer() {
+    if (!currentUserEmail) return;
+    if (_profileSyncTimer) clearTimeout(_profileSyncTimer);
+    _profileSyncTimer = setTimeout(async () => {
+        try {
+            await fetch('/api/user/profile_data', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-User-Email': currentUserEmail },
+                body: JSON.stringify({ profile_data: userProfileDimensions })
+            });
+        } catch (e) {
+            // 静默失败，不影响主流程
+        }
+    }, 3000);
+}
+
+// 从后端加载画像数据
+async function loadProfileFromServer() {
+    if (!currentUserEmail) return;
+    try {
+        const resp = await fetch('/api/user/profile_data', { headers: { 'X-User-Email': currentUserEmail } });
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data.profile_data && typeof data.profile_data === 'object') {
+                // 合并服务端画像数据到本地
+                const server = data.profile_data;
+                for (const dim of ['knowledge', 'cognition', 'error', 'interest', 'goal', 'behavior']) {
+                    if (server[dim] && typeof server[dim].score === 'number') {
+                        userProfileDimensions[dim].score = server[dim].score;
+                    }
+                }
+                renderUserProfileDimensions();
+                console.log('[画像] 已从服务端同步学习画像数据');
+            }
+        }
+    } catch (e) {
+        // 静默失败，本地数据仍然可用
+    }
 }
 
 function handleLogin(e) {
@@ -9256,7 +9355,7 @@ function handleLogin(e) {
                 users[userKey] = {
                     id: serverUser.id,
                     name: serverUser.username,
-                    pwd: pwd,
+                    pwd: '',
                     profile: {
                         grade: serverUser.grade || '',
                         major: serverUser.major || '',
@@ -9277,8 +9376,8 @@ function handleLogin(e) {
                 };
                 localStorage.setItem('lingxi_users', JSON.stringify(users));
             } else {
-                // 已有本地数据，更新密码和用户ID（兼容旧数据）
-                users[userKey].pwd = pwd;
+                // 已有本地数据，不再存储明文密码
+                users[userKey].pwd = '';
                 if (serverUser.id) users[userKey].id = serverUser.id;
                 localStorage.setItem('lingxi_users', JSON.stringify(users));
             }
@@ -9307,20 +9406,9 @@ function handleLogin(e) {
         }
     })
     .catch(err => {
-        // 服务端不可达，回退到纯本地认证
-        console.warn('服务端登录验证失败，回退本地认证:', err);
-        let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
-        let matchedUserKey = null;
-        if (users[email]) {
-            matchedUserKey = email;
-        } else {
-            for (let k in users) {
-                if (users[k].name === email) { matchedUserKey = k; break; }
-            }
-        }
-        if (!matchedUserKey) { alert('账号不存在！请先注册！'); if (emailField) emailField.classList.add('has-error'); return; }
-        if (users[matchedUserKey].pwd !== pwd) { alert('密码错误！'); if (pwdField) pwdField.classList.add('has-error'); return; }
-        _completeLogin(matchedUserKey, users);
+        // 服务端不可达，不再回退本地密码验证
+        console.warn('服务端登录验证失败:', err);
+        alert('网络异常，请检查网络连接！');
     });
 
     return false;
@@ -9420,6 +9508,9 @@ function _completeLogin(matchedUserKey, users) {
     renderFavorites();
     renderWrongs();
     renderNotifications();
+
+    // 从后端同步画像数据（换设备也能恢复）
+    loadProfileFromServer();
 
     // 登录时检查并解锁成就（如首次登录、连续天数等）
     checkAndUnlockAchievements();
@@ -9665,10 +9756,10 @@ function handleRegister(e) {
       return;
     }
 
-    // 后端验证通过，保存到 localStorage
+    // 后端验证通过，保存到 localStorage（不存储明文密码）
     users[email] = {
       name: name,
-      pwd: pwd,
+      pwd: '',
       profile: null,
       myCourses: [],
       chatHistory: [],
@@ -9894,14 +9985,14 @@ function startTransition() {
                 const searchTagsContainer = document.querySelector('.search-tags');
                 if (searchTagsContainer && interestData.searchTags) {
                   searchTagsContainer.innerHTML = interestData.searchTags.map(tag =>
-                    `<span class="search-tag" onclick="quickSearch('${tag}')">${tag}</span>`
+                    `<span class="search-tag" onclick="quickSearch('${jsStr(tag)}')">${escapeHtml(tag)}</span>`
                   ).join('');
                 }
                 // 更新侧边栏 quick-suggest
                 const sidebarSuggests = document.getElementById('sidebarQuickSuggests');
                 if (sidebarSuggests && interestData.suggests) {
                   sidebarSuggests.innerHTML = interestData.suggests.map(s =>
-                    `<span class="quick-suggest" onclick="sendQuickSuggest('${s}')">• "${s}"</span>`
+                    `<span class="quick-suggest" onclick="sendQuickSuggest('${jsStr(s)}')">• "${escapeHtml(s)}"</span>`
                   ).join('');
                 }
                 // 更新搜索中心热门推荐资源
@@ -10648,7 +10739,7 @@ async function performLocalSearch(query) {
                 <div class="resource-card" data-type="course" data-category="${escapeHtml(item.category)}" data-title="${escapeHtml(item.title)}" style="padding:16px;border-radius:14px;background:#fff;border:1px solid rgba(0,0,0,0.04);box-shadow:0 2px 8px rgba(0,0,0,0.03);cursor:pointer;transition:transform .2s,border-color .2s;display:flex;flex-direction:column;gap:6px;text-align:left;"
                      onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='#6366f1'"
                      onmouseout="this.style.transform='';this.style.borderColor='rgba(0,0,0,0.04)'"
-                     onclick="startOrSubscribeCourse('${escapeHtml(item.category)}', '${escapeHtml(item.title)}')"
+                     onclick="startOrSubscribeCourse('${jsStr(item.category)}', '${jsStr(item.title)}')"
                 >
                     <div style="display:flex;align-items:center;gap:6px;">
                         <span style="font-size:18px;">📚</span>
@@ -13193,6 +13284,130 @@ function previewUploadedAvatar(e) {
     reader.readAsDataURL(file);
 }
 
+// ==================== 修改密码 / 修改邮箱功能 ====================
+function _initAccountSecurityFields() {
+    const emailEl = document.getElementById('changePwdEmail');
+    const oldEmailEl = document.getElementById('changeEmailOld');
+    if (emailEl) emailEl.value = currentUserEmail || '';
+    if (oldEmailEl) oldEmailEl.value = currentUserEmail || '';
+}
+
+function _startCountdown(btnId, seconds) {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    let s = seconds;
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.style.cursor = 'not-allowed';
+    const tick = setInterval(() => {
+        s--;
+        btn.textContent = s + 's 后重发';
+        if (s <= 0) {
+            clearInterval(tick);
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.textContent = '发送验证码';
+        }
+    }, 1000);
+}
+
+async function sendChangePwdCode() {
+    if (!currentUserEmail) { alert('请先登录'); return; }
+    const btn = document.getElementById('changePwdSendBtn');
+    btn.textContent = '发送中...';
+    try {
+        const r = await fetch('/api/send-verify-code', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: currentUserEmail, purpose: 'change_pwd' })
+        });
+        const d = await r.json();
+        if (d.success) {
+            if (d.dev_code) { prompt('开发模式 - 验证码已生成，请复制：', d.dev_code); }
+            else { alert('验证码已发送到 ' + currentUserEmail); }
+            _startCountdown('changePwdSendBtn', 60);
+        }
+        else { alert(d.error || '发送失败'); btn.textContent = '发送验证码'; }
+    } catch (e) { alert('网络错误'); btn.textContent = '发送验证码'; }
+}
+
+async function handleChangePassword() {
+    const oldPwd = document.getElementById('changePwdOld').value;
+    const code = document.getElementById('changePwdCode').value.trim();
+    const newPwd = document.getElementById('changePwdNew').value;
+    const newPwd2 = document.getElementById('changePwdNew2').value;
+    if (!oldPwd) { alert('请输入旧密码'); return; }
+    if (!code) { alert('请输入验证码'); return; }
+    if (!newPwd || newPwd.length < 8) { alert('新密码不少于8位'); return; }
+    if (newPwd !== newPwd2) { alert('两次输入的新密码不一致'); return; }
+    try {
+        const r = await fetch('/api/user/change-password', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: currentUserEmail, old_password: oldPwd, verify_code: code, new_password: newPwd })
+        });
+        const d = await r.json();
+        if (d.success) {
+            alert('密码修改成功，请使用新密码重新登录');
+            // 清空表单
+            document.getElementById('changePwdOld').value = '';
+            document.getElementById('changePwdCode').value = '';
+            document.getElementById('changePwdNew').value = '';
+            document.getElementById('changePwdNew2').value = '';
+        } else { alert(d.error || '修改失败'); }
+    } catch (e) { alert('网络错误'); }
+}
+
+async function sendChangeEmailCode() {
+    const newEmail = document.getElementById('changeEmailNew').value.trim();
+    if (!newEmail) { alert('请输入新邮箱'); return; }
+    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(newEmail)) { alert('邮箱格式不正确'); return; }
+    const btn = document.getElementById('changeEmailSendBtn');
+    btn.textContent = '发送中...';
+    try {
+        const r = await fetch('/api/send-verify-code', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: newEmail, purpose: 'change_email' })
+        });
+        const d = await r.json();
+        if (d.success) {
+            if (d.dev_code) { prompt('开发模式 - 验证码已生成，请复制：', d.dev_code); }
+            else { alert('验证码已发送到 ' + newEmail); }
+            _startCountdown('changeEmailSendBtn', 60);
+        }
+        else { alert(d.error || '发送失败'); btn.textContent = '发送验证码'; }
+    } catch (e) { alert('网络错误'); btn.textContent = '发送验证码'; }
+}
+
+async function handleChangeEmail() {
+    const newEmail = document.getElementById('changeEmailNew').value.trim();
+    const code = document.getElementById('changeEmailCode').value.trim();
+    if (!newEmail) { alert('请输入新邮箱'); return; }
+    if (!code) { alert('请输入验证码'); return; }
+    try {
+        const r = await fetch('/api/user/change-email', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ old_email: currentUserEmail, new_email: newEmail, verify_code: code })
+        });
+        const d = await r.json();
+        if (d.success) {
+            alert('邮箱修改成功，请使用新邮箱重新登录');
+            // 更新本地存储的 key
+            const users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+            const oldData = users[currentUserEmail];
+            if (oldData) {
+                users[newEmail] = oldData;
+                delete users[currentUserEmail];
+                localStorage.setItem('lingxi_users', JSON.stringify(users));
+            }
+            localStorage.setItem('lingxi_current_user', newEmail);
+            currentUserEmail = newEmail;
+            document.getElementById('changeEmailNew').value = '';
+            document.getElementById('changeEmailCode').value = '';
+            _initAccountSecurityFields();
+        } else { alert(d.error || '修改失败'); }
+    } catch (e) { alert('网络错误'); }
+}
+
 function saveProfileSettings(e) {
     e.preventDefault(); // 阻止页面刷新
 
@@ -13631,7 +13846,9 @@ function changeSettingTab(tabName, btn) {
   }
   
   // 4. 触发对应板块的数据渲染
-  if (tabName === 'wrongs') {
+  if (tabName === 'account') {
+    _initAccountSecurityFields();
+  } else if (tabName === 'wrongs') {
     if (typeof renderWrongs === 'function') renderWrongs();
   } else if (tabName === 'courses') {
     if (typeof renderMyCourses === 'function') renderMyCourses();
@@ -15831,6 +16048,10 @@ function updateSendBtnState() {
 }
 function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function jsStr(s) {
+  if (s == null) return '';
+  return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+}
 // quiz 选项文本渲染：支持 LaTeX 数学公式（通过 safeMarkdownParse + 去除 <p> 包裹标签）
 function renderQuizOptionText(text) {
   if (!text) return '';
@@ -19438,19 +19659,19 @@ function renderAdminUserCards(users) {
       <div class="noti-item-icon" style="background:linear-gradient(135deg,${color},${color}cc); font-size:16px; font-weight:700;">${initial}</div>
       <div class="noti-item-content" style="flex:1; min-width:0;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <div class="noti-item-title" style="margin:0;">${u.username || '-'}${statusBadge}</div>
+          <div class="noti-item-title" style="margin:0;">${escapeHtml(u.username || '-')}${statusBadge}</div>
           <div style="display:flex; gap:5px; flex-shrink:0; flex-wrap:wrap;">
             <button onclick="showAdminUserDetail(${u.id})" style="padding:3px 8px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#6366f1;font-size:10px;cursor:pointer;">详情</button>
             ${toggleBtn}
-            <button onclick="adminChangePassword(${u.id},'${(u.username||'').replace(/'/g,"\\'")}')" style="padding:3px 8px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#f59e0b;font-size:10px;cursor:pointer;">改密</button>
-            <button onclick="adminDeleteUser(${u.id},'${(u.username||'').replace(/'/g,"\\'")}')" style="padding:3px 8px;border-radius:6px;border:1px solid #fecaca;background:#fff;color:#ef4444;font-size:10px;cursor:pointer;">删除</button>
+            <button onclick="adminChangePassword(${u.id},'${jsStr(u.username)}')" style="padding:3px 8px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#f59e0b;font-size:10px;cursor:pointer;">改密</button>
+            <button onclick="adminDeleteUser(${u.id},'${jsStr(u.username)}')" style="padding:3px 8px;border-radius:6px;border:1px solid #fecaca;background:#fff;color:#ef4444;font-size:10px;cursor:pointer;">删除</button>
           </div>
         </div>
         <div class="noti-item-desc" style="line-height:1.6;">
-          <span style="color:#64748b;">邮箱：</span>${u.email || '-'}
-          &nbsp;&nbsp;<span style="color:#64748b;">年级：</span>${u.grade || '-'}&nbsp;&nbsp;<span style="color:#64748b;">专业：</span>${u.major || '-'}
+          <span style="color:#64748b;">邮箱：</span>${escapeHtml(u.email || '-')}
+          &nbsp;&nbsp;<span style="color:#64748b;">年级：</span>${escapeHtml(u.grade || '-')}&nbsp;&nbsp;<span style="color:#64748b;">专业：</span>${escapeHtml(u.major || '-')}
         </div>
-        <div class="noti-item-time" style="margin-top:4px;">注册于 ${u.created_at || '-'}</div>
+        <div class="noti-item-time" style="margin-top:4px;">注册于 ${escapeHtml(u.created_at || '-')}</div>
       </div>
     </div>`;
   }).join('');
@@ -19699,8 +19920,8 @@ function showAdminUserDetail(userId) {
           <div style="background:linear-gradient(135deg,${color},${color}cc);padding:24px 20px 16px;border-radius:16px 16px 0 0;text-align:center;position:relative;">
             <button onclick="this.closest('#adminUserDetailOverlay').remove()" style="position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.25);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.4)'" onmouseout="this.style.background='rgba(255,255,255,0.25)'">✕</button>
             <div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.25);display:inline-flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;">${initial}</div>
-            <div style="color:#fff;font-size:16px;font-weight:600;">${u.username || '-'}</div>
-            <div style="color:rgba(255,255,255,0.8);font-size:11px;margin-top:2px;">${u.email || '-'}</div>
+            <div style="color:#fff;font-size:16px;font-weight:600;">${escapeHtml(u.username || '-')}</div>
+            <div style="color:rgba(255,255,255,0.8);font-size:11px;margin-top:2px;">${escapeHtml(u.email || '-')}</div>
             <div style="margin-top:6px;display:flex;justify-content:center;gap:10px;font-size:11px;">
               <span style="background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:10px;color:#fff;">账号：${statusLabel}</span>
               <span style="background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:10px;color:#fff;">榜单：${anonLabel}</span>
@@ -19722,30 +19943,30 @@ function showAdminUserDetail(userId) {
             <div style="background:#f8fafc;border-radius:10px;padding:12px 16px;">
               <div style="font-size:11px;color:#8b5cf6;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">基本信息</div>
               ${infoRow('用户 ID', u.id)}
-              ${infoRow('用户名', u.username)}
-              ${infoRow('邮箱', u.email)}
+              ${infoRow('用户名', escapeHtml(u.username))}
+              ${infoRow('邮箱', escapeHtml(u.email))}
               ${infoRow('性别', gender)}
-              ${infoRow('生日', u.birthday)}
+              ${infoRow('生日', escapeHtml(u.birthday))}
             </div>
             <div style="background:#f8fafc;border-radius:10px;padding:12px 16px;margin-top:10px;">
               <div style="font-size:11px;color:#0ea5e9;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">学业信息</div>
-              ${infoRow('年级', u.grade)}
-              ${infoRow('专业', u.major)}
-              ${infoRow('QQ', u.qq)}
+              ${infoRow('年级', escapeHtml(u.grade))}
+              ${infoRow('专业', escapeHtml(u.major))}
+              ${infoRow('QQ', escapeHtml(u.qq))}
             </div>
             <div style="background:#f8fafc;border-radius:10px;padding:12px 16px;margin-top:10px;">
               <div style="font-size:11px;color:#f59e0b;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">个人资料</div>
-              ${infoRow('个性签名', u.signature)}
-              ${infoRow('个人介绍', u.intro)}
+              ${infoRow('个性签名', escapeHtml(u.signature))}
+              ${infoRow('个人介绍', escapeHtml(u.intro))}
             </div>
             <div style="background:#f8fafc;border-radius:10px;padding:12px 16px;margin-top:10px;">
               <div style="font-size:11px;color:#6366f1;font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">最近答题记录</div>
               ${quizRecordsHtml}
             </div>
-            <div style="text-align:center;padding:10px 0 4px;font-size:11px;color:#94a3b8;">注册于 ${u.created_at || '-'}</div>
+            <div style="text-align:center;padding:10px 0 4px;font-size:11px;color:#94a3b8;">注册于 ${escapeHtml(u.created_at || '-')}</div>
           </div>
           <div style="padding:0 20px 16px;display:flex;gap:8px;justify-content:flex-end;">
-            <button onclick="adminChangePassword(${u.id},'${(u.username||'').replace(/'/g,"\\'")}');this.closest('#adminUserDetailOverlay').remove();" style="padding:8px 18px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#f59e0b;font-size:12px;cursor:pointer;font-weight:500;transition:all 0.15s;" onmouseover="this.style.background='#fffbeb'" onmouseout="this.style.background='#fff'">修改密码</button>
+            <button onclick="adminChangePassword(${u.id},'${jsStr(u.username)}');this.closest('#adminUserDetailOverlay').remove();" style="padding:8px 18px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#f59e0b;font-size:12px;cursor:pointer;font-weight:500;transition:all 0.15s;" onmouseover="this.style.background='#fffbeb'" onmouseout="this.style.background='#fff'">修改密码</button>
             <button onclick="this.closest('#adminUserDetailOverlay').remove()" style="padding:8px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:12px;cursor:pointer;font-weight:500;transition:all 0.15s;">关闭</button>
           </div>
         </div>`;
