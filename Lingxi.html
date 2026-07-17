@@ -6504,7 +6504,7 @@
               </div>
               <div class="setting-group">
                 <label for="settingBirthday">生日</label>
-                <input type="date" id="settingBirthday">
+                <input type="date" id="settingBirthday" max="2026-07-17">
               </div>
             </div>
             <div class="setting-group">
@@ -10111,6 +10111,9 @@ function switchMainPage(pageId) {
     document.getElementById('notificationArea').classList.remove('hidden');
   } else if (pageId === 'setting') {
     document.getElementById('profileSettingArea').classList.remove('hidden');
+    // 限制生日不能选择未来日期
+    const bdayInput = document.getElementById('settingBirthday');
+    if (bdayInput) { const today = new Date(); bdayInput.max = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0'); }
     document.getElementById('settingName').value = userName;
     let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
     if (currentUserEmail && users[currentUserEmail]) {
