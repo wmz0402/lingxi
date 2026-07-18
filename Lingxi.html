@@ -11697,9 +11697,9 @@ function postProcessChapterContent(container) {
 function renderChapterContent() {
   const container = document.getElementById('studyContentContainer');
   if (!container) return;
-  
+
   updateFavoriteBtnState();
-  
+
   const course = myCourses[activeCourseIndex];
   const ch = course.chapters[activeChapterIndex];
 
@@ -16244,6 +16244,21 @@ function _fcFixHeight(item) {
 var _codeExampleCache = {};
 
 async function renderStudyCodeExamples(container, chapter) {
+  // 非计算机类课程：直接提示无相关资源，不发起API请求
+  const _ceCourseTitle = (myCourses[activeCourseIndex] && myCourses[activeCourseIndex].title) || '';
+  const _ceCsKeywords = ['计算机', '编程', '数据结构', '算法', 'C++', 'c++', 'Java', 'java', 'Python', 'python', 'C语言', 'C ', '软件', '数据库', '网络', '操作系统', '前端', '后端', 'Web', 'web', 'HTML', 'html', 'CSS', 'css', 'JavaScript', '离散数学', '编译', '组成原理', '体系结构'];
+  const _ceMathKeywords = ['数学', '统计', '概率', '线性代数', '微积分', '高数', '解析几何', '数值分析', '优化', '建模'];
+  const _ceIsCS = _ceCsKeywords.some(function(kw) { return _ceCourseTitle.includes(kw) || (chapter.title || '').includes(kw); });
+  const _ceIsMath = _ceMathKeywords.some(function(kw) { return _ceCourseTitle.includes(kw) || (chapter.title || '').includes(kw); });
+  if (!_ceIsCS && !_ceIsMath) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:60px 20px;">
+        <div style="font-size:48px;margin-bottom:16px;opacity:0.6;">📚</div>
+        <div style="font-size:15px;font-weight:600;color:#475569;margin-bottom:8px;">本课程暂无代码实操资源</div>
+        <div style="font-size:13px;color:#94a3b8;line-height:1.8;">建议通过「章节讲解」和「知识卡片」深入学习，<br>或尝试使用「AI学伴」提问相关知识点。</div>
+      </div>`;
+    return;
+  }
   const cacheKey = (activeCourseIndex + '_' + activeChapterIndex);
   if (_codeExampleCache[cacheKey]) {
     _renderCodeExampleUI(container, _codeExampleCache[cacheKey]);
@@ -16281,7 +16296,7 @@ async function renderStudyCodeExamples(container, chapter) {
       if (examples.length > 0) {
         _renderCodeExampleUI(container, examples);
       } else {
-        container.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">本章暂无图表类代码案例，其他学习资源已足够。</div>`;
+        container.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">本章暂无代码实操案例。</div>`;
       }
       if (data.degraded) {
         var notice = document.createElement('div');
