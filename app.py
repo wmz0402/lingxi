@@ -4412,6 +4412,23 @@ def _fallback_code_examples(topic, language, count, difficulty):
 # ============================
 # 7.16 自适应学习路径推荐接口
 # ============================
+
+def _extract_key_concepts(chapter_title, chapter_content=None):
+    """从章节标题和内容中提取关键知识点（用于降级路径生成）。"""
+    concepts = []
+    if chapter_content:
+        import re
+        # 从Markdown中提取###和####标题作为关键知识点
+        headings = re.findall(r'^#{2,4}\s+(.+)', chapter_content, re.MULTILINE)
+        for h in headings[:6]:
+            h = h.strip()
+            if len(h) > 3 and len(h) < 40 and not any(kw in h for kw in ['例题', '习题', '小结', '参考', '下一章', '附录']):
+                concepts.append(h)
+    if not concepts:
+        # 从标题生成通用知识点
+        base = chapter_title.replace('第', '').replace('章：', '').replace('章', '').strip()
+        concepts = [f"{base}的基本概念", f"{base}的核心方法", f"{base}的应用"]
+    return concepts[:4]
 @app.route('/api/learning_path', methods=['POST'])
 def learning_path():
     """基于用户做题统计+画像数据+课程依赖关系，生成自适应学习路径推荐。"""
@@ -4458,13 +4475,13 @@ def learning_path():
             c.execute('''SELECT ch.title, ch.content FROM chapter ch 
                         JOIN course co ON ch.course_id = co.id 
                         WHERE co.name LIKE ? ORDER BY ch.id''', (f'%{course_title}%',))
-            all_chapters = [{"title": r[0], "has_content": bool(r[1])} for r in c.fetchall()]
+            all_chapters = [{"title": r[0], "has_content": bool(r[1]), "content": r[1] or ""} for r in c.fetchall()]
             # 如果精确匹配无结果，尝试模糊匹配
             if not all_chapters:
                 c.execute('''SELECT ch.title, ch.content FROM chapter ch 
                             JOIN course co ON ch.course_id = co.id 
                             ORDER BY ch.id LIMIT 15''')
-                all_chapters = [{"title": r[0], "has_content": bool(r[1])} for r in c.fetchall()]
+                all_chapters = [{"title": r[0], "has_content": bool(r[1]), "content": r[1] or ""} for r in c.fetchall()]
             conn.close()
         except Exception as e:
             print(f"[学习路径] 查询课程章节失败: {e}")
@@ -4478,6 +4495,9 @@ def learning_path():
 3. 考虑知识点的前置依赖关系（基础概念先于高级应用）
 4. 结合用户的学习风格和兴趣偏好
 5. 给出每步的具体行动建议和预估时间
+6. 为每个步骤列出2-4个关键知识点和1-2条具体学习技巧
+7. 标注每个步骤的难度等级（easy/medium/hard）
+8. 在关键节点设置里程碑（milestone:true）
 
 请输出JSON格式：
 {
@@ -4488,10 +4508,15 @@ def learning_path():
       "order": 1,
       "chapter_title": "章节标题",
       "action_type": "learn/review/practice/quiz/flashcard",
-      "reason": "推荐理由",
+      "reason": "推荐理由（说明为什么推荐这一步）",
       "priority": "high/medium/low",
       "estimated_minutes": 20,
-      "prerequisite": "前置知识（如有）"
+      "prerequisite": "前置知识（如有）",
+      "key_concepts": ["关键知识点1", "关键知识点2", "关键知识点3"],
+      "difficulty": "easy/medium/hard",
+      "study_tips": ["具体的学习技巧或建议1", "具体的学习技巧或建议2"],
+      "milestone": true或false,
+      "progress_pct": 0到100的当前掌握度
     }
   ],
   "summary": "路径总结和建议",
@@ -4529,6 +4554,11 @@ def learning_path():
         for cs in chapter_stats:
             studied_map[cs.get("chapter_title", "")] = cs
 
+        # 建立章节内容查找表（用于提取知识点）
+        content_map = {}
+        for ch in all_chapters:
+            content_map[ch["title"]] = ch.get("content", "")
+
         path_result = {
             "path_name": f"「{course_title}」自适应学习路径",
             "steps": [],
@@ -4540,14 +4570,29 @@ def learning_path():
         # 第一步：薄弱章节优先复习
         for cs in chapter_stats:
             if cs.get("studied") and cs.get("quiz_total", 0) > 0 and cs.get("accuracy", 100) < 60:
+                ch_content = content_map.get(cs["chapter_title"], "")
+                kcs = _extract_key_concepts(cs["chapter_title"], ch_content)
+                acc = cs.get("accuracy", 0)
+                diff = "hard" if acc < 40 else "medium"
+                kc0 = kcs[0] if kcs else '核心概念'
+                tips = [f"重点攻克{kc0}，建议结合例题反复理解"]
+                if acc < 40:
+                    tips.append("正确率较低，建议先回顾章节讲解再做题巩固")
+                else:
+                    tips.append("针对易错题整理错题本，找出薄弱环节")
                 path_result["steps"].append({
                     "order": order,
                     "chapter_title": cs["chapter_title"],
                     "action_type": "review",
-                    "reason": f"做题{cs['quiz_total']}道，正确率仅{cs['accuracy']}%，属于薄弱环节，建议重点复习",
+                    "reason": f"做题{cs['quiz_total']}道，正确率仅{acc}%，属于薄弱环节，建议重点复习",
                     "priority": "high",
                     "estimated_minutes": max(20, min(40, cs["quiz_total"] * 3)),
-                    "prerequisite": ""
+                    "prerequisite": "",
+                    "key_concepts": kcs,
+                    "difficulty": diff,
+                    "study_tips": tips,
+                    "milestone": order == 1,
+                    "progress_pct": acc
                 })
                 order += 1
 
@@ -4556,7 +4601,9 @@ def learning_path():
             ch_title = ch["title"]
             cs = studied_map.get(ch_title, {})
             if not cs.get("studied"):
-                content_len = "较长" if ch.get("has_content") and len(ch.get("content", "")) > 2000 else "适中"
+                ch_content = ch.get("content", "")
+                content_len = "较长" if ch.get("has_content") and len(ch_content) > 2000 else "适中"
+                kcs = _extract_key_concepts(ch_title, ch_content)
                 path_result["steps"].append({
                     "order": order,
                     "chapter_title": ch_title,
@@ -4564,35 +4611,58 @@ def learning_path():
                     "reason": f"尚未学习的章节，建议按顺序学习（内容量{content_len}）",
                     "priority": "medium",
                     "estimated_minutes": 35 if ch.get("has_content") else 25,
-                    "prerequisite": ""
+                    "prerequisite": "",
+                    "key_concepts": kcs,
+                    "difficulty": "easy",
+                    "study_tips": ["先通读章节讲解，掌握基本概念", "学习后完成章节测验检验理解程度"],
+                    "milestone": False,
+                    "progress_pct": 0
                 })
                 order += 1
 
         # 第三步：已掌握的章节安排巩固练习
         for cs in chapter_stats:
             if cs.get("studied") and cs.get("quiz_total", 0) > 0 and cs.get("accuracy", 0) >= 80:
+                ch_content = content_map.get(cs["chapter_title"], "")
+                kcs = _extract_key_concepts(cs["chapter_title"], ch_content)
+                acc = cs.get("accuracy", 0)
+                kc0 = kcs[0] if kcs else '综合应用'
                 path_result["steps"].append({
                     "order": order,
                     "chapter_title": cs["chapter_title"],
                     "action_type": "quiz",
-                    "reason": f"已做题{cs['quiz_total']}道，正确率{cs['accuracy']}%，掌握良好，可做进阶测验巩固",
+                    "reason": f"已做题{cs['quiz_total']}道，正确率{acc}%，掌握良好，可做进阶测验巩固",
                     "priority": "low",
                     "estimated_minutes": 15,
-                    "prerequisite": ""
+                    "prerequisite": "",
+                    "key_concepts": kcs,
+                    "difficulty": "easy" if acc >= 90 else "medium",
+                    "study_tips": ["尝试挑战更高难度的题目", f"关注{kc0}的深层理解"],
+                    "milestone": False,
+                    "progress_pct": acc
                 })
                 order += 1
 
         # 第四步：中等正确率的章节安排练习
         for cs in chapter_stats:
             if cs.get("studied") and cs.get("quiz_total", 0) > 0 and 60 <= cs.get("accuracy", 0) < 80:
+                ch_content = content_map.get(cs["chapter_title"], "")
+                kcs = _extract_key_concepts(cs["chapter_title"], ch_content)
+                acc = cs.get("accuracy", 0)
+                kc0 = kcs[0] if kcs else '核心知识点'
                 path_result["steps"].append({
                     "order": order,
                     "chapter_title": cs["chapter_title"],
                     "action_type": "practice",
-                    "reason": f"做题{cs['quiz_total']}道，正确率{cs['accuracy']}%，建议针对性练习提升",
+                    "reason": f"做题{cs['quiz_total']}道，正确率{acc}%，建议针对性练习提升",
                     "priority": "medium",
                     "estimated_minutes": 25,
-                    "prerequisite": ""
+                    "prerequisite": "",
+                    "key_concepts": kcs,
+                    "difficulty": "medium",
+                    "study_tips": [f"重点练习{kc0}相关的题目", "回顾错题，总结常见错误类型"],
+                    "milestone": False,
+                    "progress_pct": acc
                 })
                 order += 1
 
@@ -4622,19 +4692,34 @@ def learning_path():
             generic_steps = [
                 {"order": 1, "chapter_title": "课程概览与学习目标", "action_type": "learn",
                  "reason": "建立对课程的整体认知框架，明确学习方向", "priority": "high",
-                 "estimated_minutes": 20, "prerequisite": ""},
+                 "estimated_minutes": 20, "prerequisite": "",
+                 "key_concepts": ["课程整体框架", "学习目标与要求", "核心术语预览"],
+                 "difficulty": "easy", "study_tips": ["先浏览目录了解课程结构", "标记感兴趣或困惑的章节"],
+                 "milestone": True, "progress_pct": 0},
                 {"order": 2, "chapter_title": "核心概念学习", "action_type": "learn",
                  "reason": "掌握课程的基础概念和核心术语", "priority": "high",
-                 "estimated_minutes": 30, "prerequisite": "课程概览"},
+                 "estimated_minutes": 30, "prerequisite": "课程概览",
+                 "key_concepts": ["基础定义与定理", "核心公式推导", "典型例题分析"],
+                 "difficulty": "medium", "study_tips": ["做好笔记，记录关键定义", "遇到不理解的地方标记出来后续重点攻克"],
+                 "milestone": True, "progress_pct": 0},
                 {"order": 3, "chapter_title": "章节练习与巩固", "action_type": "practice",
                  "reason": "通过练习加深对概念的理解", "priority": "medium",
-                 "estimated_minutes": 25, "prerequisite": "核心概念学习"},
+                 "estimated_minutes": 25, "prerequisite": "核心概念学习",
+                 "key_concepts": ["基础题型训练", "综合应用题", "易错点归纳"],
+                 "difficulty": "medium", "study_tips": ["从简单题开始逐步提升难度", "做完题后回顾知识点加深理解"],
+                 "milestone": False, "progress_pct": 0},
                 {"order": 4, "chapter_title": "知识卡片复习", "action_type": "flashcard",
                  "reason": "利用间隔重复法强化记忆关键知识点", "priority": "medium",
-                 "estimated_minutes": 15, "prerequisite": "章节练习"},
+                 "estimated_minutes": 15, "prerequisite": "章节练习",
+                 "key_concepts": ["核心概念速记", "公式与定理回顾", "关键术语辨析"],
+                 "difficulty": "easy", "study_tips": ["每天复习一组卡片", "不确定的卡片标记后反复练习"],
+                 "milestone": False, "progress_pct": 0},
                 {"order": 5, "chapter_title": "阶段测验", "action_type": "quiz",
                  "reason": "检验学习成果，发现薄弱环节", "priority": "medium",
-                 "estimated_minutes": 20, "prerequisite": "知识卡片复习"},
+                 "estimated_minutes": 20, "prerequisite": "知识卡片复习",
+                 "key_concepts": ["综合知识点检验", "薄弱点排查", "查漏补缺"],
+                 "difficulty": "hard", "study_tips": ["限时完成测验模拟真实考试", "错题及时回顾找出知识盲区"],
+                 "milestone": True, "progress_pct": 0},
             ]
             path_result["steps"] = generic_steps
             path_result["total_steps"] = len(generic_steps)

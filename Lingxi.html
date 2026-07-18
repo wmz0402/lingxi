@@ -5153,19 +5153,38 @@
     /* ===== 自适应学习路径 ===== */
     .learning-path-card { background: linear-gradient(135deg, #faf5ff 0%, #f0f9ff 100%); border: 1.5px solid #e9d5ff; border-radius: 16px; padding: 20px; margin: 16px 0; }
     .learning-path-title { font-size: 15px; font-weight: 700; color: #1e1b4b; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-    .learning-path-step { display: flex; gap: 12px; margin: 10px 0; padding: 12px; background: #fff; border-radius: 12px; border: 1px solid #f1f5f9; cursor: pointer; transition: all 0.2s; }
-    .learning-path-step:hover { border-color: #8b5cf6; box-shadow: 0 2px 8px rgba(139,92,246,0.1); }
-    .lp-step-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
-    .lp-step-content { flex: 1; }
-    .lp-step-title { font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 4px; }
-    .lp-step-action { font-size: 11.5px; color: #64748b; line-height: 1.5; }
-    .lp-step-meta { display: flex; gap: 8px; margin-top: 6px; }
+    .learning-path-step { display: flex; gap: 12px; padding: 14px 16px; background: #fff; border-radius: 14px; border: 1px solid #f1f5f9; cursor: pointer; transition: all 0.25s; position: relative; }
+    .learning-path-step:hover { border-color: #8b5cf6; box-shadow: 0 4px 16px rgba(139,92,246,0.12); transform: translateY(-1px); }
+    .lp-step-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; position: relative; z-index: 2; }
+    .lp-step-content { flex: 1; min-width: 0; }
+    .lp-step-title { font-size: 13.5px; font-weight: 600; color: #1e293b; margin-bottom: 5px; }
+    .lp-step-action { font-size: 11.5px; color: #64748b; line-height: 1.6; margin-bottom: 6px; }
+    .lp-step-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
     .lp-step-tag { font-size: 10px; padding: 2px 8px; border-radius: 6px; font-weight: 600; }
     .lp-tag-high { background: #fee2e2; color: #dc2626; }
     .lp-tag-medium { background: #fef3c7; color: #d97706; }
     .lp-tag-low { background: #dcfce7; color: #16a34a; }
     .lp-tag-time { background: #f1f5f9; color: #64748b; }
     .lp-tag-type { background: #ede9fe; color: #7c3aed; }
+    .lp-progress-bar { height: 4px; background: #f1f5f9; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+    .lp-progress-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+    .lp-concepts { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+    .lp-concept-chip { font-size: 10px; padding: 2px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; color: #475569; white-space: nowrap; }
+    .lp-difficulty { display: inline-flex; align-items: center; gap: 2px; font-size: 10px; padding: 2px 6px; border-radius: 6px; }
+    .lp-diff-easy { background: #dcfce7; color: #16a34a; }
+    .lp-diff-medium { background: #fef3c7; color: #d97706; }
+    .lp-diff-hard { background: #fee2e2; color: #dc2626; }
+    .lp-milestone-badge { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; background: linear-gradient(135deg, #f59e0b, #f97316); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; box-shadow: 0 2px 4px rgba(245,158,11,0.3); z-index: 3; }
+    .lp-tips-toggle { font-size: 11px; color: #8b5cf6; cursor: pointer; margin-top: 8px; display: inline-flex; align-items: center; gap: 4px; }
+    .lp-tips-toggle:hover { color: #6d28d9; }
+    .lp-tips-content { font-size: 11px; color: #475569; line-height: 1.7; margin-top: 6px; padding: 8px 10px; background: #faf5ff; border-radius: 8px; border: 1px solid #ede9fe; display: none; }
+    .lp-tips-content.show { display: block; }
+    .lp-connector { position: absolute; left: 27px; top: 100%; width: 2px; height: 12px; background: linear-gradient(to bottom, #c7d2fe, #e2e8f0); z-index: 1; }
+    .lp-step-actions { display: flex; gap: 6px; margin-top: 8px; }
+    .lp-action-btn { font-size: 10.5px; padding: 4px 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #475569; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+    .lp-action-btn:hover { background: #6366f1; color: #fff; border-color: #6366f1; }
+    .lp-action-btn-primary { background: #6366f1; color: #fff; border-color: #6366f1; }
+    .lp-action-btn-primary:hover { background: #4f46e5; }
 </style>
 </head>
 <body>
@@ -16435,14 +16454,34 @@ async function renderStudyLearningPath(container, course, chapter) {
   }
 }
 
+function _toggleLpTips(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.toggle('show');
+}
+
 function _renderLearningPathUI(container, data) {
   const path = data.path;
   const stats = data.quiz_stats || {};
   const courseTitle = (myCourses[activeCourseIndex] && myCourses[activeCourseIndex].title) || '';
   const stepColors = ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
   const typeLabels = { learn: '📖 学习', review: '🔄 复习', practice: '✏️ 练习', quiz: '📝 测验', flashcard: '📇 卡片' };
+  const diffLabels = { easy: '⭐ 入门', medium: '⭐⭐ 进阶', hard: '⭐⭐⭐ 挑战' };
+  const actionNavMap = { review: 'lecture', learn: 'lecture', practice: 'quiz', quiz: 'quiz', flashcard: 'flashcard' };
+  const actionBtnLabels = { review: '开始复习', learn: '开始学习', practice: '去练习', quiz: '开始测验', flashcard: '复习卡片' };
+
+  // 整体进度统计
+  var steps = path.steps || [];
+  var totalMins = steps.reduce(function(sum, s) { return sum + (s.estimated_minutes || 0); }, 0);
+  var totalSteps = steps.length;
+  var highCount = steps.filter(function(s) { return s.priority === 'high'; }).length;
+  var avgProgress = 0;
+  var withProgress = steps.filter(function(s) { return typeof s.progress_pct === 'number'; });
+  if (withProgress.length > 0) {
+    avgProgress = Math.round(withProgress.reduce(function(sum, s) { return sum + (s.progress_pct || 0); }, 0) / withProgress.length);
+  }
+
   let stepsHtml = '';
-  (path.steps || []).forEach(function(step, i) {
+  steps.forEach(function(step, i) {
     const priorityClass = step.priority === 'high' ? 'lp-tag-high' : step.priority === 'low' ? 'lp-tag-low' : 'lp-tag-medium';
     const priorityLabel = step.priority === 'high' ? '高优先' : step.priority === 'low' ? '低优先' : '中优先';
     const typeLabel = typeLabels[step.action_type] || '📖 学习';
@@ -16450,8 +16489,65 @@ function _renderLearningPathUI(container, data) {
     const actionSuffixes = { review: ' · 复习', practice: ' · 练习', quiz: ' · 测验', flashcard: ' · 卡片' };
     const rawTitle = step.chapter_title || step.title || '步骤 ' + (i + 1);
     const displayTitle = rawTitle + (actionSuffixes[step.action_type] || '');
+    const progressPct = typeof step.progress_pct === 'number' ? step.progress_pct : 0;
+    const progressColor = progressPct >= 80 ? '#10b981' : progressPct >= 60 ? '#f59e0b' : progressPct > 0 ? '#ef4444' : '#e2e8f0';
+    const diff = step.difficulty || 'medium';
+    const diffClass = 'lp-diff-' + diff;
+    const diffLabel = diffLabels[diff] || '⭐⭐ 进阶';
+    const tipsId = 'lpTips_' + i;
+    const keyConcepts = step.key_concepts || [];
+    const studyTips = step.study_tips || [];
+    const isMilestone = step.milestone;
+    const navType = actionNavMap[step.action_type] || 'lecture';
+    const btnLabel = actionBtnLabels[step.action_type] || '开始学习';
+    const safeTitle = (step.chapter_title || '').replace(/'/g, "\\\\'");
+    const safeCourse = courseTitle.replace(/'/g, "\\\\'");
+
+    // 知识点标签
+    var conceptsHtml = '';
+    if (keyConcepts.length > 0) {
+      conceptsHtml = '<div class="lp-concepts">';
+      keyConcepts.forEach(function(kc) {
+        conceptsHtml += '<span class="lp-concept-chip">' + escapeHtml(kc) + '</span>';
+      });
+      conceptsHtml += '</div>';
+    }
+
+    // 学习技巧
+    var tipsHtml = '';
+    if (studyTips.length > 0) {
+      tipsHtml = '<div class="lp-tips-toggle" onclick="event.stopPropagation();_toggleLpTips(\'' + tipsId + '\')">💡 学习技巧 <span style="font-size:9px;">▼</span></div>';
+      tipsHtml += '<div class="lp-tips-content" id="' + tipsId + '">';
+      studyTips.forEach(function(tip) {
+        tipsHtml += '<div style="margin:3px 0;">• ' + escapeHtml(tip) + '</div>';
+      });
+      tipsHtml += '</div>';
+    }
+
+    // 进度条
+    var progressBarHtml = '';
+    if (typeof step.progress_pct === 'number') {
+      progressBarHtml = '<div class="lp-progress-bar"><div class="lp-progress-fill" style="width:' + progressPct + '%;background:' + progressColor + ';"></div></div>';
+    }
+
+    // 操作按钮
+    var actionsHtml = '';
+    if (step.chapter_title) {
+      actionsHtml = '<div class="lp-step-actions">';
+      actionsHtml += '<button class="lp-action-btn lp-action-btn-primary" onclick="event.stopPropagation();enterCourseStudySearch(\'' + safeCourse + '\',\'' + safeTitle + '\',\'' + navType + '\')">' + btnLabel + '</button>';
+      actionsHtml += '<button class="lp-action-btn" onclick="event.stopPropagation();enterCourseStudySearch(\'' + safeCourse + '\',\'' + safeTitle + '\',\'flashcard\')">📇 卡片</button>';
+      actionsHtml += '</div>';
+    }
+
+    // 里程碑
+    var milestoneHtml = isMilestone ? '<div class="lp-milestone-badge">🏁</div>' : '';
+
+    // 连接线
+    var connectorHtml = (i < steps.length - 1) ? '<div class="lp-connector"></div>' : '';
+
     stepsHtml += `
-      <div class="learning-path-step" onclick="${step.chapter_title ? "enterCourseStudySearch('" + courseTitle.replace(/'/g, "\\\\'") + "', '" + (step.chapter_title || '').replace(/'/g, "\\\\'") + "', 'lecture')" : ''}">
+      <div class="learning-path-step" onclick="${step.chapter_title ? "enterCourseStudySearch('" + safeCourse + "', '" + safeTitle + "', '" + navType + "')" : ''}">
+        ${milestoneHtml}
         <div class="lp-step-num" style="background:${stepColors[i % stepColors.length]}">${step.order || i + 1}</div>
         <div class="lp-step-content">
           <div class="lp-step-title">${escapeHtml(displayTitle)}</div>
@@ -16460,40 +16556,56 @@ function _renderLearningPathUI(container, data) {
             <span class="lp-step-tag ${priorityClass}">${priorityLabel}</span>
             <span class="lp-step-tag lp-tag-type">${typeLabel}</span>
             <span class="lp-step-tag lp-tag-time">⏱ ${mins}分钟</span>
+            <span class="lp-step-tag lp-difficulty ${diffClass}">${diffLabel}</span>
+            ${typeof step.progress_pct === 'number' && step.progress_pct > 0 ? '<span class="lp-step-tag" style="background:#f0fdf4;color:#059669;">掌握 ' + progressPct + '%</span>' : ''}
           </div>
+          ${conceptsHtml}
+          ${progressBarHtml}
+          ${tipsHtml}
+          ${actionsHtml}
         </div>
+        ${connectorHtml}
       </div>`;
   });
+
+  // 整体进度仪表盘
+  var dashboardHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">';
+  dashboardHtml += '<div style="text-align:center;padding:12px 8px;background:#fff;border-radius:12px;border:1px solid #f1f5f9;"><div style="font-size:20px;font-weight:700;color:#6366f1;">' + totalSteps + '</div><div style="font-size:10px;color:#94a3b8;margin-top:2px;">总步骤</div></div>';
+  dashboardHtml += '<div style="text-align:center;padding:12px 8px;background:#fff;border-radius:12px;border:1px solid #f1f5f9;"><div style="font-size:20px;font-weight:700;color:#3b82f6;">' + totalMins + '</div><div style="font-size:10px;color:#94a3b8;margin-top:2px;">分钟</div></div>';
+  dashboardHtml += '<div style="text-align:center;padding:12px 8px;background:#fff;border-radius:12px;border:1px solid #f1f5f9;"><div style="font-size:20px;font-weight:700;color:#ef4444;">' + highCount + '</div><div style="font-size:10px;color:#94a3b8;margin-top:2px;">需重点攻克</div></div>';
+  dashboardHtml += '<div style="text-align:center;padding:12px 8px;background:#fff;border-radius:12px;border:1px solid #f1f5f9;"><div style="font-size:20px;font-weight:700;color:' + (avgProgress >= 60 ? '#10b981' : '#f59e0b') + ';">' + avgProgress + '%</div><div style="font-size:10px;color:#94a3b8;margin-top:2px;">平均掌握度</div></div>';
+  dashboardHtml += '</div>';
+
+  // 薄弱/已掌握统计
   let statsHtml = '';
   if (stats.weak_chapters && stats.weak_chapters.length > 0) {
     statsHtml += '<div style="margin-top:12px;"><div style="font-size:12px;font-weight:600;color:#ef4444;margin-bottom:6px;">⚠️ 薄弱章节</div>';
     stats.weak_chapters.forEach(function(wc) {
-      statsHtml += `<div style="font-size:11px;color:#64748b;padding:2px 0;">• ${escapeHtml(wc.title)} — 正确率 ${wc.accuracy}% (${wc.total}题)</div>`;
+      var pct = Math.min(wc.accuracy, 100);
+      statsHtml += '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;"><div style="flex:1;font-size:11px;color:#64748b;">' + escapeHtml(wc.title) + '</div><div style="width:60px;height:4px;background:#fee2e2;border-radius:2px;overflow:hidden;"><div style="width:' + pct + '%;height:100%;background:#ef4444;border-radius:2px;"></div></div><div style="font-size:10px;color:#ef4444;width:36px;text-align:right;">' + wc.accuracy + '%</div></div>';
     });
     statsHtml += '</div>';
   }
   if (stats.strong_chapters && stats.strong_chapters.length > 0) {
-    statsHtml += '<div style="margin-top:8px;"><div style="font-size:12px;font-weight:600;color:#10b981;margin-bottom:6px;">✅ 已掌握章节</div>';
+    statsHtml += '<div style="margin-top:10px;"><div style="font-size:12px;font-weight:600;color:#10b981;margin-bottom:6px;">✅ 已掌握章节</div>';
     stats.strong_chapters.forEach(function(sc) {
-      statsHtml += `<div style="font-size:11px;color:#64748b;padding:2px 0;">• ${escapeHtml(sc.title)} — 正确率 ${sc.accuracy}%</div>`;
+      var pct = Math.min(sc.accuracy, 100);
+      statsHtml += '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;"><div style="flex:1;font-size:11px;color:#64748b;">' + escapeHtml(sc.title) + '</div><div style="width:60px;height:4px;background:#dcfce7;border-radius:2px;overflow:hidden;"><div style="width:' + pct + '%;height:100%;background:#10b981;border-radius:2px;"></div></div><div style="font-size:10px;color:#10b981;width:36px;text-align:right;">' + sc.accuracy + '%</div></div>';
     });
     statsHtml += '</div>';
   }
-  const totalMins = (path.steps || []).reduce(function(sum, s) { return sum + (s.estimated_minutes || 0); }, 0);
+
   container.innerHTML = `
-    <div style="max-width:680px;margin:0 auto;">
+    <div style="max-width:700px;margin:0 auto;">
       <div class="learning-path-card">
         <div class="learning-path-title">🗺️ ${escapeHtml(path.path_name || '自适应学习路径')}</div>
-        <div style="display:flex;gap:16px;margin-bottom:16px;">
-          <div style="font-size:12px;color:#64748b;background:#fff;padding:6px 12px;border-radius:8px;border:1px solid #f1f5f9;">📊 共 ${path.total_steps || (path.steps || []).length} 个步骤</div>
-          <div style="font-size:12px;color:#64748b;background:#fff;padding:6px 12px;border-radius:8px;border:1px solid #f1f5f9;">⏱ 预计 ${totalMins} 分钟</div>
-          ${path.predicted_improvement ? '<div style="font-size:12px;color:#10b981;background:#f0fdf4;padding:6px 12px;border-radius:8px;border:1px solid #bbf7d0;">📈 ' + escapeHtml(path.predicted_improvement) + '</div>' : ''}
-        </div>
+        ${dashboardHtml}
         ${stepsHtml}
-        ${path.summary ? '<div style="margin-top:16px;padding:12px;background:rgba(99,102,241,0.05);border-radius:10px;font-size:12px;color:#475569;line-height:1.6;"><strong>📋 路径总结：</strong>' + escapeHtml(path.summary) + '</div>' : ''}
-        ${path.adaptive_advice ? '<div style="margin-top:8px;padding:12px;background:rgba(245,158,11,0.05);border-radius:10px;font-size:12px;color:#92400e;line-height:1.6;"><strong>🎯 自适应建议：</strong>' + escapeHtml(path.adaptive_advice) + '</div>' : ''}
+        ${path.summary ? '<div style="margin-top:18px;padding:14px 16px;background:rgba(99,102,241,0.06);border-radius:12px;font-size:12px;color:#475569;line-height:1.7;"><strong>📌 路径总结：</strong>' + escapeHtml(path.summary) + '</div>' : ''}
+        ${path.predicted_improvement ? '<div style="margin-top:8px;padding:12px 16px;background:rgba(16,185,129,0.06);border-radius:12px;font-size:12px;color:#065f46;line-height:1.6;"><strong>📈 预期提升：</strong>' + escapeHtml(path.predicted_improvement) + '</div>' : ''}
+        ${path.adaptive_advice ? '<div style="margin-top:8px;padding:12px 16px;background:rgba(245,158,11,0.06);border-radius:12px;font-size:12px;color:#92400e;line-height:1.6;"><strong>🎯 自适应建议：</strong>' + escapeHtml(path.adaptive_advice) + '</div>' : ''}
       </div>
-      ${statsHtml ? '<div style="padding:16px;background:#fff;border-radius:14px;border:1px solid #f1f5f9;">' + statsHtml + '</div>' : ''}
+      ${statsHtml ? '<div style="margin-top:12px;padding:16px;background:#fff;border-radius:14px;border:1px solid #f1f5f9;">' + statsHtml + '</div>' : ''}
     </div>`;
   if (window.typesetMathJax) setTimeout(window.typesetMathJax, 100);
 }
