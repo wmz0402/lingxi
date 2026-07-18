@@ -183,8 +183,8 @@ SMTP_PASS = os.getenv("SMTP_PASS", "")
 SMTP_SENDER_NAME = '灵析学习平台'
 
 # 讯飞星火 WebSocket 调用的认证参数
-SPARK_AUTH_URL = "wss://spark-api.xf-yun.com/v4.0/chat"
-SPARK_DOMAIN = "4.0Ultra"
+SPARK_AUTH_URL = "wss://spark-api.xf-yun.com/chat/pro-128k"
+SPARK_DOMAIN = "pro-128k"
 VERIFY_CODE_EXPIRE = 300   # 验证码有效期（秒），5分钟
 VERIFY_CODE_COOLDOWN = 60  # 发送冷却时间（秒），防止频繁发送
 
@@ -217,11 +217,11 @@ def call_xunfei(prompt: str) -> str:
         return generate_fallback_response(prompt)
     try:
         spark = ChatSparkLLM(
-            spark_api_url="wss://spark-api.xf-yun.com/v4.0/chat",
+            spark_api_url=SPARK_AUTH_URL,
             spark_app_id=SPARK_APP_ID,
             spark_api_key=SPARK_API_KEY,
             spark_api_secret=SPARK_API_SECRET,
-            spark_llm_domain="4.0Ultra",
+            spark_llm_domain=SPARK_DOMAIN,
             request_timeout=120,
         )
         messages = [ChatMessage(role="user", content=prompt)]
@@ -239,11 +239,11 @@ def call_xunfei_with_history(messages_list: list) -> str:
         return generate_fallback_response(last_msg)
     try:
         spark = ChatSparkLLM(
-            spark_api_url="wss://spark-api.xf-yun.com/v4.0/chat",
+            spark_api_url=SPARK_AUTH_URL,
             spark_app_id=SPARK_APP_ID,
             spark_api_key=SPARK_API_KEY,
             spark_api_secret=SPARK_API_SECRET,
-            spark_llm_domain="4.0Ultra",
+            spark_llm_domain=SPARK_DOMAIN,
             request_timeout=120,
         )
         spark_messages = []
@@ -1150,7 +1150,7 @@ def call_xunfei_streaming(messages_list: list):
     from wsgiref.handlers import format_date_time
     from time import mktime
 
-    CHAT_URL = "wss://spark-api.xf-yun.com/v4.0/chat"
+    CHAT_URL = SPARK_AUTH_URL
 
     # 构建鉴权 URL
     parsed = urlparse(CHAT_URL)
@@ -1191,7 +1191,7 @@ def call_xunfei_streaming(messages_list: list):
         },
         "parameter": {
             "chat": {
-                "domain": "4.0Ultra",
+                "domain": "pro-128k",
                 "temperature": 0.5,
                 "max_tokens": 4096
             }
@@ -4415,6 +4415,7 @@ def learning_path():
     course_title = data.get('course_title', '').strip()
     current_chapter = data.get('current_chapter', '').strip()
     profile = data.get('profile', {})  # 前端传来的画像数据
+    chapter_stats = data.get('chapter_stats', [])  # 前端传来的各章节做题数据
 
     # 从数据库获取做题统计
     quiz_data = []
@@ -4496,6 +4497,7 @@ def learning_path():
 - 做题数据：共{len(quiz_data)}个章节有做题记录
 - 薄弱章节：{json.dumps(weak_chapters[:5], ensure_ascii=False) if weak_chapters else '暂无'}
 - 已掌握章节：{json.dumps(strong_chapters[:5], ensure_ascii=False) if strong_chapters else '暂无'}
+- 各章节学习进度（前端数据）：{json.dumps(chapter_stats[:15], ensure_ascii=False) if chapter_stats else '暂无'}
 - 所有可用章节：{json.dumps([ch['title'] for ch in all_chapters[:15]], ensure_ascii=False) if all_chapters else '暂无数据'}
 - 学习画像：{json.dumps(profile, ensure_ascii=False) if profile else '暂无'}"""
 
@@ -4504,6 +4506,7 @@ def learning_path():
         {"role": "user", "content": user_msg}
     ]
 
+    path_result = None
     try:
         raw = call_xunfei_with_history(messages)
         path_result = _extract_json_from_llm(raw)
@@ -4511,35 +4514,102 @@ def learning_path():
             raise ValueError("LLM返回内容无法解析为路径对象")
     except Exception as e:
         print(f"[学习路径] LLM解析失败: {e}")
+
+    # 如果 LLM 未成功生成或结果无效，使用规则降级
+    if not path_result or not path_result.get("steps"):
+        studied_map = {}
+        for cs in chapter_stats:
+            studied_map[cs.get("chapter_title", "")] = cs
+
         path_result = {
             "path_name": f"「{course_title}」自适应学习路径",
-            "total_steps": len(weak_chapters) + 2,
             "steps": [],
-            "summary": "基于做题数据自动生成的学习建议。",
-            "predicted_improvement": "坚持学习预计可提升正确率15-20%"
+            "summary": "",
+            "predicted_improvement": ""
         }
-        # 降级方案：基于规则生成路径
+
         order = 1
-        for wc in weak_chapters[:3]:
-            path_result["steps"].append({
-                "order": order, "chapter_title": wc["title"],
-                "action_type": "review", "reason": f"正确率仅{wc['accuracy']}%，需要重点复习",
-                "priority": "high", "estimated_minutes": 25, "prerequisite": ""
-            })
-            order += 1
-        for ch in all_chapters:
-            if ch["title"] not in [s["chapter_title"] for s in path_result["steps"]]:
+        # 第一步：薄弱章节优先复习
+        for cs in chapter_stats:
+            if cs.get("studied") and cs.get("quiz_total", 0) > 0 and cs.get("accuracy", 100) < 60:
                 path_result["steps"].append({
-                    "order": order, "chapter_title": ch["title"],
-                    "action_type": "learn", "reason": "尚未学习的章节",
-                    "priority": "medium", "estimated_minutes": 30, "prerequisite": ""
+                    "order": order,
+                    "chapter_title": cs["chapter_title"],
+                    "action_type": "review",
+                    "reason": f"做题{cs['quiz_total']}道，正确率仅{cs['accuracy']}%，属于薄弱环节，建议重点复习",
+                    "priority": "high",
+                    "estimated_minutes": max(20, min(40, cs["quiz_total"] * 3)),
+                    "prerequisite": ""
                 })
                 order += 1
-                if order > 6:
-                    break
-        # 修正 total_steps 为实际步骤数
+
+        # 第二步：未学习的章节按顺序学习
+        for ch in all_chapters:
+            ch_title = ch["title"]
+            cs = studied_map.get(ch_title, {})
+            if not cs.get("studied"):
+                content_len = "较长" if ch.get("has_content") and len(ch.get("content", "")) > 2000 else "适中"
+                path_result["steps"].append({
+                    "order": order,
+                    "chapter_title": ch_title,
+                    "action_type": "learn",
+                    "reason": f"尚未学习的章节，建议按顺序学习（内容量{content_len}）",
+                    "priority": "medium",
+                    "estimated_minutes": 35 if ch.get("has_content") else 25,
+                    "prerequisite": ""
+                })
+                order += 1
+
+        # 第三步：已掌握的章节安排巩固练习
+        for cs in chapter_stats:
+            if cs.get("studied") and cs.get("quiz_total", 0) > 0 and cs.get("accuracy", 0) >= 80:
+                path_result["steps"].append({
+                    "order": order,
+                    "chapter_title": cs["chapter_title"],
+                    "action_type": "quiz",
+                    "reason": f"已做题{cs['quiz_total']}道，正确率{cs['accuracy']}%，掌握良好，可做进阶测验巩固",
+                    "priority": "low",
+                    "estimated_minutes": 15,
+                    "prerequisite": ""
+                })
+                order += 1
+
+        # 第四步：中等正确率的章节安排练习
+        for cs in chapter_stats:
+            if cs.get("studied") and cs.get("quiz_total", 0) > 0 and 60 <= cs.get("accuracy", 0) < 80:
+                path_result["steps"].append({
+                    "order": order,
+                    "chapter_title": cs["chapter_title"],
+                    "action_type": "practice",
+                    "reason": f"做题{cs['quiz_total']}道，正确率{cs['accuracy']}%，建议针对性练习提升",
+                    "priority": "medium",
+                    "estimated_minutes": 25,
+                    "prerequisite": ""
+                })
+                order += 1
+
         path_result["total_steps"] = len(path_result["steps"])
-        # 如果仍无步骤（无做题数据且无章节数据），生成通用路径
+
+        # 计算整体统计
+        total_studied = sum(1 for cs in chapter_stats if cs.get("studied"))
+        total_weak = sum(1 for cs in chapter_stats if cs.get("studied") and cs.get("accuracy", 100) < 60)
+        avg_acc = 0
+        studied_with_quiz = [cs for cs in chapter_stats if cs.get("quiz_total", 0) > 0]
+        if studied_with_quiz:
+            avg_acc = round(sum(cs["accuracy"] for cs in studied_with_quiz) / len(studied_with_quiz))
+
+        if total_studied > 0:
+            path_result["summary"] = f"你已学习{total_studied}/{len(chapter_stats)}个章节"
+            if studied_with_quiz:
+                path_result["summary"] += f"，平均正确率{avg_acc}%"
+            if total_weak > 0:
+                path_result["summary"] += f"，有{total_weak}个薄弱环节需重点突破"
+            path_result["predicted_improvement"] = f"完成本路径预计可将平均正确率提升至{min(avg_acc + 15, 95)}%"
+        else:
+            path_result["summary"] = "这是你首次学习本课程，建议按顺序完成所有章节"
+            path_result["predicted_improvement"] = "完成全部章节学习后，预计掌握度可达80%以上"
+
+        # 如果仍无步骤，用通用路径
         if not path_result["steps"]:
             generic_steps = [
                 {"order": 1, "chapter_title": "课程概览与学习目标", "action_type": "learn",
@@ -4560,6 +4630,8 @@ def learning_path():
             ]
             path_result["steps"] = generic_steps
             path_result["total_steps"] = len(generic_steps)
+            path_result["summary"] = "暂无足够学习数据，建议先完成一些章节学习和做题"
+            path_result["predicted_improvement"] = "坚持学习后将生成更精准的个性化路径"
 
     return json_utf8({
         "success": True,

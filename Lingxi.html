@@ -16252,6 +16252,9 @@ async function renderStudyCodeExamples(container, chapter) {
   container.innerHTML = `<div style="text-align:center;padding:40px 0;"><div class="typing-indicator"><span></span><span></span><span></span></div><div style="font-size:13px;color:#64748b;margin-top:12px;">AI正在生成代码实操案例...</div></div>`;
   try {
     const topic = chapter.title || '编程基础';
+    const courseTitle = (myCourses[activeCourseIndex] && myCourses[activeCourseIndex].title) || '';
+    const csKeywords = ['计算机', '编程', '数据结构', '算法', 'C++', 'c++', 'Java', 'java', 'Python', 'python', 'C语言', 'C ', '软件', '数据库', '网络', '操作系统', '前端', '后端', 'Web', 'web', 'HTML', 'html', 'CSS', 'css', 'JavaScript', '离散数学', '编译', '组成原理', '体系结构'];
+    const isCS = csKeywords.some(function(kw) { return courseTitle.includes(kw) || topic.includes(kw); });
     let lang = 'python';
     if (topic.includes('C++') || topic.includes('c++')) lang = 'cpp';
     else if (topic.includes('Java') || topic.includes('java')) lang = 'java';
@@ -16263,10 +16266,23 @@ async function renderStudyCodeExamples(container, chapter) {
     });
     const data = await resp.json();
     if (data.success && data.examples && data.examples.length > 0) {
-      if (!data.degraded) {
-        _codeExampleCache[cacheKey] = data.examples;
+      var examples = data.examples;
+      if (!isCS) {
+        var plotKeywords = ['matplotlib', 'plt.', 'plot(', 'chart', 'figure', 'subplot', '可视化', '图表', '画图', '绘图', 'imshow', 'scatter', 'bar(', 'hist('];
+        examples = examples.filter(function(ex) {
+          var code = (ex.code || '').toLowerCase();
+          var title = (ex.title || '').toLowerCase();
+          return plotKeywords.some(function(kw) { return code.includes(kw.toLowerCase()) || title.includes(kw.toLowerCase()); });
+        });
       }
-      _renderCodeExampleUI(container, data.examples);
+      if (!data.degraded && examples.length > 0) {
+        _codeExampleCache[cacheKey] = examples;
+      }
+      if (examples.length > 0) {
+        _renderCodeExampleUI(container, examples);
+      } else {
+        container.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">本章暂无图表类代码案例，其他学习资源已足够。</div>`;
+      }
       if (data.degraded) {
         var notice = document.createElement('div');
         notice.style.cssText = 'max-width:680px;margin:8px auto 0;padding:10px 14px;background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;font-size:12px;color:#92400e;text-align:center;';
@@ -16355,6 +16371,30 @@ async function renderStudyLearningPath(container, course, chapter) {
       profileData.learning_style = lp.learning_style || '';
       profileData.learning_goal = lp.learning_goal || '';
     }
+    // 收集当前课程所有章节的做题进度
+    var chapterStats = [];
+    if (course && course.chapters) {
+      var email = currentUserEmail || 'guest';
+      course.chapters.forEach(function(ch, idx) {
+        var key = 'quiz_progress_' + email + '_' + activeCourseIndex + '_' + idx;
+        var prog = null;
+        try { prog = JSON.parse(localStorage.getItem(key)); } catch(e) {}
+        if (prog) {
+          chapterStats.push({
+            chapter_title: ch.title || ('第' + (idx+1) + '章'),
+            quiz_total: prog.quizTotal || 0,
+            quiz_correct: prog.quizCorrect || 0,
+            accuracy: prog.quizTotal > 0 ? Math.round((prog.quizCorrect / prog.quizTotal) * 100) : 0,
+            studied: true
+          });
+        } else {
+          chapterStats.push({
+            chapter_title: ch.title || ('第' + (idx+1) + '章'),
+            quiz_total: 0, quiz_correct: 0, accuracy: 0, studied: false
+          });
+        }
+      });
+    }
     const userId = localStorage.getItem('serverUserId') || '';
     const resp = await fetch('/api/learning_path', {
       method: 'POST',
@@ -16363,7 +16403,8 @@ async function renderStudyLearningPath(container, course, chapter) {
         user_id: userId,
         course_title: course ? course.title : '',
         current_chapter: chapter ? chapter.title : '',
-        profile: profileData
+        profile: profileData,
+        chapter_stats: chapterStats
       })
     });
     const data = await resp.json();
