@@ -16048,6 +16048,47 @@ function updateSendBtnState() {
 }
 function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function flashcardMd(s) {
+  if (!s) return '';
+  var lines = s.split('\n');
+  var html = '';
+  var inList = false;
+  var listIdx = 0;
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    if (/^#{1,4}\s+/.test(line)) {
+      if (inList) { html += '</div>'; inList = false; listIdx = 0; }
+      var level = line.match(/^(#+)/)[1].length;
+      var txt = line.replace(/^#+\s+/, '');
+      var sz = level <= 2 ? '14px' : '13px';
+      var fw = level <= 2 ? '700' : '600';
+      html += '<div style="font-size:' + sz + ';font-weight:' + fw + ';margin-top:14px;margin-bottom:6px;color:#1e1b4b;line-height:1.8;">' + _fcInline(txt) + '</div>';
+    } else if (/^\d+\.\s+/.test(line)) {
+      if (!inList) { html += '<div style="margin:6px 0 6px 4px;">'; inList = true; listIdx = 0; }
+      listIdx++;
+      var item = line.replace(/^\d+\.\s+/, '');
+      html += '<div style="font-size:13px;line-height:1.8;margin:4px 0;">' + listIdx + '. ' + _fcInline(item) + '</div>';
+    } else if (/^[-•]\s+/.test(line)) {
+      if (!inList) { html += '<div style="margin:6px 0 6px 4px;">'; inList = true; listIdx = 0; }
+      var bullet = line.replace(/^[-•]\s+/, '');
+      html += '<div style="font-size:13px;line-height:1.8;margin:4px 0;">• ' + _fcInline(bullet) + '</div>';
+    } else if (line.trim() === '') {
+      if (inList) { html += '</div>'; inList = false; listIdx = 0; }
+    } else {
+      if (inList) { html += '</div>'; inList = false; listIdx = 0; }
+      html += '<div style="font-size:13px;line-height:1.8;margin:5px 0;">' + _fcInline(line) + '</div>';
+    }
+  }
+  if (inList) html += '</div>';
+  return html;
+}
+function _fcInline(s) {
+  var e = escapeHtml(s);
+  e = e.replace(/\*\*(.+?)\*\*/g, '<strong style="color:#4f46e5;">$1</strong>');
+  e = e.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  e = e.replace(/`(.+?)`/g, '<code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;font-size:12px;">$1</code>');
+  return e;
+}
 function jsStr(s) {
   if (s == null) return '';
   return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r');
@@ -16102,9 +16143,17 @@ async function renderStudyFlashcards(container, chapter) {
     const data = await resp.json();
     if (data.success && data.flashcards && data.flashcards.length > 0) {
       _currentFlashcards = data.flashcards;
-      _studyFlashcardCache[cacheKey] = data.flashcards;
+      if (!data.degraded) {
+        _studyFlashcardCache[cacheKey] = data.flashcards;
+      }
       _currentFlashcardIndex = 0;
       _renderFlashcardUI(container);
+      if (data.degraded) {
+        var notice = document.createElement('div');
+        notice.style.cssText = 'max-width:680px;margin:8px auto 0;padding:10px 14px;background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;font-size:12px;color:#92400e;text-align:center;';
+        notice.textContent = 'AI服务暂时不可用，当前显示基于章节内容自动提取的基础卡片。恢复后将自动升级为AI智能生成卡片。';
+        container.appendChild(notice);
+      }
     } else {
       container.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">知识卡片生成失败，请重试。</div>`;
     }
@@ -16134,8 +16183,8 @@ function _renderFlashcardUI(container) {
           <div class="flashcard-back">
             <span class="fc-label">ANSWER</span>
             <span class="fc-difficulty ${diffClass}">${diffLabel}</span>
-            ${escapeHtml(card.back)}
-            ${tipText ? '<span class="fc-tip">💡 ' + escapeHtml(tipText) + '</span>' : ''}
+            <div style="padding-top:32px;padding-bottom:30px;">${flashcardMd(card.back)}</div>
+            ${tipText ? '<span class="fc-tip">💡 ' + _fcInline(tipText) + '</span>' : ''}
           </div>
         </div>
       </div>`;
@@ -16158,6 +16207,16 @@ function _renderFlashcardUI(container) {
   setTimeout(function() {
     var area = document.getElementById('flashcardArea');
     if (area) { area.querySelectorAll('.flashcard-item').forEach(function(it) { _fcFixHeight(it); }); }
+    if (window.MathJax && MathJax.typesetPromise) {
+      MathJax.typesetPromise().then(function() {
+        if (area) { area.querySelectorAll('.flashcard-item').forEach(function(it) { _fcFixHeight(it); }); }
+      }).catch(function(err) { console.warn('MathJax error:', err); });
+    } else if (window.typesetMathJax) {
+      window.typesetMathJax();
+      setTimeout(function() {
+        if (area) { area.querySelectorAll('.flashcard-item').forEach(function(it) { _fcFixHeight(it); }); }
+      }, 800);
+    }
   }, 80);
 }
 
@@ -16173,8 +16232,10 @@ function _fcFixHeight(item) {
   var front = item.querySelector('.flashcard-front');
   var back = item.querySelector('.flashcard-back');
   if (!inner || !front || !back) return;
+  back.style.overflow = 'visible';
   var fh = front.scrollHeight, bh = back.scrollHeight;
-  var h = Math.max(fh, bh, 200);
+  back.style.overflow = '';
+  var h = Math.max(fh, bh, 220) + 16;
   inner.style.height = h + 'px';
   item.style.height = h + 'px';
 }
@@ -16202,8 +16263,16 @@ async function renderStudyCodeExamples(container, chapter) {
     });
     const data = await resp.json();
     if (data.success && data.examples && data.examples.length > 0) {
-      _codeExampleCache[cacheKey] = data.examples;
+      if (!data.degraded) {
+        _codeExampleCache[cacheKey] = data.examples;
+      }
       _renderCodeExampleUI(container, data.examples);
+      if (data.degraded) {
+        var notice = document.createElement('div');
+        notice.style.cssText = 'max-width:680px;margin:8px auto 0;padding:10px 14px;background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;font-size:12px;color:#92400e;text-align:center;';
+        notice.textContent = 'AI服务暂时不可用，当前显示预设代码模板。恢复后将自动升级为AI个性化生成案例。';
+        container.appendChild(notice);
+      }
     } else {
       container.innerHTML = `<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">代码案例生成失败，请重试。</div>`;
     }
@@ -16322,11 +16391,14 @@ function _renderLearningPathUI(container, data) {
     const priorityLabel = step.priority === 'high' ? '高优先' : step.priority === 'low' ? '低优先' : '中优先';
     const typeLabel = typeLabels[step.action_type] || '📖 学习';
     const mins = step.estimated_minutes || 20;
+    const actionSuffixes = { review: ' · 复习', practice: ' · 练习', quiz: ' · 测验', flashcard: ' · 卡片' };
+    const rawTitle = step.chapter_title || step.title || '步骤 ' + (i + 1);
+    const displayTitle = rawTitle + (actionSuffixes[step.action_type] || '');
     stepsHtml += `
       <div class="learning-path-step" onclick="${step.chapter_title ? "enterCourseStudySearch('" + courseTitle.replace(/'/g, "\\\\'") + "', '" + (step.chapter_title || '').replace(/'/g, "\\\\'") + "', 'lecture')" : ''}">
         <div class="lp-step-num" style="background:${stepColors[i % stepColors.length]}">${step.order || i + 1}</div>
         <div class="lp-step-content">
-          <div class="lp-step-title">${escapeHtml(step.chapter_title || step.title || '步骤 ' + (i + 1))}</div>
+          <div class="lp-step-title">${escapeHtml(displayTitle)}</div>
           <div class="lp-step-action">${escapeHtml(step.action || step.reason || '')}</div>
           <div class="lp-step-meta">
             <span class="lp-step-tag ${priorityClass}">${priorityLabel}</span>
@@ -16367,6 +16439,7 @@ function _renderLearningPathUI(container, data) {
       </div>
       ${statsHtml ? '<div style="padding:16px;background:#fff;border-radius:14px;border:1px solid #f1f5f9;">' + statsHtml + '</div>' : ''}
     </div>`;
+  if (window.typesetMathJax) setTimeout(window.typesetMathJax, 100);
 }
 
 // ========== 多智能体协同聊天增强 ==========
@@ -16454,7 +16527,7 @@ function renderCollaborationResult(data) {
     fullHtml += '<div style="font-size:13px;font-weight:700;color:#7c3aed;margin-bottom:10px;">📇 生成的知识卡片（点击翻转）</div>';
     fullHtml += '<div class="flashcard-container">';
     genOutput.flashcards.forEach(function(card) {
-      fullHtml += '<div class="flashcard-item" onclick="this.classList.toggle(\'flipped\')" style="width:220px;height:150px;"><div class="flashcard-inner"><div class="flashcard-front"><span class="fc-label">Q</span>' + escapeHtml(card.front) + '</div><div class="flashcard-back"><span class="fc-label">A</span>' + escapeHtml(card.back) + '</div></div></div>';
+      fullHtml += '<div class="flashcard-item" onclick="this.classList.toggle(\'flipped\');_fcFixHeight(this)" style="width:220px;"><div class="flashcard-inner"><div class="flashcard-front"><span class="fc-label">Q</span>' + escapeHtml(card.front) + '</div><div class="flashcard-back"><span class="fc-label">A</span><div style="padding-top:4px;">' + flashcardMd(card.back) + '</div></div></div></div>';
     });
     fullHtml += '</div></div>';
   }

@@ -840,9 +840,13 @@ def anti_hallucination_check(text, doc_context=None, has_course_content=False, t
                 src = f"题库-{row[0]}·{row[1]}"
                 if src not in sources_found:
                     sources_found.append(src)
-        conn.close()
     except Exception as e:
         print(f"[防幻觉] 知识库锚定搜索失败: {e}")
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
     
     # 如果找到了来源，添加出处标注
     if sources_found:
@@ -1356,6 +1360,7 @@ def build_chat_messages(data):
 
 {DOC_CONTEXT_BLOCK}
 用户需求：{clean_question}""" + ANTI_LEAK
+        system_prompt = recommend_prompt
     elif is_mindmap:
         recommend_prompt = f"""你是一个专业的学习思维导图生成助手。用户想要生成一张关于某个知识主题的思维脑图。
 
@@ -1393,6 +1398,7 @@ def build_chat_messages(data):
 3. 内容准确、全面，覆盖该主题的核心知识点。
 4. 使用 Markdown 标题层级（#、##、###）表示层级关系，使用 - 表示叶子节点。
 """ + ANTI_LEAK
+        system_prompt = recommend_prompt
     elif is_code_fix:
         recommend_prompt = f"""你是一个资深的全栈代码审查与纠错专家。用户上传了代码文件，需要你帮忙检查并纠错。
 
@@ -1408,6 +1414,7 @@ def build_chat_messages(data):
 
 {DOC_CONTEXT_BLOCK}
 用户需求：{clean_question}""" + ANTI_LEAK
+        system_prompt = recommend_prompt
     elif is_quiz_gen:
         recommend_prompt = f"""你是一个专业的计算机科学考试出题专家。用户想要生成一套关于某个知识主题的选择题测试卷。
 
@@ -1432,6 +1439,7 @@ def build_chat_messages(data):
 7. 错误选项应当有一定的迷惑性，但不能存在争议
 
 请直接输出 JSON 数组，不要有任何其他多余文字或说明。""" + ANTI_LEAK
+        system_prompt = recommend_prompt
     elif agent == 'planner':
         system_prompt = f"""你是一位经验丰富、耐心细致的学习导师"路径规划师"。你的任务是针对用户的学习需求，一步一步地给出具体、可操作的学习指引。
 在回答时，请严格遵循以下规则：
@@ -3974,8 +3982,8 @@ def agent_collaborate():
     try:
         analyst_raw = call_xunfei_with_history(analyst_messages)
         analyst_result = _extract_json_from_llm(analyst_raw)
-        if analyst_result is None:
-            raise ValueError("LLM返回内容无法解析为JSON")
+        if analyst_result is None or not isinstance(analyst_result, dict):
+            raise ValueError("LLM返回内容无法解析为JSON对象")
     except Exception as e:
         print(f"[协同] 分析师JSON解析失败，使用默认值: {e}")
         analyst_result = {
@@ -4038,8 +4046,8 @@ def agent_collaborate():
     try:
         generator_raw = call_xunfei_with_history(generator_messages)
         generator_result = _extract_json_from_llm(generator_raw)
-        if generator_result is None:
-            raise ValueError("LLM返回内容无法解析为JSON")
+        if generator_result is None or not isinstance(generator_result, dict):
+            raise ValueError("LLM返回内容无法解析为JSON对象")
     except Exception as e:
         print(f"[协同] 生成师JSON解析失败: {e}")
         generator_result = {
@@ -4115,8 +4123,8 @@ def agent_collaborate():
     try:
         planner_raw = call_xunfei_with_history(planner_messages)
         planner_result = _extract_json_from_llm(planner_raw)
-        if planner_result is None:
-            raise ValueError("LLM返回内容无法解析为JSON")
+        if planner_result is None or not isinstance(planner_result, dict):
+            raise ValueError("LLM返回内容无法解析为JSON对象")
     except Exception as e:
         print(f"[协同] 规划师JSON解析失败: {e}")
         planner_result = {
@@ -4169,6 +4177,54 @@ def agent_collaborate():
 # ============================
 # 7.14 知识卡片(Flashcard)生成接口
 # ============================
+def _fallback_flashcards(topic, chapter_content, count):
+    """LLM不可用时的规则降级：从章节文本提取关键概念生成基础卡片"""
+    import re
+    cards = []
+    text = chapter_content if chapter_content else topic
+    # 策略1：提取Markdown标题作为概念卡
+    headers = re.findall(r'#{2,4}\s+(.+)', text)
+    for h in headers[:count]:
+        h = h.strip()
+        if len(h) > 2 and len(h) < 60:
+            cards.append({
+                "front": f"请解释：{h}",
+                "back": f"这是「{topic}」课程中的重要概念——{h}。建议结合教材深入理解其定义、性质和应用场景。",
+                "difficulty": "中级",
+                "tags": [topic[:10]],
+                "memory_tip": "结合课程章节上下文理解"
+            })
+    # 策略2：提取加粗/关键术语
+    bolds = re.findall(r'\*\*(.+?)\*\*', text)
+    for b in bolds[:count - len(cards)]:
+        b = b.strip()
+        if len(b) > 1 and len(b) < 40 and b not in [c['front'].replace('请解释：','') for c in cards]:
+            cards.append({
+                "front": f"什么是「{b}」？",
+                "back": f"「{b}」是{topic}领域中的核心概念之一，请参照教材中的定义和例题进行深入理解。",
+                "difficulty": "基础",
+                "tags": [topic[:10]],
+                "memory_tip": "尝试用自己的话复述定义"
+            })
+    # 策略3：如果提取不够，用主题生成通用卡
+    generic_qa = [
+        (f"「{topic}」的核心定义是什么？", f"请回顾教材中关于{topic}的定义部分，掌握其基本概念和核心要素。"),
+        (f"「{topic}」有哪些主要分类？", f"参考教材目录，{topic}通常可分为若干子方向，建议逐一梳理其区别与联系。"),
+        (f"「{topic}」的典型应用场景？", f"结合实际案例理解{topic}的应用价值，尝试举出生活中的例子。"),
+        (f"「{topic}」的重点公式或定理？", f"整理本章核心公式和定理，注意其适用条件和推导过程。"),
+        (f"「{topic}」常见易错点？", f"回顾做题中的常见错误，重点关注概念混淆和计算疏漏。"),
+    ]
+    for q, a in generic_qa:
+        if len(cards) >= count:
+            break
+        if q not in [c['front'] for c in cards]:
+            cards.append({
+                "front": q, "back": a, "difficulty": "中级",
+                "tags": [topic[:10]], "memory_tip": ""
+            })
+    return cards[:count]
+
+
 @app.route('/api/flashcards', methods=['POST'])
 def generate_flashcards():
     """从主题或章节内容生成知识卡片（Flashcard），支持翻转复习。"""
@@ -4226,8 +4282,9 @@ def generate_flashcards():
             card['back'], _ = content_safety_filter(card.get('back', ''))
         return json_utf8({"success": True, "flashcards": flashcards, "count": len(flashcards)})
     except Exception as e:
-        print(f"[Flashcard] 生成失败: {e}")
-        return jsonify({"success": False, "error": f"生成知识卡片失败: {str(e)}"}), 500
+        print(f"[Flashcard] LLM不可用，使用规则降级: {e}")
+        fallback_cards = _fallback_flashcards(topic, chapter_content, count)
+        return json_utf8({"success": True, "flashcards": fallback_cards, "count": len(fallback_cards), "degraded": True})
 
 
 # ============================
@@ -4289,8 +4346,59 @@ def generate_code_examples():
             ex['explanation'], _ = content_safety_filter(ex.get('explanation', ''))
         return json_utf8({"success": True, "examples": examples, "count": len(examples)})
     except Exception as e:
-        print(f"[代码案例] 生成失败: {e}")
-        return jsonify({"success": False, "error": f"生成代码案例失败: {str(e)}"}), 500
+        print(f"[代码案例] LLM不可用，使用规则降级: {e}")
+        fallback_examples = _fallback_code_examples(topic, language, count, difficulty)
+        return json_utf8({"success": True, "examples": fallback_examples, "count": len(fallback_examples), "degraded": True})
+
+
+def _fallback_code_examples(topic, language, count, difficulty):
+    """LLM不可用时的规则降级：根据主题关键词生成模板代码案例"""
+    examples = []
+    lang = language.lower()
+    # 根据主题关键词匹配通用代码模板
+    templates = []
+    topic_lower = topic.lower()
+    if any(k in topic_lower for k in ['排序', 'sort', '冒泡', '快速排序']):
+        templates.append({
+            "title": "冒泡排序基础实现",
+            "language": lang,
+            "code": "# 冒泡排序：比较相邻元素，将大元素逐步\"冒泡\"到末尾\ndef bubble_sort(arr):\n    n = len(arr)\n    for i in range(n):\n        # 优化：如果本轮没有交换，说明已有序\n        swapped = False\n        for j in range(0, n - i - 1):\n            if arr[j] > arr[j + 1]:\n                arr[j], arr[j + 1] = arr[j + 1], arr[j]\n                swapped = True\n        if not swapped:\n            break\n    return arr\n\n# 测试\nnumbers = [64, 34, 25, 12, 22, 11, 90]\nprint(\"排序前:\", numbers)\nprint(\"排序后:\", bubble_sort(numbers))",
+            "expected_output": "排序前: [64, 34, 25, 12, 22, 11, 90]\n排序后: [11, 12, 22, 25, 34, 64, 90]",
+            "explanation": "冒泡排序通过反复比较相邻元素并交换来实现。外层循环控制轮数，内层循环进行比较和交换。加入swapped优化可提前终止。时间复杂度O(n²)。",
+            "try_it": "尝试实现选择排序或插入排序，对比三种基础排序的效率差异。",
+            "difficulty": difficulty
+        })
+    if any(k in topic_lower for k in ['链表', 'linked', 'list']):
+        templates.append({
+            "title": "单链表基础操作",
+            "language": lang,
+            "code": "# 单链表节点定义与基础操作\nclass ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n\n# 创建链表: 1 -> 2 -> 3 -> None\nhead = ListNode(1)\nhead.next = ListNode(2)\nhead.next.next = ListNode(3)\n\n# 遍历链表\ndef print_list(node):\n    result = []\n    while node:\n        result.append(node.val)\n        node = node.next\n    print(\" -> \".join(map(str, result)))\n\nprint_list(head)  # 输出: 1 -> 2 -> 3",
+            "expected_output": "1 -> 2 -> 3",
+            "explanation": "链表由节点组成，每个节点存储值和指向下一个节点的引用。遍历链表需要从头部开始，沿着next指针逐个访问。",
+            "try_it": "尝试实现链表的插入和删除操作。",
+            "difficulty": difficulty
+        })
+    # 通用模板（当没有匹配到特定模板时）
+    if not templates:
+        templates.append({
+            "title": f"{topic} - 基础示例",
+            "language": lang,
+            "code": f"# {topic} 基础示例\n# 注意：此为基础模板，AI服务暂时不可用\n# 请结合教材理解核心概念后自行练习\n\n# 示例：{topic}的基本用法\ndef demo():\n    print(\"学习{topic}的核心概念\")\n    # TODO: 根据教材内容补充实现\n    return \"理解基本概念后尝试编码\"\n\nresult = demo()\nprint(result)",
+            "expected_output": f"学习{topic}的核心概念\n理解基本概念后尝试编码",
+            "explanation": f"这是{topic}的基础模板。当前AI生成服务暂时不可用，建议参照教材中的代码示例进行学习和练习。",
+            "try_it": f"参照教材中{topic}的例题，尝试自己编写并运行代码。",
+            "difficulty": difficulty
+        })
+        templates.append({
+            "title": f"{topic} - 练习模板",
+            "language": lang,
+            "code": f"# {topic} 练习模板\n# 请根据教材知识，补全以下代码\n\ndef practice():\n    # 第一步：理解问题\n    data = []  # TODO: 初始化数据\n    \n    # 第二步：实现核心逻辑\n    # TODO: 根据{topic}的算法/方法实现\n    result = data\n    \n    # 第三步：验证结果\n    print(\"输入:\", data)\n    print(\"输出:\", result)\n    return result\n\npractice()",
+            "expected_output": "输入: []\n输出: []",
+            "explanation": "这是一个练习模板，帮助你根据教材内容动手实现代码。请将TODO部分替换为你的实现。",
+            "try_it": "补全代码并在本地运行测试。",
+            "difficulty": difficulty
+        })
+    return templates[:count]
 
 
 # ============================
@@ -4342,6 +4450,12 @@ def learning_path():
                         JOIN course co ON ch.course_id = co.id 
                         WHERE co.name LIKE ? ORDER BY ch.id''', (f'%{course_title}%',))
             all_chapters = [{"title": r[0], "has_content": bool(r[1])} for r in c.fetchall()]
+            # 如果精确匹配无结果，尝试模糊匹配
+            if not all_chapters:
+                c.execute('''SELECT ch.title, ch.content FROM chapter ch 
+                            JOIN course co ON ch.course_id = co.id 
+                            ORDER BY ch.id LIMIT 15''')
+                all_chapters = [{"title": r[0], "has_content": bool(r[1])} for r in c.fetchall()]
             conn.close()
         except Exception as e:
             print(f"[学习路径] 查询课程章节失败: {e}")
@@ -4393,8 +4507,8 @@ def learning_path():
     try:
         raw = call_xunfei_with_history(messages)
         path_result = _extract_json_from_llm(raw)
-        if path_result is None:
-            raise ValueError("LLM返回内容无法解析为JSON")
+        if path_result is None or not isinstance(path_result, dict):
+            raise ValueError("LLM返回内容无法解析为路径对象")
     except Exception as e:
         print(f"[学习路径] LLM解析失败: {e}")
         path_result = {
@@ -4423,6 +4537,29 @@ def learning_path():
                 order += 1
                 if order > 6:
                     break
+        # 修正 total_steps 为实际步骤数
+        path_result["total_steps"] = len(path_result["steps"])
+        # 如果仍无步骤（无做题数据且无章节数据），生成通用路径
+        if not path_result["steps"]:
+            generic_steps = [
+                {"order": 1, "chapter_title": "课程概览与学习目标", "action_type": "learn",
+                 "reason": "建立对课程的整体认知框架，明确学习方向", "priority": "high",
+                 "estimated_minutes": 20, "prerequisite": ""},
+                {"order": 2, "chapter_title": "核心概念学习", "action_type": "learn",
+                 "reason": "掌握课程的基础概念和核心术语", "priority": "high",
+                 "estimated_minutes": 30, "prerequisite": "课程概览"},
+                {"order": 3, "chapter_title": "章节练习与巩固", "action_type": "practice",
+                 "reason": "通过练习加深对概念的理解", "priority": "medium",
+                 "estimated_minutes": 25, "prerequisite": "核心概念学习"},
+                {"order": 4, "chapter_title": "知识卡片复习", "action_type": "flashcard",
+                 "reason": "利用间隔重复法强化记忆关键知识点", "priority": "medium",
+                 "estimated_minutes": 15, "prerequisite": "章节练习"},
+                {"order": 5, "chapter_title": "阶段测验", "action_type": "quiz",
+                 "reason": "检验学习成果，发现薄弱环节", "priority": "medium",
+                 "estimated_minutes": 20, "prerequisite": "知识卡片复习"},
+            ]
+            path_result["steps"] = generic_steps
+            path_result["total_steps"] = len(generic_steps)
 
     return json_utf8({
         "success": True,
