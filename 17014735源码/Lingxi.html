@@ -103,8 +103,8 @@
       /* 快捷工具栏：强制一行，允许横向滚动 */
       .chat-quick-toolbar {
         display: flex;
-        flex-wrap: nowrap !important;
-        overflow-x: auto;
+        flex-wrap: wrap;
+        overflow-x: visible;
         gap: 4px;
         padding: 2px 4px;
         margin-bottom: 4px;
@@ -207,7 +207,7 @@
       /* 最小高度 */
       max-height: 60vh;
       /* 最大高度不超过视口60% */
-      overflow: hidden;
+      overflow: visible;
       /* 防止内容溢出 */
       display: flex;
       flex-direction: column;
@@ -3671,6 +3671,7 @@
       font-size: 11.5px;
       font-weight: 500;
       color: #64748b;
+      cursor: pointer;
       transition: all 0.2s;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
     }
@@ -4164,7 +4165,7 @@
       animation: fadeIn 0.2s ease;
     }
     .doc-diagnose-overlay.active {
-      display: flex;
+      display: flex !important;
     }
 
     .doc-diagnose-modal {
@@ -4502,7 +4503,7 @@
       backdrop-filter: blur(4px);
     }
     .mindmap-overlay.active {
-      display: flex;
+      display: flex !important;
     }
     .mindmap-modal {
       background: #fff;
@@ -14643,14 +14644,18 @@ function openDocDiagnoseModal() {
   docDiagnoseFiles = [];
   renderDocFileList();
   document.getElementById('docDiagnoseInput').value = '';
-  document.getElementById('docDiagnoseOverlay').classList.add('active');
+  const ov = document.getElementById('docDiagnoseOverlay');
+  ov.classList.add('active');
+  ov.style.display = 'flex'; // 双重保险：确保弹窗可见
   document.getElementById('docDiagnoseSendBtn').disabled = false;
   // 聚焦到输入框
   setTimeout(() => document.getElementById('docDiagnoseInput').focus(), 300);
 }
 
 function closeDocDiagnoseModal() {
-  document.getElementById('docDiagnoseOverlay').classList.remove('active');
+  const ov = document.getElementById('docDiagnoseOverlay');
+  ov.classList.remove('active');
+  ov.style.display = '';
   docDiagnoseFiles = [];
   document.getElementById('docFileInput').value = '';
 }
@@ -14892,12 +14897,16 @@ document.head.appendChild(docDiagnoseSpinStyle);
 
 // ===== 一键脑图弹窗相关 =====
 function openMindmapModal() {
-  document.getElementById('mindmapOverlay').classList.add('active');
+  const ov = document.getElementById('mindmapOverlay');
+  ov.classList.add('active');
+  ov.style.display = 'flex';
   setTimeout(() => document.getElementById('mindmapTopicInput').focus(), 100);
 }
 
 function closeMindmapModal() {
-  document.getElementById('mindmapOverlay').classList.remove('active');
+  const ov = document.getElementById('mindmapOverlay');
+  ov.classList.remove('active');
+  ov.style.display = '';
   document.getElementById('mindmapTopicInput').value = '';
 }
 
@@ -15110,11 +15119,15 @@ let codeFixFiles = [];
 function openCodeFixModal() {
   codeFixFiles = [];
   document.getElementById('codeFixFileList').innerHTML = '';
-  document.getElementById('codeFixOverlay').classList.add('active');
+  const ov = document.getElementById('codeFixOverlay');
+  ov.classList.add('active');
+  ov.style.display = 'flex';
 }
 
 function closeCodeFixModal() {
-  document.getElementById('codeFixOverlay').classList.remove('active');
+  const ov = document.getElementById('codeFixOverlay');
+  ov.classList.remove('active');
+  ov.style.display = '';
   document.getElementById('codeFixFileInput').value = '';
   document.getElementById('codeFixInput').value = '';
   codeFixFiles = [];
@@ -15298,11 +15311,15 @@ async function sendCodeFix() {
 
 function openQuizGenModal() {
   document.getElementById('quizGenTopic').value = '';
-  document.getElementById('quizGenOverlay').classList.add('active');
+  const ov = document.getElementById('quizGenOverlay');
+  ov.classList.add('active');
+  ov.style.display = 'flex';
 }
 
 function closeQuizGenModal() {
-  document.getElementById('quizGenOverlay').classList.remove('active');
+  const ov = document.getElementById('quizGenOverlay');
+  ov.classList.remove('active');
+  ov.style.display = '';
   document.getElementById('quizGenTopic').value = '';
 }
 

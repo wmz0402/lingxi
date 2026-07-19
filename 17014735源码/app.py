@@ -442,18 +442,18 @@ def call_deepseek_with_history(messages_list: list) -> str:
         "model": TRANSLATE_MODEL,
         "messages": messages_list,
         "temperature": 0.7,
-        "max_tokens": 4096
+        "max_tokens": 2048
     }
     
     req = urllib.request.Request(
         TRANSLATE_API_URL,
-        data=json.dumps(data).encode("utf-8"),
+        data=json.dumps(data, ensure_ascii=False).encode("utf-8"),
         headers=headers,
         method="POST"
     )
     
     try:
-        with urllib.request.urlopen(req, timeout=60) as response:
+        with urllib.request.urlopen(req, timeout=120) as response:
             result = json.loads(response.read().decode("utf-8"))
             return result["choices"][0]["message"]["content"].strip()
     except urllib.error.HTTPError as e:
@@ -685,18 +685,18 @@ def call_translate_with_history(messages_list: list) -> str:
         "model": TRANSLATE_MODEL,
         "messages": messages_list,
         "temperature": 0.7,
-        "max_tokens": 4096
+        "max_tokens": 2048
     }
     
     req = urllib.request.Request(
         TRANSLATE_API_URL,
-        data=json.dumps(data).encode("utf-8"),
+        data=json.dumps(data, ensure_ascii=False).encode("utf-8"),
         headers=headers,
         method="POST"
     )
     
     try:
-        with urllib.request.urlopen(req, timeout=60) as response:
+        with urllib.request.urlopen(req, timeout=120) as response:
             result = json.loads(response.read().decode("utf-8"))
             return result["choices"][0]["message"]["content"].strip()
     except urllib.error.HTTPError as e:
@@ -1979,7 +1979,12 @@ def group_chat():
 
     # 为 Hy-MT2 和 Qwen3 各准备独立的消息列表
     # Hy-MT2 是混元混合专家模型，具备很强的通用对话和解题能力
-    hymt2_messages = [m.copy() for m in openai_messages]
+    # 混元Turbo响应较慢，限制历史到最近2轮以加速
+    hymt2_messages = [openai_messages[0].copy()]  # system prompt
+    hymt2_history_msgs = [m for m in openai_messages[1:-1]]  # 去掉最后的user消息
+    for msg in hymt2_history_msgs[-4:]:  # 最多保留4条历史（约2轮）
+        hymt2_messages.append(msg.copy())
+    hymt2_messages.append({"role": "user", "content": user_input_with_image})
     # 给 Hy-MT2 稍微调整系统提示词，发挥其多语言和推理优势
     if hymt2_messages and hymt2_messages[0].get("role") == "system":
         hymt2_system = hymt2_messages[0]["content"] + "\n\n补充说明：你是混元AI大模型，擅长多语言理解、逻辑推理和详细解答，请用清晰、专业、有条理的方式回应用户。"
