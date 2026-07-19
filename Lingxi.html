@@ -997,6 +997,13 @@
       overflow: hidden;
     }
 
+    .intro-slide-visual img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 16px;
+    }
+
     .intro-slide-visual::after {
       content: '';
       position: absolute;
@@ -5481,7 +5488,7 @@
       <!-- Showcase Slides -->
       <div class="intro-showcase">
         <div class="intro-slide from-left" data-reveal>
-          <div class="intro-slide-visual">💬</div>
+          <div class="intro-slide-visual"><img src="/static/screenshots/chat.png" alt="多智能体协同学习" /></div>
           <div class="intro-slide-text">
             <span class="slide-tag">核心交互</span>
             <h3>像和导师对话一样学习</h3>
@@ -5490,7 +5497,7 @@
         </div>
 
         <div class="intro-slide from-right" data-reveal>
-          <div class="intro-slide-visual">📈</div>
+          <div class="intro-slide-visual"><img src="/static/screenshots/profile.png" alt="个人能力画像" /></div>
           <div class="intro-slide-text">
             <span class="slide-tag">数据驱动</span>
             <h3>看见自己的成长轨迹</h3>
@@ -5499,7 +5506,7 @@
         </div>
 
         <div class="intro-slide from-left" data-reveal>
-          <div class="intro-slide-visual">📚</div>
+          <div class="intro-slide-visual"><img src="/static/screenshots/course.png" alt="课程学习中心" /></div>
           <div class="intro-slide-text">
             <span class="slide-tag">课程体系</span>
             <h3>结构化课程管理</h3>
@@ -5844,7 +5851,7 @@
             </div>
             <div class="agent-info">
               <div class="agent-name">AI解题群</div>
-              <div class="agent-desc">讯飞 · Hy-MT2 · Qwen3</div>
+              <div class="agent-desc">讯飞 · 混元Turbo · Qwen3</div>
             </div>
             <div class="agent-status online"></div>
           </div>
@@ -6089,6 +6096,7 @@
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
               <div class="gemini-selector-dropdown" id="chatAgentDropdown">
+                <div class="gs-dropdown-item" onclick="changeGeminiAgent('chat', 'chat')">💬 普通聊天</div>
                 <div class="gs-dropdown-item active" onclick="changeGeminiAgent('all', 'chat')">🤖 全体协同</div>
                 <div class="gs-dropdown-item" onclick="changeGeminiAgent('groupChat', 'chat')">👥 AI解题群</div>
                 <div class="gs-dropdown-item" onclick="changeGeminiAgent('analyst', 'chat')">📊 学习分析师</div>
@@ -6129,7 +6137,7 @@
               <h3>AI解题群</h3>
               <div class="group-members">
                 <span class="member-dot" style="background:#8b5cf6"></span>讯飞星火
-                <span class="member-dot" style="background:#4f46e5"></span>Hy-MT2
+                <span class="member-dot" style="background:#4f46e5"></span>混元Turbo
                 <span class="member-dot" style="background:#0ea5e9"></span>Qwen3
               </div>
             </div>
@@ -9296,6 +9304,8 @@ function saveUserData() {
     }
     // 异步同步画像到后端（不阻塞主流程）
     syncProfileToServer();
+    // 异步同步聊天历史到后端（不阻塞主流程）
+    syncChatHistoryToServer();
 }
 
 // 画像数据同步到后端（防抖，避免频繁请求）
@@ -9340,10 +9350,86 @@ async function loadProfileFromServer() {
     }
 }
 
+// 从服务端加载聊天历史
+async function loadChatHistoryFromServer() {
+    if (!currentUserEmail) return;
+    try {
+        const resp = await fetch('/api/user/chat_history', { headers: { 'X-User-Email': currentUserEmail } });
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data.chat_history && Array.isArray(data.chat_history) && data.chat_history.length > 0) {
+                // 如果服务端有聊天历史且比本地新（或本地为空），则使用服务端数据
+                const serverHistory = data.chat_history;
+                // 兼容升级旧数据结构
+                const normalizedHistory = serverHistory.map(item => {
+                    if (typeof item === 'string') {
+                        return { title: item, html: '' };
+                    }
+                    return item;
+                });
+                
+                // 合并策略：如果本地历史为空，直接用服务端的；如果都有，取数量多的
+                if (!chatHistory || chatHistory.length === 0) {
+                    chatHistory = normalizedHistory;
+                    activeChatHistoryIndex = chatHistory.length > 0 ? 0 : null;
+                    renderChatHistory();
+                    if (activeChatHistoryIndex !== null) {
+                        loadChatHistoryItem(activeChatHistoryIndex);
+                    }
+                    console.log('[聊天历史] 已从服务端同步聊天历史（' + chatHistory.length + '条）');
+                } else if (normalizedHistory.length > chatHistory.length) {
+                    // 服务端历史更多，合并（保留本地已有的，补充服务端的）
+                    const localIds = new Set(chatHistory.map(h => h.id).filter(Boolean));
+                    for (const item of normalizedHistory) {
+                        if (item.id && !localIds.has(item.id)) {
+                            chatHistory.push(item);
+                        }
+                    }
+                    renderChatHistory();
+                    console.log('[聊天历史] 已从服务端合并聊天历史（新增' + (chatHistory.length - localIds.size) + '条）');
+                }
+                
+                // 同步到 localStorage
+                try {
+                    let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
+                    if (users[currentUserEmail]) {
+                        users[currentUserEmail].chatHistory = chatHistory;
+                        localStorage.setItem('lingxi_users', JSON.stringify(users));
+                    }
+                } catch (e) {
+                    console.warn('保存聊天历史到 localStorage 失败:', e);
+                }
+            }
+        }
+    } catch (e) {
+        // 静默失败，本地数据仍然可用
+        console.warn('[聊天历史] 从服务端加载失败:', e);
+    }
+}
+
+// 同步聊天历史到服务端（防抖）
+let _chatHistorySyncTimer = null;
+function syncChatHistoryToServer() {
+    if (!currentUserEmail || !chatHistory) return;
+    if (_chatHistorySyncTimer) clearTimeout(_chatHistorySyncTimer);
+    _chatHistorySyncTimer = setTimeout(async () => {
+        try {
+            await fetch('/api/user/chat_history', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-User-Email': currentUserEmail },
+                body: JSON.stringify({ chat_history: chatHistory })
+            });
+            console.log('[聊天历史] 已同步到服务端');
+        } catch (e) {
+            // 静默失败
+        }
+    }, 2000);
+}
+
 function handleLogin(e) {
     if (e) e.preventDefault();
     let ok = true;
-    const email = document.getElementById('loginEmail').value.trim();
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
     const pwd = document.getElementById('loginPwd').value;
 
     const emailField = document.getElementById('loginEmailField');
@@ -9367,7 +9453,7 @@ function handleLogin(e) {
             // 服务端验证通过，同步到 localStorage
             const serverUser = data.user;
             let users = JSON.parse(localStorage.getItem('lingxi_users') || '{}');
-            const userKey = serverUser.email || email;
+            const userKey = (serverUser.email || email).toLowerCase();
 
             // 如果 localStorage 中没有该用户（管理员添加的账户），创建初始条目
             if (!users[userKey]) {
@@ -9530,6 +9616,8 @@ function _completeLogin(matchedUserKey, users) {
 
     // 从后端同步画像数据（换设备也能恢复）
     loadProfileFromServer();
+    // 从后端同步聊天历史（换设备也能恢复）
+    loadChatHistoryFromServer();
 
     // 登录时检查并解锁成就（如首次登录、连续天数等）
     checkAndUnlockAchievements();
@@ -9572,6 +9660,10 @@ function _completeLogin(matchedUserKey, users) {
 
     // 已有配置，正常进入主应用
     startTransition();
+    
+    // 异步从后端加载聊天历史（如果服务端有更新则合并）
+    loadChatHistoryFromServer();
+    
     return true;
 }
 
@@ -13529,6 +13621,7 @@ window.changeGeminiAgent = function(agent, type) {
   if (dropdown) dropdown.classList.remove('show');
 
   const agentNames = {
+    'chat': '💬 普通聊天',
     'all': '🤖 全体协同',
     'groupChat': '👥 AI解题群',
     'analyst': '📊 学习分析师',
@@ -15856,7 +15949,7 @@ async function sendGroupMessage() {
   // 三个AI的配置
   const aiConfigs = [
     { key: 'xunfei', name: '讯飞星火', avatar: '讯', color: 'linear-gradient(135deg,#8b5cf6,#6366f1)' },
-    { key: 'deepseek', name: 'Hy-MT2', avatar: 'H', color: 'linear-gradient(135deg,#4f46e5,#6366f1)' },
+    { key: 'deepseek', name: '混元Turbo', avatar: '混', color: 'linear-gradient(135deg,#4f46e5,#6366f1)' },
     { key: 'qianwen', name: 'Qwen3', avatar: 'Q', color: 'linear-gradient(135deg,#0ea5e9,#06b6d4)' }
   ];
 
@@ -16150,7 +16243,7 @@ async function renderStudyFlashcards(container, chapter) {
     _renderFlashcardUI(container);
     return;
   }
-  container.innerHTML = `<div style="text-align:center;padding:40px 0;"><div class="typing-indicator"><span></span><span></span><span></span></div><div style="font-size:13px;color:#64748b;margin-top:12px;">AI正在生成知识卡片...</div></div>`;
+  container.innerHTML = `<div style="text-align:center;padding:40px 0;"><div class="typing-indicator"><span></span><span></span><span></span></div><div style="font-size:13px;color:#64748b;margin-top:12px;">正在从章节内容提取知识卡片...</div></div>`;
   try {
     const topic = chapter.title || '当前章节';
     const content = chapter.content ? chapter.content.substring(0, 2000) : topic;
@@ -16283,7 +16376,7 @@ async function renderStudyCodeExamples(container, chapter) {
     _renderCodeExampleUI(container, _codeExampleCache[cacheKey]);
     return;
   }
-  container.innerHTML = `<div style="text-align:center;padding:40px 0;"><div class="typing-indicator"><span></span><span></span><span></span></div><div style="font-size:13px;color:#64748b;margin-top:12px;">AI正在生成代码实操案例...</div></div>`;
+  container.innerHTML = `<div style="text-align:center;padding:40px 0;"><div class="typing-indicator"><span></span><span></span><span></span></div><div style="font-size:13px;color:#64748b;margin-top:12px;">正在加载代码实操模板...</div></div>`;
   try {
     const topic = chapter.title || '编程基础';
     const courseTitle = (myCourses[activeCourseIndex] && myCourses[activeCourseIndex].title) || '';
@@ -16396,7 +16489,7 @@ async function renderStudyLearningPath(container, course, chapter) {
     _renderLearningPathUI(container, _learningPathCache[cacheKey]);
     return;
   }
-  container.innerHTML = `<div style="text-align:center;padding:40px 0;"><div class="typing-indicator"><span></span><span></span><span></span></div><div style="font-size:13px;color:#64748b;margin-top:12px;">AI正在分析学习数据，规划个性化路径...</div></div>`;
+  container.innerHTML = `<div style="text-align:center;padding:40px 0;"><div class="typing-indicator"><span></span><span></span><span></span></div><div style="font-size:13px;color:#64748b;margin-top:12px;">正在基于学习数据规划路径...</div></div>`;
   try {
     const profileData = {};
     if (window.learningProfile) {
@@ -16631,12 +16724,13 @@ async function callAgentCollaborate(text, history) {
   }
 }
 
-function renderCollaborationResult(data) {
+function renderCollaborationResult(data, biliResources) {
   const results = data.results || {};
   const chain = data.collaboration_chain || {};
   const analyst = results.analyst || {};
   const generator = results.generator || {};
   const planner = results.planner || {};
+  const videos = (biliResources || []).filter(r => r.type === 'bilibili');
   // 协同链路可视化
   let chainHtml = '<div class="collab-chain">';
   chainHtml += '<div class="collab-chain-node"><div class="collab-chain-badge" style="background:#6366f1;">👤 你</div></div>';
@@ -16686,26 +16780,38 @@ function renderCollaborationResult(data) {
 
   let fullHtml = '<div class="collab-result-container">';
   fullHtml += chainHtml;
+  // 卡片顺序：分析师 → 规划师 → 资源生成师（最后，包含所有生成资源：知识卡片、代码案例、B站视频）
   fullHtml += '<div class="collab-agent-card"><div class="collab-agent-header"><div class="collab-agent-avatar" style="background:#3b82f6;">析</div><div class="collab-agent-meta"><div class="collab-agent-name">📊 学习分析师</div><div class="collab-agent-time">耗时 ' + (analyst.elapsed || 0) + 's · 难度建议：' + escapeHtml(analystOutput.difficulty || '中级') + '</div></div></div><div class="collab-agent-body">' + analystBody + '</div></div>';
-  fullHtml += '<div class="collab-agent-card"><div class="collab-agent-header"><div class="collab-agent-avatar" style="background:#10b981;">源</div><div class="collab-agent-meta"><div class="collab-agent-name">🎨 资源生成师</div><div class="collab-agent-time">耗时 ' + (generator.elapsed || 0) + 's · 接收分析师诊断结果生成资源</div></div></div><div class="collab-agent-body">' + genBody + '</div></div>';
   fullHtml += '<div class="collab-agent-card"><div class="collab-agent-header"><div class="collab-agent-avatar" style="background:#f59e0b;">规</div><div class="collab-agent-meta"><div class="collab-agent-name">🗺️ 路径规划师</div><div class="collab-agent-time">耗时 ' + (planner.elapsed || 0) + 's · 综合诊断+资源制定路径</div></div></div><div class="collab-agent-body">' + planBody + '</div></div>';
-  // 生成资源的详细展示
+  // 资源生成师卡片（放最后）—— 卡片body包含summary、标签，以及生成的所有资源
+  let genExtraHtml = '';
   if (genOutput.flashcards && genOutput.flashcards.length) {
-    fullHtml += '<div style="margin-top:12px;padding:14px;background:#faf5ff;border-radius:12px;border:1px solid #e9d5ff;">';
-    fullHtml += '<div style="font-size:13px;font-weight:700;color:#7c3aed;margin-bottom:10px;">📇 生成的知识卡片（点击翻转）</div>';
-    fullHtml += '<div class="flashcard-container">';
+    genExtraHtml += '<div style="margin-top:10px;padding:12px;background:#faf5ff;border-radius:10px;border:1px solid #e9d5ff;">';
+    genExtraHtml += '<div style="font-size:12px;font-weight:700;color:#7c3aed;margin-bottom:8px;">📇 生成的知识卡片（点击翻转）</div>';
+    genExtraHtml += '<div class="flashcard-container">';
     genOutput.flashcards.forEach(function(card) {
-      fullHtml += '<div class="flashcard-item" onclick="this.classList.toggle(\'flipped\');_fcFixHeight(this)" style="width:220px;"><div class="flashcard-inner"><div class="flashcard-front"><span class="fc-label">Q</span>' + escapeHtml(card.front) + '</div><div class="flashcard-back"><span class="fc-label">A</span><div style="padding-top:4px;">' + flashcardMd(card.back) + '</div></div></div></div>';
+      genExtraHtml += '<div class="flashcard-item" onclick="this.classList.toggle(\'flipped\');_fcFixHeight(this)" style="width:220px;"><div class="flashcard-inner"><div class="flashcard-front"><span class="fc-label">Q</span>' + escapeHtml(card.front) + '</div><div class="flashcard-back"><span class="fc-label">A</span><div style="padding-top:4px;">' + flashcardMd(card.back) + '</div></div></div></div>';
     });
-    fullHtml += '</div></div>';
+    genExtraHtml += '</div></div>';
   }
   if (genOutput.code_examples && genOutput.code_examples.length) {
-    fullHtml += '<div style="margin-top:12px;">';
+    genExtraHtml += '<div style="margin-top:10px;">';
     genOutput.code_examples.forEach(function(ex, i) {
-      fullHtml += '<div class="code-example-card"><div class="code-example-header"><span class="ce-title">' + escapeHtml(ex.title || '代码示例') + '</span><span class="ce-lang">' + escapeHtml(ex.language || 'python') + '</span></div><div class="code-example-body"><pre>' + escapeHtml(ex.code || '') + '</pre></div></div>';
+      genExtraHtml += '<div class="code-example-card"><div class="code-example-header"><span class="ce-title">' + escapeHtml(ex.title || '代码示例') + '</span><span class="ce-lang">' + escapeHtml(ex.language || 'python') + '</span></div><div class="code-example-body"><pre>' + escapeHtml(ex.code || '') + '</pre></div></div>';
     });
-    fullHtml += '</div>';
+    genExtraHtml += '</div>';
   }
+  // B站视频资源展示（作为资源生成师输出的一部分）
+  if (videos.length > 0) {
+    genExtraHtml += '<div style="margin-top:10px;padding:12px;background:#f0f9ff;border-radius:10px;border:1px solid #bae6fd;">';
+    genExtraHtml += '<div style="font-size:12px;font-weight:700;color:#0369a1;margin-bottom:8px;">▶️ 推荐B站学习视频（共' + videos.length + '个，点击播放）</div>';
+    genExtraHtml += '<div class="resource-grid">';
+    videos.forEach(function(v) {
+      genExtraHtml += '<div class="resource-card" data-type="bilibili" data-url="' + (v.url || '') + '" style="cursor:pointer;"><div class="rc-icon" style="background:#eff6ff;color:#3b82f6">▶️</div><div class="rc-title">' + escapeHtml(v.title || '') + '</div><div class="rc-type">bilibili</div></div>';
+    });
+    genExtraHtml += '</div></div>';
+  }
+  fullHtml += '<div class="collab-agent-card"><div class="collab-agent-header"><div class="collab-agent-avatar" style="background:#10b981;">源</div><div class="collab-agent-meta"><div class="collab-agent-name">🎨 资源生成师</div><div class="collab-agent-time">耗时 ' + (generator.elapsed || 0) + 's · 综合诊断与路径生成学习资源</div></div></div><div class="collab-agent-body">' + genBody + genExtraHtml + '</div></div>';
   fullHtml += '</div>';
   return fullHtml;
 }
@@ -16748,7 +16854,21 @@ class AnalystAgent {
 class SearcherAgent {
     async search(topic) {
         try {
-            const resp = await fetch(`/api/search?keyword=${encodeURIComponent(topic)}`);
+            // 关键词过长会导致B站搜索无结果，限制在20字以内
+            let kw = (topic || '').trim();
+            if (kw.length > 20) {
+                // 尝试取前20字，按空格/逗号/顿号截断
+                const cut = kw.slice(0, 20);
+                const m = cut.match(/^(.+?)[\s,，、。.]/);
+                kw = m ? m[1] : cut;
+            }
+            if (!kw) return [];
+            console.log('[SearcherAgent] 搜索关键词:', kw);
+            // 添加15秒超时，避免B站接口慢导致卡住
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 15000);
+            const resp = await fetch(`/api/search?keyword=${encodeURIComponent(kw)}`, { signal: controller.signal });
+            clearTimeout(timer);
             const data = await resp.json();
             return data.results || [];
         } catch (e) {
@@ -17146,6 +17266,7 @@ async function sendMessage() {
         let difficulty = "初级";
         let keywords = [];
         let hideResources = false;
+        let streamingSucceeded = false;
 
         // 取出暂存的文档内容（如果有），发送后清空
         const docContext = window._pendingDocContext || '';
@@ -17179,27 +17300,76 @@ async function sendMessage() {
 
                 if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
 
-                // 移除思考中指示器
-                const thinkingEl = document.getElementById('thinking');
-                if (thinkingEl) thinkingEl.remove();
-
                 // 全部完成
                 updateWF(4);
 
                 if (collabResult && collabResult.success) {
+                    // 协同成功，先搜索B站视频资源
+                    let biliResources = [];
+                    try {
+                        const searcher = new SearcherAgent();
+                        const analystOutput = (collabResult.results && collabResult.results.analyst && collabResult.results.analyst.output) || {};
+                        // 优先用keywords里的短词，命中率更高；其次用topic；最后用用户原始输入
+                        let searchTopic = '';
+                        if (Array.isArray(analystOutput.keywords) && analystOutput.keywords.length > 0) {
+                            // 取第一个非空且最短的关键词（短词搜索B站命中率更高）
+                            const validKws = analystOutput.keywords.filter(k => k && typeof k === 'string' && k.trim());
+                            if (validKws.length > 0) {
+                                searchTopic = validKws.reduce((a, b) => a.length <= b.length ? a : b);
+                            }
+                        }
+                        if (!searchTopic) searchTopic = analystOutput.topic || text;
+                        console.log('[协同] B站搜索关键词:', searchTopic, '(来源:', Array.isArray(analystOutput.keywords) && analystOutput.keywords.length > 0 ? 'keywords' : (analystOutput.topic ? 'topic' : '用户输入'), ')');
+                        biliResources = await searcher.search(searchTopic);
+                        console.log('协同模式B站搜索结果:', biliResources.length, biliResources.filter(r => r.type === 'bilibili').length + '个视频');
+                    } catch (searchErr) {
+                        console.warn('协同模式B站搜索失败:', searchErr);
+                    }
+                    
+                    // 渲染完整的协同结果（包含B站视频）
+                    const collabContent = renderCollaborationResult(collabResult, biliResources);
+                    const thinking = document.getElementById('thinking');
+                    if (thinking) thinking.remove();
+                    
                     chatMessageIndex++;
-                    const collabHtml = renderCollaborationResult(collabResult);
-                    const bubbleContent = wrapAssistantBubble(collabHtml, chatMessageIndex, 'chat', '多智能体协同');
-                    chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析·多智能体协同</div>${bubbleContent}</div></div>`);
-                    chat.scrollTop = chat.scrollHeight;
-                    advice = JSON.stringify(collabResult.results);
-                    topic = (collabResult.results.analyst && collabResult.results.analyst.output && collabResult.results.analyst.output.topic) || text;
-                    difficulty = (collabResult.results.analyst && collabResult.results.analyst.output && collabResult.results.analyst.output.difficulty) || '中级';
-                    keywords = (collabResult.results.analyst && collabResult.results.analyst.output && collabResult.results.analyst.output.keywords) || [];
-                    hideResources = false;
+                    const agentBg = 'linear-gradient(135deg,#6366f1,#8b5cf6)';
+                    const agentAvatar = '协';
+                    const agentName = '多智能体协同';
+                    const replyHtml = `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:${agentBg}">${agentAvatar}</div><div><div class="msg-sender">${agentName}</div>${wrapAssistantBubble(collabContent, chatMessageIndex, 'path', '协同分析报告')}</div></div>`;
+                    
+                    if (currentChatId === taskId) {
+                        chat.insertAdjacentHTML('beforeend', replyHtml);
+                        chat.scrollTop = chat.scrollHeight;
+                        window.typesetMathJax();
+                        
+                        // 保存对话历史
+                        if (activeChatHistoryIndex === null) {
+                            window.addChatHistoryItem(text, taskId);
+                        } else {
+                            chatHistory[activeChatHistoryIndex].html = chat.innerHTML;
+                            saveUserData();
+                        }
+                    } else {
+                        const histItem = chatHistory.find(h => h.id === taskId);
+                        if (histItem) {
+                            histItem.html = removeThinkingFromHtml(histItem.html) + replyHtml;
+                            saveUserData();
+                        }
+                        window.showNotification("任务已完成", `您之前发起的对话“${runningTasks[taskId].title}”已回答完成！`, taskId);
+                    }
+                    
+                    updateProfileFromChat(text);
+                    try {
+                        window.addRecentActivityItem('进行了多智能体协同学习');
+                    } catch(e) { console.warn('添加活跃记录失败:', e); }
+                    
+                    delete runningTasks[taskId];
+                    updateSendBtnState();
+                    return;
                 } else {
-                    chatMessageIndex++;
-                    chat.insertAdjacentHTML('beforeend', `<div class="msg assistant" data-chat-index="${chatMessageIndex}"><div class="msg-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">灵</div><div><div class="msg-sender">灵析助手</div>${wrapAssistantBubble('多智能体协同请求处理失败，已降级为单智能体模式。请重试或检查后端服务。', chatMessageIndex, 'chat', '系统提示')}</div></div>`);
+                    console.warn('协同模式失败，降级到流式聊天');
+                    // 降级到下面的流式聊天
+                    throw new Error('协同失败');
                 }
 
                 // 保存对话历史
@@ -17214,10 +17384,6 @@ async function sendMessage() {
                 }
 
                 updateProfileFromChat(text);
-                delete runningTasks[taskId];
-                updateSendBtnState();
-                await renderFinalAssistantMessage();
-                return;
 
             } catch (collabErr) {
                 if (collabErr.name === 'AbortError' || signal.aborted) {
@@ -17229,7 +17395,7 @@ async function sendMessage() {
         }
 
         // Try streaming first, fall back to non-streaming if it fails
-        let streamingSucceeded = false;
+        if (!streamingSucceeded) {
         try {
             const streamMsgId = 'streaming_' + Date.now();
             let streamStarted = false;
@@ -17306,9 +17472,8 @@ async function sendMessage() {
                     } catch (metaErr) {
                         console.warn('获取流式对话元数据失败:', metaErr);
                     }
-
-                    // 流式传输完成后，统一在这里根据最终的 hideResources 变量生成并渲染卡片 HTML
-                    await renderFinalAssistantMessage();
+                    // 流式完成，标记成功，后续代码统一渲染最终卡片
+                    streamingSucceeded = true;
                 }
             );
 
@@ -17351,6 +17516,7 @@ async function sendMessage() {
                 }
                 console.error('无法连接到后端 /api/chat 服务，将使用前端 Mock 代替。', err);
             }
+        }
         }
 
         if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
@@ -18072,6 +18238,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // 加载后端课程
                 loadBackendCourses();
+
+                // 从后端同步画像数据和聊天历史（换设备也能恢复）
+                loadProfileFromServer();
+                loadChatHistoryFromServer();
 
                 // 每次启动系统自动新建对话
                 newChat();
